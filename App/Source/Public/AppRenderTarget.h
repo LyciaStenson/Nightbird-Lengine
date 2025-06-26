@@ -2,7 +2,7 @@
 
 #include <Core/RenderTarget.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class AppRenderTarget : public RenderTarget
 	{

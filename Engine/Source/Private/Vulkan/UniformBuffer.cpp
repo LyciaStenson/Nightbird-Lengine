@@ -4,7 +4,7 @@
 
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanUniformBuffer::VulkanUniformBuffer(VulkanDevice* device, VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags)
 	: device(device)

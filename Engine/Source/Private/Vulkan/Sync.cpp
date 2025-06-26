@@ -4,7 +4,7 @@
 
 #include <Vulkan/Config.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanSync::VulkanSync(VkDevice logicalDevice)
 	: logicalDevice(logicalDevice)

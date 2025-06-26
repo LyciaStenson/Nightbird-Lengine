@@ -5,7 +5,7 @@
 #include <Vulkan/Helpers.h>
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanImage::VulkanImage(VulkanDevice* device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags, VkImageAspectFlags aspectFlags)
 	: device(device), format(format), ownsImage(true)

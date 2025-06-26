@@ -15,7 +15,7 @@
 #include <fastgltf/types.hpp>
 #include <fastgltf/tools.hpp>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 	class VulkanStorageBuffer;

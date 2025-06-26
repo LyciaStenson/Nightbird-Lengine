@@ -1,6 +1,6 @@
 #include <ImGui/AssetBrowser.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 AssetBrowser::AssetBrowser(bool open)
 	: ImGuiWindow("Asset Browser", open)

@@ -10,7 +10,7 @@
 #include <Vulkan/Config.h>
 #include <Vulkan/Device.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	bool QueueFamilyIndices::IsComplete() const
 	{

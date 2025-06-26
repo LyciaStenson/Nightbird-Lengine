@@ -6,7 +6,7 @@
 
 #include <Vulkan/Config.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanDevice::VulkanDevice(VkInstance instance, VkSurfaceKHR surface)
 	: instance(instance), surface(surface)

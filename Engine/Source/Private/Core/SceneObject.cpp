@@ -1,6 +1,6 @@
 #include <Core/SceneObject.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 SceneObject::SceneObject(const std::string& name)
 	: name(name)

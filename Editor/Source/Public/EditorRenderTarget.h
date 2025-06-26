@@ -4,7 +4,7 @@
 
 #include <Vulkan/ImGuiOverlay.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanInstance;
 	class VulkanDevice;

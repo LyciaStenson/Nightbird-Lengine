@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	constexpr int MAX_POINT_LIGHTS = 16;
 

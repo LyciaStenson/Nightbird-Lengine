@@ -4,7 +4,7 @@
 
 #include <Vulkan/Device.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanImage;
 

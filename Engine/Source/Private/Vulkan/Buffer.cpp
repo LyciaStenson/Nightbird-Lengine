@@ -5,7 +5,7 @@
 #include <Vulkan/Helpers.h>
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanBuffer::VulkanBuffer(VulkanDevice* device, VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags)
 	: device(device), size(size)

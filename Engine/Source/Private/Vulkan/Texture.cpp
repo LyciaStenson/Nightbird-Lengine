@@ -8,7 +8,7 @@
 
 #include <stb_image.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanTexture::VulkanTexture(VulkanDevice* device, const std::string& path)
 	: device(device)

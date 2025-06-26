@@ -2,7 +2,7 @@
 
 #include <ImGui/ImGuiWindow.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class AboutWindow : public ImGuiWindow
 	{

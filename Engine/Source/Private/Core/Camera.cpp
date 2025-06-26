@@ -6,7 +6,7 @@
 #include <Vulkan/Device.h>
 #include <Core/CameraUBO.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 Camera::Camera(const std::string& name)
 	: SceneObject(name)

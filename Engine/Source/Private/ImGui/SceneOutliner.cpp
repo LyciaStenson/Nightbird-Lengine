@@ -7,7 +7,7 @@
 #include <Vulkan/ImGuiOverlay.h>
 #include <Core/Scene.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 SceneOutliner::SceneOutliner(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
 	: ImGuiWindow("Scene Outliner", open, ImGuiWindowProperties{true}), m_Scene(scene), m_Overlay(overlay)

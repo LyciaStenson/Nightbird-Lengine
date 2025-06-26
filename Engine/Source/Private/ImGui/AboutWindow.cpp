@@ -1,6 +1,6 @@
 #include <ImGui/AboutWindow.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 AboutWindow::AboutWindow(bool open)
 	: ImGuiWindow("About", open)

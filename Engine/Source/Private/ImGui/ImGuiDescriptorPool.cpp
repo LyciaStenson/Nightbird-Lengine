@@ -6,7 +6,7 @@
 
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 ImGuiDescriptorPool::ImGuiDescriptorPool(VulkanDevice* device)
 	: device(device)

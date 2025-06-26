@@ -7,7 +7,7 @@
 
 #include <volk.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class Renderer;
 	class Scene;

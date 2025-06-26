@@ -5,7 +5,7 @@
 
 #include <Core/Transform.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class SceneObject
 	{

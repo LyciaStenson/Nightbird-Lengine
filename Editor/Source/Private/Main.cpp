@@ -9,7 +9,7 @@
 
 #include <EditorRenderTarget.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 int main(int argc, char** argv)
 {

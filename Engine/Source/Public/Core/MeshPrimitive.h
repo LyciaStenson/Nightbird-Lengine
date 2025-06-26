@@ -8,7 +8,7 @@
 
 #include <volk.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 	class VulkanTexture;

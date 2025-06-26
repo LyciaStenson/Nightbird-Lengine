@@ -16,7 +16,7 @@
 #include <Core/Transform.h>
 #include <Core/Model.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 Scene::Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorSetLayout cameraDescriptorSetLayout, VkDescriptorPool descriptorPool)
 	: device(device), modelManager(modelManager), globalDescriptorSetManager(globalDescriptorSetManager), cameraDescriptorSetLayout(cameraDescriptorSetLayout), descriptorPool(descriptorPool)

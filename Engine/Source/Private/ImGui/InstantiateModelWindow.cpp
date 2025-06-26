@@ -6,7 +6,7 @@
 #include <Core/Scene.h>
 #include <Core/Transform.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 inline float Wrap180(float angle)
 {

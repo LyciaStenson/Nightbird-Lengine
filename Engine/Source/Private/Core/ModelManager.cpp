@@ -13,7 +13,7 @@
 #include <Core/MeshInstance.h>
 #include <Vulkan/Texture.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 ModelManager::ModelManager(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout, VkDescriptorSetLayout materialDescriptorSetLayout, VkDescriptorPool descriptorPool)
 	: device(device), uniformDescriptorSetLayout(uniformDescriptorSetLayout), materialDescriptorSetLayout(materialDescriptorSetLayout), descriptorPool(descriptorPool)

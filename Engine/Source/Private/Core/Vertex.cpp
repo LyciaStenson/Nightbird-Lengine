@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VkVertexInputBindingDescription Vertex::GetBindingDescription()
 {

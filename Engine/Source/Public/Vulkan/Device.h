@@ -10,7 +10,7 @@
 
 #include <Vulkan/Helpers.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice
 	{

@@ -4,7 +4,7 @@
 
 #include <Core/ModelManager.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 LoadModelWindow::LoadModelWindow(ModelManager* modelManager, bool open)
 	: ImGuiWindow("Load Model", open, ImGuiWindowProperties{false, true, ImVec2(400, 600)}), m_ModelManager(modelManager)

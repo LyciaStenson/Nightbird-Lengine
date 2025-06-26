@@ -6,7 +6,7 @@
 #include <Vulkan/Config.h>
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanDescriptorPool::VulkanDescriptorPool(VulkanDevice* device, size_t meshCount)
 	: device(device)

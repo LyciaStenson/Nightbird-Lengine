@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 inline float Wrap180(float angle)
 {

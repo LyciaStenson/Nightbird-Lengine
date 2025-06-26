@@ -9,7 +9,7 @@
 #include <Core/Scene.h>
 #include <Core/MeshInstance.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 SceneWindow::SceneWindow(VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open)
 	: ImGuiWindow("Scene", open, BuildProperties()), device(device), colorFormat(colorFormat), depthFormat(depthFormat)

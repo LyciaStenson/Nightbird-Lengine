@@ -10,7 +10,7 @@
 #include <Core/Vertex.h>
 #include <Vulkan/UniformBuffer.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 	class VulkanTexture;

@@ -10,7 +10,7 @@
 #include <Core/CameraUBO.h>
 #include <Core/PointLightData.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 GlobalDescriptorSetManager::GlobalDescriptorSetManager(VulkanDevice* device, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool)
 	: device(device)

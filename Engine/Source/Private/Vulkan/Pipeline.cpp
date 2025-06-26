@@ -17,7 +17,7 @@
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanPipeline::VulkanPipeline(VulkanDevice* device, VulkanRenderPass* renderPass, VulkanDescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type)
 	: device(device), renderPass(renderPass), globalDescriptorSetManager(globalDescriptorSetManager), type(type)

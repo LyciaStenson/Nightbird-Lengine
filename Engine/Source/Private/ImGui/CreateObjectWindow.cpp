@@ -5,7 +5,7 @@
 #include <Core/Scene.h>
 #include <Core/Transform.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 CreateObjectWindow::CreateObjectWindow(Scene* scene, bool open)
 	: ImGuiWindow("Create Object", open, ImGuiWindowProperties{false, true, ImVec2(400, 600)}), m_Scene(scene)

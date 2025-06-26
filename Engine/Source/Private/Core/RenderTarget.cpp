@@ -4,7 +4,7 @@
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 RenderTarget::RenderTarget(Renderer* renderer)
 	: renderer(renderer)

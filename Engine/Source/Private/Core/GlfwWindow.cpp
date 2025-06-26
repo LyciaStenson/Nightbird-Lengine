@@ -4,7 +4,7 @@
 
 #include <Core/Renderer.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 GlfwWindow::GlfwWindow()
 {

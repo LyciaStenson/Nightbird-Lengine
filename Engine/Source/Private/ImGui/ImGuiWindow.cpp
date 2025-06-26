@@ -1,6 +1,6 @@
 #include <ImGui/ImGuiWindow.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowProperties& properties)
 	: m_Title(title), m_Open(open), m_HasMenuBar(properties.hasMenuBar), m_FixedSize(properties.fixedSize), m_Size(properties.size), m_ChangePadding(properties.changePadding), m_Padding(properties.padding)

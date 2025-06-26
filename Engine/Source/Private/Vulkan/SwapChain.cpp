@@ -8,7 +8,7 @@
 #include <Vulkan/Helpers.h>
 #include <Vulkan/Image.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, VkSurfaceKHR surface, GLFWwindow* window)
 	: device(device), surface(surface), window(window)

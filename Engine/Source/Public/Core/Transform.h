@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class SceneObject;
 

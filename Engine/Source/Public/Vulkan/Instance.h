@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <volk.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanInstance
 	{

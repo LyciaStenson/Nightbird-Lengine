@@ -20,7 +20,7 @@
 #include <Core/Camera.h>
 #include <Core/RenderTarget.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 Renderer::Renderer(GlfwWindow* glfwWindow)
 	: glfwWindow(glfwWindow)

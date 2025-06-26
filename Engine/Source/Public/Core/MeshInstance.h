@@ -9,7 +9,7 @@
 #include <Core/SceneObject.h>
 #include <Core/Transform.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 	class VulkanUniformBuffer;

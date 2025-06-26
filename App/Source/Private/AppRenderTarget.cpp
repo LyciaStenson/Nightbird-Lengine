@@ -4,7 +4,7 @@
 
 #include <volk.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 AppRenderTarget::AppRenderTarget(Renderer* renderer)
 	: RenderTarget(renderer)

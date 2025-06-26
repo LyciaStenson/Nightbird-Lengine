@@ -21,7 +21,7 @@
 #include <ImGui/SceneWindow.h>
 #include <ImGui/AboutWindow.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	VulkanImGuiOverlay::VulkanImGuiOverlay(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
 		: m_Window(glfwWindow)

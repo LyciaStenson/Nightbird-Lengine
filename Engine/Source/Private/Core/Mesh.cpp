@@ -9,7 +9,7 @@
 
 #include <stb_image.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 Mesh::Mesh(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout)
 	: device(device), uniformDescriptorSetLayout(uniformDescriptorSetLayout)

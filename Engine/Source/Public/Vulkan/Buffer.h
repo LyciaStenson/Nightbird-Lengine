@@ -3,7 +3,7 @@
 #include <volk.h>
 #include <vk_mem_alloc.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 

@@ -5,12 +5,12 @@
 
 #include <iostream>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanStorageBuffer::VulkanStorageBuffer(VulkanDevice* device, VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags)
 	: device(device)
 {
-	buffer = new VulkanRenderer::VulkanBuffer(device, size, usageFlags | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, propertyFlags);
+	buffer = new VulkanBuffer(device, size, usageFlags | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, propertyFlags);
 
 	if (propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
 		mappedData = buffer->Map();

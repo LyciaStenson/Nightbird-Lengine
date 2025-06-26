@@ -4,7 +4,7 @@
 
 #include <Vulkan/Config.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanInstance::VulkanInstance(GLFWwindow* window)
 {

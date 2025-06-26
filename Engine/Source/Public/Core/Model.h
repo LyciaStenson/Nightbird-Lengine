@@ -6,7 +6,7 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/types.hpp>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	struct Model
 	{

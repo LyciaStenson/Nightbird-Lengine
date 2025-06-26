@@ -11,7 +11,7 @@
 #include <Core/MaterialFactorsUBO.h>
 #include <Core/Vertex.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 MeshPrimitive::MeshPrimitive(VulkanDevice* device, VkDescriptorSetLayout materialDescriptorSetLayout, VkDescriptorPool descriptorPool, const MeshPrimitiveInfo& info)
 	:

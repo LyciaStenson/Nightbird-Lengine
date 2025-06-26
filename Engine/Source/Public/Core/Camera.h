@@ -11,7 +11,7 @@
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	struct CameraUBO;
 	

@@ -6,7 +6,7 @@
 
 #include <Vulkan/Buffer.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanDevice;
 

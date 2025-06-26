@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	struct alignas(16) MeshUBO
 	{

@@ -11,7 +11,7 @@
 #include <Vulkan/SwapChain.h>;
 #include <Core/ModelManager.h>;
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
 	: RenderTarget(renderer)

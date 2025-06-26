@@ -2,7 +2,7 @@
 
 #include <volk.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanBuffer;
 	class VulkanDevice;

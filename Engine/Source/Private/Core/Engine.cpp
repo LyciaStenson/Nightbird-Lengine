@@ -22,7 +22,7 @@
 #include <Vulkan/GlobalDescriptorSetManager.h>
 #include <ImGui/SceneWindow.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 inline float Wrap180(float angle)
 {

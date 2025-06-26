@@ -8,7 +8,7 @@
 #include <Core/Mesh.h>
 #include <Core/MeshUBO.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 MeshInstance::MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh, VulkanDevice* device, VkDescriptorPool descriptorPool)
 	: SceneObject(name), device(device), mesh(mesh)

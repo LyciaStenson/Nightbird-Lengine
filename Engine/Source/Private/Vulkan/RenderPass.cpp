@@ -5,7 +5,7 @@
 
 #include <Vulkan/Device.h>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, VkImageLayout finalColorLayout)
 	: device(device)

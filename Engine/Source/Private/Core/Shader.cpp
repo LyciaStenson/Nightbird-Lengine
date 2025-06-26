@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-using namespace VulkanRenderer;
+using namespace Nightbird;
 
 Shader::Shader(VkDevice device, const std::string& filePath, VkShaderStageFlagBits stageFlag)
 	: device(device)

@@ -6,7 +6,7 @@
 #include <ImGui/ImGuiWindow.h>
 #include <Core/SceneObject.h>
 
-namespace VulkanRenderer
+namespace Nightbird
 {
 	class VulkanImGuiOverlay;
 	class Scene;
