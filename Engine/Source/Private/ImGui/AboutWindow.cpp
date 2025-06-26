@@ -10,5 +10,5 @@ AboutWindow::AboutWindow(bool open)
 
 void AboutWindow::OnRender()
 {
-	ImGui::Text("A simple 3D renderer using C++ and Vulkan.");
+	ImGui::Text("Nightbird Engine 1.0.0");
 }
