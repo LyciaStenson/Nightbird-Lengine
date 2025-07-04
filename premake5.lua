@@ -1,4 +1,4 @@
-workspace "VulkanRenderer"
+workspace "Nightbird"
 	architecture "x86_64"
 	startproject "Editor"
 
