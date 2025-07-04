@@ -3,7 +3,8 @@
 #include <Core/Renderer.h>
 #include <Core/ModelManager.h>
 #include <Core/Scene.h>
-#include <Core/Transform.h>
+#include <Core/SceneObject.h>
+#include <Core/Camera.h>
 #include <Core/GlfwWindow.h>
 #include <Vulkan/DescriptorPool.h>
 

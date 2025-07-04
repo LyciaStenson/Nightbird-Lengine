@@ -8,6 +8,8 @@ project "Editor"
 	targetdir (outBinDir)
 	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
 
+	debugdir (outBinDir)
+
 	defines { "VK_NO_PROTOTYPES" }
 	defines { "GLFW_INCLUDE_VULKAN" }
 	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
@@ -27,11 +29,10 @@ project "Editor"
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/fastgltf/include",
-		"%{wks.location}/Engine/Vendor/imgui"
+		"%{wks.location}/Engine/Vendor/cereal",
+		"%{wks.location}/Editor/Vendor/imgui"
 	}
 
-	links { "Engine" }
+	defines { "EDITOR" }
 
-	filter { "configurations:Debug" }
-		debugdir (outBinDir)
-	filter { }
+	links { "Engine", "imgui" }

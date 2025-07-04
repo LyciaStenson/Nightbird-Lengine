@@ -6,6 +6,7 @@
 #include <Vulkan/StorageBuffer.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 #include <Core/SceneObject.h>
+#include <Core/PrefabInstance.h>
 #include <Core/MeshInstance.h>
 #include <Core/ModelManager.h>
 #include <Core/Mesh.h>
@@ -16,12 +17,21 @@
 #include <Core/Transform.h>
 #include <Core/Model.h>
 
+#include <filesystem>
+#include <fstream>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
+
 using namespace Nightbird;
 
-Scene::Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorSetLayout cameraDescriptorSetLayout, VkDescriptorPool descriptorPool)
-	: device(device), modelManager(modelManager), globalDescriptorSetManager(globalDescriptorSetManager), cameraDescriptorSetLayout(cameraDescriptorSetLayout), descriptorPool(descriptorPool)
+Scene::Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool)
+	: device(device), modelManager(modelManager), globalDescriptorSetManager(globalDescriptorSetManager), descriptorPool(descriptorPool)
 {
-
+	rootObject = std::make_unique<SceneObject>("Root");
 }
 
 Scene::~Scene()
@@ -29,14 +39,25 @@ Scene::~Scene()
 
 }
 
-const std::vector<std::unique_ptr<SceneObject>>& Scene::GetObjects() const
+const SceneObject* Scene::GetRootObject() const
 {
-	return objects;
+	return rootObject.get();
 }
 
-std::vector<std::unique_ptr<SceneObject>>& Scene::GetObjectsMutable()
+std::vector<SceneObject*> Scene::GetAllObjects()
 {
-	return objects;
+	std::vector<SceneObject*> allObjects;
+	GetAllObjectsRecursive(rootObject.get(), allObjects);
+	return allObjects;
+}
+
+void Scene::GetAllObjectsRecursive(SceneObject* root, std::vector<SceneObject*>& allObjects)
+{
+	allObjects.push_back(root);
+	for (const auto& child : root->GetChildren())
+	{
+		GetAllObjectsRecursive(child.get(), allObjects);
+	}
 }
 
 Camera* Scene::GetMainCamera() const
@@ -49,49 +70,123 @@ void Scene::SetMainCamera(Camera* camera)
 	mainCamera = camera;
 }
 
-SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, Transform* parent)
+bool Scene::SaveSceneJSON(const std::string& path)
 {
-	std::string instanceName = name;
-	int counter = 1;
-	while (objectNames.count(instanceName))
+	std::ofstream os(path);
+	if (!os.is_open())
 	{
-		instanceName = name + std::to_string(counter);
-		++counter;
+		std::cerr << "Failed to open scene for writing at " << path << std::endl;
+		return false;
 	}
-	objectNames.insert(instanceName);
+	
+	cereal::JSONOutputArchive archive(os);
+	save(archive);
+
+	return true;
+}
+
+bool Scene::SaveSceneBIN(const std::string& path)
+{
+	std::ofstream os(path, std::ios::binary);
+	if (!os.is_open())
+	{
+		std::cerr << "Failed to open scene for writing at " << path << std::endl;
+		return false;
+	}
+	
+	cereal::BinaryOutputArchive archive(os);
+	save(archive);
+
+	return true;
+}
+
+bool Scene::LoadSceneJSON(const std::string& path)
+{
+	std::ifstream is(path);
+	if (!is.is_open())
+	{
+		std::cerr << "Failed to open scene for reading at " << path << std::endl;
+		return false;
+	}
+	
+	cereal::JSONInputArchive archive(is);
+	load(archive);
+
+	return true;
+}
+
+bool Scene::LoadSceneBIN(const std::string& path)
+{
+	std::ifstream is(path, std::ios::binary);
+	if (!is.is_open())
+	{
+		std::cerr << "Failed to open scene for reading at " << path << std::endl;
+		return false;
+	}
+	
+	cereal::BinaryInputArchive archive(is);
+	load(archive);
+
+	return true;
+}
+
+SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
+{
+	if (!parent)
+		parent = rootObject.get();
+
+	std::string instanceName = name;
+	//int counter = 1;
+	//while (objectNames.count(instanceName))
+	//{
+		//instanceName = name + std::to_string(counter);
+		//++counter;
+	//}
+	//objectNames.insert(instanceName);
 
 	std::unique_ptr<SceneObject> object = std::make_unique<SceneObject>(instanceName);
 	object->transform.position = position;
 	object->transform.rotation = rotation;
 	object->transform.scale = scale;
-	object->transform.SetParent(parent);
+	object->SetParent(parent);
 
 	SceneObject* objectPtr = object.get();
-	objects.push_back(std::move(object));
+	
+	if (parent)
+		parent->AddChild(std::move(object));
+	else
+		rootObject->AddChild(std::move(object));
 
 	return objectPtr;
 }
 
-Camera* Scene::CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, Transform* parent)
+Camera* Scene::CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 {
+	if (!parent)
+		parent = rootObject.get();
+
 	std::string cameraName = name;
-	int counter = 1;
-	while (objectNames.count(cameraName))
-	{
-		cameraName = name + std::to_string(counter);
-		++counter;
-	}
-	objectNames.insert(cameraName);
+	//int counter = 1;
+	//while (objectNames.count(cameraName))
+	//{
+		//cameraName = name + std::to_string(counter);
+		//++counter;
+	//}
+	//objectNames.insert(cameraName);
 
 	std::unique_ptr<Camera> camera = std::make_unique<Camera>(cameraName);
 	camera->transform.position = position;
 	camera->transform.rotation = rotation;
 	camera->transform.scale = scale;
-	camera->transform.SetParent(parent);
-
+	camera->SetParent(parent);
+	
 	Camera* cameraPtr = camera.get();
-	objects.push_back(std::move(camera));
 
+	if (parent)
+		parent->AddChild(std::move(camera));
+	else
+		rootObject->AddChild(std::move(camera));
+	
 	if (!GetMainCamera())
 	{
 		SetMainCamera(cameraPtr);
@@ -100,53 +195,97 @@ Camera* Scene::CreateCamera(const std::string& name, const glm::vec3& position, 
 	return cameraPtr;
 }
 
-PointLight* Scene::CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, Transform* parent)
+PointLight* Scene::CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 {
+	if (!parent)
+		parent = rootObject.get();
+
 	std::string lightName = name;
-	int counter = 1;
-	while (objectNames.count(lightName))
-	{
-		lightName = name + std::to_string(counter);
-		++counter;
-	}
-	objectNames.insert(lightName);
+	//int counter = 1;
+	//while (objectNames.count(lightName))
+	//{
+		//lightName = name + std::to_string(counter);
+		//++counter;
+	//}
+	//objectNames.insert(lightName);
 
 	std::unique_ptr<PointLight> light = std::make_unique<PointLight>(lightName);
 	light->transform.position = position;
 	light->transform.rotation = rotation;
 	light->transform.scale = scale;
-	light->transform.SetParent(parent);
+	light->SetParent(parent);
+	
+	PointLight* lightPtr = light.get();
+	
+	if (parent)
+		parent->AddChild(std::move(light));
+	else
+		rootObject->AddChild(std::move(light));
 
-	PointLight* cameraPtr = light.get();
-	objects.push_back(std::move(light));
-
-	return cameraPtr;
+	return lightPtr;
 }
 
-MeshInstance* Scene::CreateMeshInstance(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, Transform* parent, std::shared_ptr<Mesh> mesh)
+PrefabInstance* Scene::CreatePrefabInstance(const std::string& name, const std::string& path, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 {
+	if (!parent)
+		parent = rootObject.get();
+
 	std::string instanceName = name;
-	int counter = 1;
-	while (objectNames.count(instanceName))
-	{
-		instanceName = name + std::to_string(counter);
-		++counter;
-	}
-	objectNames.insert(instanceName);
+	//int counter = 1;
+	//while (objectNames.count(instanceName))
+	//{
+		//instanceName = name + std::to_string(counter);
+		//++counter;
+	//}
+	//objectNames.insert(instanceName);
+
+	std::unique_ptr<PrefabInstance> prefab = std::make_unique<PrefabInstance>(instanceName, path);
+	prefab->transform.position = position;
+	prefab->transform.rotation = rotation;
+	prefab->transform.scale = scale;
+	prefab->SetParent(parent);
+
+	PrefabInstance* prefabPtr = prefab.get();
+
+	if (parent)
+		parent->AddChild(std::move(prefab));
+	else
+		rootObject->AddChild(std::move(prefab));
+
+	return prefabPtr;
+}
+
+MeshInstance* Scene::CreateMeshInstance(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent, std::shared_ptr<Mesh> mesh)
+{
+	if (!parent)
+		parent = rootObject.get();
+
+	std::string instanceName = name;
+	//int counter = 1;
+	//while (objectNames.count(instanceName))
+	//{
+		//instanceName = name + std::to_string(counter);
+		//++counter;
+	//}
+	//objectNames.insert(instanceName);
 	
 	std::unique_ptr<MeshInstance> meshInstance = std::make_unique<MeshInstance>(instanceName, mesh, device, descriptorPool);
 	meshInstance->transform.position = position;
 	meshInstance->transform.rotation = rotation;
 	meshInstance->transform.scale = scale;
-	meshInstance->transform.SetParent(parent);
+	meshInstance->SetParent(parent);
 
 	MeshInstance* meshInstancePtr = meshInstance.get();
-	objects.push_back(std::move(meshInstance));
+	
+	if (parent)
+		parent->AddChild(std::move(meshInstance));
+	else
+		rootObject->AddChild(std::move(meshInstance));
 	
 	return meshInstancePtr;
 }
 
-void Scene::InstantiateModelNode(const std::shared_ptr<Model>& model, const fastgltf::Node& node, Transform* parent)
+void Scene::InstantiateModelNode(const std::shared_ptr<Model>& model, const fastgltf::Node& node, SceneObject* parent)
 {
 	fastgltf::math::fvec3 gltfTranslation(0.0f, 0.0f, 0.0f);
 	fastgltf::math::fquat gltfRotation;
@@ -185,51 +324,112 @@ void Scene::InstantiateModelNode(const std::shared_ptr<Model>& model, const fast
 	{
 		const auto& childNode = model->gltfAsset.nodes[childNodeIndex];
 		if (object)
-			InstantiateModelNode(model, childNode, &object->transform);
+			InstantiateModelNode(model, childNode, object);
 	}
 }
 
-SceneObject* Scene::InstantiateModel(const std::string& name, const Transform& transform)
+void Scene::InstantiateModel(PrefabInstance* prefab)
 {
-	const auto& model = modelManager->GetModel(name);
+	const auto& model = modelManager->GetModel(prefab->GetPrefabPath());
 
 	if (!model)
 	{
-		std::cout << "Model " << name << " not found. Make sure model is loaded first." << std::endl;
+		std::cout << "Model at " << prefab->GetPrefabPath() << " not found. Make sure model is loaded first." << std::endl;
+		return;
+	}
+
+	const fastgltf::Scene& gltfScene = model->gltfAsset.scenes[0];
+	
+	for (size_t rootNodeIndex : gltfScene.nodeIndices)
+	{
+		InstantiateModelNode(model, model->gltfAsset.nodes[rootNodeIndex], prefab);
+	}
+}
+
+PrefabInstance* Scene::InstantiateModel(const std::string& path, const Transform& transform)
+{
+	const auto& model = modelManager->GetModel(path);
+
+	if (!model)
+	{
+		std::cout << "Model at " << path << " not found. Make sure model is loaded first." << std::endl;
 		return nullptr;
 	}
 
 	const fastgltf::Scene& gltfScene = model->gltfAsset.scenes[0];
 
-	SceneObject* root = CreateSceneObject(name, transform.position, transform.rotation, transform.scale, nullptr);
+	PrefabInstance* root = CreatePrefabInstance("Model", path, transform.position, transform.rotation, transform.scale, nullptr);
 
 	for (size_t rootNodeIndex : gltfScene.nodeIndices)
 	{
-		InstantiateModelNode(model, model->gltfAsset.nodes[rootNodeIndex], &root->transform);
+		InstantiateModelNode(model, model->gltfAsset.nodes[rootNodeIndex], root);
 	}
 
-	return nullptr;
+	return root;
+}
+
+SceneObject* Scene::FindObject(const std::string& path, SceneObject* root)
+{
+	size_t start = 0;
+	size_t end = path.find('/');
+
+	SceneObject* node = root ? root : rootObject.get();
+
+	while (true)
+	{
+		std::string token = path.substr(start, end - start);
+
+		bool found = false;
+		for (const auto& child : node->GetChildren())
+		{
+			if (child->GetName() == token)
+			{
+				node = child.get();
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			return nullptr;
+
+		if (end == std::string::npos)
+			break;
+
+		start = end + 1;
+		end = path.find('/', start);
+	}
+
+	return node;
 }
 
 void Scene::UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent)
 {
 	std::vector<PointLightData> pointLightData;
-
-	for (const auto& object : GetObjects())
-	{
-		if (auto* meshInstance = dynamic_cast<MeshInstance*>(object.get()))
-		{
-			meshInstance->UpdateUniformBuffer(currentFrame);
-		}
-		else if (auto* camera = dynamic_cast<Camera*>(object.get()))
-		{
-			globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(swapChainExtent));
-		}
-		else if (auto* light = dynamic_cast<PointLight*>(object.get()))
-		{
-			pointLightData.push_back(light->GetData());
-		}
-	}
 	
+	UpdateBuffersRecursive(currentFrame, swapChainExtent, rootObject.get(), pointLightData);
+
 	globalDescriptorSetManager->UpdatePointLights(currentFrame, pointLightData);
+}
+
+void Scene::UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<PointLightData>& pointLightData)
+{
+	if (!object)
+		return;
+
+	if (auto* meshInstance = dynamic_cast<MeshInstance*>(object))
+	{
+		meshInstance->UpdateUniformBuffer(currentFrame);
+	}
+	else if (auto* camera = dynamic_cast<Camera*>(object))
+	{
+		globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(swapChainExtent));
+	}
+	else if (auto* light = dynamic_cast<PointLight*>(object))
+	{
+		pointLightData.push_back(light->GetData());
+	}
+
+	for (const auto& child : object->GetChildren())
+		UpdateBuffersRecursive(currentFrame, swapChainExtent, child.get(), pointLightData);
 }

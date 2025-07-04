@@ -20,7 +20,6 @@
 #include <Vulkan/DescriptorPool.h>
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
-#include <ImGui/SceneWindow.h>
 
 using namespace Nightbird;
 
@@ -61,7 +60,7 @@ Engine::Engine()
 	
 	modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 	
-	scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorSetLayoutManager()->GetGlobalDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
+	scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 }
 
 Engine::~Engine()

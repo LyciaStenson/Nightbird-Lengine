@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Serialization/GlmSerialization.h>
+
 namespace Nightbird
 {
 	class SceneObject;
@@ -16,25 +18,21 @@ namespace Nightbird
 		Transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 		~Transform();
 		
-		void SetParent(Transform* transform);
-		Transform* GetParent() const;
-
-		const std::vector<Transform*>& GetChildren() const;
-
 		glm::mat4 GetLocalMatrix() const;
-		glm::mat4 GetWorldMatrix() const;
+		
+		template <class Archive>
+		void serialize(Archive& archive)
+		{
+			archive
+			(
+				CEREAL_NVP(position),
+				CEREAL_NVP(rotation),
+				CEREAL_NVP(scale)
+			);
+		}
 
 		glm::vec3 position;
 		glm::quat rotation;
 		glm::vec3 scale;
-
-		SceneObject* owner = nullptr;
-
-	private:
-		Transform* parent = nullptr;
-		std::vector<Transform*> children;
-		
-		void AddChild(Transform* child);
-		void RemoveChild(Transform* child);
 	};
 }
