@@ -103,12 +103,15 @@ namespace Nightbird
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Save Scene"))
+				if (ImGui::MenuItem("Save Scene (Binary)"))
 				{
-					//std::string path = "Assets/Scenes/Scene.tscene";
 					std::string path = "Assets/Scenes/Scene.scene";
-					//m_Scene->SaveSceneJSON(path);
 					m_Scene->SaveSceneBIN(path);
+				}
+				if (ImGui::MenuItem("Save Scene (Text)"))
+				{
+					std::string path = "Assets/Scenes/Scene.tscene";
+					m_Scene->SaveSceneJSON(path);
 				}
 				if (ImGui::MenuItem("Quit"))
 					glfwSetWindowShouldClose(m_Window, true);

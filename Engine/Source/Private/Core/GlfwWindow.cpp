@@ -10,7 +10,7 @@ GlfwWindow::GlfwWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(1280, 720, "Vulkan Renderer", nullptr, nullptr);
+	window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
 	glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
 }
 

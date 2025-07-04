@@ -1,10 +1,7 @@
 #include <Core/Engine.h>
 
 #include <Core/Renderer.h>
-#include <Core/ModelManager.h>
 #include <Core/Scene.h>
-#include <Core/Transform.h>
-#include <Vulkan/DescriptorPool.h>
 
 #include <AppRenderTarget.h>
 
