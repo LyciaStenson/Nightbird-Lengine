@@ -25,7 +25,7 @@ group "Dependencies"
 	include "Editor/vendor/imgui"
 group ""
 
-group "VulkanRenderer"
+group "Nightbird"
 	include "Engine"
 	include "App"
 	include "Editor"
