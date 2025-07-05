@@ -38,6 +38,22 @@ std::shared_ptr<Model> ModelManager::GetModel(const std::string& path)
 
 std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path)
 {
+	auto model = LoadModelInternal(path);
+	if (model)
+	{
+		UploadModel(model);
+		models[path.string()] = model;
+	}
+	return model;
+}
+
+void ModelManager::LoadModelAsync(const std::filesystem::path& path, LoadCallback callback)
+{
+
+}
+
+std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::path& path)
+{
 	std::string pathKey = path.string();
 
 	auto it = models.find(pathKey);
@@ -45,23 +61,23 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 	{
 		return it->second;
 	}
-	
+
 	fastgltf::Parser parser;
 
 	auto data = fastgltf::GltfDataBuffer::FromPath(path);
 	if (data.error() != fastgltf::Error::None)
 	{
 		std::cout << "fastgltf get buffer error: " << fastgltf::getErrorMessage(data.error()) << std::endl;
-		return false;
+		return nullptr;
 	}
-	
+
 	auto asset = parser.loadGltfBinary(data.get(), path.parent_path(), fastgltf::Options::None);
 	if (asset.error() != fastgltf::Error::None)
 	{
 		std::cout << "fastgltf get data error: " << fastgltf::getErrorMessage(asset.error()) << std::endl;
-		return false;
+		return nullptr;
 	}
-	
+
 	std::shared_ptr<Model> model = std::make_shared<Model>();
 	model->path = pathKey;
 	model->gltfAsset = std::move(asset.get());
@@ -69,23 +85,23 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 	auto& gltfAsset = model->gltfAsset;
 
 	LoadTextures(model);
-	
+
 	for (size_t meshIndex = 0; meshIndex < gltfAsset.meshes.size(); ++meshIndex)
 	{
 		const fastgltf::Mesh& gltfMesh = gltfAsset.meshes[meshIndex];
 		
-		auto mesh = std::make_shared<Mesh>(device, uniformDescriptorSetLayout);
-
+		MeshData meshData;
+		
 		for (size_t primitiveIndex = 0; primitiveIndex < gltfMesh.primitives.size(); ++primitiveIndex)
 		{
 			const fastgltf::Primitive& primitive = gltfMesh.primitives[primitiveIndex];
-			
+
 			auto positionIt = primitive.findAttribute("POSITION");
 			auto normalIt = primitive.findAttribute("NORMAL");
 			auto tangentIt = primitive.findAttribute("TANGENT");
-			
+
 			MeshPrimitiveInfo primitiveInfo{};
-			
+
 			if (positionIt != primitive.attributes.end())
 			{
 				const auto& positionAccessor = gltfAsset.accessors[positionIt->accessorIndex];
@@ -135,7 +151,7 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 
 				const auto& baseColorFactor = material.pbrData.baseColorFactor;
 				primitiveInfo.baseColorFactor = glm::vec4(baseColorFactor.x(), baseColorFactor.y(), baseColorFactor.z(), baseColorFactor.w());
-				
+
 				auto& baseColorTexture = material.pbrData.baseColorTexture;
 				if (baseColorTexture.has_value())
 				{
@@ -152,10 +168,10 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 						}
 					}
 				}
-				
+
 				primitiveInfo.metallicFactor = material.pbrData.metallicFactor;
 				primitiveInfo.roughnessFactor = material.pbrData.roughnessFactor;
-				
+
 				auto& metallicRoughnessTexture = material.pbrData.metallicRoughnessTexture;
 				if (metallicRoughnessTexture.has_value())
 				{
@@ -229,7 +245,7 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 						});
 				}
 			}
-			
+
 			primitiveInfo.baseColorTexture = fallbackTexture;
 			primitiveInfo.metallicRoughnessTexture = fallbackTexture;
 			primitiveInfo.normalTexture = fallbackTexture;
@@ -267,16 +283,39 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 				}
 			}
 			
+			meshData.primitiveInfo.push_back(std::move(primitiveInfo));
+		}
+		
+		model->meshData.push_back(std::move(meshData));
+	}
+
+	return model;
+}
+
+void ModelManager::UploadModel(std::shared_ptr<Model>& model)
+{
+	for (size_t i = 0; i < model->textureData.size(); ++i)
+	{
+		auto& textureData = model->textureData[i];
+
+		if (!model->textureData[i].pixels.empty())
+		{
+			model->textures[i] = std::make_unique<VulkanTexture>(device, textureData.pixels.data(), textureData.width, textureData.height, textureData.sRGB);
+		}
+	}
+	
+	for (const auto& meshData : model->meshData)
+	{
+		auto mesh = std::make_shared<Mesh>(device, uniformDescriptorSetLayout);
+		
+		for (const auto& primitiveInfo : meshData.primitiveInfo)
+		{
 			auto meshPrimitive = std::make_unique<MeshPrimitive>(device, materialDescriptorSetLayout, descriptorPool, primitiveInfo);
 			mesh->AddPrimitive(std::move(meshPrimitive));
 		}
-		
+
 		model->meshes.push_back(mesh);
 	}
-	
-	models[pathKey] = model;
-
-	return model;
 }
 
 void ModelManager::LoadTextures(std::shared_ptr<Model>& model)
@@ -296,8 +335,9 @@ void ModelManager::LoadTextures(std::shared_ptr<Model>& model)
 		else
 			std::cerr << "Failed to decode image at index " << imageIndex << std::endl;
 	}
-
-	model->textures.clear();
+	
+	model->textureData.clear();
+	model->textureData.resize(asset.textures.size());
 	
 	for (size_t textureIndex = 0; textureIndex < asset.textures.size(); ++textureIndex)
 	{
@@ -320,11 +360,20 @@ void ModelManager::LoadTextures(std::shared_ptr<Model>& model)
 				break;
 			}
 		}
-
+		
 		auto& imageData = decodedImages[imageIndex.value()];
 
 		auto vulkanTexture = std::make_shared<VulkanTexture>(device, imageData.pixels.data(), imageData.width, imageData.height, sRGB);
 		model->textures[textureIndex] = vulkanTexture;
+
+		model->textureData[textureIndex] = TextureData
+		{
+			std::move(imageData.pixels),
+			imageData.width,
+			imageData.height,
+			imageData.channels,
+			sRGB
+		};
 	}
 }
 
