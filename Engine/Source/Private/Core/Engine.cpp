@@ -93,6 +93,7 @@ void Engine::Run()
 	while (!glfwWindowShouldClose(glfwWindow->Get()))
 	{
 		glfwPollEvents();
+		modelManager->ProcessUploadQueue();
 		renderer->DrawFrame(scene.get());
 	}
 	vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());

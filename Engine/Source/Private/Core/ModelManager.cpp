@@ -49,7 +49,37 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::filesystem::path& path
 
 void ModelManager::LoadModelAsync(const std::filesystem::path& path, LoadCallback callback)
 {
+	modelFutures[path.string()] = std::async(std::launch::async, [this, path, callback]()
+		{
+			auto model = LoadModelInternal(path);
+			if (model)
+			{
+				std::lock_guard<std::mutex> lock(uploadQueueMutex);
+				uploadQueue.push(model);
+			}
+			if (callback)
+				callback(model);
+			return model;
+		});
+}
 
+void ModelManager::ProcessUploadQueue()
+{
+	static std::thread::id mainThreadId = std::this_thread::get_id();
+
+	if (std::this_thread::get_id() != mainThreadId)
+	{
+		std::cerr << "Wrong thread!!!" << std::endl;
+	}
+
+	std::lock_guard<std::mutex> lock(uploadQueueMutex);
+	while (!uploadQueue.empty())
+	{
+		auto model = uploadQueue.front();
+		uploadQueue.pop();
+		UploadModel(model);
+		models[model->path] = model;
+	}
 }
 
 std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::path& path)
@@ -245,11 +275,7 @@ std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::pa
 						});
 				}
 			}
-
-			primitiveInfo.baseColorTexture = fallbackTexture;
-			primitiveInfo.metallicRoughnessTexture = fallbackTexture;
-			primitiveInfo.normalTexture = fallbackTexture;
-
+			
 			if (primitive.materialIndex.has_value())
 			{
 				const auto& material = gltfAsset.materials[primitive.materialIndex.value()];
@@ -260,7 +286,8 @@ std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::pa
 					if (texture.imageIndex.has_value())
 					{
 						auto imageIndex = texture.imageIndex.value();
-						primitiveInfo.baseColorTexture = model->textures[imageIndex];
+						primitiveInfo.baseColorTextureIndex = imageIndex;
+						primitiveInfo.hasBaseColorTexture = true;
 					}
 				}
 				if (material.pbrData.metallicRoughnessTexture.has_value())
@@ -269,7 +296,8 @@ std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::pa
 					if (texture.imageIndex.has_value())
 					{
 						auto imageIndex = texture.imageIndex.value();
-						primitiveInfo.metallicRoughnessTexture = model->textures[imageIndex];
+						primitiveInfo.metallicRoughnessTextureIndex = imageIndex;
+						primitiveInfo.hasMetallicRoughnessTexture = true;
 					}
 				}
 				if (material.normalTexture.has_value())
@@ -278,7 +306,8 @@ std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::pa
 					if (texture.imageIndex.has_value())
 					{
 						auto imageIndex = texture.imageIndex.value();
-						primitiveInfo.normalTexture = model->textures[imageIndex];
+						primitiveInfo.normalTextureIndex = imageIndex;
+						primitiveInfo.hasNormalTexture = true;
 					}
 				}
 			}
@@ -294,22 +323,39 @@ std::shared_ptr<Model> ModelManager::LoadModelInternal(const std::filesystem::pa
 
 void ModelManager::UploadModel(std::shared_ptr<Model>& model)
 {
+	model->textures.reserve(model->textureData.size());
+
 	for (size_t i = 0; i < model->textureData.size(); ++i)
 	{
 		auto& textureData = model->textureData[i];
 
-		if (!model->textureData[i].pixels.empty())
+		if (!textureData.pixels.empty())
 		{
-			model->textures[i] = std::make_unique<VulkanTexture>(device, textureData.pixels.data(), textureData.width, textureData.height, textureData.sRGB);
+			model->textures[i] = std::make_shared<VulkanTexture>(device, textureData.pixels.data(), textureData.width, textureData.height, textureData.sRGB);
 		}
 	}
 	
-	for (const auto& meshData : model->meshData)
+	for (auto& meshData : model->meshData)
 	{
 		auto mesh = std::make_shared<Mesh>(device, uniformDescriptorSetLayout);
 		
-		for (const auto& primitiveInfo : meshData.primitiveInfo)
+		for (auto& primitiveInfo : meshData.primitiveInfo)
 		{
+			if (primitiveInfo.hasBaseColorTexture && model->textures.count(primitiveInfo.baseColorTextureIndex))
+				primitiveInfo.baseColorTexture = model->textures[primitiveInfo.baseColorTextureIndex];
+			else
+				primitiveInfo.baseColorTexture = fallbackTexture;
+
+			if (primitiveInfo.hasMetallicRoughnessTexture && model->textures.count(primitiveInfo.metallicRoughnessTextureIndex))
+				primitiveInfo.metallicRoughnessTexture = model->textures[primitiveInfo.metallicRoughnessTextureIndex];
+			else
+				primitiveInfo.metallicRoughnessTexture = fallbackTexture;
+
+			if (primitiveInfo.hasNormalTexture && model->textures.count(primitiveInfo.normalTextureIndex))
+				primitiveInfo.normalTexture = model->textures[primitiveInfo.normalTextureIndex];
+			else
+				primitiveInfo.normalTexture = fallbackTexture;
+
 			auto meshPrimitive = std::make_unique<MeshPrimitive>(device, materialDescriptorSetLayout, descriptorPool, primitiveInfo);
 			mesh->AddPrimitive(std::move(meshPrimitive));
 		}
@@ -362,10 +408,7 @@ void ModelManager::LoadTextures(std::shared_ptr<Model>& model)
 		}
 		
 		auto& imageData = decodedImages[imageIndex.value()];
-
-		auto vulkanTexture = std::make_shared<VulkanTexture>(device, imageData.pixels.data(), imageData.width, imageData.height, sRGB);
-		model->textures[textureIndex] = vulkanTexture;
-
+		
 		model->textureData[textureIndex] = TextureData
 		{
 			std::move(imageData.pixels),

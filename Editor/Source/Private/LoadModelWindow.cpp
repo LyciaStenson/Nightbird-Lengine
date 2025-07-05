@@ -41,8 +41,8 @@ void LoadModelWindow::OnRender()
 	ImGui::BeginDisabled(path.size() < 1);
 	if (ImGui::Button("Load Model"))
 	{
-		m_ModelManager->LoadModel(path);
-		SetOpen(false);
+		m_ModelManager->LoadModelAsync(path);
+		//SetOpen(false);
 	}
 	ImGui::EndDisabled();
 }

@@ -25,6 +25,14 @@ namespace Nightbird
 		float metallicFactor;
 		float roughnessFactor;
 
+		bool hasBaseColorTexture = false;
+		bool hasMetallicRoughnessTexture = false;
+		bool hasNormalTexture = false;
+
+		size_t baseColorTextureIndex;
+		size_t metallicRoughnessTextureIndex;
+		size_t normalTextureIndex;
+		
 		std::shared_ptr<VulkanTexture> baseColorTexture;
 		std::shared_ptr<VulkanTexture> metallicRoughnessTexture;
 		std::shared_ptr<VulkanTexture> normalTexture;

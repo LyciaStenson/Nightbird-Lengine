@@ -42,9 +42,9 @@ namespace Nightbird
 		std::shared_ptr<Model> GetModel(const std::string& path);
 		
 		std::shared_ptr<Model> LoadModel(const std::filesystem::path& path);
-		void LoadModelAsync(const std::filesystem::path& path, LoadCallback callback);
-		
-		void LoadTextures(std::shared_ptr<Model>& model);
+		void LoadModelAsync(const std::filesystem::path& path, LoadCallback callback = 0);
+
+		void ProcessUploadQueue();
 
 	private:
 		VulkanDevice* device;
@@ -56,12 +56,14 @@ namespace Nightbird
 		
 		std::unordered_map<std::string, std::shared_ptr<Model>> models;
 
-		std::unordered_map<std::string, std::future<std::shared_ptr<Model>>> loadingModels;
+		std::unordered_map<std::string, std::future<std::shared_ptr<Model>>> modelFutures;
 
-		std::mutex queueMutex;
-		std::queue<std::shared_ptr<Model>> modelUploadQueue;
+		std::mutex uploadQueueMutex;
+		std::queue<std::shared_ptr<Model>> uploadQueue;
 
 		std::shared_ptr<VulkanTexture> fallbackTexture;
+
+		void LoadTextures(std::shared_ptr<Model>& model);
 		
 		std::shared_ptr<Model> LoadModelInternal(const std::filesystem::path& path);
 
