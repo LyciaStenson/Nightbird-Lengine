@@ -12,15 +12,16 @@ project "Project"
 	}
 
 	includedirs {
-		"%{wks.location}/Source/Public",
-		"%{wks.location}/Vendor/vulkan-headers/include",
-		"%{wks.location}/Vendor/volk",
-		"%{wks.location}/Vendor/vma",
-		"%{wks.location}/Vendor/glfw/include",
-		"%{wks.location}/Vendor/glm",
-		"%{wks.location}/Vendor/stb",
-		"%{wks.location}/Vendor/fastgltf/include",
-		"%{wks.location}/Vendor/cereal"
+		"Source/Public",
+		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
+		"%{wks.location}/Engine/Vendor/volk",
+		"%{wks.location}/Engine/Vendor/vma",
+		"%{wks.location}/Engine/Vendor/glfw/include",
+		"%{wks.location}/Engine/Vendor/glm",
+		"%{wks.location}/Engine/Vendor/stb",
+		"%{wks.location}/Engine/Vendor/fastgltf/include",
+		"%{wks.location}/Engine/Vendor/cereal"
 	}
 
 	links { "Engine" }

@@ -4,6 +4,7 @@
 
 #include <Core/Scene.h>
 #include <Core/Transform.h>
+#include <Core/SceneObject.h>
 
 using namespace Nightbird;
 
@@ -13,9 +14,34 @@ CreateObjectWindow::CreateObjectWindow(Scene* scene, bool open)
 
 }
 
+void CreateObjectWindow::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+{
+	m_ObjectTypes = objectTypes;
+}
+
 void CreateObjectWindow::OnRender()
 {
-	const std::array<const std::string, 4> objectTypes = {"Empty Scene Object", "Mesh Instance", "Point Light", "Camera"};
+	//const std::array<const std::string, 4> objectTypes = {"Empty Scene Object", "Mesh Instance", "Point Light", "Camera"};
+	static std::vector<std::string> objectTypes;
+	static bool objectTypesDirty = true;
+	
+	if (objectTypesDirty)
+	{
+		objectTypes.clear();
+
+		objectTypes.push_back("Empty Scene Object");
+		objectTypes.push_back("Mesh Instance");
+		objectTypes.push_back("Point Light");
+		objectTypes.push_back("Camera");
+
+		for (const auto& objectType : m_ObjectTypes)
+		{
+			objectTypes.push_back(objectType->name);
+		}
+
+		objectTypesDirty = false;
+	}
+
 	static int selectedObjectType = -1;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 15.0f));
@@ -41,19 +67,36 @@ void CreateObjectWindow::OnRender()
 	{
 		Transform transform;
 
-		switch (selectedObjectType)
+		if (selectedObjectType < 4)
 		{
-		case 0:
-			m_Scene->CreateSceneObject("Empty Scene Object", transform.position, transform.rotation, transform.scale, nullptr);
-			break;
-		case 1:
-			break;
-		case 2:
-			m_Scene->CreatePointLight("Point Light", transform.position, transform.rotation, transform.scale, nullptr);
-			break;
-		case 3:
-			Camera* camera = m_Scene->CreateCamera("Camera", transform.position, transform.rotation, transform.scale, nullptr);
-			break;
+			switch (selectedObjectType)
+			{
+			case 0:
+				m_Scene->CreateSceneObject("Empty Scene Object", transform.position, transform.rotation, transform.scale, nullptr);
+				break;
+			case 1:
+				break;
+			case 2:
+				m_Scene->CreatePointLight("Point Light", transform.position, transform.rotation, transform.scale, nullptr);
+				break;
+			case 3:
+				Camera * camera = m_Scene->CreateCamera("Camera", transform.position, transform.rotation, transform.scale, nullptr);
+				break;
+			}
+		}
+		else
+		{
+			int customIndex = selectedObjectType - 4;
+			if (customIndex >= 0 && customIndex < static_cast<int>(m_ObjectTypes.size()))
+			{
+				auto* objectDesc = m_ObjectTypes[customIndex];
+				SceneObject* rawObject = objectDesc->create("Custom Object");
+				if (rawObject)
+				{
+					std::unique_ptr<SceneObject, SceneObjectDeleter> customObject(rawObject);
+					m_Scene->AddSceneObject(std::move(customObject));
+				}
+			}
 		}
 
 		m_Open = false;

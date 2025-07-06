@@ -16,6 +16,7 @@
 #include <Core/PointLightData.h>
 #include <Core/Transform.h>
 #include <Core/Model.h>
+#include <Core/ProjectExport.h>
 
 #include <filesystem>
 #include <fstream>
@@ -130,6 +131,14 @@ bool Scene::LoadSceneBIN(const std::string& path)
 	return true;
 }
 
+void Scene::AddSceneObject(std::unique_ptr<SceneObject, SceneObjectDeleter> object, SceneObject* parent)
+{
+	if (parent)
+		parent->AddChild(std::move(object));
+	else
+		rootObject->AddChild(std::move(object));
+}
+
 SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 {
 	if (!parent)
@@ -144,7 +153,7 @@ SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& 
 	//}
 	//objectNames.insert(instanceName);
 
-	std::unique_ptr<SceneObject> object = std::make_unique<SceneObject>(instanceName);
+	std::unique_ptr<SceneObject, SceneObjectDeleter> object(new SceneObject(instanceName), SceneObjectDeleter{});
 	object->transform.position = position;
 	object->transform.rotation = rotation;
 	object->transform.scale = scale;
@@ -174,25 +183,25 @@ Camera* Scene::CreateCamera(const std::string& name, const glm::vec3& position, 
 	//}
 	//objectNames.insert(cameraName);
 
-	std::unique_ptr<Camera> camera = std::make_unique<Camera>(cameraName);
-	camera->transform.position = position;
-	camera->transform.rotation = rotation;
-	camera->transform.scale = scale;
-	camera->SetParent(parent);
+	std::unique_ptr<SceneObject, SceneObjectDeleter> object(new Camera(cameraName), SceneObjectDeleter{});
+	object->transform.position = position;
+	object->transform.rotation = rotation;
+	object->transform.scale = scale;
+	object->SetParent(parent);
 	
-	Camera* cameraPtr = camera.get();
+	Camera* camera = static_cast<Camera*>(object.get());
 
 	if (parent)
-		parent->AddChild(std::move(camera));
+		parent->AddChild(std::move(object));
 	else
-		rootObject->AddChild(std::move(camera));
+		rootObject->AddChild(std::move(object));
 	
 	if (!GetMainCamera())
 	{
-		SetMainCamera(cameraPtr);
+		SetMainCamera(camera);
 	}
 	
-	return cameraPtr;
+	return camera;
 }
 
 PointLight* Scene::CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
@@ -209,20 +218,20 @@ PointLight* Scene::CreatePointLight(const std::string& name, const glm::vec3& po
 	//}
 	//objectNames.insert(lightName);
 
-	std::unique_ptr<PointLight> light = std::make_unique<PointLight>(lightName);
-	light->transform.position = position;
-	light->transform.rotation = rotation;
-	light->transform.scale = scale;
-	light->SetParent(parent);
+	std::unique_ptr<SceneObject, SceneObjectDeleter> object(new PointLight(lightName), SceneObjectDeleter{});
+	object->transform.position = position;
+	object->transform.rotation = rotation;
+	object->transform.scale = scale;
+	object->SetParent(parent);
 	
-	PointLight* lightPtr = light.get();
+	PointLight* light = static_cast<PointLight*>(object.get());
 	
 	if (parent)
-		parent->AddChild(std::move(light));
+		parent->AddChild(std::move(object));
 	else
-		rootObject->AddChild(std::move(light));
+		rootObject->AddChild(std::move(object));
 
-	return lightPtr;
+	return light;
 }
 
 PrefabInstance* Scene::CreatePrefabInstance(const std::string& name, const std::string& path, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
@@ -239,20 +248,20 @@ PrefabInstance* Scene::CreatePrefabInstance(const std::string& name, const std::
 	//}
 	//objectNames.insert(instanceName);
 
-	std::unique_ptr<PrefabInstance> prefab = std::make_unique<PrefabInstance>(instanceName, path);
-	prefab->transform.position = position;
-	prefab->transform.rotation = rotation;
-	prefab->transform.scale = scale;
-	prefab->SetParent(parent);
+	std::unique_ptr<SceneObject, SceneObjectDeleter> object(new PrefabInstance(instanceName, path), SceneObjectDeleter{});
+	object->transform.position = position;
+	object->transform.rotation = rotation;
+	object->transform.scale = scale;
+	object->SetParent(parent);
 
-	PrefabInstance* prefabPtr = prefab.get();
+	PrefabInstance* prefab = static_cast<PrefabInstance*>(object.get());
 
 	if (parent)
-		parent->AddChild(std::move(prefab));
+		parent->AddChild(std::move(object));
 	else
-		rootObject->AddChild(std::move(prefab));
+		rootObject->AddChild(std::move(object));
 
-	return prefabPtr;
+	return prefab;
 }
 
 MeshInstance* Scene::CreateMeshInstance(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent, std::shared_ptr<Mesh> mesh)
@@ -269,20 +278,20 @@ MeshInstance* Scene::CreateMeshInstance(const std::string& name, const glm::vec3
 	//}
 	//objectNames.insert(instanceName);
 	
-	std::unique_ptr<MeshInstance> meshInstance = std::make_unique<MeshInstance>(instanceName, mesh, device, descriptorPool);
-	meshInstance->transform.position = position;
-	meshInstance->transform.rotation = rotation;
-	meshInstance->transform.scale = scale;
-	meshInstance->SetParent(parent);
+	std::unique_ptr<SceneObject, SceneObjectDeleter> object(new MeshInstance(instanceName, mesh, device, descriptorPool));
+	object->transform.position = position;
+	object->transform.rotation = rotation;
+	object->transform.scale = scale;
+	object->SetParent(parent);
 
-	MeshInstance* meshInstancePtr = meshInstance.get();
+	MeshInstance* meshInstance = static_cast<MeshInstance*>(object.get());
 	
 	if (parent)
-		parent->AddChild(std::move(meshInstance));
+		parent->AddChild(std::move(object));
 	else
-		rootObject->AddChild(std::move(meshInstance));
+		rootObject->AddChild(std::move(object));
 	
-	return meshInstancePtr;
+	return meshInstance;
 }
 
 void Scene::InstantiateModelNode(const std::shared_ptr<Model>& model, const fastgltf::Node& node, SceneObject* parent)

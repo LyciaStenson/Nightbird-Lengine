@@ -24,6 +24,11 @@ EditorRenderTarget::~EditorRenderTarget()
 
 }
 
+void EditorRenderTarget::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+{
+	imGuiOverlay->SetObjectTypes(objectTypes);
+}
+
 void EditorRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 {
 	SceneWindow* sceneWindow = static_cast<SceneWindow*>(imGuiOverlay->GetWindow("Scene Window"));

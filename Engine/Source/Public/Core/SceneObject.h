@@ -17,6 +17,11 @@
 
 namespace Nightbird
 {
+	struct SceneObjectDeleter
+	{
+		void operator()(SceneObject* object) const;
+	};
+
 	class SceneObject
 	{
 	public:
@@ -30,13 +35,13 @@ namespace Nightbird
 		void SetParent(SceneObject* transform);
 		SceneObject* GetParent() const;
 		
-		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;
+		const std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>>& GetChildren() const;
 
 		glm::mat4 GetLocalMatrix() const;
 		glm::mat4 GetWorldMatrix() const;
 
-		void AddChild(std::unique_ptr<SceneObject> child);
-		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
+		void AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child);
+		std::unique_ptr<SceneObject, SceneObjectDeleter> DetachChild(SceneObject* child);
 
 		template <class Archive>
 		void serialize(Archive& archive)
@@ -53,10 +58,12 @@ namespace Nightbird
 
 		SceneObject* parent = nullptr;
 
+		virtual bool IsCustomObject() const { return false; }
+
 	protected:
 		std::string name;
 		
-		std::vector<std::unique_ptr<SceneObject>> children;
+		std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>> children;
 	};
 }
 
