@@ -30,3 +30,7 @@ group "Nightbird"
 	include "App"
 	include "Editor"
 group ""
+
+group "Projects"
+	include "Project"
+group ""
