@@ -5,7 +5,7 @@
 namespace Nightbird
 {
 	class ModelManager;
-
+	
 	class LoadModelWindow : public ImGuiWindow
 	{
 	public:
