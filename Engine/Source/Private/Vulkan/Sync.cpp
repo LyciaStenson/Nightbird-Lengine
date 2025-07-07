@@ -4,56 +4,57 @@
 
 #include <Vulkan/Config.h>
 
-using namespace Nightbird;
-
-VulkanSync::VulkanSync(VkDevice logicalDevice)
-	: logicalDevice(logicalDevice)
+namespace Nightbird
 {
-	CreateSyncObjects();
-}
-
-VulkanSync::~VulkanSync()
-{
-	CleanupSyncObjects();
-}
-
-void VulkanSync::CreateSyncObjects()
-{
-	imageAvailableSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
-	renderFinishedSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
-	inFlightFences.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
-
-	VkSemaphoreCreateInfo semaphoreInfo{};
-	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	VkFenceCreateInfo fenceInfo{};
-	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
+	VulkanSync::VulkanSync(VkDevice logicalDevice)
+		: logicalDevice(logicalDevice)
 	{
-		if (
-			vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-			vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS
-			)
+		CreateSyncObjects();
+	}
+
+	VulkanSync::~VulkanSync()
+	{
+		CleanupSyncObjects();
+	}
+
+	void VulkanSync::CreateSyncObjects()
+	{
+		imageAvailableSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+		renderFinishedSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+		inFlightFences.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		VkFenceCreateInfo fenceInfo{};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			std::cerr << "Failed to create semaphores and fence" << std::endl;
-			return;
+			if (
+				vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+				vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS
+				)
+			{
+				std::cerr << "Failed to create semaphores and fence" << std::endl;
+				return;
+			}
 		}
 	}
-}
 
-void VulkanSync::CleanupSyncObjects()
-{
-	for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
+	void VulkanSync::CleanupSyncObjects()
 	{
-		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
-		vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
-	}
+		for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
+			vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+		}
 
-	renderFinishedSemaphores.clear();
-	imageAvailableSemaphores.clear();
-	inFlightFences.clear();
+		renderFinishedSemaphores.clear();
+		imageAvailableSemaphores.clear();
+		inFlightFences.clear();
+	}
 }

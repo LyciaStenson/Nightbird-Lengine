@@ -11,45 +11,46 @@
 #include <Vulkan/SwapChain.h>
 #include <Core/ModelManager.h>
 
-using namespace Nightbird;
-
-EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
-	: RenderTarget(renderer)
+namespace Nightbird
 {
-	imGuiOverlay = std::make_unique<VulkanImGuiOverlay>(instance, device, swapChain, renderPass, glfwWindow, scene, modelManager);
-}
-
-EditorRenderTarget::~EditorRenderTarget()
-{
-
-}
-
-void EditorRenderTarget::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
-{
-	imGuiOverlay->SetObjectTypes(objectTypes);
-}
-
-void EditorRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
-{
-	SceneWindow* sceneWindow = static_cast<SceneWindow*>(imGuiOverlay->GetWindow("Scene Window"));
-	if (sceneWindow)
+	EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
+		: RenderTarget(renderer)
 	{
-		if (sceneWindow->ShouldResize())
-			sceneWindow->RecreateRenderResources();
-		sceneWindow->GetColorTexture()->TransitionToColor(commandBuffer);
+		imGuiOverlay = std::make_unique<VulkanImGuiOverlay>(instance, device, swapChain, renderPass, glfwWindow, scene, modelManager);
 	}
 
-	if (sceneWindow)
+	EditorRenderTarget::~EditorRenderTarget()
 	{
-		sceneWindow->BeginRenderPass(commandBuffer);
-		renderer->DrawScene(scene, commandBuffer, sceneWindow->GetExtent());
-		sceneWindow->EndRenderPass(commandBuffer);
+
 	}
 
-	if (sceneWindow)
-		sceneWindow->GetColorTexture()->TransitionToShaderRead(commandBuffer);
+	void EditorRenderTarget::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+	{
+		imGuiOverlay->SetObjectTypes(objectTypes);
+	}
 
-	renderPass->Begin(commandBuffer, framebuffer, extent);
-	imGuiOverlay->Render(commandBuffer);
-	renderPass->End(commandBuffer);
+	void EditorRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
+	{
+		SceneWindow* sceneWindow = static_cast<SceneWindow*>(imGuiOverlay->GetWindow("Scene Window"));
+		if (sceneWindow)
+		{
+			if (sceneWindow->ShouldResize())
+				sceneWindow->RecreateRenderResources();
+			sceneWindow->GetColorTexture()->TransitionToColor(commandBuffer);
+		}
+
+		if (sceneWindow)
+		{
+			sceneWindow->BeginRenderPass(commandBuffer);
+			renderer->DrawScene(scene, commandBuffer, sceneWindow->GetExtent());
+			sceneWindow->EndRenderPass(commandBuffer);
+		}
+
+		if (sceneWindow)
+			sceneWindow->GetColorTexture()->TransitionToShaderRead(commandBuffer);
+
+		renderPass->Begin(commandBuffer, framebuffer, extent);
+		imGuiOverlay->Render(commandBuffer);
+		renderPass->End(commandBuffer);
+	}
 }

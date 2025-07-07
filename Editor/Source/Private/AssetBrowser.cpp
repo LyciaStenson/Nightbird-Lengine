@@ -5,70 +5,71 @@
 #include <Core/Scene.h>
 #include <ImGuiOverlay.h>
 
-using namespace Nightbird;
-
-AssetBrowser::AssetBrowser(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
-	: ImGuiWindow("Asset Browser", open), m_Scene(scene), m_Overlay(overlay)
+namespace Nightbird
 {
-	m_CurrentPath = std::filesystem::path("Assets");
-}
-
-void AssetBrowser::OnRender()
-{
-	if (m_CurrentPath.has_parent_path())
+	AssetBrowser::AssetBrowser(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
+		: ImGuiWindow("Asset Browser", open), m_Scene(scene), m_Overlay(overlay)
 	{
-		if (ImGui::Button("^ Up"))
-		{
-			m_CurrentPath = m_CurrentPath.parent_path();
-			m_SelectedPath.clear();
-		}
+		m_CurrentPath = std::filesystem::path("Assets");
 	}
-	
-	for (const auto& entry : std::filesystem::directory_iterator(m_CurrentPath))
-	{
-		const std::filesystem::path& path = entry.path();
-		const std::string name = entry.path().filename().string();
 
-		bool selected = path == m_SelectedPath;
-		
-		if (entry.is_directory())
+	void AssetBrowser::OnRender()
+	{
+		if (m_CurrentPath.has_parent_path())
 		{
-			if (ImGui::Selectable(name.c_str(), selected))
+			if (ImGui::Button("^ Up"))
 			{
-				m_SelectedPath = path;
-			}
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-			{
-				m_CurrentPath = path;
+				m_CurrentPath = m_CurrentPath.parent_path();
 				m_SelectedPath.clear();
 			}
 		}
-		else if (entry.is_regular_file())
+
+		for (const auto& entry : std::filesystem::directory_iterator(m_CurrentPath))
 		{
-			if (ImGui::Selectable(name.c_str(), selected))
+			const std::filesystem::path& path = entry.path();
+			const std::string name = entry.path().filename().string();
+
+			bool selected = path == m_SelectedPath;
+
+			if (entry.is_directory())
 			{
-				m_SelectedPath = path;
-			}
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-			{
-				if (path.extension() == ".scene" && m_Scene)
+				if (ImGui::Selectable(name.c_str(), selected))
 				{
-					m_Scene->LoadSceneBIN(path.string());
-					m_Overlay->SelectObject(nullptr);
-					break;
+					m_SelectedPath = path;
 				}
-				else if (path.extension() == ".tscene" && m_Scene)
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					m_Scene->LoadSceneJSON(path.string());
-					m_Overlay->SelectObject(nullptr);
-					break;
+					m_CurrentPath = path;
+					m_SelectedPath.clear();
+				}
+			}
+			else if (entry.is_regular_file())
+			{
+				if (ImGui::Selectable(name.c_str(), selected))
+				{
+					m_SelectedPath = path;
+				}
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					if (path.extension() == ".scene" && m_Scene)
+					{
+						m_Scene->LoadSceneBIN(path.string());
+						m_Overlay->SelectObject(nullptr);
+						break;
+					}
+					else if (path.extension() == ".tscene" && m_Scene)
+					{
+						m_Scene->LoadSceneJSON(path.string());
+						m_Overlay->SelectObject(nullptr);
+						break;
+					}
 				}
 			}
 		}
-	}
-	
-	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-	{
-		m_SelectedPath.clear();
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		{
+			m_SelectedPath.clear();
+		}
 	}
 }

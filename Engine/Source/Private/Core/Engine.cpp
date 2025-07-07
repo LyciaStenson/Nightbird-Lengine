@@ -21,8 +21,6 @@
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 
-using namespace Nightbird;
-
 inline float Wrap180(float angle)
 {
 	angle = std::fmod(angle + 180.0f, 360.0f);
@@ -47,54 +45,57 @@ inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
 	return glm::vec3(RoundDP(angles.x, dp), RoundDP(angles.y, dp), RoundDP(angles.z, dp));
 }
 
-Engine::Engine()
+namespace Nightbird
 {
-	if (volkInitialize() != VK_SUCCESS)
+	Engine::Engine()
 	{
-		std::cerr << "Failed to initialize Volk" << std::endl;
+		if (volkInitialize() != VK_SUCCESS)
+		{
+			std::cerr << "Failed to initialize Volk" << std::endl;
+		}
+
+		glfwWindow = std::make_unique<GlfwWindow>();
+		renderer = std::make_unique<Renderer>(glfwWindow.get());
+		glfwWindow->SetRendererPointer(renderer.get());
+
+		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
+
+		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 	}
 
-	glfwWindow = std::make_unique<GlfwWindow>();
-	renderer = std::make_unique<Renderer>(glfwWindow.get());
-	glfwWindow->SetRendererPointer(renderer.get());
-	
-	modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
-	
-	scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
-}
-
-Engine::~Engine()
-{
-
-}
-
-GlfwWindow* Engine::GetGlfwWindow() const
-{
-	return glfwWindow.get();
-}
-
-Renderer* Engine::GetRenderer() const
-{
-	return renderer.get();
-}
-
-Scene* Engine::GetScene() const
-{
-	return scene.get();
-}
-
-ModelManager* Engine::GetModelManager() const
-{
-	return modelManager.get();
-}
-
-void Engine::Run()
-{
-	while (!glfwWindowShouldClose(glfwWindow->Get()))
+	Engine::~Engine()
 	{
-		glfwPollEvents();
-		modelManager->ProcessUploadQueue();
-		renderer->DrawFrame(scene.get());
+
 	}
-	vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
+
+	GlfwWindow* Engine::GetGlfwWindow() const
+	{
+		return glfwWindow.get();
+	}
+
+	Renderer* Engine::GetRenderer() const
+	{
+		return renderer.get();
+	}
+
+	Scene* Engine::GetScene() const
+	{
+		return scene.get();
+	}
+
+	ModelManager* Engine::GetModelManager() const
+	{
+		return modelManager.get();
+	}
+
+	void Engine::Run()
+	{
+		while (!glfwWindowShouldClose(glfwWindow->Get()))
+		{
+			glfwPollEvents();
+			modelManager->ProcessUploadQueue();
+			renderer->DrawFrame(scene.get());
+		}
+		vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
+	}
 }

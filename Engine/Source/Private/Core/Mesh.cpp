@@ -9,37 +9,38 @@
 
 #include <stb_image.h>
 
-using namespace Nightbird;
-
-Mesh::Mesh(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout)
-	: device(device), uniformDescriptorSetLayout(uniformDescriptorSetLayout)
+namespace Nightbird
 {
+	Mesh::Mesh(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout)
+		: device(device), uniformDescriptorSetLayout(uniformDescriptorSetLayout)
+	{
 
-}
+	}
 
-Mesh::~Mesh()
-{
+	Mesh::~Mesh()
+	{
 
-}
+	}
 
-size_t Mesh::GetPrimitiveCount() const
-{
-	return primitives.size();
-}
+	size_t Mesh::GetPrimitiveCount() const
+	{
+		return primitives.size();
+	}
 
-MeshPrimitive* Mesh::GetPrimitive(size_t index) const
-{
-	if (index < primitives.size() && primitives[index])
-		return primitives[index].get();
-	return nullptr;
-}
+	MeshPrimitive* Mesh::GetPrimitive(size_t index) const
+	{
+		if (index < primitives.size() && primitives[index])
+			return primitives[index].get();
+		return nullptr;
+	}
 
-VkDescriptorSetLayout Mesh::GetUniformDescriptorSetLayout() const
-{
-	return uniformDescriptorSetLayout;
-}
+	VkDescriptorSetLayout Mesh::GetUniformDescriptorSetLayout() const
+	{
+		return uniformDescriptorSetLayout;
+	}
 
-void Mesh::AddPrimitive(std::unique_ptr<MeshPrimitive> meshPrimitive)
-{
-	primitives.push_back(std::move(meshPrimitive));
+	void Mesh::AddPrimitive(std::unique_ptr<MeshPrimitive> meshPrimitive)
+	{
+		primitives.push_back(std::move(meshPrimitive));
+	}
 }

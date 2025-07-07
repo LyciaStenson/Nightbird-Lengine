@@ -3,58 +3,59 @@
 #include <iostream>
 #include <fstream>
 
-using namespace Nightbird;
-
-Shader::Shader(VkDevice device, const std::string& filePath, VkShaderStageFlagBits stageFlag)
-	: device(device)
+namespace Nightbird
 {
-	std::vector<char> code = ReadFile(filePath);
-
-	CreateShaderModule(code);
-
-	stageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stageCreateInfo.stage = stageFlag;
-	stageCreateInfo.module = shaderModule;
-	stageCreateInfo.pName = "main";
-}
-
-Shader::~Shader()
-{
-	if (shaderModule != VK_NULL_HANDLE)
-		vkDestroyShaderModule(device, shaderModule, nullptr);
-}
-
-const VkPipelineShaderStageCreateInfo& Shader::GetStageCreateInfo() const
-{
-	return stageCreateInfo;
-}
-
-void Shader::CreateShaderModule(const std::vector<char>& code)
-{
-	VkShaderModuleCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-		std::cerr << "Failed to create shader module" << std::endl;
-}
-
-std::vector<char> Shader::ReadFile(const std::string& filePath)
-{
-	std::ifstream file(filePath, std::ios::ate | std::ios::binary);
-	if (!file.is_open())
+	Shader::Shader(VkDevice device, const std::string& filePath, VkShaderStageFlagBits stageFlag)
+		: device(device)
 	{
-		std::cerr << "Failed to open file: " << filePath << std::endl;
-		return std::vector<char>();
+		std::vector<char> code = ReadFile(filePath);
+
+		CreateShaderModule(code);
+
+		stageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		stageCreateInfo.stage = stageFlag;
+		stageCreateInfo.module = shaderModule;
+		stageCreateInfo.pName = "main";
 	}
 
-	size_t fileSize = (size_t)file.tellg();
-	std::vector<char> buffer(fileSize);
+	Shader::~Shader()
+	{
+		if (shaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(device, shaderModule, nullptr);
+	}
 
-	file.seekg(0);
-	file.read(buffer.data(), fileSize);
-	file.close();
+	const VkPipelineShaderStageCreateInfo& Shader::GetStageCreateInfo() const
+	{
+		return stageCreateInfo;
+	}
 
-	return buffer;
+	void Shader::CreateShaderModule(const std::vector<char>& code)
+	{
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = code.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+		if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+			std::cerr << "Failed to create shader module" << std::endl;
+	}
+
+	std::vector<char> Shader::ReadFile(const std::string& filePath)
+	{
+		std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+		if (!file.is_open())
+		{
+			std::cerr << "Failed to open file: " << filePath << std::endl;
+			return std::vector<char>();
+		}
+
+		size_t fileSize = (size_t)file.tellg();
+		std::vector<char> buffer(fileSize);
+
+		file.seekg(0);
+		file.read(buffer.data(), fileSize);
+		file.close();
+
+		return buffer;
+	}
 }

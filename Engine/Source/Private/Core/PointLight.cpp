@@ -7,24 +7,25 @@
 #include <Vulkan/UniformBuffer.h>
 #include <Core/PointLightData.h>
 
-using namespace Nightbird;
-
-PointLight::PointLight(const std::string& name)
-	: SceneObject(name)
+namespace Nightbird
 {
+	PointLight::PointLight(const std::string& name)
+		: SceneObject(name)
+	{
 
-}
+	}
 
-PointLight::~PointLight()
-{
+	PointLight::~PointLight()
+	{
 
-}
+	}
 
-PointLightData PointLight::GetData() const
-{
-	PointLightData data;
-	data.positionRadius = glm::vec4(transform.position, radius);
-	data.colorIntensity = glm::vec4(color, intensity);
+	PointLightData PointLight::GetData() const
+	{
+		PointLightData data;
+		data.positionRadius = glm::vec4(transform.position, radius);
+		data.colorIntensity = glm::vec4(color, intensity);
 
-	return data;
+		return data;
+	}
 }

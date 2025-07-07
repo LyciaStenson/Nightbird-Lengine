@@ -4,39 +4,40 @@
 
 #include <Core/Renderer.h>
 
-using namespace Nightbird;
-
-GlfwWindow::GlfwWindow()
+namespace Nightbird
 {
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
-	glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
-}
+	GlfwWindow::GlfwWindow()
+	{
+		glfwInit();
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
+		glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+	}
 
-GlfwWindow::~GlfwWindow()
-{
-	glfwDestroyWindow(window);
-	glfwTerminate();
-}
+	GlfwWindow::~GlfwWindow()
+	{
+		glfwDestroyWindow(window);
+		glfwTerminate();
+	}
 
-GLFWwindow* GlfwWindow::Get() const
-{
-	return window;
-}
+	GLFWwindow* GlfwWindow::Get() const
+	{
+		return window;
+	}
 
-void GlfwWindow::SetRendererPointer(Renderer* renderer)
-{
-	glfwSetWindowUserPointer(window, renderer);
-}
+	void GlfwWindow::SetRendererPointer(Renderer* renderer)
+	{
+		glfwSetWindowUserPointer(window, renderer);
+	}
 
-void GlfwWindow::GetFramebufferSize(int* width, int* height)
-{
-	glfwGetFramebufferSize(window, width, height);
-}
+	void GlfwWindow::GetFramebufferSize(int* width, int* height)
+	{
+		glfwGetFramebufferSize(window, width, height);
+	}
 
-void GlfwWindow::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
-{
-	Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
-	renderer->FramebufferResized();
+	void GlfwWindow::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+		renderer->FramebufferResized();
+	}
 }
