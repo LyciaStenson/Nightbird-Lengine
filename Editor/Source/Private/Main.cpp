@@ -1,5 +1,6 @@
 #include <Core/Engine.h>
 
+#include <Core/SceneObject.h>
 #include <Core/Renderer.h>
 #include <Core/ModelManager.h>
 #include <Core/GlfwWindow.h>
@@ -28,17 +29,29 @@ int main(int argc, char** argv)
 	
 	using GetCustomObjectCountFunc = int (*)();
 	using GetCustomObjectDescriptorFunc = const CustomObjectDescriptor* (*)(int);
+	//using RegisterProjectTypesFunc = void (*)();
 
 	GetCustomObjectCountFunc getCount = nullptr;
 	GetCustomObjectDescriptorFunc getDescriptor = nullptr;
-
+	//RegisterProjectTypesFunc registerTypes = nullptr;
+	
 	if (project)
 	{
 		getCount = (GetCustomObjectCountFunc)GetProcAddress(project, "GetCustomObjectCount");
 		getDescriptor = (GetCustomObjectDescriptorFunc)GetProcAddress(project, "GetCustomObjectDescriptor");
+		g_DeleteCustomObject = (DeleteCustomObjectFunc)GetProcAddress(project, "DeleteCustomObject");
+		//registerTypes = (RegisterProjectTypesFunc)GetProcAddress(project, "RegisterProjectTypes");
 
 		if (!getCount || !getDescriptor)
 			std::cerr << "Failed to load Project DLL exports" << std::endl;
+		
+		if (!g_DeleteCustomObject)
+			std::cerr << "Failed to load DeleteCustomObject from Project DLL" << std::endl;
+
+		//if (registerTypes)
+			//registerTypes();
+		//else
+			//std::cerr << "Failed to load RegisterProjectTypes from Project DLL" << std::endl;
 	}
 #endif
 	

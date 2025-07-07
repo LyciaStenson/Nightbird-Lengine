@@ -31,7 +31,7 @@ namespace Nightbird
 		{
 			archive
 			(
-				cereal::base_class<SceneObject>(this),
+				cereal::base_class<::Nightbird::SceneObject>(this),
 				CEREAL_NVP(color),
 				CEREAL_NVP(intensity),
 				CEREAL_NVP(radius)

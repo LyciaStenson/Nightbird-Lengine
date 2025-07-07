@@ -6,6 +6,8 @@ project "Project"
 	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
 
+	defines { "PROJECT_BUILD" }
+
 	files {
 		"Source/**.h",
 		"Source/**.cpp"

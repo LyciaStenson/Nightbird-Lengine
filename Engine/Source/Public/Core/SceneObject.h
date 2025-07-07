@@ -15,6 +15,9 @@
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/portable_binary.hpp>
 
+using DeleteCustomObjectFunc = void (*)(void*);
+extern DeleteCustomObjectFunc g_DeleteCustomObject;
+
 namespace Nightbird
 {
 	struct SceneObjectDeleter

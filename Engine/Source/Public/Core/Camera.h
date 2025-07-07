@@ -32,7 +32,7 @@ namespace Nightbird
 		{
 			archive
 			(
-				cereal::base_class<SceneObject>(this),
+				cereal::base_class<::Nightbird::SceneObject>(this),
 				CEREAL_NVP(fov)
 			);
 		}
@@ -41,5 +41,5 @@ namespace Nightbird
 	};
 }
 
-CEREAL_REGISTER_TYPE(Nightbird::Camera)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Nightbird::SceneObject, Nightbird::Camera)
+CEREAL_REGISTER_TYPE(::Nightbird::Camera)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, ::Nightbird::Camera)

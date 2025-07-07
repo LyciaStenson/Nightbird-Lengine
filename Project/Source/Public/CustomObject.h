@@ -4,7 +4,7 @@
 
 #include <Core/SceneObject.h>
 
-#include <Core/ProjectExport.h>
+#include <Core/ProjectRegistration.h>
 
 class CustomObject : public Nightbird::SceneObject
 {
@@ -14,5 +14,25 @@ public:
 
 	int testVar = 5;
 
-	REGISTER_CUSTOM_OBJECT()
+	template <class Archive>
+	void serialize(Archive& archive)
+	{
+		archive
+		(
+			cereal::base_class<::Nightbird::SceneObject>(this),
+			CEREAL_NVP(testVar)
+		);
+	}
+	
+	//SERIALIZE_FIELDS(testVar)
+	REGISTER_IS_CUSTOM_OBJECT()
 };
+
+//REGISTER_SERIALIZATION(CustomObject)
+
+CEREAL_REGISTER_TYPE(CustomObject)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, CustomObject)
+
+//CEREAL_REGISTER_DYNAMIC_INIT(CustomObject)
+
+extern "C" __declspec(dllexport) void RegisterType();

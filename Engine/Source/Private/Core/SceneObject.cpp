@@ -2,12 +2,14 @@
 
 #include <Core/ProjectExport.h>
 
+DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
+
 namespace Nightbird
 {
 	void SceneObjectDeleter::operator()(SceneObject* object) const
 	{
-		if (object->IsCustomObject())
-			DeleteCustomObject(object);
+		if (object->IsCustomObject() && g_DeleteCustomObject)
+			g_DeleteCustomObject(object);
 		else
 			delete object;
 	}

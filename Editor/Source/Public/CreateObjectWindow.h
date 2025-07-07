@@ -4,7 +4,7 @@
 
 #include <ImGuiWindow.h>
 
-#include <Core/ProjectExport.h>
+#include <Core/ProjectRegistration.h>
 
 namespace Nightbird
 {
