@@ -25,75 +25,13 @@
 *                                                                                   *
 *************************************************************************************/
 
-#include <rttr/registration>
-#include <catch/catch.hpp>
+#ifndef RTTR_VERSION_H_
+#define RTTR_VERSION_H_
 
-using namespace rttr;
+#define RTTR_VERSION_MAJOR 0
+#define RTTR_VERSION_MINOR 9
+#define RTTR_VERSION_PATCH 6
+#define RTTR_VERSION       906
+#define RTTR_VERSION_STR   "0.9.6"
 
-struct dtor_invoke_test
-{
-    dtor_invoke_test()
-    {
-
-    }
-
-};
-
-RTTR_REGISTRATION
-{
-    registration::class_<dtor_invoke_test>("dtor_invoke_test")
-        .constructor<>() (policy::ctor::as_raw_ptr)
-       ;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-TEST_CASE("destructor - invoke", "[destructor]")
-{
-    type t = type::get<dtor_invoke_test>();
-    REQUIRE(t.is_valid() == true);
-
-    SECTION("Invoke positive")
-    {
-        variant var = t.create();
-
-        CHECK(var.is_valid() == true);
-
-        destructor dtor = var.get_type().get_destructor();
-        CHECK(dtor.is_valid() == true);
-        CHECK(static_cast<bool>(dtor) == true);
-
-        CHECK(dtor.invoke(var) == true);
-        CHECK(var.is_valid() == false);
-
-        // check that bot dtors are the same
-        CHECK(type::get<dtor_invoke_test>().get_destructor() == type::get<dtor_invoke_test*>().get_destructor());
-    }
-
-    SECTION("Invoke negative")
-    {
-        variant var;
-        CHECK(var.is_valid() == false);
-
-        destructor dtor_invalid = type::get_by_name("").get_destructor();
-        REQUIRE(dtor_invalid.is_valid() == false);
-
-        // cannot invoke destructor, because dtor wrapper is invalid
-        CHECK(dtor_invalid.invoke(var) == false);
-
-        // cannot invoke destructor, because given type is invalid
-        CHECK(type::get<dtor_invoke_test>().get_destructor().invoke(var) == false);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-TEST_CASE("destructor - via type", "[destructor]")
-{
-    variant var = type::get<dtor_invoke_test>().create();
-    REQUIRE(var.get_type() == type::get<dtor_invoke_test*>());
-    CHECK(var.get_type().destroy(var) == true);
-    CHECK(var.is_valid() == false);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
+#endif // RTTR_VERSION_H_

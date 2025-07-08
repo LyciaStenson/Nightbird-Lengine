@@ -1,4 +1,4 @@
-project "fastgltf"
+project "rttr"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
@@ -10,11 +10,12 @@ project "fastgltf"
 	files
 	{
 		"**.h",
+		"**.h++",
 		"**.hpp",
 		"**.cpp"
 	}
 
 	includedirs
 	{
-		"include"
+		"src"
 	}
