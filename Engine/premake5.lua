@@ -24,7 +24,8 @@ project "Engine"
 		"Vendor/glm",
 		"Vendor/stb",
 		"Vendor/fastgltf/include",
-		"Vendor/rttr/src"
+		"Vendor/rttr/src",
+		"Vendor/json"
 	}
 
 	links { "glfw", "fastgltf", "rttr" }

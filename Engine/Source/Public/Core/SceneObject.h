@@ -6,8 +6,12 @@
 
 #include <Core/Transform.h>
 
+#include <nlohmann/json.hpp>
+
 using DeleteCustomObjectFunc = void (*)(void*);
 extern DeleteCustomObjectFunc g_DeleteCustomObject;
+
+using json = nlohmann::json;
 
 namespace Nightbird
 {
@@ -47,6 +51,9 @@ namespace Nightbird
 		//		CEREAL_NVP(children)
 		//	);
 		//}
+
+		virtual void Serialize(json& out) const;
+		virtual void Deserialize(const json& in);
 		
 		Transform transform;
 

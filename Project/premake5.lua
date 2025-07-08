@@ -22,8 +22,7 @@ project "Project"
 		"%{wks.location}/Engine/Vendor/glfw/include",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
-		"%{wks.location}/Engine/Vendor/fastgltf/include",
-		"%{wks.location}/Engine/Vendor/cereal"
+		"%{wks.location}/Engine/Vendor/fastgltf/include"
 	}
 
 	links { "Engine" }

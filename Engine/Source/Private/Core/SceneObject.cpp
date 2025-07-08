@@ -101,4 +101,20 @@ namespace Nightbird
 
 		return nullptr;
 	}
+
+	void SceneObject::Serialize(json& out) const
+	{
+		out["name"] = name;
+		//out["transform"] = transform;
+		out["children"] = json::array();
+		for (const auto& child : children)
+		{
+			json childEntry;
+		}
+	}
+
+	void SceneObject::Deserialize(const json& in)
+	{
+
+	}
 }
