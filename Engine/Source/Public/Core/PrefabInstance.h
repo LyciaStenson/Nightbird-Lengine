@@ -38,6 +38,3 @@ namespace Nightbird
 		std::string prefabPath;
 	};
 }
-
-CEREAL_REGISTER_TYPE(Nightbird::PrefabInstance)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Nightbird::SceneObject, Nightbird::PrefabInstance)

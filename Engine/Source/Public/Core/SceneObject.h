@@ -6,15 +6,6 @@
 
 #include <Core/Transform.h>
 
-#include <cereal/cereal.hpp>
-
-#include <cereal/types/string.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/vector.hpp>
-
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/archives/portable_binary.hpp>
-
 using DeleteCustomObjectFunc = void (*)(void*);
 extern DeleteCustomObjectFunc g_DeleteCustomObject;
 
@@ -69,5 +60,3 @@ namespace Nightbird
 		std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>> children;
 	};
 }
-
-CEREAL_REGISTER_TYPE(Nightbird::SceneObject)

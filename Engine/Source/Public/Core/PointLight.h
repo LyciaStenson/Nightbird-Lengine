@@ -42,6 +42,3 @@ namespace Nightbird
 		float radius = 10.0f;
 	};
 }
-
-CEREAL_REGISTER_TYPE(Nightbird::PointLight)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Nightbird::SceneObject, Nightbird::PointLight)

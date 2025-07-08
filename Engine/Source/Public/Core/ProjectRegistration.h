@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include <cereal/types/polymorphic.hpp>
-
 namespace Nightbird
 {
 	class SceneObject;
@@ -35,17 +33,17 @@ public:
 #define REGISTER_IS_CUSTOM_OBJECT() \
 	bool IsCustomObject() const override { return true; }
 
-#define REGISTER_SERIALIZATION(ClassName) \
-	CEREAL_REGISTER_TYPE(ClassName) \
-	CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, ClassName)
+//#define REGISTER_SERIALIZATION(ClassName) \
+//	CEREAL_REGISTER_TYPE(ClassName) \
+//	CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, ClassName)
 
-#define SERIALIZE_FIELDS(...) \
-	template <class Archive> \
-	void serialize(Archive& archive) \
-	{ \
-		archive \
-		( \
-			cereal::base_class<::Nightbird::SceneObject>(this), \
-			CEREAL_NVP(__VA_ARGS__) \
-		); \
-	}
+//#define SERIALIZE_FIELDS(...) \
+//	template <class Archive> \
+//	void serialize(Archive& archive) \
+//	{ \
+//		archive \
+//		( \
+//			cereal::base_class<::Nightbird::SceneObject>(this), \
+//			CEREAL_NVP(__VA_ARGS__) \
+//		); \
+//	}

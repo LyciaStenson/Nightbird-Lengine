@@ -2,10 +2,6 @@
 
 #include <CustomObject.h>
 
-#include <cereal/cereal.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/archives/binary.hpp>
-
 PROJECT_API int GetCustomObjectCount()
 {
 	return static_cast<int>(GetCustomObjectRegistry().size());
@@ -29,5 +25,5 @@ PROJECT_API void Test(void* object)
 
 PROJECT_API void RegisterProjectTypes()
 {
-	std::cout << "Register Project Types" << std::endl;
+	//std::cout << "Register Project Types" << std::endl;
 }

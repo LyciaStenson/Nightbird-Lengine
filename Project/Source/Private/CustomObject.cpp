@@ -2,9 +2,6 @@
 
 #include <iostream>
 
-#include <cereal/cereal.hpp>
-#include <cereal/types/polymorphic.hpp>
-
 CustomObject::CustomObject()
 {
 	std::cout << "Creating custom object!" << std::endl;

@@ -15,11 +15,6 @@
 #include <fastgltf/types.hpp>
 #include <fastgltf/tools.hpp>
 
-#include <cereal/cereal.hpp>
-
-#include <cereal/types/string.hpp>
-#include <cereal/types/memory.hpp>
-
 #include <Core/SceneObject.h>
 
 namespace Nightbird

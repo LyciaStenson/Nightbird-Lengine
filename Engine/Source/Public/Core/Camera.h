@@ -11,8 +11,6 @@
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 
-//#include <cereal/types/polymorphic.hpp>
-
 namespace Nightbird
 {
 	struct CameraUBO;
@@ -39,6 +37,3 @@ namespace Nightbird
 		float fov = 70.0f;
 	};
 }
-
-CEREAL_REGISTER_TYPE(::Nightbird::Camera)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, ::Nightbird::Camera)

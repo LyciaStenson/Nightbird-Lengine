@@ -20,12 +20,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/archives/binary.hpp>
-#include <cereal/archives/json.hpp>
 
 namespace Nightbird
 {
@@ -80,8 +74,8 @@ namespace Nightbird
 			return false;
 		}
 
-		cereal::JSONOutputArchive archive(os);
-		save(archive);
+		//cereal::JSONOutputArchive archive(os);
+		//save(archive);
 
 		return true;
 	}
@@ -95,8 +89,8 @@ namespace Nightbird
 			return false;
 		}
 
-		cereal::BinaryOutputArchive archive(os);
-		save(archive);
+		//cereal::BinaryOutputArchive archive(os);
+		//save(archive);
 
 		return true;
 	}
@@ -110,8 +104,8 @@ namespace Nightbird
 			return false;
 		}
 
-		cereal::JSONInputArchive archive(is);
-		load(archive);
+		//cereal::JSONInputArchive archive(is);
+		//load(archive);
 
 		return true;
 	}
@@ -125,8 +119,8 @@ namespace Nightbird
 			return false;
 		}
 
-		cereal::BinaryInputArchive archive(is);
-		load(archive);
+		//cereal::BinaryInputArchive archive(is);
+		//load(archive);
 
 		return true;
 	}

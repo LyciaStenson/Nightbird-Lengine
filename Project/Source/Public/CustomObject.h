@@ -28,11 +28,4 @@ public:
 	REGISTER_IS_CUSTOM_OBJECT()
 };
 
-//REGISTER_SERIALIZATION(CustomObject)
-
-//CEREAL_REGISTER_TYPE(CustomObject)
-//CEREAL_REGISTER_POLYMORPHIC_RELATION(::Nightbird::SceneObject, CustomObject)
-
-//CEREAL_REGISTER_DYNAMIC_INIT(CustomObject)
-
 extern "C" __declspec(dllexport) void RegisterType();
