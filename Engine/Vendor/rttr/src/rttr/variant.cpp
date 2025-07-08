@@ -34,7 +34,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <string>
 #include <set>
 
 namespace rttr
