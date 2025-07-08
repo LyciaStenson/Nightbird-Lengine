@@ -69,37 +69,37 @@ namespace Nightbird
 		void UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent);
 		void UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<PointLightData>& pointLightData);
 
-		template <class Archive>
-		void save(Archive& archive) const
-		{
-			archive(CEREAL_NVP(rootObject));
-			std::string mainCameraPath = mainCamera ? mainCamera->GetPath() : "";
-			archive(CEREAL_NVP(mainCameraPath));
-		}
+		//template <class Archive>
+		//void save(Archive& archive) const
+		//{
+		//	archive(CEREAL_NVP(rootObject));
+		//	std::string mainCameraPath = mainCamera ? mainCamera->GetPath() : "";
+		//	archive(CEREAL_NVP(mainCameraPath));
+		//}
 
-		template <class Archive>
-		void load(Archive& archive)
-		{
-			rootObject = nullptr;
-			mainCamera = nullptr;
+		//template <class Archive>
+		//void load(Archive& archive)
+		//{
+		//	rootObject = nullptr;
+		//	mainCamera = nullptr;
 
-			archive(CEREAL_NVP(rootObject));
-			std::string mainCameraPath;
-			archive(CEREAL_NVP(mainCameraPath));
-			
-			if (!mainCameraPath.empty())
-				mainCamera = dynamic_cast<Camera*>(FindObject(mainCameraPath));
+		//	archive(CEREAL_NVP(rootObject));
+		//	std::string mainCameraPath;
+		//	archive(CEREAL_NVP(mainCameraPath));
+		//	
+		//	if (!mainCameraPath.empty())
+		//		mainCamera = dynamic_cast<Camera*>(FindObject(mainCameraPath));
 
-			std::vector<SceneObject*> allObjects = GetAllObjects();
-			for (SceneObject* object : allObjects)
-			{
-				if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
-				{
-					modelManager->LoadModel(prefab->GetPrefabPath());
-					InstantiateModel(prefab);
-				}
-			}
-		}
+		//	std::vector<SceneObject*> allObjects = GetAllObjects();
+		//	for (SceneObject* object : allObjects)
+		//	{
+		//		if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
+		//		{
+		//			modelManager->LoadModel(prefab->GetPrefabPath());
+		//			InstantiateModel(prefab);
+		//		}
+		//	}
+		//}
 
 	private:
 		VulkanDevice* device;

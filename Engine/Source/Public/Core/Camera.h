@@ -11,7 +11,7 @@
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 
-#include <cereal/types/polymorphic.hpp>
+//#include <cereal/types/polymorphic.hpp>
 
 namespace Nightbird
 {
@@ -26,15 +26,15 @@ namespace Nightbird
 		
 		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
 
-		template <class Archive>
-		void serialize(Archive& archive)
-		{
-			archive
-			(
-				cereal::base_class<::Nightbird::SceneObject>(this),
-				CEREAL_NVP(fov)
-			);
-		}
+		//template <class Archive>
+		//void serialize(Archive& archive)
+		//{
+		//	archive
+		//	(
+		//		cereal::base_class<::Nightbird::SceneObject>(this),
+		//		CEREAL_NVP(fov)
+		//	);
+		//}
 		
 		float fov = 70.0f;
 	};

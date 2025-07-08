@@ -46,16 +46,16 @@ namespace Nightbird
 		void AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child);
 		std::unique_ptr<SceneObject, SceneObjectDeleter> DetachChild(SceneObject* child);
 
-		template <class Archive>
-		void serialize(Archive& archive)
-		{
-			archive
-			(
-				CEREAL_NVP(name),
-				CEREAL_NVP(transform),
-				CEREAL_NVP(children)
-			);
-		}
+		//template <class Archive>
+		//void serialize(Archive& archive)
+		//{
+		//	archive
+		//	(
+		//		CEREAL_NVP(name),
+		//		CEREAL_NVP(transform),
+		//		CEREAL_NVP(children)
+		//	);
+		//}
 		
 		Transform transform;
 

@@ -6,9 +6,9 @@
 
 #include <volk.h>
 
-#include <cereal/types/polymorphic.hpp>
+//#include <cereal/types/polymorphic.hpp>
 
-#include <Serialization/GlmSerialization.h>
+//#include <Serialization/GlmSerialization.h>
 
 namespace Nightbird
 {
@@ -25,17 +25,17 @@ namespace Nightbird
 
 		PointLightData GetData() const;
 
-		template <class Archive>
-		void serialize(Archive& archive)
-		{
-			archive
-			(
-				cereal::base_class<::Nightbird::SceneObject>(this),
-				CEREAL_NVP(color),
-				CEREAL_NVP(intensity),
-				CEREAL_NVP(radius)
-			);
-		}
+		//template <class Archive>
+		//void serialize(Archive& archive)
+		//{
+		//	archive
+		//	(
+		//		cereal::base_class<::Nightbird::SceneObject>(this),
+		//		CEREAL_NVP(color),
+		//		CEREAL_NVP(intensity),
+		//		CEREAL_NVP(radius)
+		//	);
+		//}
 		
 		glm::vec3 color = glm::vec3(1.0f);
 		float intensity = 1.0f;

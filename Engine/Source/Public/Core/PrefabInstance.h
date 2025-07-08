@@ -5,8 +5,8 @@
 #include <Core/SceneObject.h>
 #include <Core/Transform.h>
 
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/archives/portable_binary.hpp>
+//#include <cereal/types/polymorphic.hpp>
+//#include <cereal/archives/portable_binary.hpp>
 
 namespace Nightbird
 {
@@ -23,16 +23,16 @@ namespace Nightbird
 		
 		const std::string& GetPrefabPath() const;
 
-		template <class Archive>
-		void serialize(Archive& archive)
-		{
-			archive
-			(
-				CEREAL_NVP(name),
-				CEREAL_NVP(transform),
-				CEREAL_NVP(prefabPath)
-			);
-		}
+		//template <class Archive>
+		//void serialize(Archive& archive)
+		//{
+		//	archive
+		//	(
+		//		CEREAL_NVP(name),
+		//		CEREAL_NVP(transform),
+		//		CEREAL_NVP(prefabPath)
+		//	);
+		//}
 
 	protected:
 		std::string prefabPath;

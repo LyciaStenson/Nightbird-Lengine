@@ -23,8 +23,7 @@ project "Engine"
 		"Vendor/glfw/include",
 		"Vendor/glm",
 		"Vendor/stb",
-		"Vendor/fastgltf/include",
-		"Vendor/cereal"
+		"Vendor/fastgltf/include"
 	}
 
 	links { "glfw", "fastgltf" }

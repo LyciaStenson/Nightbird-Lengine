@@ -14,15 +14,15 @@ public:
 
 	int testVar = 5;
 
-	template <class Archive>
-	void serialize(Archive& archive)
-	{
-		archive
-		(
-			cereal::base_class<::Nightbird::SceneObject>(this),
-			CEREAL_NVP(testVar)
-		);
-	}
+	//template <class Archive>
+	//void serialize(Archive& archive)
+	//{
+	//	archive
+	//	(
+	//		cereal::base_class<::Nightbird::SceneObject>(this),
+	//		CEREAL_NVP(testVar)
+	//	);
+	//}
 	
 	//SERIALIZE_FIELDS(testVar)
 	REGISTER_IS_CUSTOM_OBJECT()
