@@ -7,7 +7,6 @@
 #include <volk.h>
 
 #include <cereal/types/polymorphic.hpp>
-#include <cereal/archives/portable_binary.hpp>
 
 #include <Serialization/GlmSerialization.h>
 

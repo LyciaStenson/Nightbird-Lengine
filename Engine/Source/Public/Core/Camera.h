@@ -12,7 +12,6 @@
 #include <Vulkan/UniformBuffer.h>
 
 #include <cereal/types/polymorphic.hpp>
-#include <cereal/archives/portable_binary.hpp>
 
 namespace Nightbird
 {

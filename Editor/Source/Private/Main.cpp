@@ -29,18 +29,18 @@ int main(int argc, char** argv)
 	
 	using GetCustomObjectCountFunc = int (*)();
 	using GetCustomObjectDescriptorFunc = const CustomObjectDescriptor* (*)(int);
-	//using RegisterProjectTypesFunc = void (*)();
+	using RegisterProjectTypesFunc = void (*)();
 
 	GetCustomObjectCountFunc getCount = nullptr;
 	GetCustomObjectDescriptorFunc getDescriptor = nullptr;
-	//RegisterProjectTypesFunc registerTypes = nullptr;
+	RegisterProjectTypesFunc registerTypes = nullptr;
 	
 	if (project)
 	{
 		getCount = (GetCustomObjectCountFunc)GetProcAddress(project, "GetCustomObjectCount");
 		getDescriptor = (GetCustomObjectDescriptorFunc)GetProcAddress(project, "GetCustomObjectDescriptor");
 		g_DeleteCustomObject = (DeleteCustomObjectFunc)GetProcAddress(project, "DeleteCustomObject");
-		//registerTypes = (RegisterProjectTypesFunc)GetProcAddress(project, "RegisterProjectTypes");
+		registerTypes = (RegisterProjectTypesFunc)GetProcAddress(project, "RegisterProjectTypes");
 
 		if (!getCount || !getDescriptor)
 			std::cerr << "Failed to load Project DLL exports" << std::endl;
@@ -48,10 +48,10 @@ int main(int argc, char** argv)
 		if (!g_DeleteCustomObject)
 			std::cerr << "Failed to load DeleteCustomObject from Project DLL" << std::endl;
 
-		//if (registerTypes)
-			//registerTypes();
-		//else
-			//std::cerr << "Failed to load RegisterProjectTypes from Project DLL" << std::endl;
+		if (registerTypes)
+			registerTypes();
+		else
+			std::cerr << "Failed to load RegisterProjectTypes from Project DLL" << std::endl;
 	}
 #endif
 	

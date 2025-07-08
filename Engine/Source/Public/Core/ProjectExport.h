@@ -12,9 +12,8 @@
 
 struct CustomObjectDescriptor;
 
-//using DeleteCustomObjectFunc = void (*)(void*);
-//extern DeleteCustomObjectFunc g_DeleteCustomObject;
-
 PROJECT_API int GetCustomObjectCount();
 PROJECT_API const CustomObjectDescriptor* GetCustomObjectDescriptor(int index);
 PROJECT_API void DeleteCustomObject(void* object);
+
+PROJECT_API void RegisterProjectTypes();
