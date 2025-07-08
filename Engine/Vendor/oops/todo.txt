@@ -1,0 +1,114 @@
+C++ std library support:
+- atomic
+- bitset
+- complex
+- forward_list
+- functional (?)
+- memory (?)
+- queue
+- stack
+- tuple
+- utility (?)
+- valarray
+C++17:
+- any
+- byte
+- file system library (?)
+- string_view
++ optional
+- variant
+C++20:
+- range (?)
+
+Re-factor / important:
+- Custom format separator characters are format dependent. Use '(' and ')' in text formats and remove getOpeningCharacter() and getClosingCharacter() functions from rPropTypeInfo.
++ handle escape characters in 'c' and "str"
++ handle byte order in binary streams
+- test loading with different byte order
++ make rPropDescriptor_c to non-polymorph, and change rPropDescContainer_t to store rPropDescriptor_c.
++ remove _c postfix from class names
+- add set/get property
+- add performance measurement to different configurations
+- Performance optimization
++ Code cleanup.
+- Compare with other serialization libs: cereal, boost::serialization, ponder (https://billyquith.github.io/ponder/)
+- Handle unknown types
+- Implement unknown properties of containers and compound objects
+- Handle unknown properties
+- Add support for virtual inheritance: change the way of computing the offset of the base class.
+
+Bugs:
+- Build with Clang.
++ units::time::second serialization error. Exception in text format when loaded, but yaml parser does not recognize the error.
++ Cannot load unique_ptr if address is missing. No error message, it skip the class.
++ Vector of vectors does not work.
+- Apply pointer must check the pointer before de-referencing. Finding from gcc sanitizer.
+- writePointer() does not indent the address line.
+- ElementDescriptor have to inherit the flags of the containers. e.g. rcProp_SaveAddress
+- isClass() does not work, if rOOPS_ADD_BASE_CLASS_PROPERTIES() is used instead of rOOPS_INHERIT().
+- Handle associative containers in findPath().
++ Use unique_ptr in rPropIter and rPropConstIter.
++ Escaping non-printable characters in strings.
++ Check the return value of rPropGetTypeInfoByName() before using it, and handle it as an unknown object: skip it or stop with a meaningful error message.
+        void* pNewObj = rPropGetTypeInfoByName( _DataNodeStack[1].Type )->createObj();
+- offset_of macro does not always work. Solution: https://gist.github.com/graphitemaster/494f21190bb2c63c5516
+- Yaml parser fails when BaseClass has no any property.
++ Associative containers do not work on Linux.
++ Replace C style cast with static or reinterpret cast.
+- review strm.eof() handling. Not always checked correctly. It must be checked after reading something from the stream.
+- findPath() should handle containers.
+- find1st() and findAll() have to be reviewed.
++ Error handling review/improve.
+- Export a macro for creating type info for new crono types.
+- Building RelWithDebInfo fails on Windows. CMake issue. Only in original oops repo.
++ Loading std::set and std::map does not work, because the container elements are unmodifiable.
+  Change the rOopsIStream::cbBlockBegin(), etc. to store the object in the temp variable, fill it there, and append it to the container when it is ready!
++ rOOPS_INHERIT() does not work for abstract classes.
+- Handle all null values acceptable as null value in Yaml.
+
+Features:
++ Add default value to property definition. It has valid use-case of having a different value in the default constructor and in case of missing field. E.g. version!
++ Add rGetPropTypeInfo<TypeName>().
++ Handle uint8_t as integer, not as character. This has to be controlled somehow, when the variable is defined as a property.
++ Add a new way for handling inheritance: rOOPS_ADD_BASE_CLASS_PROPERTIES()
+  Base class properties shall be added to the Property Descriptor Table.
+  The class serialization will be flat.
++ Add compact and binary streams.
++ Add support for std::array.
++ Add support for std::optional. It is C++17!!!
++ Add units library support.
+- Improve units library property descriptor for being able to convert between different units. e.g. meter_t should be initialized from mm.
++ Improve floating point number serialization. Remove 0s from the fractional part, etc.
+- Add end() to Property Iterators and TypeInfo classes.
++ Do not use isEnd() to decide if a container is processed and insert or append shall be used. rOopsIStream should know, if a container is processed.
++ Add support for precompiler in Yaml and Oops text files.
+-     Implement expressions in #if and #elif statements. For example: #if COND==1
+-     Implement macro expansion. Defined words shall be replaced with its value.
++ Add support for template classes. Add test, and examples.
+- ElementPropDescriptor should inherit the flags of the container. SaveInPlace!!!
++ Write type name only when required: for polymorph data only.
+- Add more complex tests.
+    std::vector<std::pair<std::string, std::vector<std::string>>> funcs;
+- Virtual inheritance support.
+- Find solution to avoid duplication of variable declarations when creating the property table.
++ Add support for required properties.
++ Add version number to type names, and make it available somehow.
++ Handle versions, implement update/check/validate function called when all objects are loaded.
++ Add support for alias type names for handling typedefs.
++ Do not use assert().
++ Use override
++ Use nullptr
++ use #pragma once
++ Read containers without knowing its size.
++ Add support for std::chrono timepoints.
++ Add support for associative containers.
++ Integrate rOopsOStream into the format classes, remove it from the interface.
+
++ Binary streaming.
+- Save/load in XML fomat.
+- Find other standard formats having support in other languages.
+- Save/load to Python code.
+
+Test:
+- Add testcases for having or not having ';' after closing a block.
+- Add test for std::pair<>, std::set<std::pair<>>
