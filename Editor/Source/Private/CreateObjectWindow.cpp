@@ -14,14 +14,13 @@ namespace Nightbird
 
 	}
 
-	void CreateObjectWindow::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+	void CreateObjectWindow::SetObjectTypes(const std::vector<const SceneObjectDescriptor*>& objectTypes)
 	{
 		m_ObjectTypes = objectTypes;
 	}
 
 	void CreateObjectWindow::OnRender()
 	{
-		//const std::array<const std::string, 4> objectTypes = {"Empty Scene Object", "Mesh Instance", "Point Light", "Camera"};
 		static std::vector<std::string> objectTypes;
 		static bool objectTypesDirty = true;
 
@@ -36,7 +35,7 @@ namespace Nightbird
 
 			for (const auto& objectType : m_ObjectTypes)
 			{
-				objectTypes.push_back(objectType->name);
+				objectTypes.push_back(objectType->typeName);
 			}
 
 			objectTypesDirty = false;

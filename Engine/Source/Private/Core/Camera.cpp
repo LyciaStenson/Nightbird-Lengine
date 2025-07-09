@@ -8,12 +8,6 @@
 
 namespace Nightbird
 {
-	Camera::Camera(const std::string& name)
-		: SceneObject(name)
-	{
-
-	}
-
 	Camera::~Camera()
 	{
 
@@ -33,4 +27,18 @@ namespace Nightbird
 
 		return ubo;
 	}
+
+	void Camera::Serialize(json& out) const
+	{
+		SceneObject::Serialize(out);
+		out["fov"] = fov;
+	}
+
+	void Camera::Deserialize(const json& in)
+	{
+		SceneObject::Deserialize(in);
+		fov = in.at("fov").get<decltype(fov)>();
+	}
+
+	REGISTER_SCENE_OBJECT(Camera)
 }

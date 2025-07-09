@@ -9,12 +9,6 @@
 
 namespace Nightbird
 {
-	PointLight::PointLight(const std::string& name)
-		: SceneObject(name)
-	{
-
-	}
-
 	PointLight::~PointLight()
 	{
 
@@ -28,4 +22,6 @@ namespace Nightbird
 
 		return data;
 	}
+
+	REGISTER_SCENE_OBJECT(PointLight)
 }

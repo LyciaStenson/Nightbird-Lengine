@@ -1,29 +1,21 @@
 #include <Core/ProjectExport.h>
 
-#include <CustomObject.h>
+#include <Core/SceneObjectRegistry.h>
 
-PROJECT_API int GetCustomObjectCount()
+NB_EXPORT int GetSceneObjectCount()
 {
-	return static_cast<int>(GetCustomObjectRegistry().size());
+	return static_cast<int>(GetSceneObjectRegistry().size());
 }
 
-PROJECT_API const CustomObjectDescriptor* GetCustomObjectDescriptor(int index)
+NB_EXPORT const SceneObjectDescriptor* GetSceneObjectDescriptor(int index)
 {
-	const auto& registry = GetCustomObjectRegistry();
-	return (index >= 0 && index < static_cast<int>(registry.size())) ? &registry[index] : nullptr;
+	const auto& registry = GetSceneObjectRegistry();
+	if (index < 0 || index >= static_cast<int>(registry.size()))
+		return nullptr;
+	return &registry[index];
 }
 
-PROJECT_API void DeleteCustomObject(void* object)
+NB_EXPORT void DeleteCustomObject(void* object)
 {
 	delete object;
-}
-
-PROJECT_API void Test(void* object)
-{
-	delete object;
-}
-
-PROJECT_API void RegisterProjectTypes()
-{
-	//std::cout << "Register Project Types" << std::endl;
 }

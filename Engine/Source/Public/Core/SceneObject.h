@@ -7,6 +7,7 @@
 #include <Core/Transform.h>
 
 #include <nlohmann/json.hpp>
+#include <Core/TransformSerialization.h>
 
 using DeleteCustomObjectFunc = void (*)(void*);
 extern DeleteCustomObjectFunc g_DeleteCustomObject;
@@ -24,6 +25,7 @@ namespace Nightbird
 	{
 	public:
 		SceneObject() = default;
+		SceneObject(const char* name);
 		SceneObject(const std::string& name);
 		virtual ~SceneObject();
 
@@ -41,17 +43,8 @@ namespace Nightbird
 		void AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child);
 		std::unique_ptr<SceneObject, SceneObjectDeleter> DetachChild(SceneObject* child);
 		
-		//template <class Archive>
-		//void serialize(Archive& archive)
-		//{
-		//	archive
-		//	(
-		//		CEREAL_NVP(name),
-		//		CEREAL_NVP(transform),
-		//		CEREAL_NVP(children)
-		//	);
-		//}
-
+		virtual const char* GetTypeName() const { return "SceneObject"; }
+		
 		virtual void Serialize(json& out) const;
 		virtual void Deserialize(const json& in);
 		

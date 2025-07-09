@@ -13,9 +13,16 @@ CustomObject::CustomObject(const std::string& name)
 	std::cout << "Creating custom object!" << std::endl;
 }
 
-void RegisterType()
+void CustomObject::Serialize(json& out) const
 {
+	SceneObject::Serialize(out);
+	out["testVar"] = testVar;
+}
 
+void CustomObject::Deserialize(const json& in)
+{
+	SceneObject::Deserialize(in);
+	testVar = in.at("testVar").get<decltype(testVar)>();
 }
 
 REGISTER_SCENE_OBJECT(CustomObject)

@@ -2,18 +2,16 @@
 
 #ifdef _WIN32
 	#ifdef PROJECT_BUILD
-		#define PROJECT_API extern "C" __declspec(dllexport)
+		#define NB_EXPORT extern "C" __declspec(dllexport)
 	#else
-		#define PROJECT_API extern "C"
+		#define NB_EXPORT extern "C"// __declspec(dllimport)
 	#endif
 #else
 	#define DLL_EXPORT extern "C"
 #endif
 
-struct CustomObjectDescriptor;
+struct SceneObjectDescriptor;
 
-PROJECT_API int GetCustomObjectCount();
-PROJECT_API const CustomObjectDescriptor* GetCustomObjectDescriptor(int index);
-PROJECT_API void DeleteCustomObject(void* object);
-
-PROJECT_API void RegisterProjectTypes();
+NB_EXPORT int GetSceneObjectCount();
+NB_EXPORT const SceneObjectDescriptor* GetSceneObjectDescriptor(int index);
+NB_EXPORT void DeleteCustomObject(void* object);

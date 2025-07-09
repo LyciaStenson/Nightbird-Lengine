@@ -8,6 +8,7 @@
 #include <volk.h>
 
 #include <Core/SceneObject.h>
+#include <Core/SceneObjectRegistry.h>
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 
@@ -18,21 +19,17 @@ namespace Nightbird
 	class Camera : public SceneObject
 	{
 	public:
+		using SceneObject::SceneObject;
+
 		Camera() = default;
-		Camera(const std::string& name);
-		~Camera();
+		~Camera() override;
 		
 		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
 
-		//template <class Archive>
-		//void serialize(Archive& archive)
-		//{
-		//	archive
-		//	(
-		//		cereal::base_class<::Nightbird::SceneObject>(this),
-		//		CEREAL_NVP(fov)
-		//	);
-		//}
+		const char* GetTypeName() const override { return "Camera"; }
+
+		void Serialize(json& out) const override;
+		void Deserialize(const json& in) override;
 		
 		float fov = 70.0f;
 	};

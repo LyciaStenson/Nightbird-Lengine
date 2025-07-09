@@ -3,10 +3,8 @@
 #include <string>
 
 #include <Core/SceneObject.h>
+#include <Core/SceneObjectRegistry.h>
 #include <Core/Transform.h>
-
-//#include <cereal/types/polymorphic.hpp>
-//#include <cereal/archives/portable_binary.hpp>
 
 namespace Nightbird
 {
@@ -18,21 +16,13 @@ namespace Nightbird
 	{
 	public:
 		PrefabInstance() = default;
-		PrefabInstance(const std::string& name, const std::string& prefabPath);
-		~PrefabInstance();
+		PrefabInstance(const char* name, const char* prefabPath = "");
+		PrefabInstance(const std::string& name, const std::string& prefabPath = "");
+		~PrefabInstance() override;
 		
 		const std::string& GetPrefabPath() const;
 
-		//template <class Archive>
-		//void serialize(Archive& archive)
-		//{
-		//	archive
-		//	(
-		//		CEREAL_NVP(name),
-		//		CEREAL_NVP(transform),
-		//		CEREAL_NVP(prefabPath)
-		//	);
-		//}
+		const char* GetTypeName() const override { return "PrefabInstance"; }
 
 	protected:
 		std::string prefabPath;

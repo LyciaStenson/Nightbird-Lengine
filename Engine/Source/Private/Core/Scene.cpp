@@ -21,6 +21,8 @@
 #include <filesystem>
 #include <fstream>
 
+#include <nlohmann/json.hpp>
+
 namespace Nightbird
 {
 	Scene::Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool)
@@ -77,16 +79,18 @@ namespace Nightbird
 
 	bool Scene::SaveSceneJSON(const std::string& path)
 	{
+		nlohmann::json json;
+		rootObject->Serialize(json);
+		
 		std::ofstream os(path);
 		if (!os.is_open())
 		{
 			std::cerr << "Failed to open scene for writing at " << path << std::endl;
 			return false;
 		}
-
-		//cereal::JSONOutputArchive archive(os);
-		//save(archive);
-
+		
+		os << json.dump(4);
+		
 		return true;
 	}
 
@@ -98,10 +102,7 @@ namespace Nightbird
 			std::cerr << "Failed to open scene for writing at " << path << std::endl;
 			return false;
 		}
-
-		//cereal::BinaryOutputArchive archive(os);
-		//save(archive);
-
+		
 		return true;
 	}
 
@@ -114,9 +115,10 @@ namespace Nightbird
 			return false;
 		}
 
-		//cereal::JSONInputArchive archive(is);
-		//load(archive);
-
+		nlohmann::json json;
+		is >> json;
+		rootObject->Deserialize(json);
+		
 		return true;
 	}
 
@@ -128,10 +130,7 @@ namespace Nightbird
 			std::cerr << "Failed to open scene for reading at " << path << std::endl;
 			return false;
 		}
-
-		//cereal::BinaryInputArchive archive(is);
-		//load(archive);
-
+		
 		return true;
 	}
 

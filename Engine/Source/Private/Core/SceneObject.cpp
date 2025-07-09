@@ -1,8 +1,10 @@
 #include <Core/SceneObject.h>
 
-#include <Core/TransformSerialization.h>
+#include <iostream>
 
 #include <Core/ProjectExport.h>
+
+#include <Core/SceneObjectRegistry.h>
 
 DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
 
@@ -14,6 +16,12 @@ namespace Nightbird
 			g_DeleteCustomObject(object);
 		else
 			delete object;
+	}
+
+	SceneObject::SceneObject(const char* name)
+		: name(name ? name : "")
+	{
+
 	}
 
 	SceneObject::SceneObject(const std::string& name)
@@ -103,9 +111,10 @@ namespace Nightbird
 
 		return nullptr;
 	}
-
+	
 	void SceneObject::Serialize(json& out) const
 	{
+		out["type"] = GetTypeName();
 		out["name"] = name;
 		out["transform"] = transform;
 		out["children"] = json::array();
@@ -125,7 +134,27 @@ namespace Nightbird
 		children.clear();
 		for (const auto& childJson : in.at("children"))
 		{
-			std::unique_ptr<SceneObject, SceneObjectDeleter> child(new SceneObject(), SceneObjectDeleter());
+			std::string childType = childJson.at("type").get<std::string>();
+			std::string childName = childJson.at("name").get<std::string>();
+
+			SceneObject* object = nullptr;
+
+			std::vector<SceneObjectDescriptor>& registry = GetSceneObjectRegistry();
+
+			for (const auto& desc : GetSceneObjectRegistry())
+			{
+				if (childType == desc.typeName)
+				{
+					object = desc.create(childName.c_str());
+					break;
+				}
+			}
+
+			if (!object)
+				std::cerr << "Unknown SceneObject tyoe " << childType << std::endl;
+
+			std::unique_ptr<SceneObject, SceneObjectDeleter> child(object, SceneObjectDeleter());
+			child->SetParent(this);
 			child->Deserialize(childJson);
 			children.push_back(std::move(child));
 		}

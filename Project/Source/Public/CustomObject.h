@@ -4,28 +4,20 @@
 
 #include <Core/SceneObject.h>
 
-#include <Core/ProjectRegistration.h>
+#include <Core/SceneObjectRegistry.h>
 
 class CustomObject : public Nightbird::SceneObject
 {
 public:
 	CustomObject();
 	CustomObject(const std::string& name);
+	
+	const char* GetTypeName() const override { return "CustomObject"; }
+
+	void Serialize(json& out) const override;
+	void Deserialize(const json& in) override;
 
 	int testVar = 5;
-
-	//template <class Archive>
-	//void serialize(Archive& archive)
-	//{
-	//	archive
-	//	(
-	//		cereal::base_class<::Nightbird::SceneObject>(this),
-	//		CEREAL_NVP(testVar)
-	//	);
-	//}
 	
-	//SERIALIZE_FIELDS(testVar)
 	REGISTER_IS_CUSTOM_OBJECT()
 };
-
-extern "C" __declspec(dllexport) void RegisterType();

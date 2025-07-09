@@ -18,17 +18,6 @@ namespace Nightbird
 		
 		glm::mat4 GetLocalMatrix() const;
 		
-		//template <class Archive>
-		//void serialize(Archive& archive)
-		//{
-		//	archive
-		//	(
-		//		CEREAL_NVP(position),
-		//		CEREAL_NVP(rotation),
-		//		CEREAL_NVP(scale)
-		//	);
-		//}
-
 		glm::vec3 position;
 		glm::quat rotation;
 		glm::vec3 scale;

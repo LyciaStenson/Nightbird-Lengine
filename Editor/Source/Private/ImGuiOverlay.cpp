@@ -95,7 +95,7 @@ namespace Nightbird
 		m_SelectedObject = object;
 	}
 
-	void VulkanImGuiOverlay::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+	void VulkanImGuiOverlay::SetObjectTypes(const std::vector<const SceneObjectDescriptor*>& objectTypes)
 	{
 		CreateObjectWindow* createObjectWindow = nullptr;
 		if (m_Windows.count("Create Object Window"))

@@ -24,7 +24,7 @@ namespace Nightbird
 
 	}
 
-	void EditorRenderTarget::SetObjectTypes(const std::vector<const CustomObjectDescriptor*>& objectTypes)
+	void EditorRenderTarget::SetObjectTypes(const std::vector<const SceneObjectDescriptor*>& objectTypes)
 	{
 		imGuiOverlay->SetObjectTypes(objectTypes);
 	}

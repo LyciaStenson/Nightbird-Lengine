@@ -3,12 +3,9 @@
 #include <string>
 
 #include <Core/SceneObject.h>
+#include <Core/SceneObjectRegistry.h>
 
 #include <volk.h>
-
-//#include <cereal/types/polymorphic.hpp>
-
-//#include <Serialization/GlmSerialization.h>
 
 namespace Nightbird
 {
@@ -19,24 +16,15 @@ namespace Nightbird
 	class PointLight : public SceneObject
 	{
 	public:
+		using SceneObject::SceneObject;
+
 		PointLight() = default;
-		PointLight(const std::string& name);
-		~PointLight();
+		~PointLight() override;
 
 		PointLightData GetData() const;
-
-		//template <class Archive>
-		//void serialize(Archive& archive)
-		//{
-		//	archive
-		//	(
-		//		cereal::base_class<::Nightbird::SceneObject>(this),
-		//		CEREAL_NVP(color),
-		//		CEREAL_NVP(intensity),
-		//		CEREAL_NVP(radius)
-		//	);
-		//}
 		
+		const char* GetTypeName() const override { return "PointLight"; }
+
 		glm::vec3 color = glm::vec3(1.0f);
 		float intensity = 1.0f;
 		float radius = 10.0f;

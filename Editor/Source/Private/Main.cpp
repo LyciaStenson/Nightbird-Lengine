@@ -1,6 +1,7 @@
 #include <Core/Engine.h>
 
 #include <Core/SceneObject.h>
+#include <Core/SceneObjectRegistry.h>
 #include <Core/Renderer.h>
 #include <Core/ModelManager.h>
 #include <Core/GlfwWindow.h>
@@ -27,31 +28,23 @@ int main(int argc, char** argv)
 		std::cout << "Failed to load Project.dll" << std::endl;
 	}
 	
-	using GetCustomObjectCountFunc = int (*)();
-	using GetCustomObjectDescriptorFunc = const CustomObjectDescriptor* (*)(int);
-	using RegisterProjectTypesFunc = void (*)();
+	using GetSceneObjectCountFunc = int (*)();
+	using GetSceneObjectDescriptorFunc = const SceneObjectDescriptor* (*)(int);
 
-	GetCustomObjectCountFunc getCount = nullptr;
-	GetCustomObjectDescriptorFunc getDescriptor = nullptr;
-	RegisterProjectTypesFunc registerTypes = nullptr;
+	GetSceneObjectCountFunc getCount = nullptr;
+	GetSceneObjectDescriptorFunc getDescriptor = nullptr;
 	
 	if (project)
 	{
-		getCount = (GetCustomObjectCountFunc)GetProcAddress(project, "GetCustomObjectCount");
-		getDescriptor = (GetCustomObjectDescriptorFunc)GetProcAddress(project, "GetCustomObjectDescriptor");
+		getCount = (GetSceneObjectCountFunc)GetProcAddress(project, "GetSceneObjectCount");
+		getDescriptor = (GetSceneObjectDescriptorFunc)GetProcAddress(project, "GetSceneObjectDescriptor");
 		g_DeleteCustomObject = (DeleteCustomObjectFunc)GetProcAddress(project, "DeleteCustomObject");
-		registerTypes = (RegisterProjectTypesFunc)GetProcAddress(project, "RegisterProjectTypes");
 
 		if (!getCount || !getDescriptor)
 			std::cerr << "Failed to load Project DLL exports" << std::endl;
 		
 		if (!g_DeleteCustomObject)
 			std::cerr << "Failed to load DeleteCustomObject from Project DLL" << std::endl;
-
-		if (registerTypes)
-			registerTypes();
-		else
-			std::cerr << "Failed to load RegisterProjectTypes from Project DLL" << std::endl;
 	}
 #endif
 	
@@ -64,14 +57,17 @@ int main(int argc, char** argv)
 #ifdef _WIN32
 		if (getCount && getDescriptor)
 		{
-			std::vector<const CustomObjectDescriptor*> objectDescriptors;
+			std::vector<const SceneObjectDescriptor*> objectDescriptors;
 
 			int count = getCount();
 			for (int i = 0; i < count; ++i)
 			{
-				const CustomObjectDescriptor* objectDescriptor = getDescriptor(i);
+				const SceneObjectDescriptor* objectDescriptor = getDescriptor(i);
 				if (objectDescriptor)
+				{
+					GetSceneObjectRegistry().push_back(*objectDescriptor);
 					objectDescriptors.push_back(objectDescriptor);
+				}
 			}
 			renderTarget.SetObjectTypes(objectDescriptors);
 		}
