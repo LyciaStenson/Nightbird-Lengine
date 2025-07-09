@@ -44,12 +44,15 @@ namespace Nightbird
 		Camera* GetMainCamera() const;
 		void SetMainCamera(Camera* camera);
 
+		void Serialize(const std::string& path) const;
+		void Deserialize(const std::string& path);
+
 		bool SaveSceneJSON(const std::string& path);
 		bool SaveSceneBIN(const std::string& path);
 
 		bool LoadSceneJSON(const std::string& path);
 		bool LoadSceneBIN(const std::string& path);
-
+		
 		void AddSceneObject(std::unique_ptr<SceneObject, SceneObjectDeleter> object, SceneObject* parent = nullptr);
 
 		SceneObject* CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);

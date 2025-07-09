@@ -65,6 +65,16 @@ namespace Nightbird
 		mainCamera = camera;
 	}
 
+	void Scene::Serialize(const std::string& path) const
+	{
+
+	}
+	
+	void Scene::Deserialize(const std::string& path)
+	{
+
+	}
+
 	bool Scene::SaveSceneJSON(const std::string& path)
 	{
 		std::ofstream os(path);

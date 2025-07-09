@@ -40,7 +40,7 @@ namespace Nightbird
 
 		void AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child);
 		std::unique_ptr<SceneObject, SceneObjectDeleter> DetachChild(SceneObject* child);
-
+		
 		//template <class Archive>
 		//void serialize(Archive& archive)
 		//{

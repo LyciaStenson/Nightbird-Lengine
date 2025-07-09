@@ -1,5 +1,7 @@
 #include <Core/SceneObject.h>
 
+#include <Core/TransformSerialization.h>
+
 #include <Core/ProjectExport.h>
 
 DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
@@ -105,16 +107,27 @@ namespace Nightbird
 	void SceneObject::Serialize(json& out) const
 	{
 		out["name"] = name;
-		//out["transform"] = transform;
+		out["transform"] = transform;
 		out["children"] = json::array();
 		for (const auto& child : children)
 		{
-			json childEntry;
+			json childJson;
+			child->Serialize(childJson);
+			out["children"].push_back(childJson);
 		}
 	}
 
 	void SceneObject::Deserialize(const json& in)
 	{
+		name = in.at("name").get<std::string>();
+		in.at("transform").get_to(transform);
 
+		children.clear();
+		for (const auto& childJson : in.at("children"))
+		{
+			std::unique_ptr<SceneObject, SceneObjectDeleter> child(new SceneObject(), SceneObjectDeleter());
+			child->Deserialize(childJson);
+			children.push_back(std::move(child));
+		}
 	}
 }
