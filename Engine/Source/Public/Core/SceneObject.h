@@ -9,6 +9,9 @@
 #include <nlohmann/json.hpp>
 #include <Core/TransformSerialization.h>
 
+#include <rttr/type>
+#include <rttr/registration.h>
+
 using DeleteCustomObjectFunc = void (*)(void*);
 extern DeleteCustomObjectFunc g_DeleteCustomObject;
 
@@ -53,6 +56,8 @@ namespace Nightbird
 		SceneObject* parent = nullptr;
 
 		virtual bool IsCustomObject() const { return false; }
+
+		RTTR_ENABLE(SceneObject)
 
 	protected:
 		std::string name;

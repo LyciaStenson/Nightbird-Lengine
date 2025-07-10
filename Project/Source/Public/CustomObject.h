@@ -20,4 +20,6 @@ public:
 	int testVar = 5;
 	
 	REGISTER_IS_CUSTOM_OBJECT()
+
+	RTTR_ENABLE(CustomObject)
 };

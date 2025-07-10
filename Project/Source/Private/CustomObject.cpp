@@ -25,4 +25,11 @@ void CustomObject::Deserialize(const json& in)
 	testVar = in.at("testVar").get<decltype(testVar)>();
 }
 
+RTTR_REGISTRATION
+{
+	rttr::registration::class_<CustomObject>("CustomObject")
+	.constructor<>()
+	.property("testVar", &CustomObject::testVar);
+}
+
 REGISTER_SCENE_OBJECT(CustomObject)

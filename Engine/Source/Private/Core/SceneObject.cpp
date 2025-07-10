@@ -160,3 +160,11 @@ namespace Nightbird
 		}
 	}
 }
+
+RTTR_REGISTRATION
+{
+	rttr::registration::class_<Nightbird::SceneObject>("SceneObject")
+	.constructor<>()
+	//.property("name", &Nightbird::SceneObject::GetName)
+	.property("transform", &Nightbird::SceneObject::transform);
+}
