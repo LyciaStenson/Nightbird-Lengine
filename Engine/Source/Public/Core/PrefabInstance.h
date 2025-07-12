@@ -27,6 +27,6 @@ namespace Nightbird
 	protected:
 		std::string prefabPath;
 
-		RTTR_ENABLE(PrefabInstance)
+		//RTTR_ENABLE(PrefabInstance)
 	};
 }

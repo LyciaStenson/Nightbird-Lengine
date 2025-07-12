@@ -29,6 +29,6 @@ namespace Nightbird
 		float intensity = 1.0f;
 		float radius = 10.0f;
 
-		RTTR_ENABLE(PointLight)
+		//RTTR_ENABLE(PointLight)
 	};
 }

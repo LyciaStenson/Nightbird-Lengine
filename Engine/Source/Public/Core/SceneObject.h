@@ -56,8 +56,8 @@ namespace Nightbird
 		SceneObject* parent = nullptr;
 
 		virtual bool IsCustomObject() const { return false; }
-
-		RTTR_ENABLE(SceneObject)
+		
+		RTTR_ENABLE()
 
 	protected:
 		std::string name;

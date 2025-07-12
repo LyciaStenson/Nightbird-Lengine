@@ -21,5 +21,5 @@ public:
 	
 	REGISTER_IS_CUSTOM_OBJECT()
 
-	RTTR_ENABLE(CustomObject)
+	RTTR_ENABLE(Nightbird::SceneObject)
 };
