@@ -25,3 +25,12 @@ namespace Nightbird
 
 	REGISTER_SCENE_OBJECT(PointLight)
 }
+
+RTTR_REGISTRATION
+{
+	rttr::registration::class_<Nightbird::PointLight>("PointLight")
+	.constructor<>()
+	.property("Radius", &Nightbird::PointLight::radius)
+	.property("Intensity", &Nightbird::PointLight::intensity)
+	.property("Color", &Nightbird::PointLight::color);
+}

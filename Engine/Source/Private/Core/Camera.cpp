@@ -42,3 +42,10 @@ namespace Nightbird
 
 	REGISTER_SCENE_OBJECT(Camera)
 }
+
+RTTR_REGISTRATION
+{
+	rttr::registration::class_<Nightbird::Camera>("Camera")
+	.constructor<>()
+	.property("FOV", &Nightbird::Camera::fov);
+}

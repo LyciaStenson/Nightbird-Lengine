@@ -32,7 +32,7 @@ namespace Nightbird
 		void Deserialize(const json& in) override;
 		
 		float fov = 70.0f;
-
-		//RTTR_ENABLE(Camera)
+		
+		RTTR_ENABLE(Nightbird::SceneObject)
 	};
 }
