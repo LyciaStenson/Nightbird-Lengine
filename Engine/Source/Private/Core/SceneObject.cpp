@@ -6,15 +6,15 @@
 
 #include <Core/SceneObjectRegistry.h>
 
-DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
+//DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
 
 namespace Nightbird
 {
 	void SceneObjectDeleter::operator()(SceneObject* object) const
 	{
-		if (object->IsCustomObject() && g_DeleteCustomObject)
-			g_DeleteCustomObject(object);
-		else
+		//if (object->IsCustomObject() && g_DeleteCustomObject)
+			//g_DeleteCustomObject(object);
+		//else
 			delete object;
 	}
 
@@ -165,6 +165,6 @@ RTTR_REGISTRATION
 {
 	rttr::registration::class_<Nightbird::SceneObject>("SceneObject")
 	.constructor<>()
-	//.property("name", &Nightbird::SceneObject::GetName)
+	.property("name", &Nightbird::SceneObject::name)
 	.property("transform", &Nightbird::SceneObject::transform);
 }

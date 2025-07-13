@@ -37,8 +37,6 @@ namespace Nightbird
 		
 		SceneObject* GetSelectedObject() const;
 		void SelectObject(SceneObject* object);
-
-		void SetObjectTypes(const std::vector<const SceneObjectDescriptor*>& objectTypes);
 		
 		void Render(VkCommandBuffer commandBuffer);
 		

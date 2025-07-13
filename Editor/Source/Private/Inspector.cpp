@@ -140,19 +140,19 @@ namespace Nightbird
 			{
 				int intValue = value.get_value<int>();
 				if (ImGui::DragInt(label.c_str(), &intValue))
-					property.set_value(instance, value);
+					property.set_value(instance, intValue);
 			}
 			else if (valueType == rttr::type::get<float>())
 			{
 				float floatValue = value.get_value<float>();
 				if (ImGui::DragFloat(label.c_str(), &floatValue))
-					property.set_value(instance, value);
+					property.set_value(instance, floatValue);
 			}
 			else if (valueType == rttr::type::get<bool>())
 			{
 				bool boolValue = value.get_value<bool>();
 				if (ImGui::Checkbox(label.c_str(), &boolValue))
-					property.set_value(instance, value);
+					property.set_value(instance, boolValue);
 			}
 			else if (valueType == rttr::type::get<std::string>())
 			{
@@ -166,7 +166,7 @@ namespace Nightbird
 			{
 				glm::vec3 vec3Value = value.get_value<glm::vec3>();
 				if (ImGui::DragFloat3(label.c_str(), &vec3Value[0], 0.01f))
-					property.set_value(instance, value);
+					property.set_value(instance, vec3Value);
 			}
 			else if (valueType == rttr::type::get<Transform>())
 			{
@@ -179,12 +179,12 @@ namespace Nightbird
 				if (ImGui::DragFloat3("Position", &transform.position[0], 0.01f))
 					property.set_value(instance, transform);
 				
-				static glm::vec3 cachedEulerDegrees;
-				if (ImGui::DragFloat3("Rotation", &cachedEulerDegrees[0], 0.01f))
+				glm::vec3 cachedDegrees = glm::degrees(glm::eulerAngles(transform.rotation));
+				if (ImGui::DragFloat3("Rotation", &cachedDegrees[0], 0.01f))
 				{
-					cachedEulerDegrees = WrapEuler180(cachedEulerDegrees);
-					cachedEulerDegrees = RoundEulerDP(cachedEulerDegrees, 2);
-					glm::vec3 eulerRadians = glm::radians(cachedEulerDegrees);
+					cachedDegrees = WrapEuler180(cachedDegrees);
+					cachedDegrees = RoundEulerDP(cachedDegrees, 2);
+					glm::vec3 eulerRadians = glm::radians(cachedDegrees);
 					
 					glm::quat yaw = glm::angleAxis(eulerRadians.y, glm::vec3(0.0f, 1.0f, 0.0f));
 					glm::quat pitch = glm::angleAxis(eulerRadians.x, glm::vec3(1.0f, 0.0f, 0.0f));

@@ -11,9 +11,10 @@
 
 #include <rttr/type>
 #include <rttr/registration.h>
+#include <rttr/registration_friend.h>
 
-using DeleteCustomObjectFunc = void (*)(void*);
-extern DeleteCustomObjectFunc g_DeleteCustomObject;
+//using DeleteCustomObjectFunc = void (*)(void*);
+//extern DeleteCustomObjectFunc g_DeleteCustomObject;
 
 using json = nlohmann::json;
 
@@ -58,6 +59,7 @@ namespace Nightbird
 		virtual bool IsCustomObject() const { return false; }
 		
 		RTTR_ENABLE()
+		RTTR_REGISTRATION_FRIEND
 
 	protected:
 		std::string name;

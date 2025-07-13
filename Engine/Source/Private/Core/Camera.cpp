@@ -40,7 +40,7 @@ namespace Nightbird
 		fov = in.at("fov").get<decltype(fov)>();
 	}
 
-	REGISTER_SCENE_OBJECT(Camera)
+	//REGISTER_SCENE_OBJECT(Camera)
 }
 
 RTTR_REGISTRATION

@@ -25,11 +25,12 @@ void CustomObject::Deserialize(const json& in)
 	testVar = in.at("testVar").get<decltype(testVar)>();
 }
 
-RTTR_REGISTRATION
+RTTR_PLUGIN_REGISTRATION
 {
+	std::cout << "Registering CustomObject type" << std::endl;
 	rttr::registration::class_<CustomObject>("CustomObject")
 	.constructor<>()
 	.property("testVar", &CustomObject::testVar);
 }
 
-REGISTER_SCENE_OBJECT(CustomObject)
+//REGISTER_SCENE_OBJECT(CustomObject)

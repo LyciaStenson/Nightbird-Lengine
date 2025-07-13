@@ -37,8 +37,8 @@ public:
 	}
 };
 
-#define REGISTER_SCENE_OBJECT(Type) \
-	static SceneObjectRegistrar<Type> _registrar_##Type(#Type);
+//#define REGISTER_SCENE_OBJECT(Type) \
+	//static SceneObjectRegistrar<Type> _registrar_##Type(#Type);
 
 #define REGISTER_IS_CUSTOM_OBJECT() \
 	bool IsCustomObject() const override { return true; }

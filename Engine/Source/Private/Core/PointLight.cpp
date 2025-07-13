@@ -23,7 +23,7 @@ namespace Nightbird
 		return data;
 	}
 
-	REGISTER_SCENE_OBJECT(PointLight)
+	//REGISTER_SCENE_OBJECT(PointLight)
 }
 
 RTTR_REGISTRATION
