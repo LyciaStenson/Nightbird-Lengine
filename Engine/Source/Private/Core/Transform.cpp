@@ -1,5 +1,7 @@
 #include <Core/Transform.h>
 
+#include <iostream>
+
 namespace Nightbird
 {
 	Transform::Transform()

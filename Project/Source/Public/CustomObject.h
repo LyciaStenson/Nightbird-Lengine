@@ -9,7 +9,6 @@
 class CustomObject : public Nightbird::SceneObject
 {
 public:
-	CustomObject();
 	CustomObject(const std::string& name);
 	
 	const char* GetTypeName() const override { return "CustomObject"; }

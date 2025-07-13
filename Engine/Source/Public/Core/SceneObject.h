@@ -13,25 +13,16 @@
 #include <rttr/registration.h>
 #include <rttr/registration_friend.h>
 
-//using DeleteCustomObjectFunc = void (*)(void*);
-//extern DeleteCustomObjectFunc g_DeleteCustomObject;
-
 using json = nlohmann::json;
 
 namespace Nightbird
 {
-	struct SceneObjectDeleter
-	{
-		void operator()(SceneObject* object) const;
-	};
-
 	class SceneObject
 	{
 	public:
-		SceneObject() = default;
 		SceneObject(const char* name);
 		SceneObject(const std::string& name);
-		virtual ~SceneObject();
+		virtual ~SceneObject() = default;
 
 		const std::string& GetName() const;
 		std::string GetPath() const;
@@ -39,13 +30,13 @@ namespace Nightbird
 		void SetParent(SceneObject* transform);
 		SceneObject* GetParent() const;
 		
-		const std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>>& GetChildren() const;
+		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;
 
 		glm::mat4 GetLocalMatrix() const;
 		glm::mat4 GetWorldMatrix() const;
 
-		void AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child);
-		std::unique_ptr<SceneObject, SceneObjectDeleter> DetachChild(SceneObject* child);
+		void AddChild(std::unique_ptr<SceneObject> child);
+		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
 		
 		virtual const char* GetTypeName() const { return "SceneObject"; }
 		
@@ -64,6 +55,6 @@ namespace Nightbird
 	protected:
 		std::string name;
 		
-		std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>> children;
+		std::vector<std::unique_ptr<SceneObject>> children;
 	};
 }

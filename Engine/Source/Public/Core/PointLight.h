@@ -18,7 +18,7 @@ namespace Nightbird
 	public:
 		using SceneObject::SceneObject;
 
-		PointLight() = default;
+		//PointLight() = default;
 		~PointLight() override;
 
 		PointLightData GetData() const;

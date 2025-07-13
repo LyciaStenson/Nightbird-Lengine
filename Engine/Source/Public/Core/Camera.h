@@ -21,8 +21,8 @@ namespace Nightbird
 	public:
 		using SceneObject::SceneObject;
 
-		Camera() = default;
-		~Camera() override;
+		//Camera() = default;
+		~Camera() override = default;
 		
 		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
 

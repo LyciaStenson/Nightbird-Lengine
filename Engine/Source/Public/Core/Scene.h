@@ -53,7 +53,7 @@ namespace Nightbird
 		bool LoadSceneJSON(const std::string& path);
 		bool LoadSceneBIN(const std::string& path);
 		
-		void AddSceneObject(std::unique_ptr<SceneObject, SceneObjectDeleter> object, SceneObject* parent = nullptr);
+		void AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent = nullptr);
 
 		SceneObject* CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
 		Camera* CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);

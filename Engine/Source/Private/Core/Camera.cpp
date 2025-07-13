@@ -8,11 +8,6 @@
 
 namespace Nightbird
 {
-	Camera::~Camera()
-	{
-
-	}
-
 	CameraUBO Camera::GetUBO(VkExtent2D swapChainExtent) const
 	{
 		CameraUBO ubo{};
@@ -39,13 +34,16 @@ namespace Nightbird
 		SceneObject::Deserialize(in);
 		fov = in.at("fov").get<decltype(fov)>();
 	}
-
-	//REGISTER_SCENE_OBJECT(Camera)
 }
 
 RTTR_REGISTRATION
 {
 	rttr::registration::class_<Nightbird::Camera>("Camera")
-	.constructor<>()
+	.constructor<std::string>()
 	.property("FOV", &Nightbird::Camera::fov);
+
+	rttr::registration::method("CreateCamera", [](const std::string& name) -> Nightbird::SceneObject*
+	{
+		return new Nightbird::Camera(name);
+	});
 }

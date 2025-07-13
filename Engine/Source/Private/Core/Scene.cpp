@@ -134,7 +134,7 @@ namespace Nightbird
 		return true;
 	}
 
-	void Scene::AddSceneObject(std::unique_ptr<SceneObject, SceneObjectDeleter> object, SceneObject* parent)
+	void Scene::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
 	{
 		if (parent)
 			parent->AddChild(std::move(object));
@@ -156,7 +156,7 @@ namespace Nightbird
 		//}
 		//objectNames.insert(instanceName);
 
-		std::unique_ptr<SceneObject, SceneObjectDeleter> object(new SceneObject(instanceName), SceneObjectDeleter{});
+		std::unique_ptr<SceneObject> object(new SceneObject(instanceName));
 		object->transform.position = position;
 		object->transform.rotation = rotation;
 		object->transform.scale = scale;
@@ -186,7 +186,7 @@ namespace Nightbird
 		//}
 		//objectNames.insert(cameraName);
 
-		std::unique_ptr<SceneObject, SceneObjectDeleter> object(new Camera(cameraName), SceneObjectDeleter{});
+		std::unique_ptr<SceneObject> object(new Camera(cameraName));
 		object->transform.position = position;
 		object->transform.rotation = rotation;
 		object->transform.scale = scale;
@@ -221,7 +221,7 @@ namespace Nightbird
 		//}
 		//objectNames.insert(lightName);
 
-		std::unique_ptr<SceneObject, SceneObjectDeleter> object(new PointLight(lightName), SceneObjectDeleter{});
+		std::unique_ptr<SceneObject> object(new PointLight(lightName));
 		object->transform.position = position;
 		object->transform.rotation = rotation;
 		object->transform.scale = scale;
@@ -251,7 +251,7 @@ namespace Nightbird
 		//}
 		//objectNames.insert(instanceName);
 
-		std::unique_ptr<SceneObject, SceneObjectDeleter> object(new PrefabInstance(instanceName, path), SceneObjectDeleter{});
+		std::unique_ptr<SceneObject> object(new PrefabInstance(instanceName, path));
 		object->transform.position = position;
 		object->transform.rotation = rotation;
 		object->transform.scale = scale;
@@ -281,7 +281,7 @@ namespace Nightbird
 		//}
 		//objectNames.insert(instanceName);
 
-		std::unique_ptr<SceneObject, SceneObjectDeleter> object(new MeshInstance(instanceName, mesh, device, descriptorPool));
+		std::unique_ptr<SceneObject> object(new MeshInstance(instanceName, mesh, device, descriptorPool));
 		object->transform.position = position;
 		object->transform.rotation = rotation;
 		object->transform.scale = scale;

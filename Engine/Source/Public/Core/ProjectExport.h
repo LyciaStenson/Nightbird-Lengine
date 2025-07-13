@@ -2,16 +2,10 @@
 
 #ifdef _WIN32
 	#ifdef PROJECT_BUILD
-		#define NB_EXPORT extern "C" __declspec(dllexport)
+		#define NB_PROJECT __declspec(dllexport)
 	#else
-		#define NB_EXPORT extern "C"// __declspec(dllimport)
+		#define NB_PROJECT __declspec(dllimport)
 	#endif
 #else
-	#define DLL_EXPORT extern "C"
+	#define NB_PROJECT
 #endif
-
-struct SceneObjectDescriptor;
-
-NB_EXPORT int GetSceneObjectCount();
-NB_EXPORT const SceneObjectDescriptor* GetSceneObjectDescriptor(int index);
-NB_EXPORT void DeleteCustomObject(void* object);

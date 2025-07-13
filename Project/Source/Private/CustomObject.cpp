@@ -2,11 +2,6 @@
 
 #include <iostream>
 
-CustomObject::CustomObject()
-{
-	std::cout << "Creating custom object!" << std::endl;
-}
-
 CustomObject::CustomObject(const std::string& name)
 	: SceneObject(name)
 {
@@ -27,10 +22,17 @@ void CustomObject::Deserialize(const json& in)
 
 RTTR_PLUGIN_REGISTRATION
 {
-	std::cout << "Registering CustomObject type" << std::endl;
 	rttr::registration::class_<CustomObject>("CustomObject")
-	.constructor<>()
+	.constructor<std::string>()
 	.property("testVar", &CustomObject::testVar);
-}
 
-//REGISTER_SCENE_OBJECT(CustomObject)
+	rttr::registration::method("CreateCustomObject", [](const std::string& name) -> Nightbird::SceneObject*
+	{
+		return new CustomObject(name);
+	});
+
+	for (auto& type : rttr::type::get_types())
+	{
+		std::cout << "PROJECT: " << type.get_name() << std::endl;
+	}
+}

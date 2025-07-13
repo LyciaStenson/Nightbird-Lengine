@@ -6,18 +6,8 @@
 
 #include <Core/SceneObjectRegistry.h>
 
-//DeleteCustomObjectFunc g_DeleteCustomObject = nullptr;
-
 namespace Nightbird
 {
-	void SceneObjectDeleter::operator()(SceneObject* object) const
-	{
-		//if (object->IsCustomObject() && g_DeleteCustomObject)
-			//g_DeleteCustomObject(object);
-		//else
-			delete object;
-	}
-
 	SceneObject::SceneObject(const char* name)
 		: name(name ? name : "")
 	{
@@ -29,12 +19,7 @@ namespace Nightbird
 	{
 
 	}
-
-	SceneObject::~SceneObject()
-	{
-		//SetParent(nullptr);
-	}
-
+	
 	const std::string& SceneObject::GetName() const
 	{
 		return name;
@@ -52,8 +37,8 @@ namespace Nightbird
 	{
 		if (parent == newParent)
 			return;
-
-		std::unique_ptr<SceneObject, SceneObjectDeleter> uniquePtr = nullptr;
+		
+		std::unique_ptr<SceneObject> uniquePtr = nullptr;
 		if (parent)
 			uniquePtr = parent->DetachChild(this);
 
@@ -68,7 +53,7 @@ namespace Nightbird
 		return parent;
 	}
 
-	const std::vector<std::unique_ptr<SceneObject, SceneObjectDeleter>>& SceneObject::GetChildren() const
+	const std::vector<std::unique_ptr<SceneObject>>& SceneObject::GetChildren() const
 	{
 		return children;
 	}
@@ -86,16 +71,16 @@ namespace Nightbird
 			return transform.GetLocalMatrix();
 	}
 
-	void SceneObject::AddChild(std::unique_ptr<SceneObject, SceneObjectDeleter> child)
+	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
 		child->parent = this;
 		children.push_back(std::move(child));
 	}
 
-	std::unique_ptr<SceneObject, SceneObjectDeleter> SceneObject::DetachChild(SceneObject* child)
+	std::unique_ptr<SceneObject> SceneObject::DetachChild(SceneObject* child)
 	{
 		auto it = std::find_if(children.begin(), children.end(),
-			[child](const std::unique_ptr<SceneObject, SceneObjectDeleter>& existingChild)
+			[child](const std::unique_ptr<SceneObject>& existingChild)
 			{
 				return existingChild.get() == child;
 			}
@@ -103,7 +88,7 @@ namespace Nightbird
 
 		if (it != children.end())
 		{
-			std::unique_ptr<SceneObject, SceneObjectDeleter> detachedChild = std::move(*it);
+			std::unique_ptr<SceneObject> detachedChild = std::move(*it);
 			children.erase(it);
 			detachedChild->parent = nullptr;
 			return detachedChild;
@@ -134,29 +119,29 @@ namespace Nightbird
 		children.clear();
 		for (const auto& childJson : in.at("children"))
 		{
-			std::string childType = childJson.at("type").get<std::string>();
-			std::string childName = childJson.at("name").get<std::string>();
+			//std::string childType = childJson.at("type").get<std::string>();
+			//std::string childName = childJson.at("name").get<std::string>();
 
-			SceneObject* object = nullptr;
+			//SceneObject* object = nullptr;
 
-			std::vector<SceneObjectDescriptor>& registry = GetSceneObjectRegistry();
+			//std::vector<SceneObjectDescriptor>& registry = GetSceneObjectRegistry();
 
-			for (const auto& desc : GetSceneObjectRegistry())
-			{
-				if (childType == desc.typeName)
-				{
-					object = desc.create(childName.c_str());
-					break;
-				}
-			}
+			//for (const auto& desc : GetSceneObjectRegistry())
+			//{
+				//if (childType == desc.typeName)
+				//{
+					//object = desc.create(childName.c_str());
+					//break;
+				//}
+			//}
 
-			if (!object)
-				std::cerr << "Unknown SceneObject tyoe " << childType << std::endl;
+			//if (!object)
+				//std::cerr << "Unknown SceneObject type " << childType << std::endl;
 
-			std::unique_ptr<SceneObject, SceneObjectDeleter> child(object, SceneObjectDeleter());
-			child->SetParent(this);
-			child->Deserialize(childJson);
-			children.push_back(std::move(child));
+			//std::unique_ptr<SceneObject, SceneObjectDeleter> child(object, SceneObjectDeleter());
+			//child->SetParent(this);
+			//child->Deserialize(childJson);
+			//children.push_back(std::move(child));
 		}
 	}
 }
@@ -164,7 +149,12 @@ namespace Nightbird
 RTTR_REGISTRATION
 {
 	rttr::registration::class_<Nightbird::SceneObject>("SceneObject")
-	.constructor<>()
+	.constructor<std::string>()
 	.property("name", &Nightbird::SceneObject::name)
 	.property("transform", &Nightbird::SceneObject::transform);
+
+	rttr::registration::method("CreateSceneObject", [](const std::string& name) -> Nightbird::SceneObject*
+	{
+		return new Nightbird::SceneObject(name);
+	});
 }

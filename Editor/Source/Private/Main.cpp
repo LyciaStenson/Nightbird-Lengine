@@ -15,83 +15,34 @@
 
 #include <rttr/library.h>
 
-//#ifdef _WIN32
-//#include <Windows.h>
-//#endif
-
 using namespace Nightbird;
 
 int main(int argc, char** argv)
 {
-//#ifdef _WIN32
-	//HMODULE project = LoadLibraryA("Project.dll");
-	//if (!project)
-	//{
-		//std::cout << "Failed to load Project.dll" << std::endl;
-	//}
-
 	rttr::library project("Project");
 	bool projectLoaded = project.load();
-	if (!projectLoaded)
+	if (projectLoaded)
+	{
+		std::cout << "Loaded Project shared library via RTTR" << std::endl;
+		for (auto& type : project.get_types())
+		{
+			std::cout << type.get_name() << std::endl;
+		}
+	}
+	else
 	{
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
 	}
 	
-	for (auto& type : project.get_types())
+	for (auto& type : rttr::type::get_types())
 	{
-		std::cout << type.get_name() << std::endl;
-	}
-	
-	//using GetSceneObjectCountFunc = int (*)();
-	//using GetSceneObjectDescriptorFunc = const SceneObjectDescriptor* (*)(int);
-
-	//GetSceneObjectCountFunc getCount = nullptr;
-	//GetSceneObjectDescriptorFunc getDescriptor = nullptr;
-	
-	//if (projectLoaded)
-	//{
-		//getCount = (GetSceneObjectCountFunc)GetProcAddress(project, "GetSceneObjectCount");
-		//getDescriptor = (GetSceneObjectDescriptorFunc)GetProcAddress(project, "GetSceneObjectDescriptor");
-		//g_DeleteCustomObject = (DeleteCustomObjectFunc)GetProcAddress(project, "DeleteCustomObject");
-
-		//if (!getCount || !getDescriptor)
-			//std::cerr << "Failed to load Project DLL exports" << std::endl;
-		
-		//if (!g_DeleteCustomObject)
-			//std::cerr << "Failed to load DeleteCustomObject from Project DLL" << std::endl;
-	//}
-//#endif
-	
-	{
-		Engine engine;
-
-		EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
-		engine.GetRenderer()->SetRenderTarget(&renderTarget);
-
-//#ifdef _WIN32
-		//if (getCount && getDescriptor)
-		//{
-			//std::vector<const SceneObjectDescriptor*> objectDescriptors;
-
-			//int count = getCount();
-			//for (int i = 0; i < count; ++i)
-			//{
-				//const SceneObjectDescriptor* objectDescriptor = getDescriptor(i);
-				//if (objectDescriptor)
-				//{
-					//GetSceneObjectRegistry().push_back(*objectDescriptor);
-					//objectDescriptors.push_back(objectDescriptor);
-				//}
-			//}
-			//renderTarget.SetObjectTypes(objectDescriptors);
-		//}
-//#endif
-
-		engine.Run();
+		std::cout << "GLOBAL: " << type.get_name() << std::endl;
 	}
 
-//#ifdef _WIN32
-	//if (project)
-		//FreeLibrary(project);
-//#endif
+	Engine engine;
+	
+	EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
+	engine.GetRenderer()->SetRenderTarget(&renderTarget);
+	
+	engine.Run();
 }
