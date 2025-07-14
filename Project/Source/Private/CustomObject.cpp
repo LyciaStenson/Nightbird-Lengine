@@ -30,9 +30,4 @@ RTTR_PLUGIN_REGISTRATION
 	{
 		return new CustomObject(name);
 	});
-
-	//for (auto& type : rttr::type::get_types())
-	//{
-		//std::cout << "PROJECT: " << type.get_name() << std::endl;
-	//}
 }

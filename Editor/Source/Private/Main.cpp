@@ -32,11 +32,6 @@ int main(int argc, char** argv)
 	{
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
 	}
-	
-	//for (auto& type : rttr::type::get_types())
-	//{
-		//std::cout << "GLOBAL: " << type.get_name() << std::endl;
-	//}
 
 	Nightbird::Engine engine;
 	
