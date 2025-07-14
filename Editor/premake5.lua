@@ -37,3 +37,7 @@ project "Editor"
 	defines { "EDITOR" }
 
 	links { "Engine", "imgui" }
+
+	filter { "system:windows" }
+		links { "rttr" }
+	filter {}

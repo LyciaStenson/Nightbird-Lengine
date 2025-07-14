@@ -3,8 +3,6 @@
 #include <Core/Renderer.h>
 #include <Core/Scene.h>
 
-#include <Core/ProjectExport.h>
-
 #include <AppRenderTarget.h>
 
 using namespace Nightbird;

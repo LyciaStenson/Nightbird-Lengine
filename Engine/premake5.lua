@@ -28,4 +28,8 @@ project "Engine"
 		"Vendor/json"
 	}
 
-	links { "glfw", "fastgltf", "rttr" }
+	links { "glfw", "fastgltf" }
+
+	filter { "system:windows" }
+		links { "rttr" }
+	filter {}

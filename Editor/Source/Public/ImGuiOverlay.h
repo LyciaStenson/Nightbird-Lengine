@@ -7,8 +7,6 @@
 
 #include <ImGuiWindow.h>
 
-#include <Core/ProjectExport.h>
-
 #include <volk.h>
 #include <glfw/glfw3.h>
 

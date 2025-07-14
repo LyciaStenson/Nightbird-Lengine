@@ -10,8 +10,6 @@ class CustomObject : public Nightbird::SceneObject
 {
 public:
 	CustomObject(const std::string& name);
-	
-	const char* GetTypeName() const override { return "CustomObject"; }
 
 	void Serialize(json& out) const override;
 	void Deserialize(const json& in) override;

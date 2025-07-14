@@ -15,14 +15,11 @@ namespace Nightbird
 	class PrefabInstance : public SceneObject
 	{
 	public:
-		//PrefabInstance() = default;
 		PrefabInstance(const char* name, const char* prefabPath = "");
 		PrefabInstance(const std::string& name, const std::string& prefabPath = "");
 		~PrefabInstance() override;
 		
 		const std::string& GetPrefabPath() const;
-
-		const char* GetTypeName() const override { return "PrefabInstance"; }
 
 	protected:
 		std::string prefabPath;

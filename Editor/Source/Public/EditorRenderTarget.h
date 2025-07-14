@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Core/RenderTarget.h>
-#include <Core/ProjectExport.h>
 
 #include <ImGuiOverlay.h>
 

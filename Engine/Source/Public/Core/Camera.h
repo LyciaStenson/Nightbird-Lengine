@@ -20,13 +20,9 @@ namespace Nightbird
 	{
 	public:
 		using SceneObject::SceneObject;
-
-		//Camera() = default;
 		~Camera() override = default;
 		
 		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
-
-		const char* GetTypeName() const override { return "Camera"; }
 
 		void Serialize(json& out) const override;
 		void Deserialize(const json& in) override;

@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-#include <Core/ProjectExport.h>
-
-#include <Core/SceneObjectRegistry.h>
-
 namespace Nightbird
 {
 	SceneObject::SceneObject(const char* name)
@@ -99,7 +95,7 @@ namespace Nightbird
 	
 	void SceneObject::Serialize(json& out) const
 	{
-		out["type"] = GetTypeName();
+		//out["type"] = GetTypeName();
 		out["name"] = name;
 		out["transform"] = transform;
 		out["children"] = json::array();

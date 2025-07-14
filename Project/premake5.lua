@@ -28,3 +28,7 @@ project "Project"
 	}
 
 	links { "Engine" }
+
+	filter { "system:windows" }
+		links { "rttr" }
+	filter {}

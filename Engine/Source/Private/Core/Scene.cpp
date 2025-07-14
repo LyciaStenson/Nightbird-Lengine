@@ -16,7 +16,6 @@
 #include <Core/PointLightData.h>
 #include <Core/Transform.h>
 #include <Core/Model.h>
-#include <Core/ProjectExport.h>
 
 #include <filesystem>
 #include <fstream>

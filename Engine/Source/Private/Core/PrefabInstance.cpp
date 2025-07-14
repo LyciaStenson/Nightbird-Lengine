@@ -23,6 +23,4 @@ namespace Nightbird
 	{
 		return prefabPath;
 	}
-
-	//REGISTER_SCENE_OBJECT(PrefabInstance)
 }

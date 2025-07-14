@@ -17,13 +17,9 @@ namespace Nightbird
 	{
 	public:
 		using SceneObject::SceneObject;
-
-		//PointLight() = default;
 		~PointLight() override;
 
 		PointLightData GetData() const;
-		
-		const char* GetTypeName() const override { return "PointLight"; }
 
 		glm::vec3 color = glm::vec3(1.0f);
 		float intensity = 1.0f;
