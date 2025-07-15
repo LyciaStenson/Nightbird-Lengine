@@ -41,7 +41,7 @@ namespace Nightbird
 		const SceneObject* GetRootObject() const;
 		std::vector<SceneObject*> GetAllObjects();
 		
-		Camera* GetMainCamera() const;
+		Camera* GetMainCamera();
 		void SetMainCamera(Camera* camera);
 
 		void Serialize(const std::string& path) const;
@@ -56,8 +56,8 @@ namespace Nightbird
 		void AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent = nullptr);
 
 		SceneObject* CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
-		Camera* CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
-		PointLight* CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
+		//Camera* CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
+		//PointLight* CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
 		
 		void InstantiateModel(PrefabInstance* prefabInstance);
 		PrefabInstance* InstantiateModel(const std::string& path, const Transform& transform);
