@@ -63,6 +63,24 @@ namespace Nightbird
 		if (ImGui::IsItemClicked())
 			m_Overlay->SelectObject(object);
 
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("SCENE_OBJECT", &object, sizeof(SceneObject*));
+			ImGui::Text(object->GetName().c_str());
+			ImGui::EndDragDropSource();
+		}
+		
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_OBJECT"))
+			{
+				SceneObject* received = *static_cast<SceneObject**>(payload->Data);
+				if (received != object)
+					received->SetParent(object);
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		if (opened && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
 		{
 			for (auto& child : object->GetChildren())

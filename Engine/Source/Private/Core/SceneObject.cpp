@@ -31,7 +31,7 @@ namespace Nightbird
 
 	void SceneObject::SetParent(SceneObject* newParent)
 	{
-		if (parent == newParent)
+		if (newParent == parent || newParent == this)
 			return;
 		
 		std::unique_ptr<SceneObject> uniquePtr = nullptr;
