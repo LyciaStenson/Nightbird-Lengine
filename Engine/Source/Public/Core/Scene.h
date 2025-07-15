@@ -39,6 +39,7 @@ namespace Nightbird
 		~Scene();
 
 		const SceneObject* GetRootObject() const;
+		SceneObject* GetRootObject();
 		std::vector<SceneObject*> GetAllObjects();
 		
 		Camera* GetMainCamera();
