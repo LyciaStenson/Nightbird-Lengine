@@ -34,3 +34,7 @@ project "App"
 	}
 
 	links { "Engine" }
+
+	filter { "system:windows" }
+		links { "rttr" }
+	filter {}
