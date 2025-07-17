@@ -22,11 +22,6 @@ int main(int argc, char** argv)
 	if (projectLoaded)
 	{
 		std::cout << "Loaded Project shared library via RTTR with " << project.get_types().size() << " types" << std::endl;
-
-		for (auto& type : project.get_types())
-		{
-			std::cout << type.get_name() << std::endl;
-		}
 	}
 	else
 	{

@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <Core/TransformSerialization.h>
+#include <Core/RTTRSerialization.h>
+
 namespace Nightbird
 {
 	SceneObject::SceneObject(const char* name)
@@ -95,49 +98,98 @@ namespace Nightbird
 	
 	void SceneObject::Serialize(json& out) const
 	{
-		//out["type"] = GetTypeName();
-		out["name"] = name;
-		out["transform"] = transform;
-		out["children"] = json::array();
+		rttr::instance instance = *this;
+		rttr::type type = instance.get_derived_type();
+
+		out["__type"] = type.get_name().to_string();
+
+		for (auto& property : type.get_properties())
+		{
+			rttr::variant value = property.get_value(instance);
+			if (value.is_valid())
+				out["__properties"][property.get_name().to_string()] = value;
+		}
+		
+		out["__children"] = json::array();
 		for (const auto& child : children)
 		{
 			json childJson;
 			child->Serialize(childJson);
-			out["children"].push_back(childJson);
+			out["__children"].push_back(childJson);
 		}
 	}
 
 	void SceneObject::Deserialize(const json& in)
 	{
-		name = in.at("name").get<std::string>();
-		in.at("transform").get_to(transform);
-
-		children.clear();
-		for (const auto& childJson : in.at("children"))
+		if (!in.contains("__type"))
 		{
-			//std::string childType = childJson.at("type").get<std::string>();
-			//std::string childName = childJson.at("name").get<std::string>();
+			std::cerr << "SceneObject Deserialize Error: Missing __type" << std::endl;
+			return;
+		}
 
-			//SceneObject* object = nullptr;
+		std::string typeName = in["__type"];
+		rttr::type objectType = rttr::type::get_by_name(typeName);
 
-			//std::vector<SceneObjectDescriptor>& registry = GetSceneObjectRegistry();
+		if (!objectType.is_valid())
+		{
+			std::cerr << "SceneObject Deserialize Error: Unknown type: " << typeName << std::endl;
+			return;
+		}
 
-			//for (const auto& desc : GetSceneObjectRegistry())
-			//{
-				//if (childType == desc.typeName)
-				//{
-					//object = desc.create(childName.c_str());
-					//break;
-				//}
-			//}
+		rttr::instance instance = *this;
 
-			//if (!object)
-				//std::cerr << "Unknown SceneObject type " << childType << std::endl;
-
-			//std::unique_ptr<SceneObject, SceneObjectDeleter> child(object, SceneObjectDeleter());
-			//child->SetParent(this);
-			//child->Deserialize(childJson);
-			//children.push_back(std::move(child));
+		if (in.contains("__properties"))
+		{
+			const auto& propJson = in["__properties"];
+			for (auto& prop : objectType.get_properties())
+			{
+				std::string propName = prop.get_name().to_string();
+				if (propJson.contains(propName))
+				{
+					rttr::variant value;
+					value = propJson[propName];
+					if (value.is_valid())
+						prop.set_value(instance, value);
+				}
+			}
+		}
+		
+		children.clear();
+		if (in.contains("__children"))
+		{
+			for (const auto& childJson : in.at("__children"))
+			{
+				if (!childJson.contains("__type"))
+				{
+					std::cerr << "SceneObject Deserialize Error: Missing __type" << std::endl;
+					continue;
+				}
+				
+				std::string childTypeName = childJson["__type"];
+				rttr::type childType = rttr::type::get_by_name(childTypeName);
+				
+				if (!childType.is_valid())
+				{
+					std::cerr << "SceneObject Deserialize Error: Unknown type: " << childTypeName << std::endl;
+					continue;
+				}
+				
+				auto create = rttr::type::get_global_method("Create" + childTypeName);
+				if (create.is_valid())
+				{
+					rttr::variant variant = create.invoke({}, childTypeName);
+					if (variant.is_type<Nightbird::SceneObject*>())
+					{
+						SceneObject* rawChild = variant.get_value<Nightbird::SceneObject*>();
+						rawChild->Deserialize(childJson);
+						
+						std::unique_ptr<Nightbird::SceneObject> child(rawChild);
+						AddChild(std::move(child));
+					}
+				}
+				else
+					std::cerr << "SceneObject Deserialize Error: No factory method found for type: " << childTypeName << std::endl;
+			}
 		}
 	}
 }

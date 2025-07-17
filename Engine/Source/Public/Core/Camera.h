@@ -23,9 +23,6 @@ namespace Nightbird
 		~Camera() override = default;
 		
 		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
-
-		void Serialize(json& out) const override;
-		void Deserialize(const json& in) override;
 		
 		float fov = 70.0f;
 		
