@@ -1,3 +1,5 @@
+dofile("../rttr_copy.lua")
+
 project "App"
 	kind "ConsoleApp"
 	language "C++"
@@ -37,4 +39,7 @@ project "App"
 
 	filter { "system:windows" }
 		links { "rttr" }
+		copy_rttr("windows", outputdir)
+	filter { "system:linux" }
+		copy_rttr("linux", outputdir)
 	filter {}
