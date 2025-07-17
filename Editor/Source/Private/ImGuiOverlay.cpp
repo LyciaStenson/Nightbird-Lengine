@@ -34,6 +34,7 @@ namespace Nightbird
 		ImGui::CreateContext();
 		ImGuiIO& imGuiIO = ImGui::GetIO(); (void)imGuiIO;
 		imGuiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		imGuiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		
 		imGuiIO.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoFlex-Regular.ttf", 16.0f);
 		
@@ -179,6 +180,8 @@ namespace Nightbird
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		
+		ImGui::DockSpaceOverViewport();
 	}
 	
 	void VulkanImGuiOverlay::Draw(VkCommandBuffer commandBuffer)
