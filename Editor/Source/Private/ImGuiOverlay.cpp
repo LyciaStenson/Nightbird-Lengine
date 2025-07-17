@@ -65,8 +65,6 @@ namespace Nightbird
 		imGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
 		ImGui_ImplVulkan_Init(&imGuiInitInfo);
-
-		ImGui_ImplVulkan_CreateFontsTexture();
 		
 		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
 		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
@@ -80,8 +78,6 @@ namespace Nightbird
 	
 	VulkanImGuiOverlay::~VulkanImGuiOverlay()
 	{
-		ImGui_ImplVulkan_DestroyFontsTexture();
-
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
