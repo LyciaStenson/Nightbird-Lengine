@@ -19,7 +19,7 @@ namespace Nightbird
 	protected:
 		void OnRender() override;
 		
-		void SceneOutliner::DrawSceneNode(SceneObject* object);
+		void SceneOutliner::DrawSceneNode(SceneObject* object, bool& dropHandled);
 
 		Scene* m_Scene = nullptr;
 		VulkanImGuiOverlay* m_Overlay = nullptr;
