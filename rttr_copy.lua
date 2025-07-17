@@ -8,6 +8,7 @@ function copy_rttr(platform, outputdir)
 	else
 		print("Warning: RTTR copy not supported on " .. platform)
 		return
+	end
 
 	postbuildcommands {
 		"{COPY} " .. rttr_path .. " " .. "%{cfg.targetdir}"
