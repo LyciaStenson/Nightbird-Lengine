@@ -37,6 +37,17 @@ namespace Nightbird
 		
 		imGuiIO.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoFlex-Regular.ttf", 16.0f);
 		
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.TabRounding = 4.0f;
+		style.FrameRounding = 4.0f;
+		style.WindowRounding = 6.0f;
+		style.WindowPadding = ImVec2(8.0f, 8.0f);
+		style.FramePadding = ImVec2(8.0f, 6.0f);
+		style.ItemSpacing = ImVec2(10.0f, 8.0f);
+		style.TabBarBorderSize = 0.0f;
+		style.WindowBorderSize = 0.0f;
+		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+
 		ImGui_ImplGlfw_InitForVulkan(glfwWindow, true);
 
 		ImGui_ImplVulkan_InitInfo imGuiInitInfo = {};
@@ -172,19 +183,6 @@ namespace Nightbird
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		
-		ImGuiStyle& style = ImGui::GetStyle();
-		
-		style.TabRounding = 4.0f;
-		style.FrameRounding = 4.0f;
-		style.WindowRounding = 6.0f;
-
-		style.WindowPadding = ImVec2(8.0f, 8.0f);
-		style.FramePadding = ImVec2(8.0f, 6.0f);
-		style.ItemSpacing = ImVec2(10.0f, 8.0f);
-
-		style.TabBarBorderSize = 0.0f;
-		style.WindowBorderSize = 0.0f;
 	}
 	
 	void VulkanImGuiOverlay::Draw(VkCommandBuffer commandBuffer)
