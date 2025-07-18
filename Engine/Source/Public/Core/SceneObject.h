@@ -37,14 +37,12 @@ namespace Nightbird
 		void AddChild(std::unique_ptr<SceneObject> child);
 		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
 		
-		virtual void Serialize(json& out) const;
-		virtual void Deserialize(const json& in);
+		void Serialize(json& out) const;
+		void Deserialize(const json& in);
 		
 		Transform transform;
 
 		SceneObject* parent = nullptr;
-
-		virtual bool IsCustomObject() const { return false; }
 		
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND

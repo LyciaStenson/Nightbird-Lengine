@@ -1,7 +1,6 @@
 #include <Core/Engine.h>
 
 #include <Core/SceneObject.h>
-#include <Core/SceneObjectRegistry.h>
 #include <Core/Renderer.h>
 #include <Core/ModelManager.h>
 #include <Core/GlfwWindow.h>

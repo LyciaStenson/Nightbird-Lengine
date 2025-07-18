@@ -3,7 +3,6 @@
 #include <string>
 
 #include <Core/SceneObject.h>
-#include <Core/SceneObjectRegistry.h>
 #include <Core/Transform.h>
 
 namespace Nightbird

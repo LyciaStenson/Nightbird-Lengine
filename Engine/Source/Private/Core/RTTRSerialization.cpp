@@ -8,110 +8,106 @@
 
 namespace rttr
 {
-	void to_json(nlohmann::json& json, const rttr::variant& variant)
+	nlohmann::json SerializeRTTR(const rttr::variant& variant)
 	{
 		if (!variant.is_valid())
-			return;
+			return nullptr;
+		
+		rttr::type type = variant.get_type();
 
-		const rttr::type type = variant.get_type();
 		if (type.is_arithmetic())
 		{
 			if (type == rttr::type::get<bool>())
-				json = variant.to_bool();
-			else if (type == rttr::type::get<int>())
-				json = variant.to_int();
-			else if (type == rttr::type::get<float>())
-				json = variant.to_float();
-			else if (type == rttr::type::get<double>())
-				json = variant.to_double();
+				return variant.get_value<bool>();
+			if (type == rttr::type::get<int>())
+				return variant.get_value<int>();
+			if (type == rttr::type::get<float>())
+				return variant.get_value<float>();
+			if (type == rttr::type::get<double>())
+				return variant.get_value<double>();
 		}
-		else if (type == rttr::type::get<std::string>())
-			json = variant.to_string();
-		else if (type.is_class())
+		
+		if (type == rttr::type::get<std::string>())
+			return variant.get_value<std::string>();
+		
+		if (type.is_class())
 		{
-			json["__type"] = type.get_name().to_string();
-
-			for (auto& prop : type.get_properties())
+			nlohmann::json json;
+			rttr::instance instance = variant;
+			for (const auto& prop : type.get_properties())
 			{
-				auto propName = prop.get_name().to_string();
-				rttr::variant propValue = prop.get_value(variant);
-
-				if (!propValue.is_valid())
+				if (!prop.is_valid())
 					continue;
 
-				nlohmann::json propJson = propValue;
-				json[propName] = propJson;
+				rttr::variant propValue = prop.get_value(instance);
+				if (!propValue.is_valid())
+					continue;
+				
+				json[prop.get_name().to_string()] = SerializeRTTR(propValue);
 			}
+			return json;
 		}
-		else
-			std::cerr << "Unsupported type: " << type.get_name() << std::endl;
+
+		return variant.to_string();
 	}
 
-	void from_json(const nlohmann::json& json, rttr::variant& variant)
+	void DeserializeRTTR(const nlohmann::json& json, rttr::instance instance)
 	{
-		if (json.is_null())
-		{
-			variant = rttr::variant{};
+		rttr::type type = instance.get_derived_type();
+
+		if (!type.is_class())
 			return;
-		}
 
-		if (!json.contains("__type"))
+		for (const auto& prop : type.get_properties())
 		{
-			std::cerr << "Variant missing __type" << std::endl;
-			return;
-		}
+			std::string propName = prop.get_name().to_string();
 
-		std::string typeName = json.at("__type").get<std::string>();
-		rttr::type type = rttr::type::get_by_name(typeName);
+			if (!prop.is_valid() || prop.is_readonly())
+				continue;
 
-		if (!type.is_valid())
-		{
-			std::cerr << "Unknown type: " << typeName << std::endl;
-			return;
-		}
+			if (!json.contains(propName))
+				continue;
 
-		rttr::variant object = type.create();
-		if (!object)
-		{
-			std::cerr << "Failed to create instance of type: " << typeName << std::endl;
-			return;
-		}
+			rttr::type propType = prop.get_type();
+			const nlohmann::json& propJson = json.at(propName);
 
-		for (auto& property : type.get_properties())
-		{
-			const auto propertyName = property.get_name().to_string();
-			if (json.contains(propertyName))
+			rttr::variant variant;
+
+			if (propType.is_arithmetic())
 			{
-				const auto& propertyJson = json.at(propertyName);
-
-				rttr::type propertyType = property.get_type();
-
-				rttr::variant propertyValue;
-
-				if (propertyType.is_class() && propertyJson.is_object() && propertyJson.contains("__type"))
-					from_json(propertyJson, propertyValue);
-				else
+				if (propType == rttr::type::get<bool>())
+					variant = propJson.get<bool>();
+				if (propType == rttr::type::get<int>())
+					variant = propJson.get<int>();
+				if (propType == rttr::type::get<float>())
+					variant = propJson.get<float>();
+				if (propType == rttr::type::get<double>())
+					variant = propJson.get<double>();
+			}
+			else if (propType == rttr::type::get<std::string>())
+				variant = propJson.get<std::string>();
+			else if (propType.is_class())
+			{
+				rttr::variant propVariant = prop.get_value(instance);
+				if (propVariant.is_valid())
 				{
-					if (propertyType.is_arithmetic())
+					rttr::instance propInstance = propVariant;
+					if (!propInstance.is_valid())
 					{
-						if (propertyType == rttr::type::get<bool>())
-							propertyValue = propertyJson.get<bool>();
-						else if (propertyType == rttr::type::get<int>())
-							propertyValue = propertyJson.get<int>();
-						else if (propertyType == rttr::type::get<float>())
-							propertyValue = propertyJson.get<float>();
-						else if (propertyType == rttr::type::get<double>())
-							propertyValue = propertyJson.get<double>();
+						std::cerr << "Failed to convert variant of property " << propName << " to instance" << std::endl;
+						continue;
 					}
-					else if (propertyType == rttr::type::get<std::string>())
-						propertyValue = propertyJson.get<std::string>();
+					DeserializeRTTR(propJson, propInstance);
+					variant = propVariant;
 				}
+			}
 
-				if (propertyValue.is_valid())
-					property.set_value(object, propertyValue);
+			if (variant.is_valid())
+			{
+				bool success = prop.set_value(instance, variant);
+				if (!success)
+					std::cerr << "Failed to set value for property: " << propName << std::endl;
 			}
 		}
-
-		variant = object;
 	}
 }

@@ -8,7 +8,6 @@
 #include <volk.h>
 
 #include <Core/SceneObject.h>
-#include <Core/SceneObjectRegistry.h>
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 

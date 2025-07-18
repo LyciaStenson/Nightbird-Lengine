@@ -4,8 +4,6 @@
 
 #include <ImGuiWindow.h>
 
-#include <Core/SceneObjectRegistry.h>
-
 namespace Nightbird
 {
 	class Scene;
@@ -16,13 +14,9 @@ namespace Nightbird
 	public:
 		CreateObjectWindow(Scene* scene, bool open = false);
 
-		//void SetObjectTypes(const std::vector<const SceneObjectDescriptor*>& objectTypes);
-
 	protected:
 		void OnRender() override;
 
 		Scene* m_Scene;
-
-		//std::vector<const SceneObjectDescriptor*> m_ObjectTypes;
 	};
 }

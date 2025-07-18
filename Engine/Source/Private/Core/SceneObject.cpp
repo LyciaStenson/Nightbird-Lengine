@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include <Core/TransformSerialization.h>
 #include <Core/RTTRSerialization.h>
 
 namespace Nightbird
@@ -107,7 +106,7 @@ namespace Nightbird
 		{
 			rttr::variant value = property.get_value(instance);
 			if (value.is_valid())
-				out["__properties"][property.get_name().to_string()] = value;
+				out["__properties"][property.get_name().to_string()] = SerializeRTTR(value);
 		}
 		
 		out["__children"] = json::array();
@@ -128,30 +127,20 @@ namespace Nightbird
 		}
 
 		std::string typeName = in["__type"];
-		rttr::type objectType = rttr::type::get_by_name(typeName);
+		rttr::type type = rttr::type::get_by_name(typeName);
 
-		if (!objectType.is_valid())
+		if (!type.is_valid())
 		{
 			std::cerr << "SceneObject Deserialize Error: Unknown type: " << typeName << std::endl;
 			return;
 		}
 
 		rttr::instance instance = *this;
-
+		
 		if (in.contains("__properties"))
 		{
-			const auto& propJson = in["__properties"];
-			for (auto& prop : objectType.get_properties())
-			{
-				std::string propName = prop.get_name().to_string();
-				if (propJson.contains(propName))
-				{
-					rttr::variant value;
-					value = propJson[propName];
-					if (value.is_valid())
-						prop.set_value(instance, value);
-				}
-			}
+			const auto& propsJson = in.at("__properties");
+			DeserializeRTTR(propsJson, instance);
 		}
 		
 		children.clear();
