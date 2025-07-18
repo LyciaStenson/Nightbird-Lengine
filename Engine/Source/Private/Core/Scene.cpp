@@ -90,6 +90,18 @@ namespace Nightbird
 		is >> json;
 		rootObject->Deserialize(json);
 
+		std::vector<SceneObject*> allObjects = GetAllObjects();
+		for (SceneObject* object : allObjects)
+		{
+			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
+			{
+				modelManager->LoadModelAsync(prefab->GetPrefabPath(), [this, prefab](std::shared_ptr<Model> model)
+					{
+						InstantiateModel(prefab);
+					});
+			}
+		}
+
 		return true;
 	}
 	
@@ -117,6 +129,16 @@ namespace Nightbird
 		{
 			std::cerr << "Failed to open scene for reading at " << path << std::endl;
 			return false;
+		}
+
+		std::vector<SceneObject*> allObjects = GetAllObjects();
+		for (SceneObject* object : allObjects)
+		{
+			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
+			{
+				modelManager->LoadModel(prefab->GetPrefabPath());
+				InstantiateModel(prefab);
+			}
 		}
 
 		return true;

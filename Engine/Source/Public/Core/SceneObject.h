@@ -37,8 +37,8 @@ namespace Nightbird
 		void AddChild(std::unique_ptr<SceneObject> child);
 		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
 		
-		void Serialize(json& out) const;
-		void Deserialize(const json& in);
+		virtual void Serialize(json& out) const;
+		virtual void Deserialize(const json& in);
 		
 		Transform transform;
 
@@ -51,5 +51,8 @@ namespace Nightbird
 		std::string name;
 		
 		std::vector<std::unique_ptr<SceneObject>> children;
+
+		void SerializeBase(json& out) const;
+		void DeserializeBase(const json& out);
 	};
 }
