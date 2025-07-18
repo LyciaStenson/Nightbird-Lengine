@@ -82,17 +82,35 @@ namespace Nightbird
 		mainCamera = camera;
 	}
 
-	void Scene::Serialize(const std::string& path) const
+	bool Scene::LoadSceneJSON(const std::string& path)
 	{
+		std::ifstream is(path);
+		if (!is.is_open())
+		{
+			std::cerr << "Failed to open scene for reading at " << path << std::endl;
+			return false;
+		}
 
+		nlohmann::json json;
+		is >> json;
+		rootObject->Deserialize(json);
+
+		std::vector<SceneObject*> allObjects = GetAllObjects();
+		for (SceneObject* object : allObjects)
+		{
+			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
+			{
+				modelManager->LoadModelAsync(prefab->GetPrefabPath(), [this, prefab](std::shared_ptr<Model> model)
+					{
+						InstantiateModel(prefab);
+					});
+			}
+		}
+
+		return true;
 	}
 	
-	void Scene::Deserialize(const std::string& path)
-	{
-
-	}
-
-	bool Scene::SaveSceneJSON(const std::string& path)
+	bool Scene::SaveSceneJSON(const std::string& path) const
 	{
 		nlohmann::json json;
 		rootObject->Serialize(json);
@@ -109,7 +127,29 @@ namespace Nightbird
 		return true;
 	}
 
-	bool Scene::SaveSceneBIN(const std::string& path)
+	bool Scene::LoadSceneBIN(const std::string& path)
+	{
+		std::ifstream is(path, std::ios::binary);
+		if (!is.is_open())
+		{
+			std::cerr << "Failed to open scene for reading at " << path << std::endl;
+			return false;
+		}
+
+		std::vector<SceneObject*> allObjects = GetAllObjects();
+		for (SceneObject* object : allObjects)
+		{
+			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
+			{
+				modelManager->LoadModel(prefab->GetPrefabPath());
+				InstantiateModel(prefab);
+			}
+		}
+
+		return true;
+	}
+
+	bool Scene::SaveSceneBIN(const std::string& path) const
 	{
 		std::ofstream os(path, std::ios::binary);
 		if (!os.is_open())
@@ -120,35 +160,7 @@ namespace Nightbird
 		
 		return true;
 	}
-
-	bool Scene::LoadSceneJSON(const std::string& path)
-	{
-		std::ifstream is(path);
-		if (!is.is_open())
-		{
-			std::cerr << "Failed to open scene for reading at " << path << std::endl;
-			return false;
-		}
-
-		nlohmann::json json;
-		is >> json;
-		rootObject->Deserialize(json);
-		
-		return true;
-	}
-
-	bool Scene::LoadSceneBIN(const std::string& path)
-	{
-		std::ifstream is(path, std::ios::binary);
-		if (!is.is_open())
-		{
-			std::cerr << "Failed to open scene for reading at " << path << std::endl;
-			return false;
-		}
-		
-		return true;
-	}
-
+	
 	void Scene::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
 	{
 		if (parent)

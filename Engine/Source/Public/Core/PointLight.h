@@ -3,7 +3,6 @@
 #include <string>
 
 #include <Core/SceneObject.h>
-#include <Core/SceneObjectRegistry.h>
 
 #include <volk.h>
 
@@ -20,7 +19,7 @@ namespace Nightbird
 		~PointLight() override;
 
 		PointLightData GetData() const;
-
+		
 		glm::vec3 color = glm::vec3(1.0f);
 		float intensity = 1.0f;
 		float radius = 10.0f;
