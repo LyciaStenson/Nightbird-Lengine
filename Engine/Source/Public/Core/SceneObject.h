@@ -7,7 +7,6 @@
 #include <Core/Transform.h>
 
 #include <nlohmann/json.hpp>
-#include <Core/TransformSerialization.h>
 
 #include <rttr/type>
 #include <rttr/registration.h>
@@ -44,8 +43,6 @@ namespace Nightbird
 		Transform transform;
 
 		SceneObject* parent = nullptr;
-
-		virtual bool IsCustomObject() const { return false; }
 		
 		RTTR_ENABLE()
 		RTTR_REGISTRATION_FRIEND
@@ -54,5 +51,8 @@ namespace Nightbird
 		std::string name;
 		
 		std::vector<std::unique_ptr<SceneObject>> children;
+
+		void SerializeBase(json& out) const;
+		void DeserializeBase(const json& out);
 	};
 }
