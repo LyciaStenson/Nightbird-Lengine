@@ -12,8 +12,6 @@ namespace Nightbird
 	class ModelManager;
 	class MeshInstance;
 	class Scene;
-	class Camera;
-	class RenderTarget;
 	class Renderer;
 	
 	class Engine

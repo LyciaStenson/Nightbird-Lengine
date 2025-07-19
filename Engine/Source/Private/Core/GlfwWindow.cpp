@@ -10,34 +10,36 @@ namespace Nightbird
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
-		glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+		m_Window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
+		glfwSetFramebufferSizeCallback(m_Window, FramebufferResizeCallback);
 	}
 
 	GlfwWindow::~GlfwWindow()
 	{
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
 	GLFWwindow* GlfwWindow::Get() const
 	{
-		return window;
+		return m_Window;
 	}
 
-	void GlfwWindow::SetRendererPointer(Renderer* renderer)
+	void GlfwWindow::SetUserPointer(Renderer* renderer)
 	{
-		glfwSetWindowUserPointer(window, renderer);
+		m_UserData = {renderer};
+		glfwSetWindowUserPointer(m_Window, &m_UserData);
 	}
-
+	
 	void GlfwWindow::GetFramebufferSize(int* width, int* height)
 	{
-		glfwGetFramebufferSize(window, width, height);
+		glfwGetFramebufferSize(m_Window, width, height);
 	}
 
 	void GlfwWindow::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
-		Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
-		renderer->FramebufferResized();
+		auto userData = static_cast<WindowUserData*>(glfwGetWindowUserPointer(window));
+		if (userData && userData->renderer)
+			userData->renderer->FramebufferResized();
 	}
 }

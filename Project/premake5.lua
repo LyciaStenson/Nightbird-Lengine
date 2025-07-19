@@ -27,8 +27,6 @@ project "Project"
 		"%{wks.location}/Engine/Vendor/json"
 	}
 
-	links { "Engine" }
-
 	filter { "system:windows" }
 		links { "rttr" }
 	filter {}
