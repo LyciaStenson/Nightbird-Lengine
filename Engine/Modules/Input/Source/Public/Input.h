@@ -8,7 +8,11 @@
 
 #include <GLFW/glfw3.h>
 
-#include <rttr/type>
+#ifdef INPUT_BUILD
+#define INPUT_API __declspec(dllexport)
+#else
+#define INPUT_API __declspec(dllimport)
+#endif
 
 namespace Nightbird
 {
@@ -18,12 +22,13 @@ namespace Nightbird
 		int code;
 	};
 
-	class InputSystem
+	class INPUT_API Input
 	{
 	public:
 		using ActionCallback = std::function<void(const std::string&)>;
 		
-		static InputSystem& Get();
+		static Input& Get();
+		static void Shutdown();
 
 		void Init(GLFWwindow* window);
 		
@@ -50,6 +55,8 @@ namespace Nightbird
 		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		static void CursorPosCallback(GLFWwindow* window, double x, double y);
+
+		static Input* instance;
 		
 		GLFWwindow* m_Window = nullptr;
 		
@@ -62,7 +69,5 @@ namespace Nightbird
 
 		std::unordered_map<std::string, std::vector<ActionCallback>> m_ActionPressedCallbacks;
 		std::unordered_map<std::string, std::vector<ActionCallback>> m_ActionReleasedCallbacks;
-
-		RTTR_ENABLE()
 	};
 }

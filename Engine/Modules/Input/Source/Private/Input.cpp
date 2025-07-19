@@ -1,52 +1,57 @@
-#include <Core/InputSystem.h>
-
-#include <Core/GlfwWindow.h>
-
-#include <rttr/registration.h>
+#include <Input.h>
 
 namespace Nightbird
 {
-	InputSystem& InputSystem::Get()
+	Input* Input::instance = nullptr;
+
+	Input& Input::Get()
 	{
-		static InputSystem instance;
-		return instance;
+		if (!instance)
+			instance = new Input();
+		return *instance;
 	}
 
-	void InputSystem::Init(GLFWwindow* window)
+	void Input::Shutdown()
+	{
+		delete instance;
+		instance = nullptr;
+	}
+
+	void Input::Init(GLFWwindow* window)
 	{
 		m_Window = window;
 
-		glfwSetKeyCallback(window, &InputSystem::KeyCallback);
-		glfwSetMouseButtonCallback(window, &InputSystem::MouseButtonCallback);
-		glfwSetCursorPosCallback(window, &InputSystem::CursorPosCallback);
+		glfwSetKeyCallback(window, &Input::KeyCallback);
+		glfwSetMouseButtonCallback(window, &Input::MouseButtonCallback);
+		glfwSetCursorPosCallback(window, &Input::CursorPosCallback);
 	}
 	
-	void InputSystem::BindKey(const std::string& action, int key)
+	void Input::BindKey(const std::string& action, int key)
 	{
 		m_ActionBindings[action].push_back({Binding::Type::Key, key});
 	}
 
-	void InputSystem::BindMouseButton(const std::string& action, int button)
+	void Input::BindMouseButton(const std::string& action, int button)
 	{
 		m_ActionBindings[action].push_back({Binding::Type::MouseButton, button});
 	}
 
-	void InputSystem::SubscribeActionPressed(const std::string& action, ActionCallback callback)
+	void Input::SubscribeActionPressed(const std::string& action, ActionCallback callback)
 	{
 		m_ActionPressedCallbacks[action].push_back(callback);
 	}
 
-	void InputSystem::SubscribeActionReleased(const std::string& action, ActionCallback callback)
+	void Input::SubscribeActionReleased(const std::string& action, ActionCallback callback)
 	{
-		m_ActionPressedCallbacks[action].push_back(callback);
+		m_ActionReleasedCallbacks[action].push_back(callback);
 	}
 
-	void InputSystem::PushEvent(const InputEvent& event)
+	void Input::PushEvent(const InputEvent& event)
 	{
 		m_EventQueue.push_back(event);
 	}
 	
-	void InputSystem::HandleEvent(const InputEvent& event)
+	void Input::HandleEvent(const InputEvent& event)
 	{
 		switch (event.type)
 		{
@@ -104,9 +109,8 @@ namespace Nightbird
 		}
 	}
 
-	void InputSystem::ProcessEvents()
+	void Input::ProcessEvents()
 	{
-		glfwPollEvents();
 		while (!m_EventQueue.empty())
 		{
 			HandleEvent(m_EventQueue.front());
@@ -114,26 +118,18 @@ namespace Nightbird
 		}
 	}
 	
-	void InputSystem::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		Get().PushEvent({ InputEvent::Type::Key, key, action, 0.0, 0.0 });
 	}
 
-	void InputSystem::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	void Input::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		Get().PushEvent({ InputEvent::Type::MouseButton, button, action, 0.0, 0.0 });
 	}
 
-	void InputSystem::CursorPosCallback(GLFWwindow* window, double x, double y)
+	void Input::CursorPosCallback(GLFWwindow* window, double x, double y)
 	{
 		Get().PushEvent({ InputEvent::Type::MouseMove, 0, 0, x, y });
 	}
-}
-
-RTTR_REGISTRATION
-{
-	rttr::registration::class_<Nightbird::InputSystem>("InputSystem")
-	.method("BindKey", &Nightbird::InputSystem::BindKey)
-	.method("BindMouseButton", &Nightbird::InputSystem::BindMouseButton)
-	.method("Get", &Nightbird::InputSystem::Get);
 }

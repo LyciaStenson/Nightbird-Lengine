@@ -17,6 +17,7 @@ project "Engine"
 
 	includedirs {
 		"Source/Public",
+		"Modules/Input/Source/Public",
 		"Vendor/vulkan-headers/include",
 		"Vendor/volk",
 		"Vendor/vma",
@@ -28,7 +29,7 @@ project "Engine"
 		"Vendor/json"
 	}
 
-	links { "glfw", "fastgltf" }
+	links { "glfw", "fastgltf", "Input" }
 
 	filter { "system:windows" }
 		links { "rttr" }

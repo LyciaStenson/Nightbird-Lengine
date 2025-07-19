@@ -16,6 +16,7 @@ project "Project"
 	includedirs {
 		"Source/Public",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Modules/Input/Source/Public",
 		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
 		"%{wks.location}/Engine/Vendor/volk",
 		"%{wks.location}/Engine/Vendor/vma",
@@ -26,6 +27,8 @@ project "Project"
 		"%{wks.location}/Engine/Vendor/rttr/src",
 		"%{wks.location}/Engine/Vendor/json"
 	}
+
+	links { "Engine", "Input" }
 
 	filter { "system:windows" }
 		links { "rttr" }

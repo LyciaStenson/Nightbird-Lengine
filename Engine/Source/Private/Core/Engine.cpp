@@ -15,7 +15,7 @@
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 #include <Core/GlmRegistration.h>
-#include <Core/InputSystem.h>
+#include <Input.h>
 
 namespace Nightbird
 {
@@ -29,7 +29,7 @@ namespace Nightbird
 		}
 		
 		glfwWindow = std::make_unique<GlfwWindow>();
-		InputSystem::Get().Init(glfwWindow->Get());
+		Input::Get().Init(glfwWindow->Get());
 		
 		renderer = std::make_unique<Renderer>(glfwWindow.get());
 		glfwWindow->SetUserPointer(renderer.get());
@@ -68,7 +68,8 @@ namespace Nightbird
 	{
 		while (!glfwWindowShouldClose(glfwWindow->Get()))
 		{
-			InputSystem::Get().ProcessEvents();
+			Input::Get().ProcessEvents();
+			glfwPollEvents();
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());
 		}

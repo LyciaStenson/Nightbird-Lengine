@@ -2,17 +2,19 @@
 
 #include <iostream>
 
-#include <GetInputSystem.h>
+#include <Input.h>
+
+using namespace Nightbird;
 
 Player::Player(const std::string& name)
 	: SceneObject(name)
 {
-	GetInputSystem()->BindKey("Jump", GLFW_KEY_SPACE);
+	Input::Get().BindKey("Jump", GLFW_KEY_SPACE);
 	
-	//GetInputSystem()->SubscribeActionPressed("Jump", [](const std::string& action)
-	//{
-		//std::cout << action << " pressed" << std::endl;
-	//});
+	Input::Get().SubscribeActionPressed("Jump", [](const std::string& action)
+	{
+		std::cout << action << " pressed" << std::endl;
+	});
 }
 
 RTTR_PLUGIN_REGISTRATION

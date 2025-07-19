@@ -15,16 +15,18 @@
 int main(int argc, char** argv)
 {
 	rttr::library project("Project");
-	if (project.load())
-	{
-		auto projectInit = rttr::type::get_global_method("ProjectInit");
-		if (projectInit.is_valid())
-			projectInit.invoke({});
-	}
-	else
+	bool projectLoad = project.load();
+	if (!projectLoad)
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
 	
 	Nightbird::Engine engine;
+
+	//if (projectLoad)
+	//{
+	//	auto projectInit = rttr::type::get_global_method("ProjectInit");
+	//	if (projectInit.is_valid())
+	//		projectInit.invoke({});
+	//}
 	
 	Nightbird::EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
 	engine.GetRenderer()->SetRenderTarget(&renderTarget);
