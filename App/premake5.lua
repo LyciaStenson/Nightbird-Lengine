@@ -39,7 +39,11 @@ project "App"
 
 	filter { "system:windows" }
 		links { "rttr" }
-		copy_rttr("windows", outputdir)
+		copy_shared_lib("rttr", "windows", outputdir)
+		copy_shared_lib("glfw", "windows", outputdir)
+		copy_shared_lib("Input", "windows", outputdir)
 	filter { "system:linux" }
-		copy_rttr("linux", outputdir)
+		copy_shared_lib("rttr", "linux", outputdir)
+		copy_shared_lib("glfw", "linux", outputdir)
+		copy_shared_lib("Input", "linux", outputdir)
 	filter {}
