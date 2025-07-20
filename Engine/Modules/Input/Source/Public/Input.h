@@ -39,8 +39,6 @@ namespace Nightbird
 		static Input& Get();
 		
 		void Init(GLFWwindow* window);
-
-		void PrintActions() const;
 		
 		void BindKey(const std::string& action, int key);
 		void BindMouseButton(const std::string& action, int button);

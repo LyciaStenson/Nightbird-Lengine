@@ -49,13 +49,8 @@ namespace Nightbird
 								if (it != m_ActionPressedCallbacks.end())
 								{
 									for (auto& callback : it->second)
-									{
 										if (callback)
-										{
-											std::cout << "Press" << std::endl;
 											callback(action.c_str());
-										}
-									}
 								}
 							}
 						}
@@ -117,35 +112,8 @@ namespace Nightbird
 		impl->m_Window = window;
 
 		glfwSetKeyCallback(window, Input_KeyCallback);
-
-		auto testCallback = glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-			{
-				std::cout << "Raw callback key: " << key << ", action: " << action << std::endl;
-			});
-
-		if (testCallback == Input_KeyCallback)
-		{
-			std::cout << "Input_KeyCallback was set previously" << std::endl;
-		}
-		else
-		{
-			std::cout << "Input_KeyCallback was not set previously" << std::endl;
-		}
-		
 		glfwSetMouseButtonCallback(window, Input_MouseButtonCallback);
 		glfwSetCursorPosCallback(window, Input_CursorPosCallback);
-	}
-
-	void Input::PrintActions() const
-	{
-		for (const auto& [action, bindings] : impl->m_ActionBindings)
-		{
-			std::cout << "Action: " << action << std::endl;
-			for (const auto& binding : bindings)
-			{
-				std::cout << "Binding Type: " << (binding.type == Binding::Type::Key ? "Key" : "MouseButton") << ", Code: " << binding.code << std::endl;
-			}
-		}
 	}
 	
 	void Input::BindKey(const std::string& action, int key)
@@ -187,7 +155,6 @@ extern "C"
 {
 	INPUT_API void Input_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		std::cout << "Input: KeyCallback" << std::endl;
 		Nightbird::Input::Get().PushEvent({Nightbird::InputEvent::Type::Key, key, action, 0.0, 0.0});
 	}
 
