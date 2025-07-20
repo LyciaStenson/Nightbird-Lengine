@@ -1,4 +1,4 @@
-dofile("../rttr_copy.lua")
+dofile("../shared_lib_copy.lua")
 
 project "App"
 	kind "ConsoleApp"
