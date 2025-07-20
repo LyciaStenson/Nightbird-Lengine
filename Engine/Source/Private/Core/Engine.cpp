@@ -68,8 +68,8 @@ namespace Nightbird
 	{
 		while (!glfwWindowShouldClose(glfwWindow->Get()))
 		{
-			Input::Get().ProcessEvents();
 			glfwPollEvents();
+			Input::Get().ProcessEvents();
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());
 		}

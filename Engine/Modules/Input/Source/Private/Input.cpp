@@ -1,5 +1,7 @@
 #include <Input.h>
 
+#include <iostream>
+
 namespace Nightbird
 {
 	Input* Input::instance = nullptr;
@@ -24,6 +26,19 @@ namespace Nightbird
 		glfwSetKeyCallback(window, &Input::KeyCallback);
 		glfwSetMouseButtonCallback(window, &Input::MouseButtonCallback);
 		glfwSetCursorPosCallback(window, &Input::CursorPosCallback);
+	}
+
+	void Input::PrintActions() const
+	{
+		std::cout << "Actions: " << std::endl;
+		for (const auto& [action, bindings] : m_ActionBindings)
+		{
+			std::cout << "Action: " << action << std::endl;
+			for (const auto& binding : bindings)
+			{
+				std::cout << "Binding Type: " << (binding.type == Binding::Type::Key ? "Key" : "MouseButton") << ", Code: " << binding.code << std::endl;
+			}
+		}
 	}
 	
 	void Input::BindKey(const std::string& action, int key)
@@ -120,16 +135,17 @@ namespace Nightbird
 	
 	void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		Get().PushEvent({ InputEvent::Type::Key, key, action, 0.0, 0.0 });
+		std::cout << "KeyCallback" << std::endl;
+		Input::Get().PushEvent({ InputEvent::Type::Key, key, action, 0.0, 0.0 });
 	}
 
 	void Input::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		Get().PushEvent({ InputEvent::Type::MouseButton, button, action, 0.0, 0.0 });
+		Input::Get().PushEvent({ InputEvent::Type::MouseButton, button, action, 0.0, 0.0 });
 	}
 
 	void Input::CursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		Get().PushEvent({ InputEvent::Type::MouseMove, 0, 0, x, y });
+		Input::Get().PushEvent({ InputEvent::Type::MouseMove, 0, 0, x, y });
 	}
 }
