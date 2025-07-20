@@ -10,14 +10,6 @@ namespace Nightbird
 		int code;
 	};
 	
-	struct InputEvent
-	{
-		enum class Type { Key, MouseButton, MouseMove } type;
-		int code;
-		int action;
-		double x, y;
-	};
-
 	struct Input::Impl
 	{
 		GLFWwindow* m_Window = nullptr;
@@ -97,9 +89,7 @@ namespace Nightbird
 			}
 		}
 	};
-
-	static Input* instance = nullptr;
-
+	
 	Input::Input()
 		: impl(new Impl())
 	{
@@ -113,24 +103,17 @@ namespace Nightbird
 
 	Input& Input::Get()
 	{
-		if (!instance)
-			instance = new Input();
-		return *instance;
+		static Input instance;
+		return instance;
 	}
-
-	void Input::Shutdown()
-	{
-		delete instance;
-		instance = nullptr;
-	}
-
+	
 	void Input::Init(GLFWwindow* window)
 	{
 		impl->m_Window = window;
 
-		glfwSetKeyCallback(window, &Input::KeyCallback);
-		glfwSetMouseButtonCallback(window, &Input::MouseButtonCallback);
-		glfwSetCursorPosCallback(window, &Input::CursorPosCallback);
+		glfwSetKeyCallback(window, Input_KeyCallback);
+		glfwSetMouseButtonCallback(window, Input_MouseButtonCallback);
+		glfwSetCursorPosCallback(window, Input_CursorPosCallback);
 	}
 
 	void Input::PrintActions() const
@@ -173,20 +156,28 @@ namespace Nightbird
 			impl->m_EventQueue.pop_front();
 		}
 	}
-	
-	void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+
+	void Input::PushEvent(const InputEvent& event)
+	{
+		impl->PushEvent(event);
+	}
+}
+
+extern "C"
+{
+	INPUT_API void Input_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		std::cout << "Input: KeyCallback" << std::endl;
-		instance->impl->PushEvent({ InputEvent::Type::Key, key, action, 0.0, 0.0 });
+		Nightbird::Input::Get().PushEvent({Nightbird::InputEvent::Type::Key, key, action, 0.0, 0.0});
 	}
 
-	void Input::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	INPUT_API void Input_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		instance->impl->PushEvent({ InputEvent::Type::MouseButton, button, action, 0.0, 0.0 });
+		Nightbird::Input::Get().PushEvent({Nightbird::InputEvent::Type::MouseButton, button, action, 0.0, 0.0});
 	}
 
-	void Input::CursorPosCallback(GLFWwindow* window, double x, double y)
+	INPUT_API void Input_CursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		instance->impl->PushEvent({ InputEvent::Type::MouseMove, 0, 0, x, y });
+		Nightbird::Input::Get().PushEvent({Nightbird::InputEvent::Type::MouseMove, 0, 0, x, y});
 	}
 }

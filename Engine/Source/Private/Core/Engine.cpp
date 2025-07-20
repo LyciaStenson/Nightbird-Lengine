@@ -17,8 +17,6 @@
 #include <Core/GlmRegistration.h>
 #include <Input.h>
 
-#include <Core/PlayerTest.h>
-
 namespace Nightbird
 {
 	Engine::Engine()
@@ -41,8 +39,6 @@ namespace Nightbird
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
-
-		PlayerTest playerTest("");
 	}
 
 	void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

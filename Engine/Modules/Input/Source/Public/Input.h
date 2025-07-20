@@ -14,15 +14,30 @@
 	#define INPUT_API __declspec(dllimport)
 #endif
 
+extern "C"
+{
+	INPUT_API void Input_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	INPUT_API void Input_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	INPUT_API void Input_CursorPosCallback(GLFWwindow* window, double x, double y);
+}
+
 namespace Nightbird
 {
+	struct InputEvent
+	{
+		enum class Type { Key, MouseButton, MouseMove } type;
+		int code;
+		int action;
+		double x, y;
+	};
+
 	class INPUT_API Input
 	{
 	public:
 		using ActionCallback = std::function<void(const char*)>;
 		
 		static Input& Get();
-		static void Shutdown();
+		//static void Shutdown();
 
 		void Init(GLFWwindow* window);
 
@@ -36,6 +51,8 @@ namespace Nightbird
 
 		void ProcessEvents();
 
+		void PushEvent(const InputEvent& event);
+
 	private:
 		struct Impl;
 		Impl* impl;
@@ -45,9 +62,5 @@ namespace Nightbird
 
 		Input(const Input&) = delete;
 		Input& operator=(const Input&) = delete;
-
-		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-		static void CursorPosCallback(GLFWwindow* window, double x, double y);
 	};
 }
