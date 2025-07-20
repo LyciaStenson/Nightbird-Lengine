@@ -6,6 +6,8 @@
 
 #include <volk.h>
 
+#include <GLFW/glfw3.h>
+
 namespace Nightbird
 {
 	class GlfwWindow;
@@ -34,5 +36,7 @@ namespace Nightbird
 		
 		std::unique_ptr<Scene> scene;
 		std::unique_ptr<ModelManager> modelManager;
+
+		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	};
 }

@@ -17,6 +17,8 @@
 #include <Core/GlmRegistration.h>
 #include <Input.h>
 
+#include <Core/PlayerTest.h>
+
 namespace Nightbird
 {
 	Engine::Engine()
@@ -30,6 +32,8 @@ namespace Nightbird
 		
 		glfwWindow = std::make_unique<GlfwWindow>();
 		Input::Get().Init(glfwWindow->Get());
+
+		glfwSetKeyCallback(glfwWindow->Get(), KeyCallback);
 		
 		renderer = std::make_unique<Renderer>(glfwWindow.get());
 		glfwWindow->SetUserPointer(renderer.get());
@@ -37,6 +41,13 @@ namespace Nightbird
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
+
+		PlayerTest playerTest("");
+	}
+
+	void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		std::cout << "Engine: KeyCallback" << std::endl;
 	}
 
 	Engine::~Engine()
