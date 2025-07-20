@@ -37,8 +37,7 @@ namespace Nightbird
 		using ActionCallback = std::function<void(const char*)>;
 		
 		static Input& Get();
-		//static void Shutdown();
-
+		
 		void Init(GLFWwindow* window);
 
 		void PrintActions() const;

@@ -30,8 +30,6 @@ namespace Nightbird
 		
 		glfwWindow = std::make_unique<GlfwWindow>();
 		Input::Get().Init(glfwWindow->Get());
-
-		glfwSetKeyCallback(glfwWindow->Get(), KeyCallback);
 		
 		renderer = std::make_unique<Renderer>(glfwWindow.get());
 		glfwWindow->SetUserPointer(renderer.get());
@@ -40,12 +38,7 @@ namespace Nightbird
 		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 	}
-
-	void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		std::cout << "Engine: KeyCallback" << std::endl;
-	}
-
+	
 	Engine::~Engine()
 	{
 

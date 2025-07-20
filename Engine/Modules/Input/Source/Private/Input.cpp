@@ -49,8 +49,13 @@ namespace Nightbird
 								if (it != m_ActionPressedCallbacks.end())
 								{
 									for (auto& callback : it->second)
+									{
 										if (callback)
+										{
+											std::cout << "Press" << std::endl;
 											callback(action.c_str());
+										}
+									}
 								}
 							}
 						}
@@ -112,6 +117,21 @@ namespace Nightbird
 		impl->m_Window = window;
 
 		glfwSetKeyCallback(window, Input_KeyCallback);
+
+		auto testCallback = glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+			{
+				std::cout << "Raw callback key: " << key << ", action: " << action << std::endl;
+			});
+
+		if (testCallback == Input_KeyCallback)
+		{
+			std::cout << "Input_KeyCallback was set previously" << std::endl;
+		}
+		else
+		{
+			std::cout << "Input_KeyCallback was not set previously" << std::endl;
+		}
+		
 		glfwSetMouseButtonCallback(window, Input_MouseButtonCallback);
 		glfwSetCursorPosCallback(window, Input_CursorPosCallback);
 	}
