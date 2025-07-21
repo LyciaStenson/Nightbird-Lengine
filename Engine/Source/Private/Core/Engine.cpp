@@ -66,10 +66,19 @@ namespace Nightbird
 
 	void Engine::Run()
 	{
+		double lastTime = glfwGetTime();
+
 		while (!glfwWindowShouldClose(glfwWindow->Get()))
 		{
 			glfwPollEvents();
 			Input::Get().ProcessEvents();
+
+			double currentTime = glfwGetTime();
+			float delta = static_cast<float>(currentTime - lastTime);
+			lastTime = currentTime;
+
+			scene->Update(delta);
+
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());
 		}

@@ -8,5 +8,14 @@ public:
 	Player(const std::string& name);
 	~Player() override = default;
 
+	void EnterScene() override;
+	void Tick(float delta) override;
+	
+	void OnJump();
+
+protected:
+	float movementSpeed = 5.0f;
+
 	RTTR_ENABLE(Nightbird::SceneObject)
+	RTTR_REGISTRATION_FRIEND
 };

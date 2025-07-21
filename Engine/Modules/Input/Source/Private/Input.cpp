@@ -135,6 +135,26 @@ namespace Nightbird
 	{
 		impl->m_ActionReleasedCallbacks[action].push_back(callback);
 	}
+
+	bool Input::IsKeyPressed(int key) const
+	{
+		if (key < 0 || key > GLFW_KEY_LAST)
+			return false;
+		return impl->m_KeyState[key];
+	}
+	
+	bool Input::IsMouseButtonPressed(int button) const
+	{
+		if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
+			return false;
+		return impl->m_MouseButtonState[button];
+	}
+	
+	void Input::GetCursorPos(double& x, double& y) const
+	{
+		x = impl->m_MouseX;
+		y = impl->m_MouseY;
+	}
 	
 	void Input::ProcessEvents()
 	{

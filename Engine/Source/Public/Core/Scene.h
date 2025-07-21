@@ -60,6 +60,8 @@ namespace Nightbird
 
 		SceneObject* FindObject(const std::string& path, SceneObject* root = nullptr);
 
+		void Update(float delta);
+
 		void UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent);
 		void UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<PointLightData>& pointLightData);
 		

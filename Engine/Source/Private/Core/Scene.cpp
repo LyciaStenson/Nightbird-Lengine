@@ -163,10 +163,14 @@ namespace Nightbird
 	
 	void Scene::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
 	{
+		SceneObject* rawObject = object.get();
+
 		if (parent)
 			parent->AddChild(std::move(object));
 		else
 			rootObject->AddChild(std::move(object));
+
+		rawObject->EnterScene();
 	}
 
 	SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
@@ -195,72 +199,7 @@ namespace Nightbird
 
 		return objectPtr;
 	}
-
-	//Camera* Scene::CreateCamera(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
-	//{
-	//	if (!parent)
-	//		parent = rootObject.get();
-
-	//	std::string cameraName = name;
-	//	//int counter = 1;
-	//	//while (objectNames.count(cameraName))
-	//	//{
-	//		//cameraName = name + std::to_string(counter);
-	//		//++counter;
-	//	//}
-	//	//objectNames.insert(cameraName);
-
-	//	std::unique_ptr<SceneObject> object(new Camera(cameraName));
-	//	object->transform.position = position;
-	//	object->transform.rotation = rotation;
-	//	object->transform.scale = scale;
-	//	object->SetParent(parent);
-
-	//	Camera* camera = static_cast<Camera*>(object.get());
-
-	//	if (parent)
-	//		parent->AddChild(std::move(object));
-	//	else
-	//		rootObject->AddChild(std::move(object));
-
-	//	if (!GetMainCamera())
-	//	{
-	//		SetMainCamera(camera);
-	//	}
-
-	//	return camera;
-	//}
-
-	//PointLight* Scene::CreatePointLight(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
-	//{
-	//	if (!parent)
-	//		parent = rootObject.get();
-
-	//	std::string lightName = name;
-	//	//int counter = 1;
-	//	//while (objectNames.count(lightName))
-	//	//{
-	//		//lightName = name + std::to_string(counter);
-	//		//++counter;
-	//	//}
-	//	//objectNames.insert(lightName);
-
-	//	std::unique_ptr<SceneObject> object(new PointLight(lightName));
-	//	object->transform.position = position;
-	//	object->transform.rotation = rotation;
-	//	object->transform.scale = scale;
-	//	object->SetParent(parent);
-
-	//	PointLight* light = static_cast<PointLight*>(object.get());
-
-	//	if (parent)
-	//		parent->AddChild(std::move(object));
-	//	else
-	//		rootObject->AddChild(std::move(object));
-
-	//	return light;
-	//}
-
+	
 	PrefabInstance* Scene::CreatePrefabInstance(const std::string& name, const std::string& path, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 	{
 		if (!parent)
@@ -310,10 +249,7 @@ namespace Nightbird
 
 		MeshInstance* meshInstance = static_cast<MeshInstance*>(object.get());
 
-		if (parent)
-			parent->AddChild(std::move(object));
-		else
-			rootObject->AddChild(std::move(object));
+		AddSceneObject(std::move(object));
 
 		return meshInstance;
 	}
@@ -434,6 +370,14 @@ namespace Nightbird
 		}
 
 		return node;
+	}
+
+	void Scene::Update(float delta)
+	{
+		for (auto& object : GetAllObjects())
+		{
+			object->Tick(delta);
+		}
 	}
 
 	void Scene::UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent)

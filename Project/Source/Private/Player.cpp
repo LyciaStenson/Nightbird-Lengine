@@ -11,16 +11,30 @@ Player::Player(const std::string& name)
 {
 	Input::Get().BindKey("Jump", GLFW_KEY_SPACE);
 	
-	Input::Get().SubscribeActionPressed("Jump", []()
-	{
-		std::cout << "Jump pressed" << std::endl;
-	});
+	Input::Get().SubscribeActionPressed("Jump", [this]() { this->OnJump(); });
+}
+
+void Player::EnterScene()
+{
+	std::cout << "Player: EnterScene" << std::endl;
+}
+
+void Player::Tick(float delta)
+{
+	if (Input::Get().IsKeyPressed(GLFW_KEY_W))
+		transform.position.x += delta * movementSpeed;
+}
+
+void Player::OnJump()
+{
+	std::cout << "Jump" << std::endl;
 }
 
 RTTR_PLUGIN_REGISTRATION
 {
 	rttr::registration::class_<Player>("Player")
-	.constructor<std::string>();
+	.constructor<std::string>()
+	.property("MovementSpeed", &Player::movementSpeed);
 
 	rttr::registration::method("CreatePlayer", [](const std::string& name) -> Nightbird::SceneObject*
 	{

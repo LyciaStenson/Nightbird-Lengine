@@ -46,6 +46,10 @@ namespace Nightbird
 		void SubscribeActionPressed(const std::string& action, ActionCallback callback);
 		void SubscribeActionReleased(const std::string& action, ActionCallback callback);
 
+		bool IsKeyPressed(int key) const;
+		bool IsMouseButtonPressed(int button) const;
+		void GetCursorPos(double& x, double& y) const;
+
 		void ProcessEvents();
 
 		void PushEvent(const InputEvent& event);
