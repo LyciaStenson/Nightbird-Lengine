@@ -11,9 +11,9 @@ Player::Player(const std::string& name)
 {
 	Input::Get().BindKey("Jump", GLFW_KEY_SPACE);
 	
-	Input::Get().SubscribeActionPressed("Jump", [](const std::string& action)
+	Input::Get().SubscribeActionPressed("Jump", []()
 	{
-		std::cout << action << " pressed" << std::endl;
+		std::cout << "Jump pressed" << std::endl;
 	});
 }
 

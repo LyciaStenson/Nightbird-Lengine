@@ -34,7 +34,7 @@ namespace Nightbird
 	class INPUT_API Input
 	{
 	public:
-		using ActionCallback = std::function<void(const char*)>;
+		using ActionCallback = std::function<void()>;
 		
 		static Input& Get();
 		

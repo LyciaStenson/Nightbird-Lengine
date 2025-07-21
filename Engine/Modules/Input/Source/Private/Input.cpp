@@ -50,7 +50,7 @@ namespace Nightbird
 								{
 									for (auto& callback : it->second)
 										if (callback)
-											callback(action.c_str());
+											callback();
 								}
 							}
 						}
@@ -69,7 +69,7 @@ namespace Nightbird
 								{
 									for (auto& callback : it->second)
 										if (callback)
-											callback(action.c_str());
+											callback();
 								}
 							}
 						}
