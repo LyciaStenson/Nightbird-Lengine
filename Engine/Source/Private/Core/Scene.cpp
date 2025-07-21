@@ -164,12 +164,12 @@ namespace Nightbird
 	void Scene::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
 	{
 		SceneObject* rawObject = object.get();
-
+		
 		if (parent)
 			parent->AddChild(std::move(object));
 		else
 			rootObject->AddChild(std::move(object));
-
+		
 		rawObject->EnterScene();
 	}
 
@@ -221,8 +221,8 @@ namespace Nightbird
 		object->SetParent(parent);
 
 		PrefabInstance* prefab = static_cast<PrefabInstance*>(object.get());
-
-		AddSceneObject(std::move(object));
+		
+		AddSceneObject(std::move(object), parent);
 
 		return prefab;
 	}
@@ -248,8 +248,8 @@ namespace Nightbird
 		object->SetParent(parent);
 
 		MeshInstance* meshInstance = static_cast<MeshInstance*>(object.get());
-
-		AddSceneObject(std::move(object));
+		
+		AddSceneObject(std::move(object), parent);
 
 		return meshInstance;
 	}

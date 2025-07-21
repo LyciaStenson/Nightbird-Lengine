@@ -6,17 +6,10 @@
 
 using namespace Nightbird;
 
-Player::Player(const std::string& name)
-	: SceneObject(name)
-{
-	Input::Get().BindKey("Jump", GLFW_KEY_SPACE);
-	
-	Input::Get().SubscribeActionPressed("Jump", [this]() { this->OnJump(); });
-}
-
 void Player::EnterScene()
 {
-	std::cout << "Player: EnterScene" << std::endl;
+	Input::Get().BindKey("Jump", GLFW_KEY_SPACE);
+	Input::Get().SubscribeActionPressed("Jump", [this]() { this->OnJump(); });
 }
 
 void Player::Tick(float delta)

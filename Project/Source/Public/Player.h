@@ -5,7 +5,7 @@
 class Player : public Nightbird::SceneObject
 {
 public:
-	Player(const std::string& name);
+	using Nightbird::SceneObject::SceneObject;
 	~Player() override = default;
 
 	void EnterScene() override;
