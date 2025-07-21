@@ -12,14 +12,13 @@ namespace Nightbird
 	{
 		CameraUBO ubo{};
 
-		glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
-		glm::mat4 rotation = glm::mat4_cast(transform.rotation);
-		glm::mat4 world = translation * rotation;
-
+		glm::mat4 world = GetWorldMatrix();
+		
 		ubo.view = glm::inverse(world);
 		ubo.projection = glm::perspective(glm::radians(fov), (float)swapChainExtent.width / (float)swapChainExtent.height, 0.01f, 100.0f);
 		ubo.projection[1][1] *= -1;
-
+		ubo.position = glm::vec4(GetWorldMatrix()[3]);
+		
 		return ubo;
 	}
 }

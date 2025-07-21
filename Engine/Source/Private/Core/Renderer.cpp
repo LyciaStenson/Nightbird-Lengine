@@ -172,28 +172,33 @@ namespace Nightbird
 	{
 		scene->UpdateBuffers(currentFrame, extent);
 
-		if (scene->GetMainCamera())
+		Camera* mainCamera = scene->GetMainCamera();
+		if (!mainCamera)
+			return;
+
+		std::vector<MeshInstance*> opaqueMeshInstances;
+		std::vector<MeshInstance*> transparentMeshInstances;
+
+		for (const auto& object : scene->GetRootObject()->GetChildren())
 		{
-			std::vector<MeshInstance*> opaqueMeshInstances;
-			std::vector<MeshInstance*> transparentMeshInstances;
-
-			for (const auto& object : scene->GetRootObject()->GetChildren())
-			{
-				CollectMeshInstances(object.get(), opaqueMeshInstances, transparentMeshInstances);
-			}
-
-			std::sort(transparentMeshInstances.begin(), transparentMeshInstances.end(),
-				[&](MeshInstance* a, MeshInstance* b)
-				{
-					const glm::vec3& cameraPosition = scene->GetMainCamera()->transform.position;
-					float distA = glm::length(cameraPosition - a->transform.position);
-					float distB = glm::length(cameraPosition - b->transform.position);
-					return distA > distB;
-				});
-
-			opaquePipeline->Render(commandBuffer, currentFrame, opaqueMeshInstances, scene->GetMainCamera());
-			transparentPipeline->Render(commandBuffer, currentFrame, transparentMeshInstances, scene->GetMainCamera());
+			CollectMeshInstances(object.get(), opaqueMeshInstances, transparentMeshInstances);
 		}
+
+		glm::vec3 cameraWorldPos = glm::vec3(mainCamera->GetWorldMatrix()[3]);
+
+		std::sort(transparentMeshInstances.begin(), transparentMeshInstances.end(),
+			[&](MeshInstance* a, MeshInstance* b)
+			{
+				glm::vec3 posA = glm::vec3(a->GetWorldMatrix()[3]);
+				glm::vec3 posB = glm::vec3(b->GetWorldMatrix()[3]);
+				
+				float distA = glm::length(cameraWorldPos - posA);
+				float distB = glm::length(cameraWorldPos - posB);
+				return distA > distB;
+			});
+		
+		opaquePipeline->Render(commandBuffer, currentFrame, opaqueMeshInstances, mainCamera);
+		transparentPipeline->Render(commandBuffer, currentFrame, transparentMeshInstances, mainCamera);
 	}
 
 	void Renderer::FramebufferResized()

@@ -15,7 +15,17 @@ void Player::EnterScene()
 void Player::Tick(float delta)
 {
 	if (Input::Get().IsKeyPressed(GLFW_KEY_W))
+		transform.position.z -= delta * movementSpeed;
+	if (Input::Get().IsKeyPressed(GLFW_KEY_S))
+		transform.position.z += delta * movementSpeed;
+	if (Input::Get().IsKeyPressed(GLFW_KEY_A))
+		transform.position.x -= delta * movementSpeed;
+	if (Input::Get().IsKeyPressed(GLFW_KEY_D))
 		transform.position.x += delta * movementSpeed;
+	if (Input::Get().IsKeyPressed(GLFW_KEY_Q))
+		transform.position.y -= delta * movementSpeed;
+	if (Input::Get().IsKeyPressed(GLFW_KEY_E))
+		transform.position.y += delta * movementSpeed;
 }
 
 void Player::OnJump()
