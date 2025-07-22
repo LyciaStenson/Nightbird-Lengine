@@ -11,7 +11,7 @@ namespace Nightbird
 	class VulkanRenderPass;
 	class VulkanDescriptorSetLayoutManager;
 	class GlobalDescriptorSetManager;
-	class MeshInstance;
+	struct Renderable;
 	class Mesh;
 	class Camera;
 	
@@ -24,12 +24,12 @@ namespace Nightbird
 	class VulkanPipeline
 	{
 	public:
-		VulkanPipeline(VulkanDevice* device, VulkanRenderPass* renderPass, VulkanDescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type);
+		VulkanPipeline(VulkanDevice* device, VulkanRenderPass* renderPass, VulkanDescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type, bool doubleSided);
 		~VulkanPipeline();
 
 		void SetDescriptorPool(VkDescriptorPool pool);
 		
-		void Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<MeshInstance*>& mesheInstances, Camera* camera);
+		void Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<Renderable>& renderables, Camera* camera);
 
 	private:
 		void CreateGraphicsPipeline(VulkanDescriptorSetLayoutManager* layoutManager);
@@ -40,6 +40,7 @@ namespace Nightbird
 		VkDescriptorPool descriptorPool;
 
 		PipelineType type;
+		bool doubleSided;
 		
 		VulkanRenderPass* renderPass;
 

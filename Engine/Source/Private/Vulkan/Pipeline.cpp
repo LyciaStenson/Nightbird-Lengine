@@ -7,6 +7,7 @@
 
 #include <Core/Shader.h>
 #include <Core/Vertex.h>
+#include <Core/Renderable.h>
 #include <Core/MeshInstance.h>
 #include <Core/Mesh.h>
 #include <Core/MeshPrimitive.h>
@@ -19,8 +20,8 @@
 
 namespace Nightbird
 {
-	VulkanPipeline::VulkanPipeline(VulkanDevice* device, VulkanRenderPass* renderPass, VulkanDescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type)
-		: device(device), renderPass(renderPass), globalDescriptorSetManager(globalDescriptorSetManager), type(type)
+	VulkanPipeline::VulkanPipeline(VulkanDevice* device, VulkanRenderPass* renderPass, VulkanDescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type, bool doubleSided)
+		: device(device), renderPass(renderPass), globalDescriptorSetManager(globalDescriptorSetManager), type(type), doubleSided(doubleSided)
 	{
 		CreateGraphicsPipeline(descriptorSetLayoutManager);
 	}
@@ -84,7 +85,7 @@ namespace Nightbird
 		rasterizationStateInfo.rasterizerDiscardEnable = VK_FALSE;
 		rasterizationStateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizationStateInfo.lineWidth = 1.0f;
-		rasterizationStateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizationStateInfo.cullMode = doubleSided ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 		rasterizationStateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizationStateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationStateInfo.depthBiasConstantFactor = 0.0f;
@@ -191,32 +192,25 @@ namespace Nightbird
 		}
 	}
 
-	void VulkanPipeline::Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<MeshInstance*>& meshInstances, Camera* camera)
+	void VulkanPipeline::Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<Renderable>& renderables, Camera* camera)
 	{
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 		
-		for (const auto& meshInstance : meshInstances)
+		for (const auto& renderable : renderables)
 		{
-			std::shared_ptr<const Mesh> mesh = meshInstance->GetMesh();
-
-			for (size_t i = 0; i < mesh->GetPrimitiveCount(); ++i)
-			{
-				MeshPrimitive* primitive = mesh->GetPrimitive(i);
-
-				VkBuffer vertexBuffers[] = {primitive->vertexBuffer->Get()};
-				VkDeviceSize offsets[] = {0};
-
-				// Bind vertex and index buffers of mesh
-				vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-				vkCmdBindIndexBuffer(commandBuffer, primitive->indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT16);
-
-				// Bind camera (view & proj matrices) and mesh (model matrix & textures) descriptor sets
-				std::array<VkDescriptorSet, 3> descriptorSets = {globalDescriptorSetManager->GetDescriptorSets()[currentFrame], meshInstance->GetUniformDescriptorSets()[currentFrame], primitive->GetMaterialDescriptorSets()[currentFrame]};
-				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
-
-				// Draw the mesh
-				vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(primitive->GetIndicesSize()), 1, 0, 0, 0);
-			}
+			VkBuffer vertexBuffers[] = {renderable.primitive->vertexBuffer->Get()};
+			VkDeviceSize offsets[] = {0};
+			
+			// Bind vertex and index buffers of mesh
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(commandBuffer, renderable.primitive->indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT16);
+			
+			// Bind camera (view & proj matrices) and mesh (model matrix & textures) descriptor sets
+			std::array<VkDescriptorSet, 3> descriptorSets = {globalDescriptorSetManager->GetDescriptorSets()[currentFrame], renderable.instance->GetUniformDescriptorSets()[currentFrame], renderable.primitive->GetMaterialDescriptorSets()[currentFrame]};
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
+			
+			// Draw the mesh
+			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderable.primitive->GetIndicesSize()), 1, 0, 0, 0);
 		}
 	}
 }

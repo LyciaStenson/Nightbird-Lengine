@@ -15,6 +15,7 @@
 #include <Core/GlfwWindow.h>
 #include <Core/Scene.h>
 #include <Core/SceneObject.h>
+#include <Core/Renderable.h>
 #include <Core/Mesh.h>
 #include <Core/MeshPrimitive.h>
 #include <Core/MeshInstance.h>
@@ -39,11 +40,15 @@ namespace Nightbird
 
 		globalDescriptorSetManager = std::make_unique<GlobalDescriptorSetManager>(device.get(), descriptorSetLayoutManager->GetGlobalDescriptorSetLayout(), descriptorPool->Get());
 
-		opaquePipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Opaque);
-		transparentPipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Transparent);
+		opaquePipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Opaque, false);
+		transparentPipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Transparent, false);
+		opaqueDoubleSidedPipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Opaque, true);
+		transparentDoubleSidedPipeline = std::make_unique<VulkanPipeline>(device.get(), renderPass.get(), descriptorSetLayoutManager.get(), globalDescriptorSetManager.get(), PipelineType::Transparent, true);
 
 		opaquePipeline->SetDescriptorPool(descriptorPool->Get());
 		transparentPipeline->SetDescriptorPool(descriptorPool->Get());
+		opaqueDoubleSidedPipeline->SetDescriptorPool(descriptorPool->Get());
+		transparentDoubleSidedPipeline->SetDescriptorPool(descriptorPool->Get());
 
 		sync = std::make_unique<VulkanSync>(device->GetLogical());
 	}
@@ -176,29 +181,44 @@ namespace Nightbird
 		if (!mainCamera)
 			return;
 
-		std::vector<MeshInstance*> opaqueMeshInstances;
-		std::vector<MeshInstance*> transparentMeshInstances;
+		std::vector<Renderable> opaqueRenderables;
+		std::vector<Renderable> transparentRenderables;
+		std::vector<Renderable> opaqueDoubleSidedRenderables;
+		std::vector<Renderable> transparentDoubleSidedRenderables;
 
 		for (const auto& object : scene->GetRootObject()->GetChildren())
 		{
-			CollectMeshInstances(object.get(), opaqueMeshInstances, transparentMeshInstances);
+			CollectRenderables(object.get(), opaqueRenderables, transparentRenderables, opaqueDoubleSidedRenderables, transparentDoubleSidedRenderables);
 		}
 
 		glm::vec3 cameraWorldPos = glm::vec3(mainCamera->GetWorldMatrix()[3]);
 
-		std::sort(transparentMeshInstances.begin(), transparentMeshInstances.end(),
-			[&](MeshInstance* a, MeshInstance* b)
+		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
+			[&](const Renderable& a, const Renderable& b)
 			{
-				glm::vec3 posA = glm::vec3(a->GetWorldMatrix()[3]);
-				glm::vec3 posB = glm::vec3(b->GetWorldMatrix()[3]);
+				glm::vec3 posA = glm::vec3(a.instance->GetWorldMatrix()[3]);
+				glm::vec3 posB = glm::vec3(b.instance->GetWorldMatrix()[3]);
 				
 				float distA = glm::length(cameraWorldPos - posA);
 				float distB = glm::length(cameraWorldPos - posB);
 				return distA > distB;
 			});
+
+		std::sort(transparentDoubleSidedRenderables.begin(), transparentDoubleSidedRenderables.end(),
+			[&](const Renderable& a, const Renderable& b)
+			{
+				glm::vec3 posA = glm::vec3(a.instance->GetWorldMatrix()[3]);
+				glm::vec3 posB = glm::vec3(b.instance->GetWorldMatrix()[3]);
+
+				float distA = glm::length(cameraWorldPos - posA);
+				float distB = glm::length(cameraWorldPos - posB);
+				return distA > distB;
+			});
 		
-		opaquePipeline->Render(commandBuffer, currentFrame, opaqueMeshInstances, mainCamera);
-		transparentPipeline->Render(commandBuffer, currentFrame, transparentMeshInstances, mainCamera);
+		opaquePipeline->Render(commandBuffer, currentFrame, opaqueRenderables, mainCamera);
+		transparentPipeline->Render(commandBuffer, currentFrame, transparentRenderables, mainCamera);
+		opaqueDoubleSidedPipeline->Render(commandBuffer, currentFrame, opaqueDoubleSidedRenderables, mainCamera);
+		transparentDoubleSidedPipeline->Render(commandBuffer, currentFrame, transparentDoubleSidedRenderables, mainCamera);
 	}
 
 	void Renderer::FramebufferResized()
@@ -228,23 +248,36 @@ namespace Nightbird
 		sync->CreateSyncObjects();
 	}
 
-	void Renderer::CollectMeshInstances(SceneObject* object, std::vector<MeshInstance*>& opaque, std::vector<MeshInstance*>& transparent)
+	void Renderer::CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& transparent, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparentDoubleSided)
 	{
 		if (!object)
 			return;
 
-		if (auto* meshInstance = dynamic_cast<MeshInstance*>(object))
+		if (auto* instance = dynamic_cast<MeshInstance*>(object))
 		{
-			for (size_t i = 0; i < meshInstance->GetMesh()->GetPrimitiveCount(); ++i)
+			auto mesh = instance->GetMesh();
+
+			for (size_t i = 0; i < mesh->GetPrimitiveCount(); ++i)
 			{
-				if (meshInstance->GetMesh()->GetPrimitive(i)->GetTransparencyEnabled())
-					transparent.push_back(meshInstance);
+				MeshPrimitive* primitive = mesh->GetPrimitive(i);
+
+				Renderable renderable{ instance, primitive };
+
+				bool transparencyEnabled = primitive->GetTransparencyEnabled();
+				bool doubleSided = primitive->GetDoubleSided();
+
+				if (transparencyEnabled && doubleSided)
+					transparentDoubleSided.push_back(renderable);
+				else if (transparencyEnabled)
+					transparent.push_back(renderable);
+				else if (doubleSided)
+					opaqueDoubleSided.push_back(renderable);
 				else
-					opaque.push_back(meshInstance);
+					opaque.push_back(renderable);
 			}
 		}
 
 		for (const auto& child : object->GetChildren())
-			CollectMeshInstances(child.get(), opaque, transparent);
+			CollectRenderables(child.get(), opaque, transparent, opaqueDoubleSided, transparentDoubleSided);
 	}
 }
