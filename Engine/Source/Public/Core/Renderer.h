@@ -49,7 +49,7 @@ namespace Nightbird
 	private:
 		void RecreateSwapChain();
 
-		void CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& transparent, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparentDoubleSided);
+		void CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparent);
 
 		std::unique_ptr<VulkanInstance> instance;
 		std::unique_ptr<VulkanDevice> device;

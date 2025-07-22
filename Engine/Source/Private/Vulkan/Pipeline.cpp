@@ -111,7 +111,7 @@ namespace Nightbird
 		depthStencilInfo.stencilTestEnable = VK_FALSE;
 		depthStencilInfo.front = {};
 		depthStencilInfo.back = {};
-
+		
 		if (type == PipelineType::Opaque)
 		{
 			depthStencilInfo.depthWriteEnable = VK_TRUE;
@@ -123,7 +123,7 @@ namespace Nightbird
 
 		VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
 		colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
+		
 		if (type == PipelineType::Opaque)
 		{
 			colorBlendAttachmentState.blendEnable = VK_FALSE;
@@ -212,5 +212,24 @@ namespace Nightbird
 			// Draw the mesh
 			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderable.primitive->GetIndicesSize()), 1, 0, 0, 0);
 		}
+	}
+
+	void VulkanPipeline::RenderSingle(VkCommandBuffer commandBuffer, uint32_t currentFrame, const Renderable& renderable, Camera* camera)
+	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+		
+		VkBuffer vertexBuffers[] = {renderable.primitive->vertexBuffer->Get()};
+		VkDeviceSize offsets[] = {0};
+		
+		// Bind vertex and index buffers of mesh
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, renderable.primitive->indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT16);
+
+		// Bind camera (view & proj matrices) and mesh (model matrix & textures) descriptor sets
+		std::array<VkDescriptorSet, 3> descriptorSets = {globalDescriptorSetManager->GetDescriptorSets()[currentFrame], renderable.instance->GetUniformDescriptorSets()[currentFrame], renderable.primitive->GetMaterialDescriptorSets()[currentFrame]};
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
+
+		// Draw the mesh
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderable.primitive->GetIndicesSize()), 1, 0, 0, 0);
 	}
 }

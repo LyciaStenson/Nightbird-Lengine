@@ -30,6 +30,7 @@ namespace Nightbird
 		void SetDescriptorPool(VkDescriptorPool pool);
 		
 		void Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<Renderable>& renderables, Camera* camera);
+		void RenderSingle(VkCommandBuffer commandBuffer, uint32_t currentFrame, const Renderable& renderable, Camera* camera);
 
 	private:
 		void CreateGraphicsPipeline(VulkanDescriptorSetLayoutManager* layoutManager);

@@ -182,13 +182,12 @@ namespace Nightbird
 			return;
 
 		std::vector<Renderable> opaqueRenderables;
-		std::vector<Renderable> transparentRenderables;
 		std::vector<Renderable> opaqueDoubleSidedRenderables;
-		std::vector<Renderable> transparentDoubleSidedRenderables;
+		std::vector<Renderable> transparentRenderables;
 
 		for (const auto& object : scene->GetRootObject()->GetChildren())
 		{
-			CollectRenderables(object.get(), opaqueRenderables, transparentRenderables, opaqueDoubleSidedRenderables, transparentDoubleSidedRenderables);
+			CollectRenderables(object.get(), opaqueRenderables, opaqueDoubleSidedRenderables, transparentRenderables);
 		}
 
 		glm::vec3 cameraWorldPos = glm::vec3(mainCamera->GetWorldMatrix()[3]);
@@ -203,22 +202,18 @@ namespace Nightbird
 				float distB = glm::length(cameraWorldPos - posB);
 				return distA > distB;
 			});
-
-		std::sort(transparentDoubleSidedRenderables.begin(), transparentDoubleSidedRenderables.end(),
-			[&](const Renderable& a, const Renderable& b)
-			{
-				glm::vec3 posA = glm::vec3(a.instance->GetWorldMatrix()[3]);
-				glm::vec3 posB = glm::vec3(b.instance->GetWorldMatrix()[3]);
-
-				float distA = glm::length(cameraWorldPos - posA);
-				float distB = glm::length(cameraWorldPos - posB);
-				return distA > distB;
-			});
 		
 		opaquePipeline->Render(commandBuffer, currentFrame, opaqueRenderables, mainCamera);
-		transparentPipeline->Render(commandBuffer, currentFrame, transparentRenderables, mainCamera);
 		opaqueDoubleSidedPipeline->Render(commandBuffer, currentFrame, opaqueDoubleSidedRenderables, mainCamera);
-		transparentDoubleSidedPipeline->Render(commandBuffer, currentFrame, transparentDoubleSidedRenderables, mainCamera);
+
+		for (const auto& renderable : transparentRenderables)
+		{
+			bool doubleSided = renderable.primitive->GetDoubleSided();
+			if (doubleSided)
+				transparentDoubleSidedPipeline->RenderSingle(commandBuffer, currentFrame, renderable, mainCamera);
+			else
+				transparentPipeline->RenderSingle(commandBuffer, currentFrame, renderable, mainCamera);
+		}
 	}
 
 	void Renderer::FramebufferResized()
@@ -248,7 +243,7 @@ namespace Nightbird
 		sync->CreateSyncObjects();
 	}
 
-	void Renderer::CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& transparent, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparentDoubleSided)
+	void Renderer::CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparent)
 	{
 		if (!object)
 			return;
@@ -265,10 +260,8 @@ namespace Nightbird
 
 				bool transparencyEnabled = primitive->GetTransparencyEnabled();
 				bool doubleSided = primitive->GetDoubleSided();
-
-				if (transparencyEnabled && doubleSided)
-					transparentDoubleSided.push_back(renderable);
-				else if (transparencyEnabled)
+				
+				if (transparencyEnabled)
 					transparent.push_back(renderable);
 				else if (doubleSided)
 					opaqueDoubleSided.push_back(renderable);
@@ -278,6 +271,6 @@ namespace Nightbird
 		}
 
 		for (const auto& child : object->GetChildren())
-			CollectRenderables(child.get(), opaque, transparent, opaqueDoubleSided, transparentDoubleSided);
+			CollectRenderables(child.get(), opaque, opaqueDoubleSided, transparent);
 	}
 }
