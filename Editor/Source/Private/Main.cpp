@@ -6,8 +6,6 @@
 #include <Core/GlfwWindow.h>
 #include <Vulkan/DescriptorPool.h>
 
-#include <Core/ProjectRegistration.h>
-
 #include <EditorRenderTarget.h>
 
 #include <iostream>
@@ -17,11 +15,18 @@
 int main(int argc, char** argv)
 {
 	rttr::library project("Project");
-	bool projectLoaded = project.load();
-	if (!projectLoaded)
+	bool projectLoad = project.load();
+	if (!projectLoad)
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
 	
 	Nightbird::Engine engine;
+
+	//if (projectLoad)
+	//{
+	//	auto projectInit = rttr::type::get_global_method("ProjectInit");
+	//	if (projectInit.is_valid())
+	//		projectInit.invoke({});
+	//}
 	
 	Nightbird::EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
 	engine.GetRenderer()->SetRenderTarget(&renderTarget);

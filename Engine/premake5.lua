@@ -6,9 +6,12 @@ project "Engine"
 	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
 
-	defines { "VK_NO_PROTOTYPES" }
-	defines { "VMA_DYNAMIC_VULKAN_FUNCTIONS" }
-	defines { "GLFW_INCLUDE_VULKAN" }
+	defines {
+		"VK_NO_PROTOTYPES",
+		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
+		"GLFW_INCLUDE_VULKAN",
+		"GLFW_DLL"
+	}
 
 	files {
 		"Source/**.h",
@@ -17,6 +20,7 @@ project "Engine"
 
 	includedirs {
 		"Source/Public",
+		"Modules/Input/Source/Public",
 		"Vendor/vulkan-headers/include",
 		"Vendor/volk",
 		"Vendor/vma",
@@ -28,7 +32,7 @@ project "Engine"
 		"Vendor/json"
 	}
 
-	links { "glfw", "fastgltf" }
+	links { "glfw", "fastgltf", "Input" }
 
 	filter { "system:windows" }
 		links { "rttr" }

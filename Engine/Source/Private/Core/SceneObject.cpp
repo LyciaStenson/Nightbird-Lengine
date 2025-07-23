@@ -94,6 +94,16 @@ namespace Nightbird
 
 		return nullptr;
 	}
+
+	void SceneObject::EnterScene()
+	{
+
+	}
+
+	void SceneObject::Tick(float deltaTime)
+	{
+
+	}
 	
 	void SceneObject::Serialize(json& out) const
 	{
@@ -150,7 +160,7 @@ namespace Nightbird
 			}
 		}
 	}
-
+	
 	void SceneObject::SerializeBase(json& out) const
 	{
 		rttr::instance instance = *this;

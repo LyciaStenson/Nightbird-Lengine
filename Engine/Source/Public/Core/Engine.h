@@ -6,14 +6,14 @@
 
 #include <volk.h>
 
+#include <GLFW/glfw3.h>
+
 namespace Nightbird
 {
 	class GlfwWindow;
 	class ModelManager;
 	class MeshInstance;
 	class Scene;
-	class Camera;
-	class RenderTarget;
 	class Renderer;
 	
 	class Engine

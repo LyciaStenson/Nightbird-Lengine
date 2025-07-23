@@ -6,6 +6,11 @@ namespace Nightbird
 {
 	class Renderer;
 
+	struct WindowUserData
+	{
+		Renderer* renderer;
+	};
+
 	class GlfwWindow
 	{
 	public:
@@ -14,12 +19,14 @@ namespace Nightbird
 
 		GLFWwindow* Get() const;
 
-		void SetRendererPointer(Renderer* renderer);
+		void SetUserPointer(Renderer* renderer);
 
 		void GetFramebufferSize(int* width, int* height);
 
 	private:
-		GLFWwindow* window;
+		GLFWwindow* m_Window = nullptr;
+
+		WindowUserData m_UserData = {};
 
 		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
 	};

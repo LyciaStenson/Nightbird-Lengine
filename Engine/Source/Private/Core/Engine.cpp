@@ -7,13 +7,7 @@
 
 #include <Core/GlfwWindow.h>
 #include <Core/ModelManager.h>
-#include <Core/MeshInstance.h>
-#include <Core/MeshPrimitive.h>
-#include <Core/Mesh.h>
-#include <Core/Camera.h>
 #include <Core/Scene.h>
-#include <Core/Vertex.h>
-#include <Core/Transform.h>
 #include <Core/RenderTarget.h>
 #include <Core/Renderer.h>
 #include <Vulkan/Device.h>
@@ -21,30 +15,7 @@
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 #include <Core/GlmRegistration.h>
-
-inline float Wrap180(float angle)
-{
-	angle = std::fmod(angle + 180.0f, 360.0f);
-	if (angle < 0.0f)
-		angle += 360.0f;
-	return angle - 180.0f;
-}
-
-inline glm::vec3 WrapEuler180(const glm::vec3 angles)
-{
-	return glm::vec3(Wrap180(angles.x), Wrap180(angles.y), Wrap180(angles.z));
-}
-
-inline float RoundDP(float value, int dp)
-{
-	float factor = (float)std::pow(10.0f, dp);
-	return std::round(value * factor) / factor;
-}
-
-inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
-{
-	return glm::vec3(RoundDP(angles.x, dp), RoundDP(angles.y, dp), RoundDP(angles.z, dp));
-}
+#include <Input.h>
 
 namespace Nightbird
 {
@@ -56,16 +27,18 @@ namespace Nightbird
 		{
 			std::cerr << "Failed to initialize Volk" << std::endl;
 		}
-
+		
 		glfwWindow = std::make_unique<GlfwWindow>();
+		Input::Get().Init(glfwWindow->Get());
+		
 		renderer = std::make_unique<Renderer>(glfwWindow.get());
-		glfwWindow->SetRendererPointer(renderer.get());
+		glfwWindow->SetUserPointer(renderer.get());
 
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
-
+		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 	}
-
+	
 	Engine::~Engine()
 	{
 
@@ -93,9 +66,19 @@ namespace Nightbird
 
 	void Engine::Run()
 	{
+		double lastTime = glfwGetTime();
+
 		while (!glfwWindowShouldClose(glfwWindow->Get()))
 		{
 			glfwPollEvents();
+			Input::Get().ProcessEvents();
+
+			double currentTime = glfwGetTime();
+			float delta = static_cast<float>(currentTime - lastTime);
+			lastTime = currentTime;
+
+			scene->Update(delta);
+
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());
 		}
