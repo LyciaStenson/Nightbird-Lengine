@@ -187,13 +187,6 @@ namespace Nightbird
 					auto& material = gltfAsset.materials[primitive.materialIndex.value()];
 
 					primitiveInfo.enableTransparency = (material.alphaMode == fastgltf::AlphaMode::Blend);
-
-					if (material.alphaMode == fastgltf::AlphaMode::Blend)
-					{
-						const auto& baseColorFactor = material.pbrData.baseColorFactor;
-						std::cout << "Base Color Factor: " << baseColorFactor.x() << ", " << baseColorFactor.y() << ", " << baseColorFactor.z() << ", " << baseColorFactor.w() << std::endl;
-					}
-
 					primitiveInfo.doubleSided = material.doubleSided;
 
 					const auto& baseColorFactor = material.pbrData.baseColorFactor;
