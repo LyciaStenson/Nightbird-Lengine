@@ -34,9 +34,21 @@ namespace Nightbird
 		ImGui::CreateContext();
 		ImGuiIO& imGuiIO = ImGui::GetIO(); (void)imGuiIO;
 		imGuiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		imGuiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		
 		imGuiIO.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoFlex-Regular.ttf", 16.0f);
 		
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.TabRounding = 4.0f;
+		style.FrameRounding = 4.0f;
+		style.WindowRounding = 6.0f;
+		style.WindowPadding = ImVec2(8.0f, 8.0f);
+		style.FramePadding = ImVec2(8.0f, 6.0f);
+		style.ItemSpacing = ImVec2(10.0f, 8.0f);
+		style.TabBarBorderSize = 0.0f;
+		style.WindowBorderSize = 0.0f;
+		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+
 		ImGui_ImplGlfw_InitForVulkan(glfwWindow, true);
 
 		ImGui_ImplVulkan_InitInfo imGuiInitInfo = {};
@@ -54,8 +66,6 @@ namespace Nightbird
 		imGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
 		ImGui_ImplVulkan_Init(&imGuiInitInfo);
-
-		ImGui_ImplVulkan_CreateFontsTexture();
 		
 		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
 		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
@@ -69,8 +79,6 @@ namespace Nightbird
 	
 	VulkanImGuiOverlay::~VulkanImGuiOverlay()
 	{
-		ImGui_ImplVulkan_DestroyFontsTexture();
-
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -173,18 +181,7 @@ namespace Nightbird
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		
-		ImGuiStyle& style = ImGui::GetStyle();
-		
-		style.TabRounding = 4.0f;
-		style.FrameRounding = 4.0f;
-		style.WindowRounding = 6.0f;
-
-		style.WindowPadding = ImVec2(8.0f, 8.0f);
-		style.FramePadding = ImVec2(8.0f, 6.0f);
-		style.ItemSpacing = ImVec2(10.0f, 8.0f);
-
-		style.TabBarBorderSize = 0.0f;
-		style.WindowBorderSize = 0.0f;
+		ImGui::DockSpaceOverViewport();
 	}
 	
 	void VulkanImGuiOverlay::Draw(VkCommandBuffer commandBuffer)

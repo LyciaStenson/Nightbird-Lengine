@@ -39,6 +39,11 @@ namespace Nightbird
 	{
 		return rootObject.get();
 	}
+	
+	SceneObject* Scene::GetRootObject()
+	{
+		return rootObject.get();
+	}
 
 	std::vector<SceneObject*> Scene::GetAllObjects()
 	{

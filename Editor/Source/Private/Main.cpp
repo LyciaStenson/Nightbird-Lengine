@@ -18,15 +18,9 @@ int main(int argc, char** argv)
 {
 	rttr::library project("Project");
 	bool projectLoaded = project.load();
-	if (projectLoaded)
-	{
-		std::cout << "Loaded Project shared library via RTTR with " << project.get_types().size() << " types" << std::endl;
-	}
-	else
-	{
+	if (!projectLoaded)
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
-	}
-
+	
 	Nightbird::Engine engine;
 	
 	Nightbird::EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());

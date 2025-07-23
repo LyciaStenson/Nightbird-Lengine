@@ -40,13 +40,29 @@ namespace Nightbird
 			ImGui::EndMenuBar();
 		}
 
+		bool dropHandled = false;
+		
 		for (const auto& child : m_Scene->GetRootObject()->GetChildren())
 		{
-			DrawSceneNode(child.get());
+			DrawSceneNode(child.get(), dropHandled);
+		}
+
+		ImVec2 space = ImGui::GetContentRegionAvail();
+		ImGui::Dummy(ImVec2(space.x, std::max(24.0f, space.y)));
+
+		if (!dropHandled && ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_OBJECT"))
+			{
+				SceneObject* received = *static_cast<SceneObject**>(payload->Data);
+				if (received)
+					received->SetParent(m_Scene->GetRootObject());
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 
-	void SceneOutliner::DrawSceneNode(SceneObject* object)
+	void SceneOutliner::DrawSceneNode(SceneObject* object, bool& dropHandled)
 	{
 		if (!object)
 			return;
@@ -63,11 +79,29 @@ namespace Nightbird
 		if (ImGui::IsItemClicked())
 			m_Overlay->SelectObject(object);
 
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("SCENE_OBJECT", &object, sizeof(SceneObject*));
+			ImGui::Text(object->GetName().c_str());
+			ImGui::EndDragDropSource();
+		}
+		
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_OBJECT"))
+			{
+				SceneObject* received = *static_cast<SceneObject**>(payload->Data);
+				if (received && received != object)
+					received->SetParent(object);
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		if (opened && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
 		{
 			for (auto& child : object->GetChildren())
 			{
-				DrawSceneNode(child.get());
+				DrawSceneNode(child.get(), dropHandled);
 			}
 			ImGui::TreePop();
 		}
