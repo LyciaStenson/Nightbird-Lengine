@@ -56,6 +56,7 @@ namespace Nightbird
 		const std::vector<VkDescriptorSet>& GetMaterialDescriptorSets() const;
 
 		bool GetTransparencyEnabled() const;
+		bool GetDoubleSided() const;
 		
 		VulkanBuffer* vertexBuffer;
 		VulkanBuffer* indexBuffer;
@@ -72,6 +73,7 @@ namespace Nightbird
 		VulkanDevice* device;
 
 		bool transparencyEnabled = false;
+		bool doubleSided = false;
 
 		size_t indicesSize;
 

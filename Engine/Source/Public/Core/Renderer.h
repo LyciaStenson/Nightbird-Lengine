@@ -19,7 +19,9 @@ namespace Nightbird
 	class GlfwWindow;
 	class Scene;
 	class SceneObject;
+	struct Renderable;
 	class MeshInstance;
+	class MeshPrimitive;
 	class RenderTarget;
 	
 	class Renderer
@@ -47,7 +49,7 @@ namespace Nightbird
 	private:
 		void RecreateSwapChain();
 
-		void CollectMeshInstances(SceneObject* object, std::vector<MeshInstance*>& opaque, std::vector<MeshInstance*>& transparent);
+		void CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparent);
 
 		std::unique_ptr<VulkanInstance> instance;
 		std::unique_ptr<VulkanDevice> device;
@@ -60,6 +62,8 @@ namespace Nightbird
 
 		std::unique_ptr<VulkanPipeline> opaquePipeline;
 		std::unique_ptr<VulkanPipeline> transparentPipeline;
+		std::unique_ptr<VulkanPipeline> opaqueDoubleSidedPipeline;
+		std::unique_ptr<VulkanPipeline> transparentDoubleSidedPipeline;
 		
 		RenderTarget* renderTarget = nullptr;
 

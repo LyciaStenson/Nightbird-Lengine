@@ -186,6 +186,7 @@ namespace Nightbird
 				{
 					auto& material = gltfAsset.materials[primitive.materialIndex.value()];
 
+					primitiveInfo.enableTransparency = (material.alphaMode == fastgltf::AlphaMode::Blend);
 					primitiveInfo.doubleSided = material.doubleSided;
 
 					const auto& baseColorFactor = material.pbrData.baseColorFactor;

@@ -23,7 +23,8 @@ namespace Nightbird
 		baseColorTexture(info.baseColorTexture),
 		metallicRoughnessTexture(info.metallicRoughnessTexture),
 		normalTexture(info.normalTexture),
-		transparencyEnabled(info.enableTransparency)
+		transparencyEnabled(info.enableTransparency),
+		doubleSided(info.doubleSided)
 	{
 		CreateVertexBuffer(info.vertices);
 		CreateIndexBuffer(info.indices);
@@ -81,6 +82,11 @@ namespace Nightbird
 	bool MeshPrimitive::GetTransparencyEnabled() const
 	{
 		return transparencyEnabled;
+	}
+
+	bool MeshPrimitive::GetDoubleSided() const
+	{
+		return doubleSided;
 	}
 
 	void MeshPrimitive::CreateMaterialFactorsUniformBuffer()
