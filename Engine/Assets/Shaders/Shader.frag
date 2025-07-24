@@ -27,6 +27,8 @@ layout(set = 2, binding = 0) uniform MaterialFactorsUBO
 {
 	vec4 baseColor;
 	vec3 metallicRoughness;
+	int alphaMode;	// Opaque, Mask, Blend
+	float alphaCutoff;
 } factorsUBO;
 
 layout(set = 2, binding = 1) uniform sampler2D baseColorSampler;
@@ -45,6 +47,12 @@ layout(location = 0) out vec4 outColor;
 void main()
 {
 	vec4 baseColor = texture(baseColorSampler, fragBaseColorTexCoord) * factorsUBO.baseColor;
+
+	if (factorsUBO.alphaMode == 2) // MASK
+	{
+		if (baseColor.a < factorsUBO.alphaCutoff)
+			discard;
+	}
 
 	vec4 metallicRoughness = texture(metallicRoughnessSampler, fragMetallicRoughnessTexCoord);
 	float metallic = metallicRoughness.b * factorsUBO.metallicRoughness.b;
