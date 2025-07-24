@@ -12,6 +12,8 @@
 #include <Core/Mesh.h>
 #include <Core/Camera.h>
 #include <Core/CameraUBO.h>
+#include <Core/DirectionalLight.h>
+#include <Core/DirectionalLightData.h>
 #include <Core/PointLight.h>
 #include <Core/PointLightData.h>
 #include <Core/Transform.h>
@@ -382,14 +384,16 @@ namespace Nightbird
 
 	void Scene::UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent)
 	{
+		std::vector<DirectionalLightData> directionalLightData;
 		std::vector<PointLightData> pointLightData;
 
-		UpdateBuffersRecursive(currentFrame, swapChainExtent, rootObject.get(), pointLightData);
+		UpdateBuffersRecursive(currentFrame, swapChainExtent, rootObject.get(), directionalLightData, pointLightData);
 
+		globalDescriptorSetManager->UpdateDirectionalLights(currentFrame, directionalLightData);
 		globalDescriptorSetManager->UpdatePointLights(currentFrame, pointLightData);
 	}
 
-	void Scene::UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<PointLightData>& pointLightData)
+	void Scene::UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<DirectionalLightData>& directionalLightData, std::vector<PointLightData>& pointLightData)
 	{
 		if (!object)
 			return;
@@ -402,12 +406,16 @@ namespace Nightbird
 		{
 			globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(swapChainExtent));
 		}
-		else if (auto* light = dynamic_cast<PointLight*>(object))
+		else if (auto* directionalLight = dynamic_cast<DirectionalLight*>(object))
 		{
-			pointLightData.push_back(light->GetData());
+			directionalLightData.push_back(directionalLight->GetData());
+		}
+		else if (auto* pointLight = dynamic_cast<PointLight*>(object))
+		{
+			pointLightData.push_back(pointLight->GetData());
 		}
 
 		for (const auto& child : object->GetChildren())
-			UpdateBuffersRecursive(currentFrame, swapChainExtent, child.get(), pointLightData);
+			UpdateBuffersRecursive(currentFrame, swapChainExtent, child.get(), directionalLightData, pointLightData);
 	}
 }

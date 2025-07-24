@@ -8,6 +8,7 @@
 #include <Vulkan/UniformBuffer.h>
 #include <Vulkan/StorageBuffer.h>
 #include <Core/CameraUBO.h>
+#include <Core/DirectionalLightData.h>
 #include <Core/PointLightData.h>
 
 namespace Nightbird
@@ -34,6 +35,19 @@ namespace Nightbird
 		memcpy(cameraBuffers[frameIndex].GetMappedData(), &cameraUBO, sizeof(cameraUBO));
 	}
 
+	void GlobalDescriptorSetManager::UpdateDirectionalLights(uint32_t frameIndex, const std::vector<DirectionalLightData>& directionalLights)
+	{
+		VkDeviceSize size = sizeof(PointLightData) * directionalLights.size();
+		if (size > 0)
+		{
+			directionalLightBuffers[frameIndex].UploadData(directionalLights.data(), size);
+
+			DirectionalLightMetaUBO metaUBO{};
+			metaUBO.count = static_cast<uint32_t>(directionalLights.size());
+			memcpy(directionalLightMetaBuffers[frameIndex].GetMappedData(), &metaUBO, sizeof(metaUBO));
+		}
+	}
+
 	void GlobalDescriptorSetManager::UpdatePointLights(uint32_t frameIndex, const std::vector<PointLightData>& pointLights)
 	{
 		VkDeviceSize size = sizeof(PointLightData) * pointLights.size();
@@ -50,10 +64,14 @@ namespace Nightbird
 	void GlobalDescriptorSetManager::CreateBuffers()
 	{
 		VkDeviceSize cameraSize = sizeof(CameraUBO);
+		VkDeviceSize directionalLightBufferSize = sizeof(DirectionalLightData) * MAX_DIRECTIONAL_LIGHTS;
+		VkDeviceSize directionalLightMetaBufferSize = sizeof(DirectionalLightMetaUBO) * MAX_DIRECTIONAL_LIGHTS;
 		VkDeviceSize pointLightBufferSize = sizeof(PointLightData) * MAX_POINT_LIGHTS;
 		VkDeviceSize pointLightMetaBufferSize = sizeof(PointLightMetaUBO) * MAX_POINT_LIGHTS;
 
 		cameraBuffers.reserve(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+		directionalLightBuffers.reserve(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+		directionalLightMetaBuffers.reserve(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
 		pointLightBuffers.reserve(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
 		pointLightMetaBuffers.reserve(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
 
@@ -61,9 +79,11 @@ namespace Nightbird
 		{
 			cameraBuffers.emplace_back(device, cameraSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-			pointLightBuffers.emplace_back(device, pointLightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			directionalLightBuffers.emplace_back(device, directionalLightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			directionalLightMetaBuffers.emplace_back(device, directionalLightMetaBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-			pointLightMetaBuffers.emplace_back(device, cameraSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			pointLightBuffers.emplace_back(device, pointLightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			pointLightMetaBuffers.emplace_back(device, pointLightMetaBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		}
 	}
 
@@ -92,6 +112,17 @@ namespace Nightbird
 			cameraInfo.offset = 0;
 			cameraInfo.range = sizeof(CameraUBO);
 
+			VkDescriptorBufferInfo directionalLightsInfo{};
+			directionalLightsInfo.buffer = directionalLightBuffers[i].Get();
+			directionalLightsInfo.offset = 0;
+			directionalLightsInfo.range = VK_WHOLE_SIZE;
+			//directionalLightsInfo.range = sizeof(PointLightData) * MAX_DIRECTIONAL_LIGHTS;
+
+			VkDescriptorBufferInfo directionalLightsMetaInfo{};
+			directionalLightsMetaInfo.buffer = directionalLightMetaBuffers[i].Get();
+			directionalLightsMetaInfo.offset = 0;
+			directionalLightsMetaInfo.range = sizeof(DirectionalLightMetaUBO);
+
 			VkDescriptorBufferInfo pointLightsInfo{};
 			pointLightsInfo.buffer = pointLightBuffers[i].Get();
 			pointLightsInfo.offset = 0;
@@ -103,7 +134,7 @@ namespace Nightbird
 			pointLightsMetaInfo.offset = 0;
 			pointLightsMetaInfo.range = sizeof(PointLightMetaUBO);
 
-			std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+			std::array<VkWriteDescriptorSet, 5> descriptorWrites{};
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrites[0].dstSet = descriptorSets[i];
 			descriptorWrites[0].dstBinding = 0;
@@ -118,7 +149,7 @@ namespace Nightbird
 			descriptorWrites[1].dstArrayElement = 0;
 			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			descriptorWrites[1].descriptorCount = 1;
-			descriptorWrites[1].pBufferInfo = &pointLightsInfo;
+			descriptorWrites[1].pBufferInfo = &directionalLightsInfo;
 
 			descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrites[2].dstSet = descriptorSets[i];
@@ -126,7 +157,23 @@ namespace Nightbird
 			descriptorWrites[2].dstArrayElement = 0;
 			descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			descriptorWrites[2].descriptorCount = 1;
-			descriptorWrites[2].pBufferInfo = &pointLightsMetaInfo;
+			descriptorWrites[2].pBufferInfo = &directionalLightsMetaInfo;
+
+			descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[3].dstSet = descriptorSets[i];
+			descriptorWrites[3].dstBinding = 3;
+			descriptorWrites[3].dstArrayElement = 0;
+			descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descriptorWrites[3].descriptorCount = 1;
+			descriptorWrites[3].pBufferInfo = &pointLightsInfo;
+
+			descriptorWrites[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[4].dstSet = descriptorSets[i];
+			descriptorWrites[4].dstBinding = 4;
+			descriptorWrites[4].dstArrayElement = 0;
+			descriptorWrites[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrites[4].descriptorCount = 1;
+			descriptorWrites[4].pBufferInfo = &pointLightsMetaInfo;
 
 			vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
