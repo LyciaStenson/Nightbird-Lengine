@@ -71,7 +71,7 @@ namespace Nightbird
 		if (object == m_Overlay->GetSelectedObject())
 			flags |= ImGuiTreeNodeFlags_Selected;
 
-		if (object->GetChildren().empty() || dynamic_cast<PrefabInstance*>(object))
+		if (object->GetChildren().empty())// || dynamic_cast<PrefabInstance*>(object))
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 		bool opened = ImGui::TreeNodeEx(object, flags, "%s", object->GetName().c_str());

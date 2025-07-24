@@ -178,19 +178,67 @@ namespace Nightbird
 							primitiveInfo.indices.push_back(index);
 						});
 				}
-
+				
 				std::size_t baseColorTexcoordIndex = 0;
 				std::size_t metallicRoughnessTexcoordIndex = 0;
 				std::size_t normalTexcoordIndex = 0;
 				if (primitive.materialIndex.has_value())
 				{
-					auto& material = gltfAsset.materials[primitive.materialIndex.value()];
+					const auto& material = gltfAsset.materials[primitive.materialIndex.value()];
 
-					primitiveInfo.enableTransparency = (material.alphaMode == fastgltf::AlphaMode::Blend);
+					if (material.pbrData.baseColorTexture.has_value())
+					{
+						const auto& texture = gltfAsset.textures[material.pbrData.baseColorTexture->textureIndex];
+						if (texture.imageIndex.has_value())
+						{
+							auto imageIndex = texture.imageIndex.value();
+							primitiveInfo.baseColorTextureIndex = imageIndex;
+							primitiveInfo.hasBaseColorTexture = true;
+						}
+					}
+					if (material.pbrData.metallicRoughnessTexture.has_value())
+					{
+						const auto& texture = gltfAsset.textures[material.pbrData.metallicRoughnessTexture->textureIndex];
+						if (texture.imageIndex.has_value())
+						{
+							auto imageIndex = texture.imageIndex.value();
+							primitiveInfo.metallicRoughnessTextureIndex = imageIndex;
+							primitiveInfo.hasMetallicRoughnessTexture = true;
+						}
+					}
+					if (material.normalTexture.has_value())
+					{
+						const auto& texture = gltfAsset.textures[material.normalTexture->textureIndex];
+						if (texture.imageIndex.has_value())
+						{
+							auto imageIndex = texture.imageIndex.value();
+							primitiveInfo.normalTextureIndex = imageIndex;
+							primitiveInfo.hasNormalTexture = true;
+						}
+					}
+					
 					primitiveInfo.doubleSided = material.doubleSided;
 
 					const auto& baseColorFactor = material.pbrData.baseColorFactor;
 					primitiveInfo.baseColorFactor = glm::vec4(baseColorFactor.x(), baseColorFactor.y(), baseColorFactor.z(), baseColorFactor.w());
+
+					switch (material.alphaMode)
+					{
+					case fastgltf::AlphaMode::Opaque:
+						primitiveInfo.alphaMode = AlphaMode::Opaque;
+						break;
+					case fastgltf::AlphaMode::Mask:
+						primitiveInfo.alphaMode = AlphaMode::Mask;
+						break;
+					case fastgltf::AlphaMode::Blend:
+						primitiveInfo.alphaMode = AlphaMode::Blend;
+						break;
+					default:
+						primitiveInfo.alphaMode = AlphaMode::Opaque;
+						break;
+					}
+
+					primitiveInfo.alphaCutoff = static_cast<float>(material.alphaCutoff);
 
 					auto& baseColorTexture = material.pbrData.baseColorTexture;
 					if (baseColorTexture.has_value())
@@ -283,42 +331,6 @@ namespace Nightbird
 							{
 								primitiveInfo.vertices[idx].normalTexCoord = glm::vec2(uv.x(), uv.y());
 							});
-					}
-				}
-
-				if (primitive.materialIndex.has_value())
-				{
-					const auto& material = gltfAsset.materials[primitive.materialIndex.value()];
-
-					if (material.pbrData.baseColorTexture.has_value())
-					{
-						const auto& texture = gltfAsset.textures[material.pbrData.baseColorTexture->textureIndex];
-						if (texture.imageIndex.has_value())
-						{
-							auto imageIndex = texture.imageIndex.value();
-							primitiveInfo.baseColorTextureIndex = imageIndex;
-							primitiveInfo.hasBaseColorTexture = true;
-						}
-					}
-					if (material.pbrData.metallicRoughnessTexture.has_value())
-					{
-						const auto& texture = gltfAsset.textures[material.pbrData.metallicRoughnessTexture->textureIndex];
-						if (texture.imageIndex.has_value())
-						{
-							auto imageIndex = texture.imageIndex.value();
-							primitiveInfo.metallicRoughnessTextureIndex = imageIndex;
-							primitiveInfo.hasMetallicRoughnessTexture = true;
-						}
-					}
-					if (material.normalTexture.has_value())
-					{
-						const auto& texture = gltfAsset.textures[material.normalTexture->textureIndex];
-						if (texture.imageIndex.has_value())
-						{
-							auto imageIndex = texture.imageIndex.value();
-							primitiveInfo.normalTextureIndex = imageIndex;
-							primitiveInfo.hasNormalTexture = true;
-						}
 					}
 				}
 
@@ -418,7 +430,7 @@ namespace Nightbird
 			}
 
 			auto& imageData = decodedImages[imageIndex.value()];
-
+			
 			model->textureData[textureIndex] = TextureData
 			{
 				std::move(imageData.pixels),
@@ -466,9 +478,15 @@ namespace Nightbird
 								if (pixels)
 								{
 									outPixels.assign(pixels, pixels + (outWidth * outHeight * 4));
-
+									
+									if (outChannels == 3)
+									{
+										for (size_t i = 0; i < outPixels.size(); i += 4)
+											outPixels[i + 3] = 255;
+									}
+									
 									outChannels = 4;
-
+									
 									stbi_image_free(pixels);
 
 									decoded = true;

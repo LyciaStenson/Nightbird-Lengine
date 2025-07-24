@@ -257,16 +257,18 @@ namespace Nightbird
 				MeshPrimitive* primitive = mesh->GetPrimitive(i);
 
 				Renderable renderable{ instance, primitive };
-
-				bool transparencyEnabled = primitive->GetTransparencyEnabled();
-				bool doubleSided = primitive->GetDoubleSided();
 				
-				if (transparencyEnabled)
+				bool doubleSided = primitive->GetDoubleSided();
+
+				AlphaMode alphaMode = primitive->GetAlphaMode();
+
+				if (alphaMode == AlphaMode::Blend)
 					transparent.push_back(renderable);
-				else if (doubleSided)
-					opaqueDoubleSided.push_back(renderable);
 				else
-					opaque.push_back(renderable);
+					if (doubleSided)
+						opaqueDoubleSided.push_back(renderable);
+					else
+						opaque.push_back(renderable);
 			}
 		}
 

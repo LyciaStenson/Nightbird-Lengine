@@ -23,8 +23,10 @@ namespace Nightbird
 		baseColorTexture(info.baseColorTexture),
 		metallicRoughnessTexture(info.metallicRoughnessTexture),
 		normalTexture(info.normalTexture),
-		transparencyEnabled(info.enableTransparency),
-		doubleSided(info.doubleSided)
+		doubleSided(info.doubleSided),
+		alphaMode(info.alphaMode),
+		alphaCutoff(info.alphaCutoff)
+
 	{
 		CreateVertexBuffer(info.vertices);
 		CreateIndexBuffer(info.indices);
@@ -79,9 +81,9 @@ namespace Nightbird
 		return materialDescriptorSets;
 	}
 
-	bool MeshPrimitive::GetTransparencyEnabled() const
+	AlphaMode MeshPrimitive::GetAlphaMode() const
 	{
-		return transparencyEnabled;
+		return alphaMode;
 	}
 
 	bool MeshPrimitive::GetDoubleSided() const
@@ -98,6 +100,8 @@ namespace Nightbird
 		MaterialFactorsUBO ubo{};
 		ubo.baseColor = baseColorFactor;
 		ubo.metallicRoughness = glm::vec3(0.0f, roughnessFactor, metallicFactor);
+		ubo.alphaMode = static_cast<int>(alphaMode);
+		ubo.alphaCutoff = alphaCutoff;
 
 		memcpy(materialFactorsUniformBuffer->GetMappedData(), &ubo, sizeof(ubo));
 	}

@@ -15,6 +15,11 @@ namespace Nightbird
 	class VulkanBuffer;
 	class VulkanUniformBuffer;
 	struct Vertex;
+	
+	enum class AlphaMode
+	{
+		Opaque, Mask, Blend
+	};
 
 	struct MeshPrimitiveInfo
 	{
@@ -32,13 +37,15 @@ namespace Nightbird
 		size_t baseColorTextureIndex;
 		size_t metallicRoughnessTextureIndex;
 		size_t normalTextureIndex;
-		
+
 		std::shared_ptr<VulkanTexture> baseColorTexture;
 		std::shared_ptr<VulkanTexture> metallicRoughnessTexture;
 		std::shared_ptr<VulkanTexture> normalTexture;
 
-		bool enableTransparency = false;
 		bool doubleSided = false;
+		
+		AlphaMode alphaMode = AlphaMode::Opaque;
+		float alphaCutoff = 0.5f;
 	};
 
 	class MeshPrimitive
@@ -54,9 +61,9 @@ namespace Nightbird
 		VkDescriptorImageInfo GetNormalInfo() const;
 		
 		const std::vector<VkDescriptorSet>& GetMaterialDescriptorSets() const;
-
-		bool GetTransparencyEnabled() const;
+		
 		bool GetDoubleSided() const;
+		AlphaMode GetAlphaMode() const;
 		
 		VulkanBuffer* vertexBuffer;
 		VulkanBuffer* indexBuffer;
@@ -71,9 +78,11 @@ namespace Nightbird
 
 	private:
 		VulkanDevice* device;
-
-		bool transparencyEnabled = false;
+		
 		bool doubleSided = false;
+
+		AlphaMode alphaMode = AlphaMode::Opaque;
+		float alphaCutoff;
 
 		size_t indicesSize;
 
