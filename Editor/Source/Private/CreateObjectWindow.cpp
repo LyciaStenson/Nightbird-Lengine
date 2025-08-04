@@ -94,7 +94,7 @@ namespace Nightbird
 		ImGuiWindowProperties properties;
 		properties.fixedSize = true;
 		properties.size = {400, 600};
-		properties.enableDocking = true;
+		properties.enableDocking = false;
 		
 		return properties;
 	}

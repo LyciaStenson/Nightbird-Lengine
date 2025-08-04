@@ -13,6 +13,8 @@ namespace Nightbird
 
 	protected:
 		void OnRender() override;
+
+		static ImGuiWindowProperties BuildProperties();
 		
 		ModelManager* m_ModelManager = nullptr;
 	};
