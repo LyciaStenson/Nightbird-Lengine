@@ -109,23 +109,15 @@ namespace Nightbird
 				if (ImGui::DragFloat3("Position", &transform.position[0], 0.01f))
 					property.set_value(instance, transform);
 				
-				glm::vec3 cachedDegrees = glm::degrees(glm::eulerAngles(transform.rotation));
-				if (ImGui::DragFloat3("Rotation", &cachedDegrees[0], 0.01f))
+				glm::vec3 lastEuler = transform.eulerCache;
+				if (ImGui::DragFloat3("Rotation", glm::value_ptr(lastEuler)))
 				{
-					cachedDegrees = WrapEuler180(cachedDegrees);
-					cachedDegrees = RoundEulerDP(cachedDegrees, 2);
-					glm::vec3 eulerRadians = glm::radians(cachedDegrees);
+					transform.eulerCache = lastEuler;
+					transform.rotation = glm::quat(glm::radians(transform.eulerCache));
 					
-					glm::quat yaw = glm::angleAxis(eulerRadians.y, glm::vec3(0.0f, 1.0f, 0.0f));
-					glm::quat pitch = glm::angleAxis(eulerRadians.x, glm::vec3(1.0f, 0.0f, 0.0f));
-					glm::quat roll = glm::angleAxis(eulerRadians.z, glm::vec3(0.0f, 0.0f, 1.0f));
-					
-					// Translate back to radians and quaternion for internal memory
-					transform.rotation = yaw * pitch * roll;
-
 					property.set_value(instance, transform);
 				}
-
+				
 				if (ImGui::DragFloat3("Scale", &transform.scale[0], 0.01f))
 					property.set_value(instance, transform);
 

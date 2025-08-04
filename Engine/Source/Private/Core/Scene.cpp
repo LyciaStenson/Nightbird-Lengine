@@ -100,6 +100,7 @@ namespace Nightbird
 		std::vector<SceneObject*> allObjects = GetAllObjects();
 		for (SceneObject* object : allObjects)
 		{
+			object->transform.eulerCache = glm::degrees(glm::eulerAngles(object->transform.rotation));
 			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
 			{
 				modelManager->LoadModelAsync(prefab->GetPrefabPath(), [this, prefab](std::shared_ptr<Model> model)
