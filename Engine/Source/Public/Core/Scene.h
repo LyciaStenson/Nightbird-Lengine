@@ -29,6 +29,7 @@ namespace Nightbird
 	class Camera;
 	class PointLight;
 	class Transform;
+	struct DirectionalLightData;
 	struct PointLightData;
 	struct Model;
 
@@ -63,7 +64,7 @@ namespace Nightbird
 		void Update(float delta);
 
 		void UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent);
-		void UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<PointLightData>& pointLightData);
+		void UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<DirectionalLightData>& directionalLightData, std::vector<PointLightData>& pointLightData);
 
 	private:
 		VulkanDevice* device;

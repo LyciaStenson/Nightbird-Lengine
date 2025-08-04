@@ -12,6 +12,8 @@
 
 #include <rttr/library.h>
 
+using namespace Nightbird;
+
 int main(int argc, char** argv)
 {
 	rttr::library project("Project");
@@ -19,9 +21,9 @@ int main(int argc, char** argv)
 	if (!projectLoad)
 		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
 	
-	Nightbird::Engine engine;
+	Engine engine;
 	
-	Nightbird::EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
+	EditorRenderTarget renderTarget(engine.GetRenderer(), engine.GetRenderer()->GetInstance(), engine.GetRenderer()->GetDevice(), engine.GetRenderer()->GetSwapChain(), engine.GetRenderer()->GetRenderPass(), engine.GetGlfwWindow()->Get(), engine.GetScene(), engine.GetModelManager());
 	engine.GetRenderer()->SetRenderTarget(&renderTarget);
 	
 	engine.Run();
