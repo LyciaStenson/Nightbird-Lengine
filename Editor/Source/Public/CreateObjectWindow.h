@@ -16,7 +16,9 @@ namespace Nightbird
 
 	protected:
 		void OnRender() override;
-
+		
+		static ImGuiWindowProperties BuildProperties();
+		
 		Scene* m_Scene;
 	};
 }

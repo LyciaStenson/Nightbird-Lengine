@@ -38,10 +38,10 @@ namespace Nightbird
 
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Vulkan Test";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "No Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pApplicationName = "NightbirdApp";
+		appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
+		appInfo.pEngineName = "Nightbird";
+		appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo createInfo{};

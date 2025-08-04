@@ -3,7 +3,7 @@
 namespace Nightbird
 {
 	ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowProperties& properties)
-		: m_Title(title), m_Open(open), m_HasMenuBar(properties.hasMenuBar), m_FixedSize(properties.fixedSize), m_Size(properties.size), m_ChangePadding(properties.changePadding), m_Padding(properties.padding)
+		: m_Title(title), m_Open(open), m_HasMenuBar(properties.hasMenuBar), m_FixedSize(properties.fixedSize), m_Size(properties.size), m_ChangePadding(properties.changePadding), m_Padding(properties.padding), m_EnableDocking(properties.enableDocking)
 	{
 
 	}
@@ -26,11 +26,11 @@ namespace Nightbird
 			flags |= ImGuiWindowFlags_NoResize;
 			ImGui::SetNextWindowSize(m_Size, ImGuiCond_Once);
 		}
+		if (m_EnableDocking)
+			flags |= ImGuiWindowFlags_NoDocking;
 
 		if (m_ChangePadding)
-		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_Padding);
-		}
 
 		if (ImGui::Begin(m_Title.c_str(), &m_Open, flags))
 		{
@@ -40,8 +40,6 @@ namespace Nightbird
 		ImGui::End();
 
 		if (m_ChangePadding)
-		{
 			ImGui::PopStyleVar();
-		}
 	}
 }
