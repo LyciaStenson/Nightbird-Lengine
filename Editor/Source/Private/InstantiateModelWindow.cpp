@@ -33,7 +33,7 @@ inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
 namespace Nightbird
 {
 	InstantiateModelWindow::InstantiateModelWindow(ModelManager* modelManager, Scene* scene, bool open)
-		: ImGuiWindow("Instantiate Model", open, ImGuiWindowProperties{false, true, ImVec2(400, 600)}), m_ModelManager(modelManager), m_Scene(scene)
+		: ImGuiWindow("Instantiate Model", open, BuildProperties()), m_ModelManager(modelManager), m_Scene(scene)
 	{
 
 	}
@@ -76,5 +76,15 @@ namespace Nightbird
 			SetOpen(false);
 		}
 		ImGui::EndDisabled();
+	}
+
+	ImGuiWindowProperties InstantiateModelWindow::BuildProperties()
+	{
+		ImGuiWindowProperties properties;
+		properties.fixedSize = true;
+		properties.size = {400, 600};
+		properties.enableDocking = false;
+
+		return properties;
 	}
 }
