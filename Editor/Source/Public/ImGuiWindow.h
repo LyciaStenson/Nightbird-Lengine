@@ -15,6 +15,7 @@ namespace Nightbird
 		ImVec2 size;
 		bool changePadding = false;
 		ImVec2 padding;
+		bool enableDocking = true;
 	};
 
 	class ImGuiWindow
@@ -37,5 +38,6 @@ namespace Nightbird
 		ImVec2 m_Size;
 		bool m_ChangePadding;
 		ImVec2 m_Padding;
+		bool m_EnableDocking;
 	};
 }
