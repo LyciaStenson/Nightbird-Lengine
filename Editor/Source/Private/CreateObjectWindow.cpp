@@ -10,7 +10,7 @@
 namespace Nightbird
 {
 	CreateObjectWindow::CreateObjectWindow(Scene* scene, bool open)
-		: ImGuiWindow("Create Object", open, ImGuiWindowProperties{false, true, ImVec2(400, 600)}), m_Scene(scene)
+		: ImGuiWindow("Create Object", open, BuildProperties()), m_Scene(scene)
 	{
 
 	}
@@ -87,5 +87,15 @@ namespace Nightbird
 		ImGui::EndDisabled();
 
 		ImGui::PopStyleVar();
+	}
+
+	ImGuiWindowProperties CreateObjectWindow::BuildProperties()
+	{
+		ImGuiWindowProperties properties;
+		properties.fixedSize = true;
+		properties.size = {400, 600};
+		properties.enableDocking = true;
+		
+		return properties;
 	}
 }
