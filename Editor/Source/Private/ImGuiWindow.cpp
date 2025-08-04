@@ -26,7 +26,7 @@ namespace Nightbird
 			flags |= ImGuiWindowFlags_NoResize;
 			ImGui::SetNextWindowSize(m_Size, ImGuiCond_Once);
 		}
-		if (m_EnableDocking)
+		if (!m_EnableDocking)
 			flags |= ImGuiWindowFlags_NoDocking;
 
 		if (m_ChangePadding)
