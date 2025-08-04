@@ -8,7 +8,7 @@
 namespace Nightbird
 {
 	class SceneObject;
-
+	
 	class Transform
 	{
 	public:
@@ -21,5 +21,7 @@ namespace Nightbird
 		glm::vec3 position;
 		glm::quat rotation;
 		glm::vec3 scale;
+		
+		glm::vec3 eulerCache = glm::vec3(0.0f);
 	};
 }

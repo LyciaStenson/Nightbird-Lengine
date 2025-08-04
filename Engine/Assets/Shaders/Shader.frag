@@ -7,18 +7,34 @@ layout(set = 0, binding = 0) uniform CameraUBO
 	vec4 position;
 } cameraUBO;
 
+struct DirectionalLight
+{
+	vec4 direction;
+	vec4 colorIntensity;
+};
+
+layout (std430, set = 0, binding = 1) readonly buffer DirectionalLights
+{
+	DirectionalLight directionalLights[];
+};
+
+layout (set = 0, binding = 2) uniform DirectionalLightMeta
+{
+	uint count;
+} directionalLightMeta;
+
 struct PointLight
 {
 	vec4 positionRadius;
 	vec4 colorIntensity;
 };
 
-layout (std430, set = 0, binding = 1) readonly buffer PointLights
+layout (std430, set = 0, binding = 3) readonly buffer PointLights
 {
 	PointLight pointLights[];
 };
 
-layout (set = 0, binding = 2) uniform PointLightMeta
+layout (set = 0, binding = 4) uniform PointLightMeta
 {
 	uint count;
 } pointLightMeta;
@@ -66,6 +82,25 @@ void main()
 	//outColor = vec4(normal, 1.0);
 
 	vec3 color = vec3(0.0);
+
+	for (uint i = 0; i < directionalLightMeta.count; ++i)
+	{
+		DirectionalLight light = directionalLights[i];
+		vec3 lightDir = normalize(-light.direction.xyz);
+		vec3 lightColor = light.colorIntensity.rgb;
+		float intensity = light.colorIntensity.a;
+
+		float diffuse = max(dot(normal, lightDir), 0.0);
+
+		vec3 viewDir = normalize(cameraUBO.position.xyz - fragWorldPos);
+		vec3 halfDir = normalize(viewDir + lightDir);
+		float specularFactor = max(dot(normal, halfDir), 0.0);
+
+		float shininess = mix(4.0, 128.0, 1.0 - roughness);
+		float specular = pow(specularFactor, shininess);
+
+		color += (diffuse + specular) * lightColor * intensity;
+	}
 
 	for (uint i = 0; i < pointLightMeta.count; ++i)
 	{
