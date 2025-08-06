@@ -1,6 +1,6 @@
 #include <Inspector.h>
 
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 
 #include <Core/SceneObject.h>
 #include <Core/Scene.h>
@@ -36,15 +36,15 @@ inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
 
 namespace Nightbird
 {
-	Inspector::Inspector(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
-		: ImGuiWindow("Inspector", open), m_Scene(scene), m_Overlay(overlay)
+	Inspector::Inspector(Scene* scene, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Inspector", open), m_Scene(scene), m_EditorUI(editorUI)
 	{
 
 	}
 
 	void Inspector::OnRender()
 	{
-		SceneObject* selectedObject = m_Overlay->GetSelectedObject();
+		SceneObject* selectedObject = m_EditorUI->GetSelectedObject();
 		if (selectedObject)
 		{
 			RenderProperties(rttr::instance(*selectedObject));

@@ -7,14 +7,14 @@
 
 namespace Nightbird
 {
-	class VulkanImGuiOverlay;
+	class EditorUI;
 	class SceneObject;
 	class Scene;
 
 	class Inspector : public ImGuiWindow
 	{
 	public:
-		Inspector(Scene* scene, VulkanImGuiOverlay* overlay, bool open = true);
+		Inspector(Scene* scene, EditorUI* editorUI, bool open = true);
 
 	protected:
 		void OnRender() override;
@@ -22,7 +22,7 @@ namespace Nightbird
 		void RenderProperties(rttr::instance instance);
 		
 		Scene* m_Scene = nullptr;
-		VulkanImGuiOverlay* m_Overlay = nullptr;
+		EditorUI* m_EditorUI = nullptr;
 
 		SceneObject* m_SelectedObject = nullptr;
 	};
