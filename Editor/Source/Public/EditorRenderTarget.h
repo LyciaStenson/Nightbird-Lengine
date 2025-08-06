@@ -2,7 +2,7 @@
 
 #include <Core/RenderTarget.h>
 
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 
 namespace Nightbird
 {
@@ -20,6 +20,6 @@ namespace Nightbird
 		void Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent) override;
 
 	private:
-		std::unique_ptr<VulkanImGuiOverlay> imGuiOverlay;
+		std::unique_ptr<EditorUI> editorUI;
 	};
 }

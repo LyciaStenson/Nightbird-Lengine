@@ -7,7 +7,6 @@
 namespace Nightbird
 {
 	class Scene;
-	class VulkanImGuiOverlay;
 	
 	class CreateObjectWindow : public ImGuiWindow
 	{

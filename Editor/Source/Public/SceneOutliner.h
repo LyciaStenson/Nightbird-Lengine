@@ -8,13 +8,13 @@
 
 namespace Nightbird
 {
-	class VulkanImGuiOverlay;
+	class EditorUI;
 	class Scene;
 	
 	class SceneOutliner : public ImGuiWindow
 	{
 	public:
-		SceneOutliner(Scene* scene, VulkanImGuiOverlay* overlay, bool open = true);
+		SceneOutliner(Scene* scene, EditorUI* editorUI, bool open = true);
 
 	protected:
 		void OnRender() override;
@@ -22,6 +22,6 @@ namespace Nightbird
 		void SceneOutliner::DrawSceneNode(SceneObject* object, bool& dropHandled);
 
 		Scene* m_Scene = nullptr;
-		VulkanImGuiOverlay* m_Overlay = nullptr;
+		EditorUI* m_EditorUI = nullptr;
 	};
 }
