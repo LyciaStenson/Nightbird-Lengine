@@ -3,6 +3,7 @@
 #include <Core/Engine.h>
 #include <Core/Renderer.h>
 #include <Core/Scene.h>
+#include <Core/Camera.h>
 #include <Vulkan/Texture.h>
 #include <EditorUI.h>
 #include <SceneWindow.h>
@@ -18,6 +19,8 @@ namespace Nightbird
 		: RenderTarget(renderer)
 	{
 		editorUI = std::make_unique<EditorUI>(instance, device, swapChain, renderPass, glfwWindow, scene, modelManager);
+
+		editorCamera = std::make_unique<Camera>("EditorCamera");
 	}
 
 	EditorRenderTarget::~EditorRenderTarget()
@@ -38,9 +41,7 @@ namespace Nightbird
 		if (sceneWindow)
 		{
 			sceneWindow->BeginRenderPass(commandBuffer);
-			Camera* mainCamera = scene->GetMainCamera();
-			if (mainCamera)
-				renderer->DrawScene(scene, mainCamera, commandBuffer, sceneWindow->GetExtent());
+			renderer->DrawScene(scene, editorCamera.get(), commandBuffer, sceneWindow->GetExtent());
 			sceneWindow->EndRenderPass(commandBuffer);
 		}
 

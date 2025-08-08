@@ -20,6 +20,7 @@
 #include <Core/MeshPrimitive.h>
 #include <Core/MeshInstance.h>
 #include <Core/Camera.h>
+#include <Core/CameraUBO.h>
 #include <Core/RenderTarget.h>
 
 namespace Nightbird
@@ -176,6 +177,7 @@ namespace Nightbird
 	void Renderer::DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
 		scene->UpdateBuffers(currentFrame, extent);
+		globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(extent));
 		
 		std::vector<Renderable> opaqueRenderables;
 		std::vector<Renderable> opaqueDoubleSidedRenderables;

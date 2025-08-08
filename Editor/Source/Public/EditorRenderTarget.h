@@ -10,6 +10,7 @@ namespace Nightbird
 	class VulkanDevice;
 	class VulkaVulkanSwapChain;
 	class ModelManager;
+	class Camera;
 	
 	class EditorRenderTarget : public RenderTarget
 	{
@@ -21,5 +22,7 @@ namespace Nightbird
 
 	private:
 		std::unique_ptr<EditorUI> editorUI;
+
+		std::unique_ptr<Camera> editorCamera;
 	};
 }
