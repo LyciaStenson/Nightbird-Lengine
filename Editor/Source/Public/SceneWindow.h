@@ -74,6 +74,6 @@ namespace Nightbird
 		bool shouldResize = false;
 
 		ImGuizmo::OPERATION currentGizmoOperation = ImGuizmo::TRANSLATE;
-		ImGuizmo::MODE currentGizmoMode = ImGuizmo::WORLD;
+		ImGuizmo::MODE currentGizmoMode = ImGuizmo::LOCAL;
 	};
 }
