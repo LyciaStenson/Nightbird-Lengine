@@ -20,6 +20,7 @@
 #include <Core/MeshPrimitive.h>
 #include <Core/MeshInstance.h>
 #include <Core/Camera.h>
+#include <Core/CameraUBO.h>
 #include <Core/RenderTarget.h>
 
 namespace Nightbird
@@ -173,14 +174,11 @@ namespace Nightbird
 		currentFrame = (currentFrame + 1) % VulkanConfig::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Renderer::DrawScene(Scene* scene, VkCommandBuffer commandBuffer, VkExtent2D extent)
+	void Renderer::DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
 		scene->UpdateBuffers(currentFrame, extent);
-
-		Camera* mainCamera = scene->GetMainCamera();
-		if (!mainCamera)
-			return;
-
+		globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(extent));
+		
 		std::vector<Renderable> opaqueRenderables;
 		std::vector<Renderable> opaqueDoubleSidedRenderables;
 		std::vector<Renderable> transparentRenderables;
@@ -190,7 +188,7 @@ namespace Nightbird
 			CollectRenderables(object.get(), opaqueRenderables, opaqueDoubleSidedRenderables, transparentRenderables);
 		}
 
-		glm::vec3 cameraWorldPos = glm::vec3(mainCamera->GetWorldMatrix()[3]);
+		glm::vec3 cameraWorldPos = glm::vec3(camera->GetWorldMatrix()[3]);
 
 		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
 			[&](const Renderable& a, const Renderable& b)
@@ -203,16 +201,16 @@ namespace Nightbird
 				return distA > distB;
 			});
 		
-		opaquePipeline->Render(commandBuffer, currentFrame, opaqueRenderables, mainCamera);
-		opaqueDoubleSidedPipeline->Render(commandBuffer, currentFrame, opaqueDoubleSidedRenderables, mainCamera);
+		opaquePipeline->Render(commandBuffer, currentFrame, opaqueRenderables, camera);
+		opaqueDoubleSidedPipeline->Render(commandBuffer, currentFrame, opaqueDoubleSidedRenderables, camera);
 
 		for (const auto& renderable : transparentRenderables)
 		{
 			bool doubleSided = renderable.primitive->GetDoubleSided();
 			if (doubleSided)
-				transparentDoubleSidedPipeline->RenderSingle(commandBuffer, currentFrame, renderable, mainCamera);
+				transparentDoubleSidedPipeline->RenderSingle(commandBuffer, currentFrame, renderable, camera);
 			else
-				transparentPipeline->RenderSingle(commandBuffer, currentFrame, renderable, mainCamera);
+				transparentPipeline->RenderSingle(commandBuffer, currentFrame, renderable, camera);
 		}
 	}
 

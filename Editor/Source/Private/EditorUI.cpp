@@ -12,6 +12,7 @@
 #include <Core/Camera.h>
 #include <Core/Scene.h>
 #include <Core/ModelManager.h>
+#include <Core/Engine.h>
 
 #include <ImGuiDescriptorPool.h>
 #include <SceneOutliner.h>
@@ -25,7 +26,7 @@
 
 namespace Nightbird
 {
-	EditorUI::EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
+	EditorUI::EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine)
 		: m_Window(glfwWindow), m_Scene(scene)
 	{
 		m_DescriptorPool = std::make_unique<ImGuiDescriptorPool>(device);
@@ -73,7 +74,7 @@ namespace Nightbird
 		m_Windows["Create Object Window"] = std::make_unique<CreateObjectWindow>(scene);
 		m_Windows["Inspector"] = std::make_unique<Inspector>(scene, this);
 		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(scene, this);
-		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
+		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
 		m_Windows["About"] = std::make_unique<AboutWindow>();
 	}
 	
