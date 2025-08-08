@@ -34,12 +34,13 @@ project "Editor"
 		"%{wks.location}/Engine/Vendor/fastgltf/include",
 		"%{wks.location}/Engine/Vendor/rttr/src",
 		"%{wks.location}/Engine/Vendor/json",
-		"%{wks.location}/Editor/Vendor/imgui"
+		"%{wks.location}/Editor/Vendor/imgui",
+		"%{wks.location}/Editor/Vendor/imguizmo"
 	}
 
 	defines { "EDITOR" }
 
-	links { "Engine", "imgui" }
+	links { "Engine", "imgui", "imguizmo" }
 
 	filter { "system:windows" }
 		links { "rttr" }

@@ -3,6 +3,8 @@
 #include <array>
 #include <iostream>
 
+#include <ImGuizmo.h>
+
 #include <Vulkan/Device.h>
 #include <Vulkan/RenderPass.h>
 #include <Vulkan/Texture.h>
@@ -47,6 +49,16 @@ namespace Nightbird
 	VkExtent2D SceneWindow::GetExtent() const
 	{
 		return extent;
+	}
+
+	ImVec2 SceneWindow::GetViewportPos() const
+	{
+		return viewportPos;
+	}
+
+	ImVec2 SceneWindow::GetViewportSize() const
+	{
+		return viewportSize;
 	}
 
 	void SceneWindow::BeginRenderPass(VkCommandBuffer commandBuffer)
@@ -98,11 +110,12 @@ namespace Nightbird
 			}
 			editorCamera->Tick(engine->GetDeltaTime());
 		}
+		
+		viewportSize = ImGui::GetContentRegionAvail();
+		viewportPos = ImGui::GetCursorScreenPos();
 
-		ImVec2 size = ImGui::GetContentRegionAvail();
-
-		unsigned int newWidth = std::max(1, (int)size.x);
-		unsigned int newHeight = std::max(1, (int)size.y);
+		unsigned int newWidth = std::max(1, (int)viewportSize.x);
+		unsigned int newHeight = std::max(1, (int)viewportSize.y);
 
 		if (newWidth != currentWidth || newHeight != currentHeight)
 		{
@@ -114,6 +127,8 @@ namespace Nightbird
 			shouldResize = true;
 		}
 
+		ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+		
 		ImGui::Image(imGuiTextureId, ImVec2((float)extent.width, (float)extent.height));
 	}
 

@@ -3,6 +3,9 @@
 #include <vector>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <Vulkan/Instance.h>
 #include <Vulkan/Device.h>
 #include <Vulkan/SwapChain.h>
@@ -23,6 +26,7 @@
 #include <AssetBrowser.h>
 #include <SceneWindow.h>
 #include <AboutWindow.h>
+#include <EditorCamera.h>
 
 namespace Nightbird
 {
@@ -167,6 +171,53 @@ namespace Nightbird
 			window->Render();
 		}
 		
+		auto* sceneWindow = dynamic_cast<SceneWindow*>(GetWindow("Scene Window"));
+		if (sceneWindow && m_SelectedObject)
+		{
+			ImGuizmo::SetOrthographic(false);
+
+			ImVec2 viewportPos = sceneWindow->GetViewportPos();
+			ImVec2 viewportSize = sceneWindow->GetViewportSize();
+			
+			ImGuizmo::SetRect(viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
+
+			EditorCamera* editorCamera = sceneWindow->GetEditorCamera();
+			if (!editorCamera)
+				return;
+
+			glm::mat4 view = editorCamera->GetViewMatrix();
+			glm::mat4 proj = editorCamera->GetProjectionMatrix(viewportSize.x, viewportSize.y);
+
+			glm::mat4 model = m_SelectedObject->GetLocalMatrix();
+
+			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj), m_CurrentGizmoOperation, m_CurrentGizmoMode, glm::value_ptr(model));
+
+			std::cout << "Hovered: " << ImGuizmo::IsOver() << ", Using: " << ImGuizmo::IsUsing() << ", MouseDown: " << ImGui::IsMouseDown(ImGuiMouseButton_Left) << std::endl;
+
+			if (ImGuizmo::IsUsing())
+			{
+				std::cout << "Using" << std::endl;
+				
+				glm::vec3 translation = glm::vec3(model[3]);
+				
+				glm::vec3 scale = glm::vec3(1.0f);
+				scale.x = glm::length(glm::vec3(model[0]));
+				scale.y = glm::length(glm::vec3(model[1]));
+				scale.z = glm::length(glm::vec3(model[2]));
+
+				glm::mat3 rotationMat;
+				rotationMat[0] = glm::vec3(model[0]) / scale.x;
+				rotationMat[1] = glm::vec3(model[1]) / scale.y;
+				rotationMat[2] = glm::vec3(model[2]) / scale.z;
+
+				glm::quat rotation = glm::quat_cast(rotationMat);
+
+				m_SelectedObject->transform.position = translation;
+				m_SelectedObject->transform.rotation = rotation;
+				m_SelectedObject->transform.scale = scale;
+			}
+		}
+
 		Draw(commandBuffer);
 	}
 

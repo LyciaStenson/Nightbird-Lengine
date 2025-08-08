@@ -28,6 +28,9 @@ namespace Nightbird
 
 		VkFramebuffer GetFramebuffer() const;
 		VkExtent2D GetExtent() const;
+
+		ImVec2 GetViewportPos() const;
+		ImVec2 GetViewportSize() const;
 		
 		void BeginRenderPass(VkCommandBuffer commandBuffer);
 		void EndRenderPass(VkCommandBuffer commandBuffer);
@@ -62,6 +65,9 @@ namespace Nightbird
 		VkFormat depthFormat;
 
 		ImTextureID imGuiTextureId = 0;
+
+		ImVec2 viewportPos = ImVec2(0.0f, 0.0f);
+		ImVec2 viewportSize = ImVec2(800, 600);
 
 		unsigned int currentWidth = 800;
 		unsigned int currentHeight = 600;
