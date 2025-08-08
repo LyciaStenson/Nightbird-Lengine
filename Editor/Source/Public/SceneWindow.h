@@ -13,12 +13,16 @@ namespace Nightbird
 	class VulkanTexture;
 	class VulkanRenderPass;
 	class Scene;
+	class Engine;
+	class EditorCamera;
 	
 	class SceneWindow : public ImGuiWindow
 	{
 	public:
-		SceneWindow(VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open = true);
+		SceneWindow(Engine* engine, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open = true);
 		~SceneWindow() override;
+
+		EditorCamera* GetEditorCamera() const;
 
 		VulkanTexture* GetColorTexture() const;
 
@@ -39,6 +43,10 @@ namespace Nightbird
 		void CleanupRenderResources();
 
 		static ImGuiWindowProperties BuildProperties();
+
+		std::unique_ptr<EditorCamera> editorCamera;
+
+		Engine* engine = nullptr;
 		
 		VulkanDevice* device = nullptr;
 

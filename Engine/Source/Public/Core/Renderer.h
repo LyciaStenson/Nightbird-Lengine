@@ -19,10 +19,11 @@ namespace Nightbird
 	class GlfwWindow;
 	class Scene;
 	class SceneObject;
-	struct Renderable;
+	class Camera;
 	class MeshInstance;
 	class MeshPrimitive;
 	class RenderTarget;
+	struct Renderable;
 	
 	class Renderer
 	{
@@ -42,7 +43,7 @@ namespace Nightbird
 
 		void DrawFrame(Scene* scene);
 
-		void DrawScene(Scene* scene, VkCommandBuffer commandBuffer, VkExtent2D extent);
+		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void FramebufferResized();
 

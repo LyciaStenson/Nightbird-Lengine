@@ -64,6 +64,11 @@ namespace Nightbird
 		return modelManager.get();
 	}
 
+	float Engine::GetDeltaTime() const
+	{
+		return deltaTime;
+	}
+
 	void Engine::Run()
 	{
 		double lastTime = glfwGetTime();
@@ -74,10 +79,10 @@ namespace Nightbird
 			Input::Get().ProcessEvents();
 
 			double currentTime = glfwGetTime();
-			float delta = static_cast<float>(currentTime - lastTime);
+			deltaTime = static_cast<float>(currentTime - lastTime);
 			lastTime = currentTime;
 
-			scene->Update(delta);
+			scene->Update(deltaTime);
 
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());

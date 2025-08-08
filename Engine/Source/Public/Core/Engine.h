@@ -26,6 +26,8 @@ namespace Nightbird
 		Renderer* GetRenderer() const;
 		Scene* GetScene() const;
 		ModelManager* GetModelManager() const;
+
+		float GetDeltaTime() const;
 		
 		void Run();
 
@@ -36,5 +38,7 @@ namespace Nightbird
 		
 		std::unique_ptr<Scene> scene;
 		std::unique_ptr<ModelManager> modelManager;
+
+		float deltaTime = 0.0f;
 	};
 }

@@ -24,11 +24,12 @@ namespace Nightbird
 	class SceneObject;
 	class Scene;
 	class ModelManager;
+	class Engine;
 	
 	class EditorUI
 	{
 	public:
-		EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager);
+		EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine);
 		~EditorUI();
 		
 		ImGuiWindow* GetWindow(const std::string& title);
