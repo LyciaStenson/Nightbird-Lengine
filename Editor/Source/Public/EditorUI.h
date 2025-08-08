@@ -14,8 +14,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
-#include <ImGuizmo.h>
-
 namespace Nightbird
 {
 	class VulkanInstance;
@@ -52,9 +50,6 @@ namespace Nightbird
 		SceneObject* m_SelectedObject = nullptr;
 
 		std::unordered_map<std::string, std::unique_ptr<ImGuiWindow>> m_Windows;
-
-		ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::LOCAL;
 		
 		void NewFrame();
 		void Draw(VkCommandBuffer commandBuffer);

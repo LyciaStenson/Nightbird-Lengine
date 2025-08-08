@@ -11,13 +11,14 @@
 #include <Core/Engine.h>
 #include <Core/Scene.h>
 #include <Core/MeshInstance.h>
+#include <EditorUI.h>
 #include <EditorCamera.h>
 #include <Input.h>
 
 namespace Nightbird
 {
-	SceneWindow::SceneWindow(Engine* engine, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open)
-		: ImGuiWindow("Scene", open, BuildProperties()), engine(engine), device(device), colorFormat(colorFormat), depthFormat(depthFormat)
+	SceneWindow::SceneWindow(Engine* engine, EditorUI* editorUI, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open)
+		: ImGuiWindow("Scene", open, BuildProperties()), engine(engine), editorUI(editorUI), device(device), colorFormat(colorFormat), depthFormat(depthFormat)
 	{
 		renderPass = std::make_unique<VulkanRenderPass>(device, colorFormat, depthFormat, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		
@@ -50,17 +51,7 @@ namespace Nightbird
 	{
 		return extent;
 	}
-
-	ImVec2 SceneWindow::GetViewportPos() const
-	{
-		return viewportPos;
-	}
-
-	ImVec2 SceneWindow::GetViewportSize() const
-	{
-		return viewportSize;
-	}
-
+	
 	void SceneWindow::BeginRenderPass(VkCommandBuffer commandBuffer)
 	{
 		renderPass->Begin(commandBuffer, framebuffer, extent);
@@ -111,11 +102,11 @@ namespace Nightbird
 			editorCamera->Tick(engine->GetDeltaTime());
 		}
 		
-		viewportSize = ImGui::GetContentRegionAvail();
-		viewportPos = ImGui::GetCursorScreenPos();
+		ImVec2 size = ImGui::GetContentRegionAvail();
+		ImVec2 pos = ImGui::GetCursorScreenPos();
 
-		unsigned int newWidth = std::max(1, (int)viewportSize.x);
-		unsigned int newHeight = std::max(1, (int)viewportSize.y);
+		unsigned int newWidth = std::max(1, (int)size.x);
+		unsigned int newHeight = std::max(1, (int)size.y);
 
 		if (newWidth != currentWidth || newHeight != currentHeight)
 		{
@@ -127,9 +118,58 @@ namespace Nightbird
 			shouldResize = true;
 		}
 
+		ImGui::Image(imGuiTextureId, ImVec2((float)extent.width, (float)extent.height));
+
+		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 		
-		ImGui::Image(imGuiTextureId, ImVec2((float)extent.width, (float)extent.height));
+		ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+
+		glm::mat4 view = editorCamera->GetViewMatrix();
+		glm::mat4 proj = editorCamera->GetProjectionMatrix(size.x, size.y);
+
+		SceneObject* selectedObject = editorUI->GetSelectedObject();
+		if (!selectedObject)
+			return;
+		
+		glm::mat4 model = selectedObject->GetLocalMatrix();
+
+		if (!ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		{
+			if (ImGui::IsKeyPressed(ImGuiKey_W))
+				currentGizmoOperation = ImGuizmo::TRANSLATE;
+
+			if (ImGui::IsKeyPressed(ImGuiKey_E))
+				currentGizmoOperation = ImGuizmo::ROTATE;
+
+			if (ImGui::IsKeyPressed(ImGuiKey_R))
+				currentGizmoOperation = ImGuizmo::SCALE;
+		}
+		
+		ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj), currentGizmoOperation, currentGizmoMode, glm::value_ptr(model));
+		
+		if (ImGuizmo::IsUsing())
+		{
+			std::cout << "Using" << std::endl;
+
+			glm::vec3 translation = glm::vec3(model[3]);
+
+			glm::vec3 scale = glm::vec3(1.0f);
+			scale.x = glm::length(glm::vec3(model[0]));
+			scale.y = glm::length(glm::vec3(model[1]));
+			scale.z = glm::length(glm::vec3(model[2]));
+
+			glm::mat3 rotationMat;
+			rotationMat[0] = glm::vec3(model[0]) / scale.x;
+			rotationMat[1] = glm::vec3(model[1]) / scale.y;
+			rotationMat[2] = glm::vec3(model[2]) / scale.z;
+
+			glm::quat rotation = glm::quat_cast(rotationMat);
+
+			selectedObject->transform.position = translation;
+			selectedObject->transform.rotation = rotation;
+			selectedObject->transform.scale = scale;
+		}
 	}
 
 	void SceneWindow::CreateRenderResources()
