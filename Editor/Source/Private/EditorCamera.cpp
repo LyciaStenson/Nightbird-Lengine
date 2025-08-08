@@ -10,34 +10,36 @@ namespace Nightbird
 {
 	void EditorCamera::Tick(float delta)
 	{
-		static bool looking = false;
 		static bool first = true;
 
 		if (!ImGui::IsWindowHovered() || !ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
-			looking = false;
 			first = true;
 			return;
 		}
-
-		looking = true;
 		
 		auto& input = Input::Get();
+
+		glm::vec3 forward = transform.rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 right = transform.rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 up = transform.rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 		
 		glm::vec3 movementDir(0.0f);
 
 		if (Input::Get().IsKeyPressed(GLFW_KEY_W))
-			transform.position.z -= delta * movementSpeed;
+			movementDir += forward;
 		if (Input::Get().IsKeyPressed(GLFW_KEY_S))
-			transform.position.z += delta * movementSpeed;
+			movementDir -= forward;
 		if (Input::Get().IsKeyPressed(GLFW_KEY_A))
-			transform.position.x -= delta * movementSpeed;
+			movementDir -= right;
 		if (Input::Get().IsKeyPressed(GLFW_KEY_D))
-			transform.position.x += delta * movementSpeed;
+			movementDir += right;
 		if (Input::Get().IsKeyPressed(GLFW_KEY_Q))
-			transform.position.y -= delta * movementSpeed;
+			movementDir -= up;
 		if (Input::Get().IsKeyPressed(GLFW_KEY_E))
-			transform.position.y += delta * movementSpeed;
+			movementDir += up;
+
+		transform.position += movementDir * movementSpeed * delta;
 		
 		double mouseX, mouseY;
 		input.GetCursorPos(mouseX, mouseY);
@@ -60,10 +62,8 @@ namespace Nightbird
 		
 		float yawDelta = deltaX * lookSensitivity;
 		float pitchDelta = deltaY * lookSensitivity;
-
-		glm::vec3 right = transform.rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+		
 		glm::quat pitchQuat = glm::angleAxis(pitchDelta, right);
-
 		glm::quat yawQuat = glm::angleAxis(yawDelta, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		transform.rotation = glm::normalize(yawQuat * pitchQuat * transform.rotation);
