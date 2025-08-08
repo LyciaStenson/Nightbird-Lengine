@@ -2,6 +2,7 @@
 
 #include <Core/Engine.h>
 #include <Core/Renderer.h>
+#include <Core/Scene.h>
 #include <Vulkan/Texture.h>
 #include <EditorUI.h>
 #include <SceneWindow.h>
@@ -37,7 +38,9 @@ namespace Nightbird
 		if (sceneWindow)
 		{
 			sceneWindow->BeginRenderPass(commandBuffer);
-			renderer->DrawScene(scene, commandBuffer, sceneWindow->GetExtent());
+			Camera* mainCamera = scene->GetMainCamera();
+			if (mainCamera)
+				renderer->DrawScene(scene, mainCamera, commandBuffer, sceneWindow->GetExtent());
 			sceneWindow->EndRenderPass(commandBuffer);
 		}
 
