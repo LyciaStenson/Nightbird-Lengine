@@ -12,8 +12,12 @@ namespace Nightbird
 
 		void Tick(float delta) override;
 
+		void SetLastMousePos(double x, double y);
+
 	protected:
 		float movementSpeed = 10.0f;
-		float lookSensitivity = 0.01f;
+		float lookSensitivity = 0.005f;
+
+		double lastX, lastY;
 	};
 }

@@ -10,6 +10,7 @@
 #include <Core/Scene.h>
 #include <Core/MeshInstance.h>
 #include <EditorCamera.h>
+#include <Input.h>
 
 namespace Nightbird
 {
@@ -74,7 +75,29 @@ namespace Nightbird
 
 	void SceneWindow::OnRender()
 	{
-		editorCamera->Tick(engine->GetDeltaTime());
+		static bool rightMouseHeld = false;
+		static bool firstFrame = true;
+
+		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		{
+			rightMouseHeld = true;
+			firstFrame = true;
+		}
+
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+			rightMouseHeld = false;
+
+		if (rightMouseHeld && ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		{
+			if (firstFrame)
+			{
+				double mouseX, mouseY;
+				Input::Get().GetCursorPos(mouseX, mouseY);
+				editorCamera->SetLastMousePos(mouseX, mouseY);
+				firstFrame = false;
+			}
+			editorCamera->Tick(engine->GetDeltaTime());
+		}
 
 		ImVec2 size = ImGui::GetContentRegionAvail();
 
