@@ -109,12 +109,9 @@ namespace Nightbird
 				if (ImGui::DragFloat3("Position", &transform.position[0], 0.01f))
 					property.set_value(instance, transform);
 				
-				glm::vec3 lastEuler = transform.eulerCache;
-				if (ImGui::DragFloat3("Rotation", glm::value_ptr(lastEuler)))
+				if (ImGui::DragFloat3("Rotation", glm::value_ptr(transform.eulerCache)))
 				{
-					transform.eulerCache = lastEuler;
 					transform.rotation = glm::quat(glm::radians(transform.eulerCache));
-					
 					property.set_value(instance, transform);
 				}
 				
