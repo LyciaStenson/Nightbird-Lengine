@@ -3,6 +3,9 @@
 #include <vector>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <Vulkan/Instance.h>
 #include <Vulkan/Device.h>
 #include <Vulkan/SwapChain.h>
@@ -23,6 +26,7 @@
 #include <AssetBrowser.h>
 #include <SceneWindow.h>
 #include <AboutWindow.h>
+#include <EditorCamera.h>
 
 namespace Nightbird
 {
@@ -74,7 +78,7 @@ namespace Nightbird
 		m_Windows["Create Object Window"] = std::make_unique<CreateObjectWindow>(scene);
 		m_Windows["Inspector"] = std::make_unique<Inspector>(scene, this);
 		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(scene, this);
-		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
+		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, this, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
 		m_Windows["About"] = std::make_unique<AboutWindow>();
 	}
 	
@@ -181,6 +185,7 @@ namespace Nightbird
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 		
 		ImGui::DockSpaceOverViewport();
 	}
