@@ -20,8 +20,11 @@ namespace Nightbird
 	public:
 		using SceneObject::SceneObject;
 		~Camera() override = default;
+
+		glm::mat4 GetViewMatrix() const;
+		glm::mat4 GetProjectionMatrix(float width, float height) const;
 		
-		CameraUBO GetUBO(VkExtent2D swapChainExtent) const;
+		CameraUBO GetUBO(VkExtent2D extent) const;
 		
 		float fov = 70.0f;
 		

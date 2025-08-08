@@ -4,6 +4,8 @@
 
 #include <ImGuiWindow.h>
 
+#include <ImGuizmo.h>
+
 #include <volk.h>
 
 namespace Nightbird
@@ -14,12 +16,13 @@ namespace Nightbird
 	class VulkanRenderPass;
 	class Scene;
 	class Engine;
+	class EditorUI;
 	class EditorCamera;
 	
 	class SceneWindow : public ImGuiWindow
 	{
 	public:
-		SceneWindow(Engine* engine, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open = true);
+		SceneWindow(Engine* engine, EditorUI* editorUI, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open = true);
 		~SceneWindow() override;
 
 		EditorCamera* GetEditorCamera() const;
@@ -45,8 +48,10 @@ namespace Nightbird
 		static ImGuiWindowProperties BuildProperties();
 
 		std::unique_ptr<EditorCamera> editorCamera;
-
+		
 		Engine* engine = nullptr;
+
+		EditorUI* editorUI = nullptr;
 		
 		VulkanDevice* device = nullptr;
 
@@ -62,10 +67,13 @@ namespace Nightbird
 		VkFormat depthFormat;
 
 		ImTextureID imGuiTextureId = 0;
-
+		
 		unsigned int currentWidth = 800;
 		unsigned int currentHeight = 600;
 
 		bool shouldResize = false;
+
+		ImGuizmo::OPERATION currentGizmoOperation = ImGuizmo::TRANSLATE;
+		ImGuizmo::MODE currentGizmoMode = ImGuizmo::WORLD;
 	};
 }

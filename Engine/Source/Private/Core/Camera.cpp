@@ -8,15 +8,26 @@
 
 namespace Nightbird
 {
-	CameraUBO Camera::GetUBO(VkExtent2D swapChainExtent) const
+	glm::mat4 Camera::GetViewMatrix() const
+	{
+		return glm::inverse(GetWorldMatrix());
+	}
+
+	glm::mat4 Camera::GetProjectionMatrix(float width, float height) const
+	{
+		glm::mat4 proj = glm::perspective(glm::radians(fov), width / height, 0.01f, 100.0f);
+		return proj;
+	}
+
+	CameraUBO Camera::GetUBO(VkExtent2D extent) const
 	{
 		CameraUBO ubo{};
-
-		glm::mat4 world = GetWorldMatrix();
 		
-		ubo.view = glm::inverse(world);
-		ubo.projection = glm::perspective(glm::radians(fov), (float)swapChainExtent.width / (float)swapChainExtent.height, 0.01f, 100.0f);
-		ubo.projection[1][1] *= -1;
+		ubo.view = GetViewMatrix();
+		
+		glm::mat4 proj = GetProjectionMatrix((float)extent.width, (float)extent.height);
+		proj[1][1] *= -1;
+		ubo.projection = proj;
 		ubo.position = glm::vec4(GetWorldMatrix()[3]);
 		
 		return ubo;
