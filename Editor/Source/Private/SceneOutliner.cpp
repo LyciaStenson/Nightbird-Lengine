@@ -4,14 +4,14 @@
 #include <string>
 #include <iostream>
 
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 #include <Core/Scene.h>
 #include <Core/PrefabInstance.h>
 
 namespace Nightbird
 {
-	SceneOutliner::SceneOutliner(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
-		: ImGuiWindow("Scene Outliner", open, ImGuiWindowProperties{true}), m_Scene(scene), m_Overlay(overlay)
+	SceneOutliner::SceneOutliner(Scene* scene, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Scene Outliner", open, ImGuiWindowProperties{true}), m_Scene(scene), m_EditorUI(editorUI)
 	{
 
 	}
@@ -24,17 +24,17 @@ namespace Nightbird
 			{
 				if (ImGui::MenuItem("New Scene Object"))
 				{
-					m_Overlay->OpenWindow("Create Object Window");
+					m_EditorUI->OpenWindow("Create Object Window");
 				}
 				if (ImGui::MenuItem("Instantiate Model"))
 				{
-					m_Overlay->OpenWindow("Instantiate Model Window");
+					m_EditorUI->OpenWindow("Instantiate Model Window");
 				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Load Model"))
 			{
-				m_Overlay->OpenWindow("Load Model Window");
+				m_EditorUI->OpenWindow("Load Model Window");
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
@@ -68,7 +68,7 @@ namespace Nightbird
 			return;
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		if (object == m_Overlay->GetSelectedObject())
+		if (object == m_EditorUI->GetSelectedObject())
 			flags |= ImGuiTreeNodeFlags_Selected;
 
 		if (object->GetChildren().empty())// || dynamic_cast<PrefabInstance*>(object))
@@ -77,7 +77,7 @@ namespace Nightbird
 		bool opened = ImGui::TreeNodeEx(object, flags, "%s", object->GetName().c_str());
 
 		if (ImGui::IsItemClicked())
-			m_Overlay->SelectObject(object);
+			m_EditorUI->SelectObject(object);
 
 		if (ImGui::BeginDragDropSource())
 		{

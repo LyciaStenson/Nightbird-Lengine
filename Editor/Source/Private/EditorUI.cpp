@@ -1,4 +1,4 @@
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 
 #include <vector>
 #include <iostream>
@@ -25,7 +25,7 @@
 
 namespace Nightbird
 {
-	VulkanImGuiOverlay::VulkanImGuiOverlay(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
+	EditorUI::EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
 		: m_Window(glfwWindow), m_Scene(scene)
 	{
 		m_DescriptorPool = std::make_unique<ImGuiDescriptorPool>(device);
@@ -77,14 +77,14 @@ namespace Nightbird
 		m_Windows["About"] = std::make_unique<AboutWindow>();
 	}
 	
-	VulkanImGuiOverlay::~VulkanImGuiOverlay()
+	EditorUI::~EditorUI()
 	{
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	ImGuiWindow* VulkanImGuiOverlay::GetWindow(const std::string& title)
+	ImGuiWindow* EditorUI::GetWindow(const std::string& title)
 	{
 		if (m_Windows.count(title))
 		{
@@ -93,17 +93,17 @@ namespace Nightbird
 		return nullptr;
 	}
 	
-	SceneObject* VulkanImGuiOverlay::GetSelectedObject() const
+	SceneObject* EditorUI::GetSelectedObject() const
 	{
 		return m_SelectedObject;
 	}
 
-	void VulkanImGuiOverlay::SelectObject(SceneObject* object)
+	void EditorUI::SelectObject(SceneObject* object)
 	{
 		m_SelectedObject = object;
 	}
 	
-	void VulkanImGuiOverlay::Render(VkCommandBuffer commandBuffer)
+	void EditorUI::Render(VkCommandBuffer commandBuffer)
 	{
 		NewFrame();
 
@@ -169,13 +169,13 @@ namespace Nightbird
 		Draw(commandBuffer);
 	}
 
-	void VulkanImGuiOverlay::OpenWindow(const std::string& title)
+	void EditorUI::OpenWindow(const std::string& title)
 	{
 		if (m_Windows.count(title))
 			m_Windows[title]->SetOpen(true);
 	}
 	
-	void VulkanImGuiOverlay::NewFrame()
+	void EditorUI::NewFrame()
 	{
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -184,7 +184,7 @@ namespace Nightbird
 		ImGui::DockSpaceOverViewport();
 	}
 	
-	void VulkanImGuiOverlay::Draw(VkCommandBuffer commandBuffer)
+	void EditorUI::Draw(VkCommandBuffer commandBuffer)
 	{
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);

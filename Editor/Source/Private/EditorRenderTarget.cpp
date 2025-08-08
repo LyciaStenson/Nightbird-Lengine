@@ -3,7 +3,7 @@
 #include <Core/Engine.h>
 #include <Core/Renderer.h>
 #include <Vulkan/Texture.h>
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 #include <SceneWindow.h>
 
 #include <Vulkan/Instance.h>
@@ -16,7 +16,7 @@ namespace Nightbird
 	EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager)
 		: RenderTarget(renderer)
 	{
-		imGuiOverlay = std::make_unique<VulkanImGuiOverlay>(instance, device, swapChain, renderPass, glfwWindow, scene, modelManager);
+		editorUI = std::make_unique<EditorUI>(instance, device, swapChain, renderPass, glfwWindow, scene, modelManager);
 	}
 
 	EditorRenderTarget::~EditorRenderTarget()
@@ -26,7 +26,7 @@ namespace Nightbird
 	
 	void EditorRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 	{
-		SceneWindow* sceneWindow = static_cast<SceneWindow*>(imGuiOverlay->GetWindow("Scene Window"));
+		SceneWindow* sceneWindow = static_cast<SceneWindow*>(editorUI->GetWindow("Scene Window"));
 		if (sceneWindow)
 		{
 			if (sceneWindow->ShouldResize())
@@ -45,7 +45,7 @@ namespace Nightbird
 			sceneWindow->GetColorTexture()->TransitionToShaderRead(commandBuffer);
 
 		renderPass->Begin(commandBuffer, framebuffer, extent);
-		imGuiOverlay->Render(commandBuffer);
+		editorUI->Render(commandBuffer);
 		renderPass->End(commandBuffer);
 	}
 }

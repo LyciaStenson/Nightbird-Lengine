@@ -3,12 +3,12 @@
 #include <iostream>
 
 #include <Core/Scene.h>
-#include <ImGuiOverlay.h>
+#include <EditorUI.h>
 
 namespace Nightbird
 {
-	AssetBrowser::AssetBrowser(Scene* scene, VulkanImGuiOverlay* overlay, bool open)
-		: ImGuiWindow("Asset Browser", open), m_Scene(scene), m_Overlay(overlay)
+	AssetBrowser::AssetBrowser(Scene* scene, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Asset Browser", open), m_Scene(scene), m_EditorUI(editorUI)
 	{
 		m_CurrentPath = std::filesystem::path("Assets");
 	}
@@ -54,13 +54,13 @@ namespace Nightbird
 					if (path.extension() == ".scene" && m_Scene)
 					{
 						m_Scene->LoadSceneBIN(path.string());
-						m_Overlay->SelectObject(nullptr);
+						m_EditorUI->SelectObject(nullptr);
 						break;
 					}
 					else if (path.extension() == ".tscene" && m_Scene)
 					{
 						m_Scene->LoadSceneJSON(path.string());
-						m_Overlay->SelectObject(nullptr);
+						m_EditorUI->SelectObject(nullptr);
 						break;
 					}
 				}
