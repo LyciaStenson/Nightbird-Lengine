@@ -6,22 +6,31 @@
 #include <Vulkan/Device.h>
 #include <Vulkan/RenderPass.h>
 #include <Vulkan/Texture.h>
+#include <Core/Engine.h>
 #include <Core/Scene.h>
 #include <Core/MeshInstance.h>
+#include <EditorCamera.h>
 
 namespace Nightbird
 {
-	SceneWindow::SceneWindow(VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open)
-		: ImGuiWindow("Scene", open, BuildProperties()), device(device), colorFormat(colorFormat), depthFormat(depthFormat)
+	SceneWindow::SceneWindow(Engine* engine, VulkanDevice* device, VkFormat colorFormat, VkFormat depthFormat, bool open)
+		: ImGuiWindow("Scene", open, BuildProperties()), engine(engine), device(device), colorFormat(colorFormat), depthFormat(depthFormat)
 	{
 		renderPass = std::make_unique<VulkanRenderPass>(device, colorFormat, depthFormat, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
+		
 		CreateRenderResources();
+		
+		editorCamera = std::make_unique<EditorCamera>("EditorCamera");
 	}
 
 	SceneWindow::~SceneWindow()
 	{
 		CleanupRenderResources();
+	}
+
+	EditorCamera* SceneWindow::GetEditorCamera() const
+	{
+		return editorCamera.get();
 	}
 
 	VulkanTexture* SceneWindow::GetColorTexture() const
@@ -65,6 +74,8 @@ namespace Nightbird
 
 	void SceneWindow::OnRender()
 	{
+		editorCamera->Tick(engine->GetDeltaTime());
+
 		ImVec2 size = ImGui::GetContentRegionAvail();
 
 		unsigned int newWidth = std::max(1, (int)size.x);

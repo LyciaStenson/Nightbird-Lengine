@@ -403,10 +403,6 @@ namespace Nightbird
 		{
 			meshInstance->UpdateUniformBuffer(currentFrame);
 		}
-		//else if (auto* camera = dynamic_cast<Camera*>(object))
-		//{
-			//globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(swapChainExtent));
-		//}
 		else if (auto* directionalLight = dynamic_cast<DirectionalLight*>(object))
 		{
 			directionalLightData.push_back(directionalLight->GetData());
