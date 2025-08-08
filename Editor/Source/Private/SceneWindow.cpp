@@ -150,24 +150,15 @@ namespace Nightbird
 		
 		if (ImGuizmo::IsUsing())
 		{
-			std::cout << "Using" << std::endl;
+			glm::vec3 translation, eulerDegrees, scale;
 
-			glm::vec3 translation = glm::vec3(model[3]);
-
-			glm::vec3 scale = glm::vec3(1.0f);
-			scale.x = glm::length(glm::vec3(model[0]));
-			scale.y = glm::length(glm::vec3(model[1]));
-			scale.z = glm::length(glm::vec3(model[2]));
-
-			glm::mat3 rotationMat;
-			rotationMat[0] = glm::vec3(model[0]) / scale.x;
-			rotationMat[1] = glm::vec3(model[1]) / scale.y;
-			rotationMat[2] = glm::vec3(model[2]) / scale.z;
-
-			glm::quat rotation = glm::quat_cast(rotationMat);
-
+			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(model), &translation[0], &eulerDegrees[0], &scale[0]);
+			
 			selectedObject->transform.position = translation;
-			selectedObject->transform.rotation = rotation;
+
+			selectedObject->transform.eulerCache = eulerDegrees;
+			selectedObject->transform.rotation = glm::quat(glm::radians(eulerDegrees));
+
 			selectedObject->transform.scale = scale;
 		}
 	}
