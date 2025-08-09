@@ -7,7 +7,7 @@
 
 #include <volk.h>
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 #include <Core/Transform.h>
 #include <Vulkan/UniformBuffer.h>
 
@@ -15,10 +15,10 @@ namespace Nightbird
 {
 	struct CameraUBO;
 	
-	class Camera : public SceneObject
+	class Camera : public SpatialObject
 	{
 	public:
-		using SceneObject::SceneObject;
+		using SpatialObject::SpatialObject;
 		~Camera() override = default;
 
 		glm::mat4 GetViewMatrix() const;
@@ -28,6 +28,6 @@ namespace Nightbird
 		
 		float fov = 70.0f;
 		
-		RTTR_ENABLE(Nightbird::SceneObject)
+		RTTR_ENABLE(Nightbird::SpatialObject)
 	};
 }

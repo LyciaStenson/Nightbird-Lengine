@@ -6,7 +6,7 @@
 
 #include <volk.h>
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 #include <Core/Transform.h>
 
 namespace Nightbird
@@ -15,7 +15,7 @@ namespace Nightbird
 	class VulkanUniformBuffer;
 	class Mesh;
 	
-	class MeshInstance : public SceneObject
+	class MeshInstance : public SpatialObject
 	{
 	public:
 		MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh, VulkanDevice* device, VkDescriptorPool descriptorPool);

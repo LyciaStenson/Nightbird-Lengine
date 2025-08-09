@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 
 #include <volk.h>
 
@@ -12,10 +12,10 @@ namespace Nightbird
 	class VulkanUniformBuffer;
 	struct DirectionalLightData;
 
-	class DirectionalLight : public SceneObject
+	class DirectionalLight : public SpatialObject
 	{
 	public:
-		using SceneObject::SceneObject;
+		using SpatialObject::SpatialObject;
 		~DirectionalLight() override;
 
 		DirectionalLightData GetData() const;
@@ -23,6 +23,6 @@ namespace Nightbird
 		glm::vec3 color = glm::vec3(1.0f);
 		float intensity = 1.0f;
 		
-		RTTR_ENABLE(Nightbird::SceneObject)
+		RTTR_ENABLE(Nightbird::SpatialObject)
 	};
 }

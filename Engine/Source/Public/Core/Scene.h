@@ -16,6 +16,7 @@
 #include <fastgltf/tools.hpp>
 
 #include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 
 namespace Nightbird
 {
@@ -54,7 +55,8 @@ namespace Nightbird
 		
 		void AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent = nullptr);
 
-		SceneObject* CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
+		SceneObject* CreateSceneObject(const std::string& name, SceneObject* parent = nullptr);
+		SpatialObject* CreateSpatialObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent = nullptr);
 		
 		void InstantiateModel(PrefabInstance* prefabInstance);
 		PrefabInstance* InstantiateModel(const std::string& path, const Transform& transform);
