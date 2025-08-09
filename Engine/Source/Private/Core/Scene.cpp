@@ -303,7 +303,7 @@ namespace Nightbird
 		glm::vec3 scale = glm::vec3(gltfScale.x(), gltfScale.y(), gltfScale.z());
 
 		SceneObject* object = nullptr;
-
+		
 		if (node.meshIndex.has_value())
 		{
 			if (node.meshIndex.value() < model->meshes.size())

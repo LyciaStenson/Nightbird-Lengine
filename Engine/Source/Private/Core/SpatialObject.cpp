@@ -14,8 +14,7 @@ namespace Nightbird
 			if (SpatialObject* spatialParent = dynamic_cast<SpatialObject*>(parent))
 				return spatialParent->GetWorldMatrix() * transform.GetLocalMatrix();
 		}
-		else
-			return transform.GetLocalMatrix();
+		return transform.GetLocalMatrix();
 	}
 }
 
