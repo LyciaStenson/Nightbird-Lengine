@@ -7,6 +7,12 @@ project "freetype"
 
 	defines { "FT2_BUILD_LIBRARY" }
 
+	filter { "system:windows" }
+		defines { "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_WARNINGS" }
+
+		buildoptions { "/wd4996", "/wd4267", "/wd4244" }
+	filter { }
+
 	files
 	{
 		"src/autofit/autofit.c",
