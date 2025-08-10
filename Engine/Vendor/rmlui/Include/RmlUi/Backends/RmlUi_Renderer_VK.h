@@ -79,7 +79,7 @@ public:
 
 	using CreateSurfaceCallback = bool (*)(VkInstance instance, VkSurfaceKHR* out_surface);
 
-	bool Initialize(Rml::Vector<const char*> required_extensions, CreateSurfaceCallback create_surface_callback);
+	bool Initialize(VkInstance instance, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkSurfaceKHR surface, uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent);
 	void Shutdown();
 
 	void BeginFrame();
@@ -439,24 +439,17 @@ private:
 private:
 	Rml::TextureHandle CreateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i dimensions, const Rml::String& name);
 
-	void Initialize_Instance(Rml::Vector<const char*> required_extensions) noexcept;
-	void Initialize_Device() noexcept;
-	void Initialize_PhysicalDevice(VkPhysicalDeviceProperties& out_physical_device_properties) noexcept;
-	void Initialize_Swapchain(VkExtent2D window_extent) noexcept;
-	void Initialize_Surface(CreateSurfaceCallback create_surface_callback) noexcept;
-	void Initialize_QueueIndecies() noexcept;
-	void Initialize_Queues() noexcept;
-	void Initialize_SyncPrimitives() noexcept;
-	void Initialize_Resources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept;
-	void Initialize_Allocator() noexcept;
-
-	void Destroy_Instance() noexcept;
-	void Destroy_Device() noexcept;
-	void Destroy_Swapchain() noexcept;
-	void Destroy_Surface() noexcept;
+	void SetInstance(VkInstance instance) noexcept;
+	void SetDevice(VkDevice logicalDevice, VkPhysicalDevice physicalDevice) noexcept;
+	void SetSwapchain(VkSwapchainKHR swapchain, VkFormat swapchainFormat, VkExtent2D extent) noexcept;
+	void SetSurface(VkSurfaceKHR surface) noexcept;
+	void SetQueues(uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent) noexcept;
+	void SetSyncPrimitives() noexcept;
+	void SetResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept;
+	void SetAllocator() noexcept;
+	
 	void Destroy_SyncPrimitives() noexcept;
 	void Destroy_Resources() noexcept;
-	void Destroy_Allocator() noexcept;
 
 	void QueryInstanceLayers(LayerPropertiesList& result) noexcept;
 	void QueryInstanceExtensions(ExtensionPropertiesList& result, const LayerPropertiesList& instance_layer_properties) noexcept;

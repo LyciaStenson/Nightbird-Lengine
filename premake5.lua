@@ -4,6 +4,8 @@ workspace "Nightbird"
 
 	configurations { "Debug", "Release" }
 
+	defines { "RMLUI_STATIC_LIB" }
+
 	filter { "configurations:Debug"}
 		defines { "DEBUG" }
 		symbols "On"

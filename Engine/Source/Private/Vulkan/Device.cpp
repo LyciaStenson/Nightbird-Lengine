@@ -26,6 +26,22 @@ namespace Nightbird
 		vkDestroyDevice(logicalDevice, nullptr);
 	}
 
+	bool VulkanDevice::CheckDeviceExtensionSupport()
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data());
+
+		std::set<std::string> requiredExtensions(VulkanConfig::deviceExtensions.begin(), VulkanConfig::deviceExtensions.end());
+
+		for (const auto& extension : availableExtensions)
+			requiredExtensions.erase(extension.extensionName);
+
+		return requiredExtensions.empty();
+	}
+
 	void VulkanDevice::SelectPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
@@ -74,7 +90,7 @@ namespace Nightbird
 			queueCreateInfo.pQueuePriorities = &queuePriority;
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
-
+		
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -102,8 +118,10 @@ namespace Nightbird
 		}
 
 		graphicsQueueFamily = indices.graphicsFamily.value();
+		presentQueueFamily = indices.presentFamily.value();
+
 		vkGetDeviceQueue(logicalDevice, graphicsQueueFamily, 0, &graphicsQueue);
-		vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+		vkGetDeviceQueue(logicalDevice, presentQueueFamily, 0, &presentQueue);
 	}
 
 	void VulkanDevice::CreateAllocator()
@@ -218,5 +236,10 @@ namespace Nightbird
 	VmaAllocator VulkanDevice::GetAllocator() const
 	{
 		return allocator;
+	}
+
+	VkPhysicalDeviceProperties VulkanDevice::GetPhysicalDeviceProperties() const
+	{
+		return physicalDeviceProperties;
 	}
 }

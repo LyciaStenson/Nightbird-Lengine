@@ -4,9 +4,11 @@
 #include <vector>
 #include <memory>
 
-#include <volk.h>
-
-#include <GLFW/glfw3.h>
+namespace Rml
+{
+	class Context;
+	class ElementDocument;
+}
 
 namespace Nightbird
 {
@@ -38,6 +40,9 @@ namespace Nightbird
 		
 		std::unique_ptr<Scene> scene;
 		std::unique_ptr<ModelManager> modelManager;
+
+		Rml::Context* context = nullptr;
+		Rml::ElementDocument* document = nullptr;
 
 		float deltaTime = 0.0f;
 	};

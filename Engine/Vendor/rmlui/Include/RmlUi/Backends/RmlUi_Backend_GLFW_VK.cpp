@@ -65,29 +65,9 @@ struct BackendData {
 };
 static Rml::UniquePtr<BackendData> data;
 
-bool Backend::Initialize(const char* window_name, int width, int height, bool allow_resize)
+bool Backend::Initialize(VkInstance instance, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkSurfaceKHR surface, uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent, GLFWwindow* window)
 {
 	RMLUI_ASSERT(!data);
-
-	glfwSetErrorCallback(LogErrorFromGLFW);
-
-	if (!glfwInit())
-	{
-		glfwTerminate();
-		return false;
-	}
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, allow_resize ? GLFW_TRUE : GLFW_FALSE);
-	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-
-	GLFWwindow* window = glfwCreateWindow(width, height, window_name, nullptr, nullptr);
-
-	if (!window)
-	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "GLFW failed to create window");
-		return false;
-	}
 
 	data = Rml::MakeUnique<BackendData>();
 	data->window = window;
@@ -95,11 +75,7 @@ bool Backend::Initialize(const char* window_name, int width, int height, bool al
 	uint32_t count;
 	const char** extensions = glfwGetRequiredInstanceExtensions(&count);
 	RMLUI_VK_ASSERTMSG(extensions != nullptr, "Failed to query GLFW Vulkan extensions");
-	if (!data->render_interface.Initialize(Rml::Vector<const char*>(extensions, extensions + count),
-			[](VkInstance instance, VkSurfaceKHR* out_surface) {
-				return glfwCreateWindowSurface(instance, data->window, nullptr, out_surface) == VkResult::VK_SUCCESS;
-				;
-			}))
+	if (!data->render_interface.Initialize(instance, logicalDevice, physicalDevice, physicalDeviceProperties, surface, queueIndexGraphics, queueGraphics, queueIndexPresent, queuePresent))
 	{
 		data.reset();
 		Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to initialize Vulkan render interface");
@@ -107,6 +83,9 @@ bool Backend::Initialize(const char* window_name, int width, int height, bool al
 	}
 
 	data->system_interface.SetWindow(window);
+
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
 	data->render_interface.SetViewport(width, height);
 
 	// Receive num lock and caps lock modifiers for proper handling of numpad inputs in text fields.

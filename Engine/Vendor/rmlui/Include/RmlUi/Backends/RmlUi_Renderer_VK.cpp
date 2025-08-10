@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <string.h>
 
+#include <iostream>
+
 // AlignUp(314, 256) = 512
 template <typename T>
 static T AlignUp(T val, T alignment)
@@ -752,38 +754,38 @@ void RenderInterface_VK::EndFrame()
 
 void RenderInterface_VK::SetViewport(int width, int height)
 {
-	auto status = vkDeviceWaitIdle(m_p_device);
-	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkDeviceWaitIdle");
-
-	if (width > 0 && height > 0)
-	{
-		m_width = width;
-		m_height = height;
-	}
-
-	if (m_p_swapchain)
-	{
-		Destroy_Swapchain();
-		DestroyResourcesDependentOnSize();
-		m_p_swapchain = {};
-	}
-
-	VkExtent2D window_extent = GetValidSurfaceExtent();
-	if (window_extent.width == 0 || window_extent.height == 0)
-		return;
-
-#ifdef RMLUI_VK_DEBUG
-	Rml::Log::Message(Rml::Log::Type::LT_DEBUG, "Rml width: %d height: %d | Vulkan width: %d height: %d", m_width, m_height, window_extent.width,
-		window_extent.height);
-#endif
-
-	//  we need to sync the data from Vulkan so we can't use native Rml's data about width and height so be careful otherwise we create framebuffer
-	//  with Rml's width and height but they're different to what Vulkan determines for our window (e.g. device/swapchain)
-	m_width = window_extent.width;
-	m_height = window_extent.height;
-
-	Initialize_Swapchain(window_extent);
-	CreateResourcesDependentOnSize(window_extent);
+//	auto status = vkDeviceWaitIdle(m_p_device);
+//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkDeviceWaitIdle");
+//
+//	if (width > 0 && height > 0)
+//	{
+//		m_width = width;
+//		m_height = height;
+//	}
+//
+//	if (m_p_swapchain)
+//	{
+//		Destroy_Swapchain();
+//		DestroyResourcesDependentOnSize();
+//		m_p_swapchain = {};
+//	}
+//
+//	VkExtent2D window_extent = GetValidSurfaceExtent();
+//	if (window_extent.width == 0 || window_extent.height == 0)
+//		return;
+//
+//#ifdef RMLUI_VK_DEBUG
+//	Rml::Log::Message(Rml::Log::Type::LT_DEBUG, "Rml width: %d height: %d | Vulkan width: %d height: %d", m_width, m_height, window_extent.width,
+//		window_extent.height);
+//#endif
+//
+//	//  we need to sync the data from Vulkan so we can't use native Rml's data about width and height so be careful otherwise we create framebuffer
+//	//  with Rml's width and height but they're different to what Vulkan determines for our window (e.g. device/swapchain)
+//	m_width = window_extent.width;
+//	m_height = window_extent.height;
+//
+//	Initialize_Swapchain(window_extent);
+//	CreateResourcesDependentOnSize(window_extent);
 }
 
 bool RenderInterface_VK::IsSwapchainValid()
@@ -796,33 +798,21 @@ void RenderInterface_VK::RecreateSwapchain()
 	SetViewport(m_width, m_height);
 }
 
-bool RenderInterface_VK::Initialize(Rml::Vector<const char*> required_extensions, CreateSurfaceCallback create_surface_callback)
+bool RenderInterface_VK::Initialize(VkInstance instance, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkSurfaceKHR surface, uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent)
 {
 	RMLUI_ZoneScopedN("Vulkan - Initialize");
 
-	//int glad_result = 0;
-	//glad_result = gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE);
-	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Global functions");
+	SetInstance(instance);
+	
+	SetDevice(logicalDevice, physicalDevice);
 
-	Initialize_Instance(std::move(required_extensions));
+	SetSurface(surface);
 
-	VkPhysicalDeviceProperties physical_device_properties = {};
-	Initialize_PhysicalDevice(physical_device_properties);
+	SetQueues(queueIndexGraphics, queueGraphics, queueIndexPresent, queuePresent);
 
-	//glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, VK_NULL_HANDLE);
-	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Instance functions");
-
-	Initialize_Surface(create_surface_callback);
-	Initialize_QueueIndecies();
-	Initialize_Device();
-
-	//glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, m_p_device);
-	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Device functions");
-
-	Initialize_Queues();
-	Initialize_SyncPrimitives();
-	Initialize_Allocator();
-	Initialize_Resources(physical_device_properties);
+	SetSyncPrimitives();
+	SetAllocator();
+	SetResources(physicalDeviceProperties);
 
 	return true;
 }
@@ -834,305 +824,44 @@ void RenderInterface_VK::Shutdown()
 	auto status = vkDeviceWaitIdle(m_p_device);
 
 	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "you must have a valid status here");
-
+	
 	DestroyResourcesDependentOnSize();
-	Destroy_Resources();
-	Destroy_Allocator();
-	Destroy_SyncPrimitives();
-	Destroy_Swapchain();
-	Destroy_Surface();
-	Destroy_Device();
 	Destroy_ReportDebugCallback();
-	Destroy_Instance();
-
-	//gladLoaderUnloadVulkan();
 }
 
-void RenderInterface_VK::Initialize_Instance(Rml::Vector<const char*> required_extensions) noexcept
+void RenderInterface_VK::SetInstance(VkInstance instance) noexcept
 {
-	uint32_t required_version = GetRequiredVersionAndValidateMachine();
-
-	VkApplicationInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	info.pNext = nullptr;
-	info.pApplicationName = "RmlUi Shell";
-	info.applicationVersion = 50;
-	info.pEngineName = "RmlUi";
-	info.apiVersion = required_version;
-
-	Rml::Vector<const char*> instance_layer_names;
-	Rml::Vector<const char*> instance_extension_names = std::move(required_extensions);
-	CreatePropertiesFor_Instance(instance_layer_names, instance_extension_names);
-
-	VkInstanceCreateInfo info_instance = {};
-	info_instance.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	info_instance.pNext = &debug_validation_features_ext;
-	info_instance.flags = 0;
-	info_instance.pApplicationInfo = &info;
-	info_instance.enabledExtensionCount = static_cast<uint32_t>(instance_extension_names.size());
-	info_instance.ppEnabledExtensionNames = instance_extension_names.data();
-	info_instance.enabledLayerCount = static_cast<uint32_t>(instance_layer_names.size());
-	info_instance.ppEnabledLayerNames = instance_layer_names.data();
-
-	VkResult status = vkCreateInstance(&info_instance, nullptr, &m_p_instance);
-	RMLUI_VK_ASSERTMSG(status == VK_SUCCESS, "failed to vkCreateInstance");
-
-	CreateReportDebugCallback();
+	m_p_instance = instance;
 }
 
-void RenderInterface_VK::Initialize_Device() noexcept
+void RenderInterface_VK::SetDevice(VkDevice logicalDevice, VkPhysicalDevice physicalDevice) noexcept
 {
-	ExtensionPropertiesList device_extension_properties;
-	CreatePropertiesFor_Device(device_extension_properties);
-
-	Rml::Vector<const char*> device_extension_names;
-	AddExtensionToDevice(device_extension_names, device_extension_properties, VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-	AddExtensionToDevice(device_extension_names, device_extension_properties, VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME);
-
-#ifdef RMLUI_DEBUG
-	AddExtensionToDevice(device_extension_names, device_extension_properties, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-#endif
-
-	float queue_priorities[1] = {0.0f};
-
-	VkDeviceQueueCreateInfo info_queue[2] = {};
-
-	info_queue[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	info_queue[0].pNext = nullptr;
-	info_queue[0].queueCount = 1;
-	info_queue[0].pQueuePriorities = queue_priorities;
-	info_queue[0].queueFamilyIndex = m_queue_index_graphics;
-
-	info_queue[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	info_queue[1].pNext = nullptr;
-	info_queue[1].queueCount = 1;
-	info_queue[1].pQueuePriorities = queue_priorities;
-	info_queue[1].queueFamilyIndex = m_queue_index_compute;
-
-	VkPhysicalDeviceFeatures features_physical_device = {};
-
-	features_physical_device.fillModeNonSolid = true;
-	features_physical_device.pipelineStatisticsQuery = true;
-	features_physical_device.fragmentStoresAndAtomics = true;
-	features_physical_device.vertexPipelineStoresAndAtomics = true;
-	features_physical_device.shaderImageGatherExtended = true;
-	features_physical_device.wideLines = true;
-
-	VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR shader_subgroup_extended_type = {};
-
-	shader_subgroup_extended_type.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES_KHR;
-	shader_subgroup_extended_type.pNext = nullptr;
-	shader_subgroup_extended_type.shaderSubgroupExtendedTypes = VK_TRUE;
-
-	VkPhysicalDeviceFeatures2 features_physical_device2 = {};
-
-	features_physical_device2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-	features_physical_device2.features = features_physical_device;
-	features_physical_device2.pNext = &shader_subgroup_extended_type;
-
-	VkDeviceCreateInfo info_device = {};
-
-	info_device.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	info_device.pNext = &features_physical_device2;
-	info_device.queueCreateInfoCount = m_queue_index_compute != m_queue_index_graphics ? 2 : 1;
-	info_device.pQueueCreateInfos = info_queue;
-	info_device.enabledExtensionCount = static_cast<uint32_t>(device_extension_names.size());
-	info_device.ppEnabledExtensionNames = info_device.enabledExtensionCount ? device_extension_names.data() : nullptr;
-	info_device.pEnabledFeatures = nullptr;
-
-	VkResult status = vkCreateDevice(m_p_physical_device, &info_device, nullptr, &m_p_device);
-
-	RMLUI_VK_ASSERTMSG(status == VK_SUCCESS, "failed to vkCreateDevice");
+	m_p_device = logicalDevice;
+	m_p_physical_device = physicalDevice;
 }
 
-void RenderInterface_VK::Initialize_PhysicalDevice(VkPhysicalDeviceProperties& out_physical_device_properties) noexcept
+void RenderInterface_VK::SetSwapchain(VkSwapchainKHR swapchain, VkFormat swapchainFormat, VkExtent2D extent) noexcept
 {
-	PhysicalDeviceWrapperList physical_devices;
-	CollectPhysicalDevices(physical_devices);
 
-	const PhysicalDeviceWrapper* selected_physical_device =
-		ChoosePhysicalDevice(physical_devices, VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
-
-	if (!selected_physical_device)
-	{
-		Rml::Log::Message(Rml::Log::LT_WARNING, "Failed to pick the discrete gpu, now trying to pick integrated GPU");
-		selected_physical_device = ChoosePhysicalDevice(physical_devices, VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU);
-
-		if (!selected_physical_device)
-		{
-			Rml::Log::Message(Rml::Log::LT_WARNING, "Failed to pick the integrated gpu, now trying to pick the CPU");
-			selected_physical_device = ChoosePhysicalDevice(physical_devices, VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_CPU);
-		}
-	}
-
-	RMLUI_VK_ASSERTMSG(selected_physical_device, "there's no suitable physical device for rendering, abort this application");
-
-	m_p_physical_device = selected_physical_device->m_p_physical_device;
-	vkGetPhysicalDeviceProperties(m_p_physical_device, &out_physical_device_properties);
-
-#ifdef RMLUI_VK_DEBUG
-	const auto& properties = selected_physical_device->m_physical_device_properties;
-	Rml::Log::Message(Rml::Log::LT_DEBUG, "Picked physical device: %s", properties.deviceName);
-#endif
 }
 
-void RenderInterface_VK::Initialize_Swapchain(VkExtent2D window_extent) noexcept
-{
-	m_swapchain_format = ChooseSwapchainFormat();
-
-	VkSwapchainCreateInfoKHR info = {};
-	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	info.pNext = nullptr;
-	info.surface = m_p_surface;
-	info.imageFormat = m_swapchain_format.format;
-	info.minImageCount = Choose_SwapchainImageCount();
-	info.imageColorSpace = m_swapchain_format.colorSpace;
-	info.imageExtent = window_extent;
-	info.preTransform = CreatePretransformSwapchain();
-	info.compositeAlpha = ChooseSwapchainCompositeAlpha();
-	info.imageArrayLayers = 1;
-	info.presentMode = GetPresentMode();
-	info.oldSwapchain = nullptr;
-	info.clipped = true;
-	info.imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	info.queueFamilyIndexCount = 0;
-	info.pQueueFamilyIndices = nullptr;
-
-	uint32_t queue_family_index_present = m_queue_index_present;
-	uint32_t queue_family_index_graphics = m_queue_index_graphics;
-
-	if (queue_family_index_graphics != queue_family_index_present)
-	{
-		uint32_t p_indecies[2] = {queue_family_index_graphics, queue_family_index_present};
-
-		info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		info.queueFamilyIndexCount = sizeof(p_indecies) / sizeof(p_indecies[0]);
-		info.pQueueFamilyIndices = p_indecies;
-	}
-
-	VkResult status = vkCreateSwapchainKHR(m_p_device, &info, nullptr, &m_p_swapchain);
-
-	RMLUI_VK_ASSERTMSG(status == VK_SUCCESS, "failed to vkCreateSwapchainKHR");
-}
-
-void RenderInterface_VK::Initialize_Surface(CreateSurfaceCallback create_surface_callback) noexcept
+void RenderInterface_VK::SetSurface(VkSurfaceKHR surface) noexcept
 {
 	RMLUI_VK_ASSERTMSG(m_p_instance, "you must initialize your VkInstance");
 
-	bool result = create_surface_callback(m_p_instance, &m_p_surface);
-	RMLUI_VK_ASSERTMSG(result && m_p_surface, "failed to call create_surface_callback");
+	m_p_surface = surface;
 }
 
-void RenderInterface_VK::Initialize_QueueIndecies() noexcept
+void RenderInterface_VK::SetQueues(uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent) noexcept
 {
-	RMLUI_VK_ASSERTMSG(m_p_physical_device, "you must initialize your physical device");
-	RMLUI_VK_ASSERTMSG(m_p_surface, "you must initialize VkSurfaceKHR before calling this method");
+	m_queue_index_graphics = queueIndexGraphics;
+	m_p_queue_graphics = queueGraphics;
 
-	uint32_t queue_family_count = 0;
-
-	vkGetPhysicalDeviceQueueFamilyProperties(m_p_physical_device, &queue_family_count, nullptr);
-
-	RMLUI_VK_ASSERTMSG(queue_family_count >= 1, "failed to vkGetPhysicalDeviceQueueFamilyProperties (getting count)");
-
-	Rml::Vector<VkQueueFamilyProperties> queue_props;
-	queue_props.resize(queue_family_count);
-
-	vkGetPhysicalDeviceQueueFamilyProperties(m_p_physical_device, &queue_family_count, queue_props.data());
-
-	RMLUI_VK_ASSERTMSG(queue_family_count >= 1, "failed to vkGetPhysicalDeviceQueueFamilyProperties (filling vector of VkQueueFamilyProperties)");
-
-	constexpr uint32_t kUint32Undefined = uint32_t(-1);
-
-	m_queue_index_compute = kUint32Undefined;
-	m_queue_index_graphics = kUint32Undefined;
-	m_queue_index_present = kUint32Undefined;
-
-	for (uint32_t i = 0; i < queue_family_count; ++i)
-	{
-		if ((queue_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0)
-		{
-			if (m_queue_index_graphics == kUint32Undefined)
-				m_queue_index_graphics = i;
-
-			VkBool32 is_support_present;
-
-			vkGetPhysicalDeviceSurfaceSupportKHR(m_p_physical_device, i, m_p_surface, &is_support_present);
-
-			// User's videocard may have same index for two queues like graphics and present
-
-			if (is_support_present == VK_TRUE)
-			{
-				m_queue_index_graphics = i;
-				m_queue_index_present = m_queue_index_graphics;
-				break;
-			}
-		}
-	}
-
-	if (m_queue_index_present == static_cast<uint32_t>(-1))
-	{
-		Rml::Log::Message(Rml::Log::LT_WARNING, "[Vulkan] User doesn't have one index for two queues, so we need to find for present queue index");
-
-		for (uint32_t i = 0; i < queue_family_count; ++i)
-		{
-			VkBool32 is_support_present;
-
-			vkGetPhysicalDeviceSurfaceSupportKHR(m_p_physical_device, i, m_p_surface, &is_support_present);
-
-			if (is_support_present == VK_TRUE)
-			{
-				m_queue_index_present = i;
-				break;
-			}
-		}
-	}
-
-	for (uint32_t i = 0; i < queue_family_count; ++i)
-	{
-		if ((queue_props[i].queueFlags & VK_QUEUE_COMPUTE_BIT) != 0)
-		{
-			if (m_queue_index_compute == kUint32Undefined)
-				m_queue_index_compute = i;
-
-			if (i != m_queue_index_graphics)
-			{
-				m_queue_index_compute = i;
-				break;
-			}
-		}
-	}
-
-#ifdef RMLUI_VK_DEBUG
-	Rml::Log::Message(Rml::Log::LT_DEBUG, "[Vulkan] User family queues indecies: Graphics[%d] Present[%d] Compute[%d]", m_queue_index_graphics,
-		m_queue_index_present, m_queue_index_compute);
-#endif
+	m_queue_index_present = queueIndexPresent;
+	m_p_queue_present = queuePresent;
 }
 
-void RenderInterface_VK::Initialize_Queues() noexcept
-{
-	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize VkDevice before using this method");
-
-	vkGetDeviceQueue(m_p_device, m_queue_index_graphics, 0, &m_p_queue_graphics);
-
-	if (m_queue_index_graphics == m_queue_index_present)
-	{
-		m_p_queue_present = m_p_queue_graphics;
-	}
-	else
-	{
-		vkGetDeviceQueue(m_p_device, m_queue_index_present, 0, &m_p_queue_present);
-	}
-
-	constexpr uint32_t kUint32Undefined = uint32_t(-1);
-
-	if (m_queue_index_compute != kUint32Undefined)
-	{
-		vkGetDeviceQueue(m_p_device, m_queue_index_compute, 0, &m_p_queue_compute);
-	}
-}
-
-void RenderInterface_VK::Initialize_SyncPrimitives() noexcept
+void RenderInterface_VK::SetSyncPrimitives() noexcept
 {
 	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize your device");
 
@@ -1149,6 +878,9 @@ void RenderInterface_VK::Initialize_SyncPrimitives() noexcept
 		info_fence.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		info_fence.pNext = nullptr;
 		info_fence.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		if (m_p_device == VK_NULL_HANDLE)
+			std::cerr << "Device is NULL" << std::endl;
 
 		status = vkCreateFence(m_p_device, &info_fence, nullptr, &m_executed_fences[i]);
 
@@ -1170,7 +902,7 @@ void RenderInterface_VK::Initialize_SyncPrimitives() noexcept
 	}
 }
 
-void RenderInterface_VK::Initialize_Resources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept
+void RenderInterface_VK::SetResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept
 {
 	m_command_buffer_ring.Initialize(m_p_device, m_queue_index_graphics);
 
@@ -1187,7 +919,7 @@ void RenderInterface_VK::Initialize_Resources(const VkPhysicalDeviceProperties& 
 	CreateDescriptorSets();
 }
 
-void RenderInterface_VK::Initialize_Allocator() noexcept
+void RenderInterface_VK::SetAllocator() noexcept
 {
 	RMLUI_VK_ASSERTMSG(m_p_device, "you must have a valid VkDevice here");
 	RMLUI_VK_ASSERTMSG(m_p_physical_device, "you must have a valid VkPhysicalDevice here");
@@ -1208,28 +940,6 @@ void RenderInterface_VK::Initialize_Allocator() noexcept
 	auto status = vmaCreateAllocator(&info, &m_p_allocator);
 
 	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vmaCreateAllocator");
-}
-
-void RenderInterface_VK::Destroy_Instance() noexcept
-{
-	vkDestroyInstance(m_p_instance, nullptr);
-}
-
-void RenderInterface_VK::Destroy_Device() noexcept
-{
-	vkDestroyDevice(m_p_device, nullptr);
-}
-
-void RenderInterface_VK::Destroy_Swapchain() noexcept
-{
-	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize device");
-
-	vkDestroySwapchainKHR(m_p_device, m_p_swapchain, nullptr);
-}
-
-void RenderInterface_VK::Destroy_Surface() noexcept
-{
-	vkDestroySurfaceKHR(m_p_instance, m_p_surface, nullptr);
 }
 
 void RenderInterface_VK::Destroy_SyncPrimitives() noexcept
@@ -1275,15 +985,6 @@ void RenderInterface_VK::Destroy_Resources() noexcept
 	Destroy_Geometries();
 
 	m_manager_descriptors.Shutdown(m_p_device);
-}
-
-void RenderInterface_VK::Destroy_Allocator() noexcept
-{
-	RMLUI_VK_ASSERTMSG(m_p_allocator, "you must have an initialized allocator for deleting");
-
-	vmaDestroyAllocator(m_p_allocator);
-
-	m_p_allocator = nullptr;
 }
 
 void RenderInterface_VK::QueryInstanceLayers(LayerPropertiesList& result) noexcept
@@ -3039,6 +2740,4 @@ void RenderInterface_VK::MemoryPool::Free_GeometryHandle_ShaderDataOnly(geometry
 	p_valid_geometry_handle->m_p_shader_allocation = nullptr;
 }
 
-#define GLAD_VULKAN_IMPLEMENTATION
-#define VMA_IMPLEMENTATION
 #include "RmlUi_Include_Vulkan.h"

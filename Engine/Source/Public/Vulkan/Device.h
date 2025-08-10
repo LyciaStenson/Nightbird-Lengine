@@ -28,16 +28,20 @@ namespace Nightbird
 
 		VmaAllocator GetAllocator() const;
 
+		VkPhysicalDeviceProperties GetPhysicalDeviceProperties() const;
+
 		std::vector<VkCommandBuffer> commandBuffers;
 
 		VkQueue graphicsQueue;
 		VkQueue presentQueue;
 
 		uint32_t graphicsQueueFamily;
+		uint32_t presentQueueFamily;
 
 	private:
 		VkDevice logicalDevice;
 		VkPhysicalDevice physicalDevice;
+		VkPhysicalDeviceProperties physicalDeviceProperties;
 
 		VkInstance instance;
 		VkSurfaceKHR surface;
@@ -45,6 +49,8 @@ namespace Nightbird
 		VmaAllocator allocator;
 
 		VkCommandPool commandPool;
+		
+		bool CheckDeviceExtensionSupport();
 
 		void SelectPhysicalDevice();
 		void CreateLogicalDevice();

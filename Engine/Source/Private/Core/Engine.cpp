@@ -10,12 +10,16 @@
 #include <Core/Scene.h>
 #include <Core/RenderTarget.h>
 #include <Core/Renderer.h>
+#include <Vulkan/Instance.h>
 #include <Vulkan/Device.h>
 #include <Vulkan/DescriptorPool.h>
 #include <Vulkan/DescriptorSetLayoutManager.h>
 #include <Vulkan/GlobalDescriptorSetManager.h>
 #include <Core/GlmRegistration.h>
 #include <Input.h>
+
+#include <RmlUi/Core.h>
+#include <RmlUi/Backends/RmlUi_Backend.h>
 
 namespace Nightbird
 {
@@ -37,11 +41,29 @@ namespace Nightbird
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
+		
+		int width, height;
+		glfwWindow->GetFramebufferSize(&width, &height);
+		if (!Backend::Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueueFamily, renderer->GetDevice()->presentQueue, glfwWindow->Get()))
+		{
+			std::cerr << "Failed to inialize backend" << std::endl;
+		}
+
+		Rml::SetSystemInterface(Backend::GetSystemInterface());
+		Rml::SetRenderInterface(Backend::GetRenderInterface());
+
+		Rml::Initialise();
+
+		context = Rml::CreateContext("main", Rml::Vector2i(width, height));
+		if (!context)
+		{
+			std::cerr << "Failed to create context" << std::endl;
+		}
 	}
 	
 	Engine::~Engine()
 	{
-
+		Rml::Shutdown();
 	}
 
 	GlfwWindow* Engine::GetGlfwWindow() const

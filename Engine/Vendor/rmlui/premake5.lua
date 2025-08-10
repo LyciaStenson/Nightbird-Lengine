@@ -6,18 +6,16 @@ project "rmlui"
 	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
 
-	defines { "RMLUI_STATIC_LIB" }
-
 	files
 	{
 		"Source/**.cpp",
-		"Backends/RmlUi_Platform_GLFW.cpp",
-		"Backends/RmlUi_Renderer_VK.cpp",
-		"Backends/RmlUi_Backend_GLFW_VK.cpp",
-		"Backends/RmlUi_Platform_GLFW.h",
-		"Backends/RmlUi_Renderer_VK.h",
-		"Backends/RmlUi_Include_Vulkan.h",
-		"Backends/RmlUi_Vulkan/ShadersCompiledSPV.h"
+		"Include/RmlUi/Backends/RmlUi_Platform_GLFW.cpp",
+		"Include/RmlUi/Backends/RmlUi_Renderer_VK.cpp",
+		"Include/RmlUi/Backends/RmlUi_Backend_GLFW_VK.cpp",
+		"Include/RmlUi/Backends/RmlUi_Platform_GLFW.h",
+		"Include/RmlUi/Backends/RmlUi_Renderer_VK.h",
+		"Include/RmlUi/Backends/RmlUi_Include_Vulkan.h",
+		"Include/RmlUi/Backends/RmlUi_Vulkan/ShadersCompiledSPV.h"
 	}
 
 	removefiles
@@ -30,7 +28,6 @@ project "rmlui"
 	includedirs
 	{
 		"Include",
-		"Backends",
 		"%{wks.location}/Engine/Vendor/freetype/include",
 		"%{wks.location}/Engine/Vendor/glfw/include",
 		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
