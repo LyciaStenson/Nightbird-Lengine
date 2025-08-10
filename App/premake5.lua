@@ -37,7 +37,7 @@ project "App"
 		"%{wks.location}/Engine/Vendor/freetype"
 	}
 
-	links { "Engine", "rmlui", "freetype" }
+	links { "Engine" }
 
 	filter { "system:windows" }
 		links { "rttr" }

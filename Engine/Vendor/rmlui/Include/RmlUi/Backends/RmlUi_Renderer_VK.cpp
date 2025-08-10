@@ -810,9 +810,9 @@ bool RenderInterface_VK::Initialize(VkInstance instance, VkDevice logicalDevice,
 
 	SetQueues(queueIndexGraphics, queueGraphics, queueIndexPresent, queuePresent);
 
-	SetSyncPrimitives();
+	CreateSyncPrimitives();
 	SetAllocator();
-	SetResources(physicalDeviceProperties);
+	CreateResources(physicalDeviceProperties);
 
 	return true;
 }
@@ -826,6 +826,8 @@ void RenderInterface_VK::Shutdown()
 	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "you must have a valid status here");
 	
 	DestroyResourcesDependentOnSize();
+	Destroy_Resources();
+	Destroy_SyncPrimitives();
 	Destroy_ReportDebugCallback();
 }
 
@@ -861,7 +863,7 @@ void RenderInterface_VK::SetQueues(uint32_t queueIndexGraphics, VkQueue queueGra
 	m_p_queue_present = queuePresent;
 }
 
-void RenderInterface_VK::SetSyncPrimitives() noexcept
+void RenderInterface_VK::CreateSyncPrimitives() noexcept
 {
 	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize your device");
 
@@ -911,7 +913,7 @@ void RenderInterface_VK::SetSyncPrimitives() noexcept
 	}
 }
 
-void RenderInterface_VK::SetResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept
+void RenderInterface_VK::CreateResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept
 {
 	m_command_buffer_ring.Initialize(m_p_device, m_queue_index_graphics);
 

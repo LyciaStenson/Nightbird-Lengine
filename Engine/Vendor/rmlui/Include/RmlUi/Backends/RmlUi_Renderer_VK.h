@@ -444,8 +444,8 @@ private:
 	void SetSwapchain(VkSwapchainKHR swapchain, VkFormat swapchainFormat, VkExtent2D extent) noexcept;
 	void SetSurface(VkSurfaceKHR surface) noexcept;
 	void SetQueues(uint32_t queueIndexGraphics, VkQueue queueGraphics, uint32_t queueIndexPresent, VkQueue queuePresent) noexcept;
-	void SetSyncPrimitives() noexcept;
-	void SetResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept;
+	void CreateSyncPrimitives() noexcept;
+	void CreateResources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept;
 	void SetAllocator() noexcept;
 	
 	void Destroy_SyncPrimitives() noexcept;

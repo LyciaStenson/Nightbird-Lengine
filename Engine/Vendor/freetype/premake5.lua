@@ -54,7 +54,10 @@ project "freetype"
 		"src/truetype/truetype.c",
 		"src/type1/type1.c",
 		"src/type42/type42.c",
-		"src/winfonts/winfnt.c"
+		"src/winfonts/winfnt.c",
+
+		"src/base/ftsystem.c",
+		"src/base/ftdebug.c"
 	}
 
 	includedirs
