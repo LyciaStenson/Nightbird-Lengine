@@ -29,7 +29,8 @@ project "Engine"
 		"Vendor/stb",
 		"Vendor/fastgltf/include",
 		"Vendor/rttr/src",
-		"Vendor/json"
+		"Vendor/json",
+		"Vendor/rmlui/Include"
 	}
 
 	links { "glfw", "fastgltf", "Input" }

@@ -800,24 +800,24 @@ bool RenderInterface_VK::Initialize(Rml::Vector<const char*> required_extensions
 {
 	RMLUI_ZoneScopedN("Vulkan - Initialize");
 
-	int glad_result = 0;
-	glad_result = gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE);
-	RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Global functions");
+	//int glad_result = 0;
+	//glad_result = gladLoaderLoadVulkan(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE);
+	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Global functions");
 
 	Initialize_Instance(std::move(required_extensions));
 
 	VkPhysicalDeviceProperties physical_device_properties = {};
 	Initialize_PhysicalDevice(physical_device_properties);
 
-	glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, VK_NULL_HANDLE);
-	RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Instance functions");
+	//glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, VK_NULL_HANDLE);
+	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Instance functions");
 
 	Initialize_Surface(create_surface_callback);
 	Initialize_QueueIndecies();
 	Initialize_Device();
 
-	glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, m_p_device);
-	RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Device functions");
+	//glad_result = gladLoaderLoadVulkan(m_p_instance, m_p_physical_device, m_p_device);
+	//RMLUI_VK_ASSERTMSG(glad_result != 0, "Vulkan loader failed - Device functions");
 
 	Initialize_Queues();
 	Initialize_SyncPrimitives();
@@ -845,7 +845,7 @@ void RenderInterface_VK::Shutdown()
 	Destroy_ReportDebugCallback();
 	Destroy_Instance();
 
-	gladLoaderUnloadVulkan();
+	//gladLoaderUnloadVulkan();
 }
 
 void RenderInterface_VK::Initialize_Instance(Rml::Vector<const char*> required_extensions) noexcept
