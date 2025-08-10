@@ -54,11 +54,11 @@ namespace Nightbird
 
 		Rml::Initialise();
 
-		context = Rml::CreateContext("main", Rml::Vector2i(width, height));
-		if (!context)
-		{
-			std::cerr << "Failed to create context" << std::endl;
-		}
+		//context = Rml::CreateContext("main", Rml::Vector2i(width, height));
+		//if (!context)
+		//{
+			//std::cerr << "Failed to create context" << std::endl;
+		//}
 	}
 	
 	Engine::~Engine()

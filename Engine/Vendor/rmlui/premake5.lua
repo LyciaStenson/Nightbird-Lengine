@@ -6,6 +6,14 @@ project "rmlui"
 	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
 
+	defines {
+		"RMLUI_FONT_ENGINE_FREETYPE",
+		"VK_NO_PROTOTYPES",
+		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
+		"GLFW_INCLUDE_VULKAN",
+		"GLFW_DLL"
+	}
+
 	files
 	{
 		"Source/**.cpp",
@@ -31,6 +39,7 @@ project "rmlui"
 		"%{wks.location}/Engine/Vendor/freetype/include",
 		"%{wks.location}/Engine/Vendor/glfw/include",
 		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
+		"%{wks.location}/Engine/Vendor/volk",
 		"%{wks.location}/Engine/Vendor/vma"
 	}
 

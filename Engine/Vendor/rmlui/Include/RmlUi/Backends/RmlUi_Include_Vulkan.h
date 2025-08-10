@@ -21,7 +21,7 @@
 	#pragma GCC system_header
 #endif
 
-#include "vulkan/vulkan.h"
+#include "volk.h"
 // Always include "vulkan.h" first, this comment prevents clang-format from reordering the includes.
 #include "vk_mem_alloc.h"
 

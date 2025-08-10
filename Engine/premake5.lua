@@ -33,7 +33,7 @@ project "Engine"
 		"Vendor/rmlui/Include"
 	}
 
-	links { "glfw", "fastgltf", "rmlui", "Input" }
+	links { "glfw", "fastgltf", "rmlui", "freetype", "Input" }
 
 	filter { "system:windows" }
 		links { "rttr" }

@@ -33,10 +33,11 @@ project "App"
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/fastgltf/include",
 		"%{wks.location}/Engine/Vendor/rttr/src",
-		"%{wks.location}/Engine/Vendor/json"
+		"%{wks.location}/Engine/Vendor/json",
+		"%{wks.location}/Engine/Vendor/freetype"
 	}
 
-	links { "Engine" }
+	links { "Engine", "rmlui", "freetype" }
 
 	filter { "system:windows" }
 		links { "rttr" }

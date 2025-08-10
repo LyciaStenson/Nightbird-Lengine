@@ -865,6 +865,13 @@ void RenderInterface_VK::SetSyncPrimitives() noexcept
 {
 	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize your device");
 
+	VkFence testFence;
+	VkFenceCreateInfo testInfo = {};
+	testInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	testInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	VkResult testStatus = vkCreateFence(m_p_device, &testInfo, nullptr, &testFence);
+
 	m_executed_fences.resize(kSwapchainBackBufferCount);
 	m_semaphores_finished_render.resize(kSwapchainBackBufferCount);
 	m_semaphores_image_available.resize(kSwapchainBackBufferCount);
@@ -881,6 +888,8 @@ void RenderInterface_VK::SetSyncPrimitives() noexcept
 
 		if (m_p_device == VK_NULL_HANDLE)
 			std::cerr << "Device is NULL" << std::endl;
+
+		std::cout << "m_executed_fences[" << i << "]: " << &m_executed_fences[i] << std::endl;
 
 		status = vkCreateFence(m_p_device, &info_fence, nullptr, &m_executed_fences[i]);
 
