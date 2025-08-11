@@ -40,5 +40,4 @@ project "rmlui"
 
 	filter "configurations:Debug"
 		defines { "RMLUI_DEBUG" }
-
 	filter { }

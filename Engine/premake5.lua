@@ -30,7 +30,8 @@ project "Engine"
 		"Vendor/fastgltf/include",
 		"Vendor/rttr/src",
 		"Vendor/json",
-		"Vendor/rmlui/Include"
+		"Vendor/rmlui/Include",
+		"Vendor/rmlui/Backends"
 	}
 
 	links { "glfw", "fastgltf", "rmlui", "freetype", "Input" }
@@ -38,3 +39,7 @@ project "Engine"
 	filter { "system:windows" }
 		links { "rttr" }
 	filter {}
+
+	filter "configurations:Debug"
+		defines { "RMLUI_DEBUG" }
+	filter { }
