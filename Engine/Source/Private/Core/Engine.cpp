@@ -44,21 +44,14 @@ namespace Nightbird
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 		
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
-
-		//int width, height;
-		//glfwWindow->GetFramebufferSize(&width, &height);
-		//if (!Backend::Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueueFamily, renderer->GetDevice()->presentQueue, glfwWindow->Get()))
-		//{
-			//std::cerr << "Failed to inialize backend" << std::endl;
-		//}
-
-		uiSystemInterface = std::make_unique<UISystemInterface>();
+		
+		uiSystemInterface = std::make_unique<UISystemInterface>(glfwWindow->Get());
 		uiRenderInterface = std::make_unique<UIRenderInterface>();
 
 		Rml::SetSystemInterface(uiSystemInterface.get());
 		Rml::SetRenderInterface(uiRenderInterface.get());
-
-		//Rml::Initialise();
+		
+		Rml::Initialise();
 
 		//context = Rml::CreateContext("main", Rml::Vector2i(width, height));
 		//if (!context)
@@ -69,7 +62,7 @@ namespace Nightbird
 	
 	Engine::~Engine()
 	{
-		//Rml::Shutdown();
+		Rml::Shutdown();
 	}
 
 	GlfwWindow* Engine::GetGlfwWindow() const
