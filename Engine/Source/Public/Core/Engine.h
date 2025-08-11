@@ -17,6 +17,8 @@ namespace Nightbird
 	class MeshInstance;
 	class Scene;
 	class Renderer;
+	class UISystemInterface;
+	class UIRenderInterface;
 	
 	class Engine
 	{
@@ -40,6 +42,9 @@ namespace Nightbird
 		
 		std::unique_ptr<Scene> scene;
 		std::unique_ptr<ModelManager> modelManager;
+
+		std::unique_ptr<UISystemInterface> uiSystemInterface;
+		std::unique_ptr<UIRenderInterface> uiRenderInterface;
 
 		Rml::Context* context = nullptr;
 		Rml::ElementDocument* document = nullptr;

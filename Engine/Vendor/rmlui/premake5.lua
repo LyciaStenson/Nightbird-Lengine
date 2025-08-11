@@ -16,14 +16,7 @@ project "rmlui"
 
 	files
 	{
-		"Source/**.cpp",
-		"Include/RmlUi/Backends/RmlUi_Platform_GLFW.cpp",
-		"Include/RmlUi/Backends/RmlUi_Renderer_VK.cpp",
-		"Include/RmlUi/Backends/RmlUi_Backend_GLFW_VK.cpp",
-		"Include/RmlUi/Backends/RmlUi_Platform_GLFW.h",
-		"Include/RmlUi/Backends/RmlUi_Renderer_VK.h",
-		"Include/RmlUi/Backends/RmlUi_Include_Vulkan.h",
-		"Include/RmlUi/Backends/RmlUi_Vulkan/ShadersCompiledSPV.h"
+		"Source/**.cpp"
 	}
 
 	removefiles
