@@ -5,6 +5,11 @@
 
 #include <volk.h>
 
+namespace Rml
+{
+	class Context;
+}
+
 namespace Nightbird
 {
 	class VulkanInstance;
@@ -41,7 +46,7 @@ namespace Nightbird
 		
 		void SetRenderTarget(RenderTarget* renderTarget);
 
-		void DrawFrame(Scene* scene);
+		void DrawFrame(Scene* scene, Rml::Context* uiContext);
 
 		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
 

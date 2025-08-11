@@ -19,6 +19,7 @@
 #include <Input.h>
 
 #include <RmlUi/Core.h>
+#include <RmlUi/Debugger.h>
 
 #include <UI/SystemInterface.h>
 #include <UI/RenderInterface.h>
@@ -58,8 +59,21 @@ namespace Nightbird
 		context = Rml::CreateContext("main", Rml::Vector2i(width, height));
 		if (!context)
 		{
-			std::cerr << "Failed to create context" << std::endl;
+			std::cerr << "Failed to create RmlUi Context" << std::endl;
+			Rml::Shutdown();
 		}
+
+		Rml::Debugger::Initialise(context);
+
+		Rml::LoadFontFace("Assets/Fonts/RobotoFlex-Regular.ttf");
+		
+		Rml::ElementDocument* document = context->LoadDocument("Assets/Test.rml");
+		if (!document)
+		{
+			std::cerr << "Failed to load RmlUi Test Document" << std::endl;
+			Rml::Shutdown();
+		}
+		document->Show();
 	}
 	
 	Engine::~Engine()
@@ -108,7 +122,11 @@ namespace Nightbird
 			scene->Update(deltaTime);
 
 			modelManager->ProcessUploadQueue();
-			renderer->DrawFrame(scene.get());
+
+			if (context)
+				context->Update();
+			
+			renderer->DrawFrame(scene.get(), context);
 		}
 		vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
 	}

@@ -23,6 +23,8 @@
 #include <Core/CameraUBO.h>
 #include <Core/RenderTarget.h>
 
+#include <RmlUi/Core.h>
+
 namespace Nightbird
 {
 	Renderer::Renderer(GlfwWindow* glfwWindow)
@@ -99,7 +101,7 @@ namespace Nightbird
 		renderTarget = target;
 	}
 
-	void Renderer::DrawFrame(Scene* scene)
+	void Renderer::DrawFrame(Scene* scene, Rml::Context* uiContext)
 	{
 		vkWaitForFences(device->GetLogical(), 1, &sync->inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -124,6 +126,8 @@ namespace Nightbird
 
 		renderTarget->Render(scene, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
 
+		uiContext->Render();
+		
 		renderPass->EndCommandBuffer(commandBuffer);
 
 		vkResetFences(device->GetLogical(), 1, &sync->inFlightFences[currentFrame]);
