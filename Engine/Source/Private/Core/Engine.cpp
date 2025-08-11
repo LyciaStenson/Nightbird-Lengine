@@ -19,7 +19,6 @@
 #include <Input.h>
 
 #include <RmlUi/Core.h>
-//#include <RmlUi/Backends/RmlUi_Backend.h>
 
 #include <UI/SystemInterface.h>
 #include <UI/RenderInterface.h>
@@ -53,11 +52,14 @@ namespace Nightbird
 		
 		Rml::Initialise();
 
-		//context = Rml::CreateContext("main", Rml::Vector2i(width, height));
-		//if (!context)
-		//{
-			//std::cerr << "Failed to create context" << std::endl;
-		//}
+		int width = 1280, height = 720;
+		glfwGetWindowSize(glfwWindow->Get(), &width, &height);
+		
+		context = Rml::CreateContext("main", Rml::Vector2i(width, height));
+		if (!context)
+		{
+			std::cerr << "Failed to create context" << std::endl;
+		}
 	}
 	
 	Engine::~Engine()

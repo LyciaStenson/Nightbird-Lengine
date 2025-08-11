@@ -6,13 +6,13 @@
 #include <deque>
 #include <bitset>
 
-#include <GLFW/glfw3.h>
-
 #ifdef INPUT_BUILD
 	#define INPUT_API __declspec(dllexport)
 #else
 	#define INPUT_API __declspec(dllimport)
 #endif
+
+struct GLFWwindow;
 
 extern "C"
 {

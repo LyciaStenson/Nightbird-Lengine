@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <GLFW/glfw3.h>
+
 #include <Core/Renderer.h>
 
 namespace Nightbird

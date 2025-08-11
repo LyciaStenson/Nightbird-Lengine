@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <GLFW/glfw3.h>
+
 #include <Vulkan/Config.h>
 
 namespace Nightbird

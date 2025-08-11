@@ -3,8 +3,6 @@
 #include <vector>
 #include <optional>
 
-#include <GLFW/glfw3.h>
-
 #include <volk.h>
 #include <vk_mem_alloc.h>
 

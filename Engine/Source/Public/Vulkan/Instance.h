@@ -2,8 +2,9 @@
 
 #include <vector>
 
-#include <GLFW/glfw3.h>
 #include <volk.h>
+
+struct GLFWwindow;
 
 namespace Nightbird
 {

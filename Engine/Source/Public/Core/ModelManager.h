@@ -8,8 +8,6 @@
 #include <future>
 #include <string>
 
-#include <Vulkan/Texture.h>
-
 #include <volk.h>
 
 #include <glm/glm.hpp>
@@ -18,6 +16,8 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/types.hpp>
 #include <fastgltf/tools.hpp>
+
+#include <Vulkan/Texture.h>
 
 namespace Nightbird
 {

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <GLFW/glfw3.h>
+
 #include <Input.h>
 
 using namespace Nightbird;
