@@ -11,6 +11,7 @@
 #include <Core/RenderTarget.h>
 #include <Core/Renderer.h>
 #include <Vulkan/Instance.h>
+#include <Vulkan/SwapChain.h>
 #include <Vulkan/Device.h>
 #include <Vulkan/DescriptorPool.h>
 #include <Vulkan/DescriptorSetLayoutManager.h>
@@ -46,14 +47,19 @@ namespace Nightbird
 		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 		
 		uiSystemInterface = std::make_unique<UISystemInterface>(glfwWindow->Get());
-		uiRenderInterface = std::make_unique<UIRenderInterface>();
 
+		uiRenderInterface = std::make_unique<UIRenderInterface>();
+		uiRenderInterface->Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetAllocator(), renderer->GetRenderPass()->Get(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueue, renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->presentQueueFamily);
+		
+		int width = 1280, height = 720;
+		glfwWindow->GetFramebufferSize(&width, &height);
+		uiRenderInterface->SetViewport(renderer->GetSwapChain()->Get(), width, height);
+		
 		Rml::SetSystemInterface(uiSystemInterface.get());
 		Rml::SetRenderInterface(uiRenderInterface.get());
 		
 		Rml::Initialise();
-
-		int width = 1280, height = 720;
+		
 		glfwGetWindowSize(glfwWindow->Get(), &width, &height);
 		
 		context = Rml::CreateContext("main", Rml::Vector2i(width, height));
@@ -78,6 +84,7 @@ namespace Nightbird
 	
 	Engine::~Engine()
 	{
+		uiRenderInterface->Shutdown();
 		Rml::Shutdown();
 	}
 
@@ -126,7 +133,7 @@ namespace Nightbird
 			if (context)
 				context->Update();
 			
-			renderer->DrawFrame(scene.get(), context);
+			renderer->DrawFrame(scene.get(), uiRenderInterface.get(), context);
 		}
 		vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
 	}

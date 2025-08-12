@@ -20,6 +20,7 @@ project "Engine"
 
 	includedirs {
 		"Source/Public",
+		"Source/Private",
 		"Modules/Input/Source/Public",
 		"Vendor/vulkan-headers/include",
 		"Vendor/volk",

@@ -28,6 +28,7 @@ namespace Nightbird
 	class MeshInstance;
 	class MeshPrimitive;
 	class RenderTarget;
+	class UIRenderInterface;
 	struct Renderable;
 	
 	class Renderer
@@ -46,7 +47,7 @@ namespace Nightbird
 		
 		void SetRenderTarget(RenderTarget* renderTarget);
 
-		void DrawFrame(Scene* scene, Rml::Context* uiContext);
+		void DrawFrame(Scene* scene, UIRenderInterface* uiRenderInterface, Rml::Context* uiContext);
 
 		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
 

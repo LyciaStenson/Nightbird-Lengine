@@ -66,6 +66,7 @@ namespace Nightbird
 		if (candidates.rbegin()->first > 0)
 		{
 			physicalDevice = candidates.rbegin()->second;
+			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 		}
 		else
 		{

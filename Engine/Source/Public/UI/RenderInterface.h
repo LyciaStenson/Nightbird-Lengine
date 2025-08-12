@@ -82,15 +82,15 @@ namespace Nightbird
 
 		using CreateSurfaceCallback = bool (*)(VkInstance instance, VkSurfaceKHR* out_surface);
 
-		bool Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily);
+		bool Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily);
 		void Shutdown();
 
-		void BeginFrame();
-		void EndFrame();
+		//void BeginFrame();
+		//void EndFrame();
 
-		void SetViewport(int width, int height);
+		void SetViewport(VkSwapchainKHR swapchain, int width, int height);
 		bool IsSwapchainValid();
-		void RecreateSwapchain();
+		//void RecreateSwapchain();
 
 		// -- Inherited from Rml::RenderInterface --
 
@@ -452,24 +452,24 @@ namespace Nightbird
 	private:
 		Rml::TextureHandle CreateTexture(Rml::Span<const Rml::byte> source, Rml::Vector2i dimensions, const Rml::String& name);
 
-		void Initialize_Instance(Rml::Vector<const char*> required_extensions) noexcept;
-		void Initialize_Device() noexcept;
-		void Initialize_PhysicalDevice(VkPhysicalDeviceProperties& out_physical_device_properties) noexcept;
-		void Initialize_Swapchain(VkExtent2D window_extent) noexcept;
-		void Initialize_Surface(CreateSurfaceCallback create_surface_callback) noexcept;
-		void Initialize_QueueIndecies() noexcept;
-		void Initialize_Queues() noexcept;
+		//void Initialize_Instance(Rml::Vector<const char*> required_extensions) noexcept;
+		//void Initialize_Device() noexcept;
+		//void Initialize_PhysicalDevice(VkPhysicalDeviceProperties& out_physical_device_properties) noexcept;
+		//void Initialize_Swapchain(VkExtent2D window_extent) noexcept;
+		//void Initialize_Surface(CreateSurfaceCallback create_surface_callback) noexcept;
+		//void Initialize_QueueIndecies() noexcept;
+		//void Initialize_Queues() noexcept;
 		void Initialize_SyncPrimitives() noexcept;
 		void Initialize_Resources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept;
-		void Initialize_Allocator() noexcept;
+		//void Initialize_Allocator() noexcept;
 
-		void Destroy_Instance() noexcept;
-		void Destroy_Device() noexcept;
-		void Destroy_Swapchain() noexcept;
-		void Destroy_Surface() noexcept;
+		//void Destroy_Instance() noexcept;
+		//void Destroy_Device() noexcept;
+		//void Destroy_Swapchain() noexcept;
+		//void Destroy_Surface() noexcept;
 		void Destroy_SyncPrimitives() noexcept;
 		void Destroy_Resources() noexcept;
-		void Destroy_Allocator() noexcept;
+		//void Destroy_Allocator() noexcept;
 
 		void QueryInstanceLayers(LayerPropertiesList& result) noexcept;
 		void QueryInstanceExtensions(ExtensionPropertiesList& result, const LayerPropertiesList& instance_layer_properties) noexcept;
@@ -510,7 +510,7 @@ namespace Nightbird
 		void CreateDescriptorSets() noexcept;
 		void CreateSamplers() noexcept;
 		void Create_Pipelines() noexcept;
-		void CreateRenderPass() noexcept;
+		//void CreateRenderPass() noexcept;
 
 		void CreateSwapchainFrameBuffers(const VkExtent2D& real_render_image_size) noexcept;
 
@@ -531,22 +531,22 @@ namespace Nightbird
 
 		void Destroy_Texture(const texture_data_t& p_texture) noexcept;
 
-		void DestroyResourcesDependentOnSize() noexcept;
-		void DestroySwapchainImageViews() noexcept;
-		void DestroySwapchainFrameBuffers() noexcept;
-		void DestroyRenderPass() noexcept;
+		//void DestroyResourcesDependentOnSize() noexcept;
+		//void DestroySwapchainImageViews() noexcept;
+		//void DestroySwapchainFrameBuffers() noexcept;
+		//void DestroyRenderPass() noexcept;
 		void Destroy_Pipelines() noexcept;
 		void DestroyDescriptorSets() noexcept;
 		void DestroyPipelineLayout() noexcept;
 		void DestroySamplers() noexcept;
 
-		void Wait() noexcept;
+		//void Wait() noexcept;
 
 		void Update_PendingForDeletion_Textures_By_Frames() noexcept;
 		void Update_PendingForDeletion_Geometries() noexcept;
 
-		void Submit() noexcept;
-		void Present() noexcept;
+		//void Submit() noexcept;
+		//void Present() noexcept;
 
 		VkFormat Get_SupportedDepthFormat();
 
