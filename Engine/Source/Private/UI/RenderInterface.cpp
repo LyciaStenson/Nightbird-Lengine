@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <string.h>
 
+#include <iostream>
+
 // AlignUp(314, 256) = 512
 template <typename T>
 static T AlignUp(T val, T alignment)
@@ -802,6 +804,11 @@ namespace Nightbird
 	//{
 		//SetViewport(m_width, m_height);
 	//}
+
+	void UIRenderInterface::SetCommandBuffer(VkCommandBuffer commandBuffer)
+	{
+		m_p_current_command_buffer = commandBuffer;
+	}
 
 	bool UIRenderInterface::Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily)
 	{

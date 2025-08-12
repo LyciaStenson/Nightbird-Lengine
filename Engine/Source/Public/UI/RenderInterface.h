@@ -92,6 +92,8 @@ namespace Nightbird
 		bool IsSwapchainValid();
 		//void RecreateSwapchain();
 
+		void SetCommandBuffer(VkCommandBuffer commandBuffer);
+
 		// -- Inherited from Rml::RenderInterface --
 
 		/// Called by RmlUi when it wants to compile geometry it believes will be static for the forseeable future.
