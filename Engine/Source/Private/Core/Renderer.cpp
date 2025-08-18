@@ -129,10 +129,10 @@ namespace Nightbird
 		renderPass->Begin(commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
 
 		renderTarget->Render(scene, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
-
-		uiRenderInterface->SetCommandBuffer(commandBuffer);
+		
 		uiRenderInterface->BeginFrame();
 		uiContext->Render();
+		uiRenderInterface->EndFrame();
 
 		renderPass->End(commandBuffer);
 		

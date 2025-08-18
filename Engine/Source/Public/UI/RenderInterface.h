@@ -85,14 +85,12 @@ namespace Nightbird
 		bool Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily);
 		void Shutdown();
 		
-		void BeginFrame();
-		//void EndFrame();
+		void BeginFrame();//VkCommandBuffer commandBuffer);
+		void EndFrame();
 
 		void SetViewport(VkSwapchainKHR swapchain, int width, int height);
 		bool IsSwapchainValid();
 		//void RecreateSwapchain();
-
-		void SetCommandBuffer(VkCommandBuffer commandBuffer);
 
 		// -- Inherited from Rml::RenderInterface --
 
@@ -331,7 +329,7 @@ namespace Nightbird
 		};
 
 		// If we need additional command buffers, we can add them to this list and retrieve them from the ring.
-		enum class CommandBufferName { Primary, Count };
+		enum class CommandBufferName { Primary, Secondary, Count };
 
 		// The command buffer ring stores a unique set of named command buffers for each bufferd frame.
 		// Explanation of how to use Vulkan efficiently: https://vkguide.dev/docs/chapter-4/double_buffering/
@@ -538,11 +536,11 @@ namespace Nightbird
 		//void DestroySwapchainFrameBuffers() noexcept;
 		//void DestroyRenderPass() noexcept;
 		void Destroy_Pipelines() noexcept;
-		void DestroyDescriptorSets() noexcept;
-		void DestroyPipelineLayout() noexcept;
+		//void DestroyDescriptorSets() noexcept;
+		//void DestroyPipelineLayout() noexcept;
 		void DestroySamplers() noexcept;
 
-		void Wait() noexcept;
+		//void Wait() noexcept;
 
 		void Update_PendingForDeletion_Textures_By_Frames() noexcept;
 		void Update_PendingForDeletion_Geometries() noexcept;

@@ -692,26 +692,26 @@ namespace Nightbird
 		m_user_data_for_vertex_shader.m_transform = m_projection * (transform ? *transform : Rml::Matrix4f::Identity());
 	}
 
-	void UIRenderInterface::BeginFrame()
+	void UIRenderInterface::BeginFrame()//VkCommandBuffer commandBuffer)
 	{
 		//Wait();
 
 		Update_PendingForDeletion_Textures_By_Frames();
 		Update_PendingForDeletion_Geometries();
+		
+		m_command_buffer_ring.OnBeginFrame();
+		m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
 
-		//m_command_buffer_ring.OnBeginFrame();
-		//m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
+		VkCommandBufferBeginInfo info = {};
 
-		//VkCommandBufferBeginInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		info.pInheritanceInfo = nullptr;
+		info.pNext = nullptr;
+		info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-		//info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		//info.pInheritanceInfo = nullptr;
-		//info.pNext = nullptr;
-		//info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
 
-		//auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
-
-		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
+		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
 
 		//VkClearValue for_filling_back_buffer_color;
 		//VkClearValue for_stencil_depth;
@@ -735,26 +735,26 @@ namespace Nightbird
 		//info_pass.renderArea.extent.height = m_height;
 
 		//vkCmdBeginRenderPass(m_p_current_command_buffer, &info_pass, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
-		//vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
+		vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
 
 		m_is_apply_to_regular_geometry_stencil = false;
 	}
 
-	//void UIRenderInterface::EndFrame()
-	//{
+	void UIRenderInterface::EndFrame()
+	{
 		//if (m_p_current_command_buffer == nullptr)
 			//return;
 
 		//vkCmdEndRenderPass(m_p_current_command_buffer);
 
-		//auto status = vkEndCommandBuffer(m_p_current_command_buffer);
+		auto status = vkEndCommandBuffer(m_p_current_command_buffer);
 
-		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
+		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
 
 		//Submit();
 		//Present();
 		//m_p_current_command_buffer = nullptr;
-	//}
+	}
 
 	void UIRenderInterface::SetViewport(VkSwapchainKHR swapchain, int width, int height)
 	{
@@ -804,11 +804,6 @@ namespace Nightbird
 	//{
 		//SetViewport(m_width, m_height);
 	//}
-
-	void UIRenderInterface::SetCommandBuffer(VkCommandBuffer commandBuffer)
-	{
-		m_p_current_command_buffer = commandBuffer;
-	}
 
 	bool UIRenderInterface::Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily)
 	{
@@ -2521,9 +2516,9 @@ namespace Nightbird
 		vkDestroyPipeline(m_p_device, m_p_pipeline_stencil_for_regular_geometry_that_applied_to_region_without_textures, nullptr);
 	}
 
-	void UIRenderInterface::DestroyDescriptorSets() noexcept {}
+	//void UIRenderInterface::DestroyDescriptorSets() noexcept {}
 
-	void UIRenderInterface::DestroyPipelineLayout() noexcept {}
+	//void UIRenderInterface::DestroyPipelineLayout() noexcept {}
 
 	void UIRenderInterface::DestroySamplers() noexcept
 	{
@@ -2615,26 +2610,26 @@ namespace Nightbird
 	//	RMLUI_VK_ASSERTMSG(status == VK_SUCCESS, "failed to vkCreateRenderPass");
 	//}
 
-	void UIRenderInterface::Wait() noexcept
-	{
-		RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize device");
-		RMLUI_VK_ASSERTMSG(m_p_swapchain, "you must initialize swapchain");
+	//void UIRenderInterface::Wait() noexcept
+	//{
+	//	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize device");
+	//	RMLUI_VK_ASSERTMSG(m_p_swapchain, "you must initialize swapchain");
 
-		constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
+	//	constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 
-		auto status =
-			vkAcquireNextImageKHR(m_p_device, m_p_swapchain, kMaxUint64, m_semaphores_image_available[m_semaphore_index], nullptr, &m_image_index);
-		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkAcquireNextImageKHR (see status)");
+	//	auto status =
+	//		vkAcquireNextImageKHR(m_p_device, m_p_swapchain, kMaxUint64, m_semaphores_image_available[m_semaphore_index], nullptr, &m_image_index);
+	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkAcquireNextImageKHR (see status)");
 
-		m_semaphore_index_previous = m_semaphore_index;
-		m_semaphore_index = ((m_semaphore_index + 1) % kSwapchainBackBufferCount);
+	//	m_semaphore_index_previous = m_semaphore_index;
+	//	m_semaphore_index = ((m_semaphore_index + 1) % kSwapchainBackBufferCount);
 
-		status = vkWaitForFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous], VK_TRUE, kMaxUint64);
-		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkWaitForFences (see status)");
+	//	status = vkWaitForFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous], VK_TRUE, kMaxUint64);
+	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkWaitForFences (see status)");
 
-		status = vkResetFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous]);
-		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetFences (see status)");
-	}
+	//	status = vkResetFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous]);
+	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetFences (see status)");
+	//}
 
 	void UIRenderInterface::Update_PendingForDeletion_Textures_By_Frames() noexcept
 	{
@@ -2764,7 +2759,7 @@ namespace Nightbird
 				info_buffer.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 				info_buffer.pNext = nullptr;
 				info_buffer.commandPool = p_pool;
-				info_buffer.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+				info_buffer.level = (command_buffer_index == static_cast<uint32_t>(CommandBufferName::Primary)) ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 				info_buffer.commandBufferCount = 1;
 
 				VkCommandBuffer p_buffer = nullptr;
