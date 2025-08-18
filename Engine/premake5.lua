@@ -43,4 +43,5 @@ project "Engine"
 
 	filter "configurations:Debug"
 		defines { "RMLUI_DEBUG" }
+		defines { "RMLUI_VK_DEBUG" }
 	filter { }

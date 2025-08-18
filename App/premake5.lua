@@ -14,7 +14,6 @@ project "App"
 
 	defines { "VK_NO_PROTOTYPES" }
 	defines { "GLFW_INCLUDE_VULKAN" }
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
 
 	files {
 		"Source/**.h",
