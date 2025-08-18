@@ -84,8 +84,8 @@ namespace Nightbird
 
 		bool Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily);
 		void Shutdown();
-
-		//void BeginFrame();
+		
+		void BeginFrame();
 		//void EndFrame();
 
 		void SetViewport(VkSwapchainKHR swapchain, int width, int height);
@@ -542,7 +542,7 @@ namespace Nightbird
 		void DestroyPipelineLayout() noexcept;
 		void DestroySamplers() noexcept;
 
-		//void Wait() noexcept;
+		void Wait() noexcept;
 
 		void Update_PendingForDeletion_Textures_By_Frames() noexcept;
 		void Update_PendingForDeletion_Geometries() noexcept;

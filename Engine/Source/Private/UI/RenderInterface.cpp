@@ -692,68 +692,68 @@ namespace Nightbird
 		m_user_data_for_vertex_shader.m_transform = m_projection * (transform ? *transform : Rml::Matrix4f::Identity());
 	}
 
-	//void UIRenderInterface::BeginFrame()
-	//{
-	//	Wait();
+	void UIRenderInterface::BeginFrame()
+	{
+		//Wait();
 
-	//	Update_PendingForDeletion_Textures_By_Frames();
-	//	Update_PendingForDeletion_Geometries();
+		Update_PendingForDeletion_Textures_By_Frames();
+		Update_PendingForDeletion_Geometries();
 
-	//	m_command_buffer_ring.OnBeginFrame();
-	//	m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
+		//m_command_buffer_ring.OnBeginFrame();
+		//m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
 
-	//	VkCommandBufferBeginInfo info = {};
+		//VkCommandBufferBeginInfo info = {};
 
-	//	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	//	info.pInheritanceInfo = nullptr;
-	//	info.pNext = nullptr;
-	//	info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		//info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		//info.pInheritanceInfo = nullptr;
+		//info.pNext = nullptr;
+		//info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	//	auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
+		//auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
 
-	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
+		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
 
-	//	VkClearValue for_filling_back_buffer_color;
-	//	VkClearValue for_stencil_depth;
+		//VkClearValue for_filling_back_buffer_color;
+		//VkClearValue for_stencil_depth;
 
-	//	for_stencil_depth.depthStencil = {1.0f, 0};
-	//	for_filling_back_buffer_color.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		//for_stencil_depth.depthStencil = {1.0f, 0};
+		//for_filling_back_buffer_color.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
-	//	const VkClearValue p_color_rt[] = {for_filling_back_buffer_color, for_stencil_depth};
+		//const VkClearValue p_color_rt[] = {for_filling_back_buffer_color, for_stencil_depth};
 
-	//	VkRenderPassBeginInfo info_pass = {};
+		//VkRenderPassBeginInfo info_pass = {};
 
-	//	info_pass.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	//	info_pass.pNext = nullptr;
-	//	info_pass.renderPass = m_p_render_pass;
-	//	info_pass.framebuffer = m_swapchain_frame_buffers[m_image_index];
-	//	info_pass.pClearValues = p_color_rt;
-	//	info_pass.clearValueCount = 2;
-	//	info_pass.renderArea.offset.x = 0;
-	//	info_pass.renderArea.offset.y = 0;
-	//	info_pass.renderArea.extent.width = m_width;
-	//	info_pass.renderArea.extent.height = m_height;
+		//info_pass.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		//info_pass.pNext = nullptr;
+		//info_pass.renderPass = m_p_render_pass;
+		//info_pass.framebuffer = m_swapchain_frame_buffers[m_image_index];
+		//info_pass.pClearValues = p_color_rt;
+		//info_pass.clearValueCount = 2;
+		//info_pass.renderArea.offset.x = 0;
+		//info_pass.renderArea.offset.y = 0;
+		//info_pass.renderArea.extent.width = m_width;
+		//info_pass.renderArea.extent.height = m_height;
 
-	//	vkCmdBeginRenderPass(m_p_current_command_buffer, &info_pass, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
-	//	vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
+		//vkCmdBeginRenderPass(m_p_current_command_buffer, &info_pass, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+		//vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
 
-	//	m_is_apply_to_regular_geometry_stencil = false;
-	//}
+		m_is_apply_to_regular_geometry_stencil = false;
+	}
 
 	//void UIRenderInterface::EndFrame()
 	//{
-	//	if (m_p_current_command_buffer == nullptr)
-	//		return;
+		//if (m_p_current_command_buffer == nullptr)
+			//return;
 
-	//	vkCmdEndRenderPass(m_p_current_command_buffer);
+		//vkCmdEndRenderPass(m_p_current_command_buffer);
 
-	//	auto status = vkEndCommandBuffer(m_p_current_command_buffer);
+		//auto status = vkEndCommandBuffer(m_p_current_command_buffer);
 
-	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
+		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
 
-	//	Submit();
-	//	Present();
-	//	m_p_current_command_buffer = nullptr;
+		//Submit();
+		//Present();
+		//m_p_current_command_buffer = nullptr;
 	//}
 
 	void UIRenderInterface::SetViewport(VkSwapchainKHR swapchain, int width, int height)
@@ -2615,26 +2615,26 @@ namespace Nightbird
 	//	RMLUI_VK_ASSERTMSG(status == VK_SUCCESS, "failed to vkCreateRenderPass");
 	//}
 
-	//void UIRenderInterface::Wait() noexcept
-	//{
-	//	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize device");
-	//	RMLUI_VK_ASSERTMSG(m_p_swapchain, "you must initialize swapchain");
+	void UIRenderInterface::Wait() noexcept
+	{
+		RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize device");
+		RMLUI_VK_ASSERTMSG(m_p_swapchain, "you must initialize swapchain");
 
-	//	constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
+		constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 
-	//	auto status =
-	//		vkAcquireNextImageKHR(m_p_device, m_p_swapchain, kMaxUint64, m_semaphores_image_available[m_semaphore_index], nullptr, &m_image_index);
-	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkAcquireNextImageKHR (see status)");
+		auto status =
+			vkAcquireNextImageKHR(m_p_device, m_p_swapchain, kMaxUint64, m_semaphores_image_available[m_semaphore_index], nullptr, &m_image_index);
+		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkAcquireNextImageKHR (see status)");
 
-	//	m_semaphore_index_previous = m_semaphore_index;
-	//	m_semaphore_index = ((m_semaphore_index + 1) % kSwapchainBackBufferCount);
+		m_semaphore_index_previous = m_semaphore_index;
+		m_semaphore_index = ((m_semaphore_index + 1) % kSwapchainBackBufferCount);
 
-	//	status = vkWaitForFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous], VK_TRUE, kMaxUint64);
-	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkWaitForFences (see status)");
+		status = vkWaitForFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous], VK_TRUE, kMaxUint64);
+		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkWaitForFences (see status)");
 
-	//	status = vkResetFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous]);
-	//	RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetFences (see status)");
-	//}
+		status = vkResetFences(m_p_device, 1, &m_executed_fences[m_semaphore_index_previous]);
+		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetFences (see status)");
+	}
 
 	void UIRenderInterface::Update_PendingForDeletion_Textures_By_Frames() noexcept
 	{

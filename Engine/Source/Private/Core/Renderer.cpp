@@ -131,6 +131,7 @@ namespace Nightbird
 		renderTarget->Render(scene, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
 
 		uiRenderInterface->SetCommandBuffer(commandBuffer);
+		uiRenderInterface->BeginFrame();
 		uiContext->Render();
 
 		renderPass->End(commandBuffer);

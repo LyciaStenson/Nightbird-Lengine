@@ -85,8 +85,8 @@ namespace Nightbird
 	Engine::~Engine()
 	{
 		document->Close();
-		uiRenderInterface->Shutdown();
 		Rml::Shutdown();
+		uiRenderInterface->Shutdown();
 	}
 
 	GlfwWindow* Engine::GetGlfwWindow() const
