@@ -73,7 +73,7 @@ namespace Nightbird
 
 		Rml::LoadFontFace("Assets/Fonts/RobotoFlex-Regular.ttf");
 		
-		Rml::ElementDocument* document = context->LoadDocument("Assets/Test.rml");
+		document = context->LoadDocument("Assets/Test.rml");
 		if (!document)
 		{
 			std::cerr << "Failed to load RmlUi Test Document" << std::endl;
@@ -84,6 +84,7 @@ namespace Nightbird
 	
 	Engine::~Engine()
 	{
+		document->Close();
 		uiRenderInterface->Shutdown();
 		Rml::Shutdown();
 	}
