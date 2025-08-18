@@ -71,16 +71,13 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL MyDebugReportCallback(VkDebugUtilsMessageS
 	{
 		return VK_FALSE;
 	}
-
-	#ifdef RMLUI_PLATFORM_WIN32
+	
 	if (severityFlags & VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 	{
 		// some logs are not passed to our UI, because of early calling for explicity I put native log output
-		OutputDebugString(TEXT("\n"));
-		OutputDebugStringA(pCallbackData->pMessage);
+		std::cerr << pCallbackData->pMessage << std::endl;
 	}
-	#endif
-
+	
 	Rml::Log::Message(Rml::Log::LT_ERROR, "[Vulkan][VALIDATION] %s ", pCallbackData->pMessage);
 
 	return VK_FALSE;
