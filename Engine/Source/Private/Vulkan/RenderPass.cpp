@@ -50,10 +50,10 @@ namespace Nightbird
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-		VkRect2D scissor{};
-		scissor.offset = {0, 0};
-		scissor.extent = extent;
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+		//VkRect2D scissor{};
+		//scissor.offset = {0, 0};
+		//scissor.extent = extent;
+		//vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
 	void VulkanRenderPass::End(VkCommandBuffer commandBuffer)

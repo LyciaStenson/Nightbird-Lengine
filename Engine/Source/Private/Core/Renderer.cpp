@@ -226,6 +226,22 @@ namespace Nightbird
 		}
 	}
 
+	void Renderer::EnableScissor(bool enable)
+	{
+		scissorEnabled = enable;
+	}
+	
+	void Renderer::SetScissorRect(VkRect2D rect)
+	{
+		scissorRect = rect;
+	}
+	
+	void Renderer::ApplyScissor(VkCommandBuffer commandBuffer, VkExtent2D fullExtent)
+	{
+		VkRect2D rect = scissorEnabled ? scissorRect : VkRect2D{{0,0}, fullExtent};
+		vkCmdSetScissor(commandBuffer, 0, 1, &rect);
+	}
+
 	void Renderer::FramebufferResized()
 	{
 		framebufferResized = true;

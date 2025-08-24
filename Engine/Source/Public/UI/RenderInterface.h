@@ -22,7 +22,7 @@ namespace Nightbird
 		/// Called by RmlUi when it wants to render application-compiled geometry.
 		void RenderGeometry(Rml::CompiledGeometryHandle handle, Rml::Vector2f translation, Rml::TextureHandle texture) override;
 		/// Called by RmlUi when it wants to release application-compiled geometry.
-		void ReleaseGeometry(Rml::CompiledGeometryHandle geometry) override;
+		void ReleaseGeometry(Rml::CompiledGeometryHandle handle) override;
 
 		/// Called by RmlUi when a texture is required by the library.
 		Rml::TextureHandle LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
@@ -38,5 +38,19 @@ namespace Nightbird
 
 		/// Called by RmlUi when it wants to set the current transform matrix to a new matrix.
 		void SetTransform(const Rml::Matrix4f* transform) override;
+
+	private:
+		Renderer* m_Renderer = nullptr;
+
+		struct Geometry
+		{
+			VkBuffer vertexBuffer = VK_NULL_HANDLE;
+			VkBuffer indexBuffer = VK_NULL_HANDLE;
+			VmaAllocation vertexAllocation = VK_NULL_HANDLE;
+			VmaAllocation indexAllocation = VK_NULL_HANDLE;
+			uint32_t indexCount = 0;
+		};
+
+		std::vector<Geometry> geometries;
 	};
 }

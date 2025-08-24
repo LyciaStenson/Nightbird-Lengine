@@ -51,6 +51,10 @@ namespace Nightbird
 
 		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
 
+		void EnableScissor(bool enable);
+		void SetScissorRect(VkRect2D rect);
+		void ApplyScissor(VkCommandBuffer commandBuffer, VkExtent2D fullExtent);
+
 		void FramebufferResized();
 
 	private:
@@ -77,6 +81,9 @@ namespace Nightbird
 		GlfwWindow* glfwWindow = nullptr;
 
 		int currentFrame = 0;
+
+		VkRect2D scissorRect;
+		bool scissorEnabled = false;
 
 		bool framebufferResized = false;
 	};

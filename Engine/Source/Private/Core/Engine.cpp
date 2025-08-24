@@ -48,7 +48,7 @@ namespace Nightbird
 		
 		uiSystemInterface = std::make_unique<UISystemInterface>(glfwWindow->Get());
 
-		uiRenderInterface = std::make_unique<UIRenderInterface>();
+		uiRenderInterface = std::make_unique<UIRenderInterface>(renderer.get());
 		//uiRenderInterface->Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetAllocator(), renderer->GetRenderPass()->Get(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueue, renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->presentQueueFamily);
 		
 		int width = 1280, height = 720;
