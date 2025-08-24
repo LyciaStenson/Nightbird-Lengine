@@ -49,11 +49,11 @@ namespace Nightbird
 		uiSystemInterface = std::make_unique<UISystemInterface>(glfwWindow->Get());
 
 		uiRenderInterface = std::make_unique<UIRenderInterface>();
-		uiRenderInterface->Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetAllocator(), renderer->GetRenderPass()->Get(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueue, renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->presentQueueFamily);
+		//uiRenderInterface->Initialize(renderer->GetInstance()->Get(), renderer->GetDevice()->GetPhysical(), renderer->GetDevice()->GetPhysicalDeviceProperties(), renderer->GetDevice()->GetLogical(), renderer->GetDevice()->GetAllocator(), renderer->GetRenderPass()->Get(), renderer->GetInstance()->GetSurface(), renderer->GetDevice()->graphicsQueue, renderer->GetDevice()->presentQueue, renderer->GetDevice()->graphicsQueueFamily, renderer->GetDevice()->presentQueueFamily);
 		
 		int width = 1280, height = 720;
 		glfwWindow->GetFramebufferSize(&width, &height);
-		uiRenderInterface->SetViewport(renderer->GetSwapChain()->Get(), width, height);
+		//uiRenderInterface->SetViewport(renderer->GetSwapChain()->Get(), width, height);
 		
 		Rml::SetSystemInterface(uiSystemInterface.get());
 		Rml::SetRenderInterface(uiRenderInterface.get());
@@ -86,7 +86,7 @@ namespace Nightbird
 	{
 		document->Close();
 		Rml::Shutdown();
-		uiRenderInterface->Shutdown();
+		//uiRenderInterface->Shutdown();
 	}
 
 	GlfwWindow* Engine::GetGlfwWindow() const
