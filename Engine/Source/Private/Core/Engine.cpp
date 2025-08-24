@@ -132,7 +132,17 @@ namespace Nightbird
 			modelManager->ProcessUploadQueue();
 
 			if (context)
+			{
+				Rml::Vector2 dimensions = context->GetDimensions();
+				if (dimensions.x != 1280 || dimensions.y != 720)
+					std::cout << dimensions.x << ", " << dimensions.y << std::endl;
+
 				context->Update();
+
+				dimensions = context->GetDimensions();
+				if (dimensions.x != 1280 || dimensions.y != 720)
+					std::cout << dimensions.x << ", " << dimensions.y << std::endl;
+			}
 			
 			renderer->DrawFrame(scene.get(), uiRenderInterface.get(), context);
 		}

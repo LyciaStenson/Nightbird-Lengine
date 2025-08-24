@@ -689,26 +689,28 @@ namespace Nightbird
 		m_user_data_for_vertex_shader.m_transform = m_projection * (transform ? *transform : Rml::Matrix4f::Identity());
 	}
 
-	void UIRenderInterface::BeginFrame()//VkCommandBuffer commandBuffer)
+	void UIRenderInterface::BeginFrame(VkCommandBuffer commandBuffer)
 	{
 		//Wait();
 
 		Update_PendingForDeletion_Textures_By_Frames();
 		Update_PendingForDeletion_Geometries();
 		
-		m_command_buffer_ring.OnBeginFrame();
-		m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
+		//m_command_buffer_ring.OnBeginFrame();
+		//m_p_current_command_buffer = m_command_buffer_ring.GetCommandBufferForActiveFrame(CommandBufferName::Primary);
 
-		VkCommandBufferBeginInfo info = {};
+		m_p_current_command_buffer = commandBuffer;
 
-		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		info.pInheritanceInfo = nullptr;
-		info.pNext = nullptr;
-		info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		//VkCommandBufferBeginInfo info = {};
 
-		auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
+		//info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		//info.pInheritanceInfo = nullptr;
+		//info.pNext = nullptr;
+		//info.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
+		//auto status = vkBeginCommandBuffer(m_p_current_command_buffer, &info);
+
+		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkBeginCommandBuffer");
 
 		//VkClearValue for_filling_back_buffer_color;
 		//VkClearValue for_stencil_depth;
@@ -732,26 +734,26 @@ namespace Nightbird
 		//info_pass.renderArea.extent.height = m_height;
 
 		//vkCmdBeginRenderPass(m_p_current_command_buffer, &info_pass, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
+		//vkCmdSetViewport(m_p_current_command_buffer, 0, 1, &m_viewport);
 
 		m_is_apply_to_regular_geometry_stencil = false;
 	}
 
-	void UIRenderInterface::EndFrame()
-	{
+	//void UIRenderInterface::EndFrame()
+	//{
 		//if (m_p_current_command_buffer == nullptr)
 			//return;
 
 		//vkCmdEndRenderPass(m_p_current_command_buffer);
 
-		auto status = vkEndCommandBuffer(m_p_current_command_buffer);
+		//auto status = vkEndCommandBuffer(m_p_current_command_buffer);
 
-		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
+		//RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkEndCommandBuffer");
 
 		//Submit();
 		//Present();
 		//m_p_current_command_buffer = nullptr;
-	}
+	//}
 
 	void UIRenderInterface::SetViewport(VkSwapchainKHR swapchain, int width, int height)
 	{
@@ -1179,7 +1181,7 @@ namespace Nightbird
 
 	void UIRenderInterface::Initialize_Resources(const VkPhysicalDeviceProperties& physical_device_properties) noexcept
 	{
-		m_command_buffer_ring.Initialize(m_p_device, m_queue_index_graphics);
+		//m_command_buffer_ring.Initialize(m_p_device, m_queue_index_graphics);
 
 		const VkDeviceSize min_buffer_alignment = physical_device_properties.limits.minUniformBufferOffsetAlignment;
 		m_memory_pool.Initialize(kVideoMemoryForAllocation, min_buffer_alignment, m_p_allocator, m_p_device);
@@ -1259,7 +1261,7 @@ namespace Nightbird
 
 	void UIRenderInterface::Destroy_Resources() noexcept
 	{
-		m_command_buffer_ring.Shutdown();
+		//m_command_buffer_ring.Shutdown();
 		m_upload_manager.Shutdown();
 
 		if (m_p_descriptor_set)
@@ -2727,90 +2729,90 @@ namespace Nightbird
 		return VkFormat::VK_FORMAT_UNDEFINED;
 	}
 
-	UIRenderInterface::CommandBufferRing::CommandBufferRing() : m_p_device{}, m_frame_index{}, m_p_current_frame{}, m_frames{} {}
+	//UIRenderInterface::CommandBufferRing::CommandBufferRing() : m_p_device{}, m_frame_index{}, m_p_current_frame{}, m_frames{} {}
 
-	void UIRenderInterface::CommandBufferRing::Initialize(VkDevice p_device, uint32_t queue_index_graphics) noexcept
-	{
-		RMLUI_VK_ASSERTMSG(p_device, "you can't pass an invalid VkDevice here");
-		RMLUI_VK_ASSERTMSG(!m_p_device, "already initialized");
+	//void UIRenderInterface::CommandBufferRing::Initialize(VkDevice p_device, uint32_t queue_index_graphics) noexcept
+	//{
+	//	RMLUI_VK_ASSERTMSG(p_device, "you can't pass an invalid VkDevice here");
+	//	RMLUI_VK_ASSERTMSG(!m_p_device, "already initialized");
 
-		m_p_device = p_device;
+	//	m_p_device = p_device;
 
-		for (CommandBuffersPerFrame& current_buffer : m_frames)
-		{
-			for (uint32_t command_buffer_index = 0; command_buffer_index < kNumCommandBuffersPerFrame; ++command_buffer_index)
-			{
-				VkCommandPoolCreateInfo info_pool = {};
-				info_pool.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-				info_pool.pNext = nullptr;
-				info_pool.queueFamilyIndex = queue_index_graphics;
-				info_pool.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+	//	for (CommandBuffersPerFrame& current_buffer : m_frames)
+	//	{
+	//		for (uint32_t command_buffer_index = 0; command_buffer_index < kNumCommandBuffersPerFrame; ++command_buffer_index)
+	//		{
+	//			VkCommandPoolCreateInfo info_pool = {};
+	//			info_pool.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	//			info_pool.pNext = nullptr;
+	//			info_pool.queueFamilyIndex = queue_index_graphics;
+	//			info_pool.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
-				VkCommandPool p_pool = nullptr;
-				auto status = vkCreateCommandPool(p_device, &info_pool, nullptr, &p_pool);
-				RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "can't create command pool");
+	//			VkCommandPool p_pool = nullptr;
+	//			auto status = vkCreateCommandPool(p_device, &info_pool, nullptr, &p_pool);
+	//			RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "can't create command pool");
 
-				current_buffer.m_command_pools[command_buffer_index] = p_pool;
+	//			current_buffer.m_command_pools[command_buffer_index] = p_pool;
 
-				VkCommandBufferAllocateInfo info_buffer = {};
-				info_buffer.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-				info_buffer.pNext = nullptr;
-				info_buffer.commandPool = p_pool;
-				info_buffer.level = (command_buffer_index == static_cast<uint32_t>(CommandBufferName::Primary)) ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-				info_buffer.commandBufferCount = 1;
+	//			VkCommandBufferAllocateInfo info_buffer = {};
+	//			info_buffer.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	//			info_buffer.pNext = nullptr;
+	//			info_buffer.commandPool = p_pool;
+	//			info_buffer.level = (command_buffer_index == static_cast<uint32_t>(CommandBufferName::Primary)) ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+	//			info_buffer.commandBufferCount = 1;
 
-				VkCommandBuffer p_buffer = nullptr;
-				status = vkAllocateCommandBuffers(p_device, &info_buffer, &p_buffer);
-				RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to fill command buffers");
+	//			VkCommandBuffer p_buffer = nullptr;
+	//			status = vkAllocateCommandBuffers(p_device, &info_buffer, &p_buffer);
+	//			RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to fill command buffers");
 
-				current_buffer.m_command_buffers[command_buffer_index] = p_buffer;
-			}
-		}
+	//			current_buffer.m_command_buffers[command_buffer_index] = p_buffer;
+	//		}
+	//	}
 
-		m_frame_index = 0;
-		m_p_current_frame = &m_frames[m_frame_index];
-	}
+	//	m_frame_index = 0;
+	//	m_p_current_frame = &m_frames[m_frame_index];
+	//}
 
-	void UIRenderInterface::CommandBufferRing::Shutdown()
-	{
-		RMLUI_VK_ASSERTMSG(m_p_device, "you can't have an uninitialized VkDevice");
+	//void UIRenderInterface::CommandBufferRing::Shutdown()
+	//{
+	//	RMLUI_VK_ASSERTMSG(m_p_device, "you can't have an uninitialized VkDevice");
 
-		for (CommandBuffersPerFrame& current_buffer : m_frames)
-		{
-			for (uint32_t i = 0; i < kNumCommandBuffersPerFrame; ++i)
-			{
-				vkFreeCommandBuffers(m_p_device, current_buffer.m_command_pools[i], 1, &current_buffer.m_command_buffers[i]);
-				vkDestroyCommandPool(m_p_device, current_buffer.m_command_pools[i], nullptr);
-			}
-		}
-	}
+	//	for (CommandBuffersPerFrame& current_buffer : m_frames)
+	//	{
+	//		for (uint32_t i = 0; i < kNumCommandBuffersPerFrame; ++i)
+	//		{
+	//			vkFreeCommandBuffers(m_p_device, current_buffer.m_command_pools[i], 1, &current_buffer.m_command_buffers[i]);
+	//			vkDestroyCommandPool(m_p_device, current_buffer.m_command_pools[i], nullptr);
+	//		}
+	//	}
+	//}
 
-	void UIRenderInterface::CommandBufferRing::OnBeginFrame()
-	{
-		m_frame_index = ((m_frame_index + 1) % kNumFramesToBuffer);
-		m_p_current_frame = &m_frames[m_frame_index];
+	//void UIRenderInterface::CommandBufferRing::OnBeginFrame()
+	//{
+	//	m_frame_index = ((m_frame_index + 1) % kNumFramesToBuffer);
+	//	m_p_current_frame = &m_frames[m_frame_index];
 
-		// Reset all command pools of the current frame.
-		for (VkCommandPool command_pool : m_p_current_frame->m_command_pools)
-		{
-			auto status = vkResetCommandPool(m_p_device, command_pool, 0);
-			RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetCommandPool");
-		}
-	}
+	//	// Reset all command pools of the current frame.
+	//	for (VkCommandPool command_pool : m_p_current_frame->m_command_pools)
+	//	{
+	//		auto status = vkResetCommandPool(m_p_device, command_pool, 0);
+	//		RMLUI_VK_ASSERTMSG(status == VkResult::VK_SUCCESS, "failed to vkResetCommandPool");
+	//	}
+	//}
 
-	VkCommandBuffer UIRenderInterface::CommandBufferRing::GetCommandBufferForActiveFrame(CommandBufferName named_command_buffer)
-	{
-		RMLUI_VK_ASSERTMSG(m_p_current_frame, "must be valid");
-		RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize your VkDevice field with valid pointer or it's uninitialized field");
-		RMLUI_VK_ASSERTMSG((int)named_command_buffer < (int)CommandBufferName::Count, "overflow, please use one of the named command lists");
+	//VkCommandBuffer UIRenderInterface::CommandBufferRing::GetCommandBufferForActiveFrame(CommandBufferName named_command_buffer)
+	//{
+	//	RMLUI_VK_ASSERTMSG(m_p_current_frame, "must be valid");
+	//	RMLUI_VK_ASSERTMSG(m_p_device, "you must initialize your VkDevice field with valid pointer or it's uninitialized field");
+	//	RMLUI_VK_ASSERTMSG((int)named_command_buffer < (int)CommandBufferName::Count, "overflow, please use one of the named command lists");
 
-		const uint32_t list_index = static_cast<uint32_t>(named_command_buffer);
+	//	const uint32_t list_index = static_cast<uint32_t>(named_command_buffer);
 
-		VkCommandBuffer result = m_p_current_frame->m_command_buffers[list_index];
-		RMLUI_VK_ASSERTMSG(result, "your VkCommandBuffer must be valid otherwise debug your command list class for frame");
+	//	VkCommandBuffer result = m_p_current_frame->m_command_buffers[list_index];
+	//	RMLUI_VK_ASSERTMSG(result, "your VkCommandBuffer must be valid otherwise debug your command list class for frame");
 
-		return result;
-	}
+	//	return result;
+	//}
 
 	UIRenderInterface::MemoryPool::MemoryPool() :
 		m_memory_total_size{}, m_device_min_uniform_alignment{}, m_p_data{}, m_p_buffer{}, m_p_buffer_alloc{}, m_p_device{}, m_p_vk_allocator{},

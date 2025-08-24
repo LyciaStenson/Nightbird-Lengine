@@ -38,7 +38,7 @@
 	#define RMLUI_VK_ASSERTMSG(statement, msg) RMLUI_ASSERTMSG(statement, msg)
 
 	// Uncomment the following line to enable additional Vulkan debugging.
-	// #define RMLUI_VK_DEBUG
+	#define RMLUI_VK_DEBUG
 #else
 	#define RMLUI_VK_ASSERTMSG(statement, msg) static_cast<void>(statement)
 #endif
@@ -85,8 +85,8 @@ namespace Nightbird
 		bool Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties physicalDeviceProperties, VkDevice device, VmaAllocator allocator, VkRenderPass renderPass, VkSurfaceKHR surface, VkQueue graphicsQueue, VkQueue presentQueue, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily);
 		void Shutdown();
 		
-		void BeginFrame();//VkCommandBuffer commandBuffer);
-		void EndFrame();
+		void BeginFrame(VkCommandBuffer commandBuffer);
+		//void EndFrame();
 
 		void SetViewport(VkSwapchainKHR swapchain, int width, int height);
 		bool IsSwapchainValid();
@@ -329,36 +329,36 @@ namespace Nightbird
 		};
 
 		// If we need additional command buffers, we can add them to this list and retrieve them from the ring.
-		enum class CommandBufferName { Primary, Secondary, Count };
+		//enum class CommandBufferName { Primary, Secondary, Count };
 
 		// The command buffer ring stores a unique set of named command buffers for each bufferd frame.
 		// Explanation of how to use Vulkan efficiently: https://vkguide.dev/docs/chapter-4/double_buffering/
-		class CommandBufferRing
-		{
-		public:
-			static constexpr uint32_t kNumFramesToBuffer = kSwapchainBackBufferCount;
-			static constexpr uint32_t kNumCommandBuffersPerFrame = static_cast<uint32_t>(CommandBufferName::Count);
+		//class CommandBufferRing
+		//{
+		//public:
+		//	static constexpr uint32_t kNumFramesToBuffer = kSwapchainBackBufferCount;
+		//	static constexpr uint32_t kNumCommandBuffersPerFrame = static_cast<uint32_t>(CommandBufferName::Count);
 
-			CommandBufferRing();
+		//	CommandBufferRing();
 
-			void Initialize(VkDevice p_device, uint32_t queue_index_graphics) noexcept;
-			void Shutdown();
+		//	void Initialize(VkDevice p_device, uint32_t queue_index_graphics) noexcept;
+		//	void Shutdown();
 
-			void OnBeginFrame();
-			VkCommandBuffer GetCommandBufferForActiveFrame(CommandBufferName named_command_buffer);
+		//	void OnBeginFrame();
+		//	VkCommandBuffer GetCommandBufferForActiveFrame(CommandBufferName named_command_buffer);
 
-		private:
-			struct CommandBuffersPerFrame
-			{
-				Rml::Array<VkCommandPool, kNumCommandBuffersPerFrame> m_command_pools;
-				Rml::Array<VkCommandBuffer, kNumCommandBuffersPerFrame> m_command_buffers;
-			};
+		//private:
+		//	struct CommandBuffersPerFrame
+		//	{
+		//		Rml::Array<VkCommandPool, kNumCommandBuffersPerFrame> m_command_pools;
+		//		Rml::Array<VkCommandBuffer, kNumCommandBuffersPerFrame> m_command_buffers;
+		//	};
 
-			VkDevice m_p_device;
-			uint32_t m_frame_index;
-			CommandBuffersPerFrame* m_p_current_frame;
-			Rml::Array<CommandBuffersPerFrame, kNumFramesToBuffer> m_frames;
-		};
+		//	VkDevice m_p_device;
+		//	uint32_t m_frame_index;
+		//	CommandBuffersPerFrame* m_p_current_frame;
+		//	Rml::Array<CommandBuffersPerFrame, kNumFramesToBuffer> m_frames;
+		//};
 
 		class DescriptorPoolManager
 		{
@@ -617,7 +617,7 @@ namespace Nightbird
 		// vma handles that thing, so there's no need for frame splitting
 		Rml::Vector<geometry_handle_t*> m_pending_for_deletion_geometries;
 
-		CommandBufferRing m_command_buffer_ring;
+		//CommandBufferRing m_command_buffer_ring;
 		MemoryPool m_memory_pool;
 		UploadResourceManager m_upload_manager;
 		DescriptorPoolManager m_manager_descriptors;
