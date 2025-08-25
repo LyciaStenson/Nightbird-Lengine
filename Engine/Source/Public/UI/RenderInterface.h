@@ -15,6 +15,9 @@ namespace Nightbird
 		UIRenderInterface(Renderer* renderer);
 		~UIRenderInterface();
 
+		void BeginFrame(VkCommandBuffer commandBuffer);
+		void EndFrame();
+
 		// -- Inherited from Rml::RenderInterface --
 
 		/// Called by RmlUi when it wants to compile geometry it believes will be static for the forseeable future.
@@ -40,7 +43,25 @@ namespace Nightbird
 		void SetTransform(const Rml::Matrix4f* transform) override;
 
 	private:
+		enum class ShaderId { Vertex, FragmentColor, FragmentTexture };
+
+		void CreateShaders();
+
+		void CreateDescriptorSetLayouts();
+		void CreateDescriptorSets();
+
+		void CreatePipelineLayout();
+		void CreatePipeline();
+
 		Renderer* m_Renderer = nullptr;
+
+		VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;
+		
+		VkDescriptorSetLayout m_DescriptorSetLayoutVertexTransform = VK_NULL_HANDLE;
+		VkDescriptorSetLayout m_DescriptorSetLayoutTexture = VK_NULL_HANDLE;
+		
+		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
+		VkPipeline m_Pipeline = VK_NULL_HANDLE;
 
 		struct Geometry
 		{
@@ -51,6 +72,8 @@ namespace Nightbird
 			uint32_t indexCount = 0;
 		};
 
-		std::vector<Geometry> geometries;
+		std::vector<Geometry> m_Geometries;
+
+		std::vector<VkShaderModule> m_Shaders;
 	};
 }

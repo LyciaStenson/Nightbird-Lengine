@@ -23,7 +23,7 @@
 #include <Core/CameraUBO.h>
 #include <Core/RenderTarget.h>
 
-#include <UI/RenderInterfaceModified.h>
+#include <UI/RenderInterface.h>
 
 #include <RmlUi/Core.h>
 
@@ -130,9 +130,9 @@ namespace Nightbird
 
 		renderTarget->Render(scene, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
 		
-		//uiRenderInterface->BeginFrame(commandBuffer);
+		uiRenderInterface->BeginFrame(commandBuffer);
 		uiContext->Render();
-		//uiRenderInterface->EndFrame();
+		uiRenderInterface->EndFrame();
 
 		renderPass->End(commandBuffer);
 		
