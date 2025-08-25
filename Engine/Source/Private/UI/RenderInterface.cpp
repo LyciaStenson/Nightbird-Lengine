@@ -16,19 +16,22 @@ namespace Nightbird
 		CreateDescriptorSetLayouts();
 		CreatePipelineLayout();
 		CreatePipeline();
-		//CreateDescriptorSets();
+		CreateDescriptorPool();
+		CreateDescriptorSets();
 	}
 
 	UIRenderInterface::~UIRenderInterface()
 	{
 		VkDevice device = m_Renderer->GetDevice()->GetLogical();
-		
+
+		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
+
 		vkDestroyPipeline(device, m_Pipeline, nullptr);
+
+		vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
 
 		vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayoutVertexTransform, nullptr);
 		vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayoutTexture, nullptr);
-		
-		vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
 
 		for (const auto& p_module : m_Shaders)
 		{
@@ -112,6 +115,56 @@ namespace Nightbird
 		
 		if (vkCreateDescriptorSetLayout(device, &fragmentTextureInfo, nullptr, &m_DescriptorSetLayoutTexture) != VK_SUCCESS)
 			std::cerr << "Failed to create fragment texture descriptor set layout" << std::endl;
+	}
+
+	void UIRenderInterface::CreateDescriptorSets()
+	{
+		VkDevice device = m_Renderer->GetDevice()->GetLogical();
+
+		VkDescriptorSetAllocateInfo allocateInfo{};
+		allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocateInfo.descriptorPool = m_DescriptorPool;
+		allocateInfo.descriptorSetCount = 1;
+		allocateInfo.pSetLayouts = &m_DescriptorSetLayoutVertexTransform;
+
+		if (vkAllocateDescriptorSets(device, &allocateInfo, &m_DescriptorSetVertexTransform) != VK_SUCCESS)
+			std::cerr << "Failed to allocate descriptor set for vertex transform" << std::endl;
+
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = m_VertexUniformBuffer;
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(Rml::Matrix4f);
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = m_DescriptorSetVertexTransform;
+		write.dstBinding = 1;
+		write.dstArrayElement = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		write.pBufferInfo = &bufferInfo;
+
+		vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+	}
+
+	void UIRenderInterface::CreateDescriptorPool()
+	{
+		VkDevice device = m_Renderer->GetDevice()->GetLogical();
+
+		VkDescriptorPoolSize poolSizes[] =
+		{
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 10 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 }
+		};
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.maxSets = 10;
+		poolInfo.poolSizeCount = 2;
+		poolInfo.pPoolSizes = poolSizes;
+
+		if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
+			std::cerr << "Failed to create descriptor pool" << std::endl;
 	}
 
 	void UIRenderInterface::CreatePipelineLayout()

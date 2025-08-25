@@ -49,6 +49,7 @@ namespace Nightbird
 
 		void CreateDescriptorSetLayouts();
 		void CreateDescriptorSets();
+		void CreateDescriptorPool();
 
 		void CreatePipelineLayout();
 		void CreatePipeline();
@@ -59,9 +60,15 @@ namespace Nightbird
 		
 		VkDescriptorSetLayout m_DescriptorSetLayoutVertexTransform = VK_NULL_HANDLE;
 		VkDescriptorSetLayout m_DescriptorSetLayoutTexture = VK_NULL_HANDLE;
+
+		VkDescriptorSet m_DescriptorSetVertexTransform = VK_NULL_HANDLE;
 		
 		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
 		VkPipeline m_Pipeline = VK_NULL_HANDLE;
+
+		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
+
+		VkBuffer m_VertexUniformBuffer = VK_NULL_HANDLE;
 
 		struct Geometry
 		{
