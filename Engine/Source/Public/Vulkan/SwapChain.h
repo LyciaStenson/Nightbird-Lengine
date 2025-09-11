@@ -16,6 +16,8 @@ namespace Nightbird
 
 		VkSwapchainKHR Get() const;
 
+		VkExtent2D GetExtent() const;
+
 		uint32_t GetImageCount() const;
 		uint32_t GetMinImageCount() const;
 

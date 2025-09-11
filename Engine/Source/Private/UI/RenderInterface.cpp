@@ -6,6 +6,7 @@
 #include <Core/Renderer.h>
 #include <Vulkan/Device.h>
 #include <Vulkan/RenderPass.h>
+#include <Vulkan/SwapChain.h>
 
 namespace Nightbird
 {
@@ -17,13 +18,18 @@ namespace Nightbird
 		CreatePipelineLayout();
 		CreatePipeline();
 		CreateDescriptorPool();
+		CreateUniformBuffer();
 		CreateDescriptorSets();
 	}
 
 	UIRenderInterface::~UIRenderInterface()
 	{
 		VkDevice device = m_Renderer->GetDevice()->GetLogical();
-
+		
+		vmaDestroyBuffer(m_Renderer->GetDevice()->GetAllocator(), m_VertexUniformBuffer, m_VertexUniformAllocation);
+		m_VertexUniformBuffer = VK_NULL_HANDLE;
+		m_VertexUniformAllocation = VK_NULL_HANDLE;
+		
 		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
 
 		vkDestroyPipeline(device, m_Pipeline, nullptr);
@@ -45,6 +51,32 @@ namespace Nightbird
 	void UIRenderInterface::BeginFrame(VkCommandBuffer commandBuffer)
 	{
 		m_CommandBuffer = commandBuffer;
+
+		VkRect2D full{};
+		full.offset = {0, 0};
+		full.extent = m_Renderer->GetSwapChain()->GetExtent();
+		vkCmdSetScissor(m_CommandBuffer, 0, 1, &full);
+
+		m_ScissorEnabled = false;
+
+		VkExtent2D extent = m_Renderer->GetSwapChain()->GetExtent();
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
+
+		m_Projection = Rml::Matrix4f::ProjectOrtho(0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, -10000, 10000);
+
+		// https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+		Rml::Matrix4f correctionMatrix;
+		correctionMatrix.SetColumns(Rml::Vector4f(1.0f, 0.0f, 0.0f, 0.0f), Rml::Vector4f(0.0f, -1.0f, 0.0f, 0.0f), Rml::Vector4f(0.0f, 0.0f, 0.5f, 0.0f), Rml::Vector4f(0.0f, 0.0f, 0.5f, 1.0f));
+
+		m_Projection = correctionMatrix * m_Projection;
 	}
 
 	void UIRenderInterface::EndFrame()
@@ -90,7 +122,7 @@ namespace Nightbird
 		
 		VkDescriptorSetLayoutBinding vertexTransformBinding = {};
 		vertexTransformBinding.binding = 1;
-		vertexTransformBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		vertexTransformBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		vertexTransformBinding.descriptorCount = 1;
 		vertexTransformBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 		
@@ -133,7 +165,7 @@ namespace Nightbird
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = m_VertexUniformBuffer;
 		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(Rml::Matrix4f);
+		bufferInfo.range = sizeof(ShaderVertexUserData);
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -141,7 +173,7 @@ namespace Nightbird
 		write.dstBinding = 1;
 		write.dstArrayElement = 0;
 		write.descriptorCount = 1;
-		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		write.pBufferInfo = &bufferInfo;
 
 		vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
@@ -153,7 +185,7 @@ namespace Nightbird
 
 		VkDescriptorPoolSize poolSizes[] =
 		{
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 10 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 }
 		};
 
@@ -165,6 +197,30 @@ namespace Nightbird
 
 		if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
 			std::cerr << "Failed to create descriptor pool" << std::endl;
+	}
+
+	void UIRenderInterface::CreateUniformBuffer()
+	{
+		VmaAllocator allocator = m_Renderer->GetDevice()->GetAllocator();
+
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = sizeof(ShaderVertexUserData);
+		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+
+		VmaAllocationCreateInfo allocInfo{};
+		allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+		allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		
+		if (vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &m_VertexUniformBuffer, &m_VertexUniformAllocation, nullptr) != VK_SUCCESS)
+		{
+			std::cerr << "Failed to create uniform buffer" << std::endl;
+			return;
+		}
+
+		VmaAllocationInfo allocInfoOut;
+		vmaGetAllocationInfo(allocator, m_VertexUniformAllocation, &allocInfoOut);
+		m_MappedVertexUniformMemory = allocInfoOut.pMappedData;
 	}
 
 	void UIRenderInterface::CreatePipelineLayout()
@@ -298,15 +354,13 @@ namespace Nightbird
 		pipelineInfo.renderPass = m_Renderer->GetRenderPass()->Get();
 		pipelineInfo.subpass = 0;
 
-		if (vkCreateGraphicsPipelines(m_Renderer->GetDevice()->GetLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline))
+		if (vkCreateGraphicsPipelines(m_Renderer->GetDevice()->GetLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
 			std::cerr << "Failed to create graphics pipeline" << std::endl;
 	}
 
 	/// Called by RmlUi when it wants to compile geometry it believes will be static for the forseeable future.
 	Rml::CompiledGeometryHandle UIRenderInterface::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices)
 	{
-		std::cout << "RmlUi wants to compile geometry" << std::endl;
-
 		VmaAllocator allocator = m_Renderer->GetDevice()->GetAllocator();
 
 		Geometry geometry{};
@@ -357,8 +411,11 @@ namespace Nightbird
 		vkCmdBindVertexBuffers(m_CommandBuffer, 0, 1, &geometry.vertexBuffer, offsets);
 		vkCmdBindIndexBuffer(m_CommandBuffer, geometry.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-		// Need to bind pipeline and descriptor sets
-		//vkCmdDrawIndexed(m_CommandBuffer, geometry.indexCount, 1, 0, 0, 0);
+		vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+		
+		vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSetVertexTransform, 0, nullptr);
+		
+		vkCmdDrawIndexed(m_CommandBuffer, geometry.indexCount, 1, 0, 0, 0);
 	}
 
 	/// Called by RmlUi when it wants to release application-compiled geometry.
@@ -404,25 +461,50 @@ namespace Nightbird
 	void UIRenderInterface::EnableScissorRegion(bool enable)
 	{
 		std::cout << "RmlUi wants to set scissor region enabled to " << enable << std::endl;
-		m_Renderer->EnableScissor(enable);
+
+		if (m_CommandBuffer == VK_NULL_HANDLE)
+			return;
+
+		if (!enable)
+		{
+			VkRect2D full{};
+			full.offset = {0, 0};
+			full.extent = m_Renderer->GetSwapChain()->GetExtent();
+			vkCmdSetScissor(m_CommandBuffer, 0, 1, &full);
+		}
+
+		m_ScissorEnabled = enable;
 	}
 
 	/// Called by RmlUi when it wants to change the scissor region.
 	void UIRenderInterface::SetScissorRegion(Rml::Rectanglei region)
 	{
 		std::cout << "RmlUi wants to set scissor region" << std::endl;
+
+		if (m_CommandBuffer == VK_NULL_HANDLE || !m_ScissorEnabled)
+			return;
 		
 		VkRect2D rect{};
 		rect.offset.x = std::max(0, region.Left());
 		rect.offset.y = std::max(0, region.Top());
 		rect.extent.width = static_cast<uint32_t>(region.Width());
 		rect.extent.height = static_cast<uint32_t>(region.Height());
-		m_Renderer->SetScissorRect(rect);
+
+		vkCmdSetScissor(m_CommandBuffer, 0, 1, &rect);
 	}
 
 	/// Called by RmlUi when it wants to set the current transform matrix to a new matrix.
 	void UIRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 	{
+		if (!transform)
+			return;
+		
+		Rml::Matrix4f mvp = m_Projection * (*transform);
+		
+		memcpy(m_ShaderVertexUserData.transform, &mvp, sizeof(m_ShaderVertexUserData.transform));
+		m_ShaderVertexUserData.translate[0] = 0.0f;
+		m_ShaderVertexUserData.translate[1] = 0.0f;
 
+		memcpy(m_MappedVertexUniformMemory, &m_ShaderVertexUserData, sizeof(m_ShaderVertexUserData));
 	}
 }

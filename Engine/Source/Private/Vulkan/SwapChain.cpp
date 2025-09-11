@@ -27,6 +27,11 @@ namespace Nightbird
 		return swapChain;
 	}
 
+	VkExtent2D VulkanSwapChain::GetExtent() const
+	{
+		return extent;
+	}
+
 	uint32_t VulkanSwapChain::GetImageCount() const
 	{
 		return imageCount;

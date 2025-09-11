@@ -50,6 +50,7 @@ namespace Nightbird
 		void CreateDescriptorSetLayouts();
 		void CreateDescriptorSets();
 		void CreateDescriptorPool();
+		void CreateUniformBuffer();
 
 		void CreatePipelineLayout();
 		void CreatePipeline();
@@ -69,6 +70,8 @@ namespace Nightbird
 		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
 
 		VkBuffer m_VertexUniformBuffer = VK_NULL_HANDLE;
+		VmaAllocation m_VertexUniformAllocation = VK_NULL_HANDLE;
+		void* m_MappedVertexUniformMemory = nullptr;
 
 		struct Geometry
 		{
@@ -79,8 +82,21 @@ namespace Nightbird
 			uint32_t indexCount = 0;
 		};
 
+		struct alignas(16) ShaderVertexUserData
+		{
+			alignas(16) float transform[16];
+			alignas(16) float translate[2];
+			float _padding[2];
+		};
+
+		ShaderVertexUserData m_ShaderVertexUserData;
+
+		Rml::Matrix4f m_Projection;
+
 		std::vector<Geometry> m_Geometries;
 
 		std::vector<VkShaderModule> m_Shaders;
+
+		bool m_ScissorEnabled = false;
 	};
 }
