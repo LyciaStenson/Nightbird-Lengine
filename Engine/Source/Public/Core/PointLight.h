@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 
 #include <volk.h>
 
@@ -12,10 +12,10 @@ namespace Nightbird
 	class VulkanUniformBuffer;
 	struct PointLightData;
 	
-	class PointLight : public SceneObject
+	class PointLight : public SpatialObject
 	{
 	public:
-		using SceneObject::SceneObject;
+		using SpatialObject::SpatialObject;
 		~PointLight() override;
 
 		PointLightData GetData() const;
@@ -24,6 +24,6 @@ namespace Nightbird
 		float intensity = 1.0f;
 		float radius = 10.0f;
 		
-		RTTR_ENABLE(Nightbird::SceneObject)
+		RTTR_ENABLE(Nightbird::SpatialObject)
 	};
 }

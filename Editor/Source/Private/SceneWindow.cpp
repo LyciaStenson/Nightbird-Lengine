@@ -132,7 +132,11 @@ namespace Nightbird
 		if (!selectedObject)
 			return;
 		
-		glm::mat4 model = selectedObject->GetLocalMatrix();
+		SpatialObject* selectedSpatialObject = dynamic_cast<SpatialObject*>(selectedObject);
+		if (!selectedSpatialObject)
+			return;
+
+		glm::mat4 model = selectedSpatialObject->GetLocalMatrix();
 
 		if (!ImGui::IsMouseDown(ImGuiMouseButton_Right))
 		{
@@ -154,12 +158,12 @@ namespace Nightbird
 
 			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(model), &translation[0], &eulerDegrees[0], &scale[0]);
 			
-			selectedObject->transform.position = translation;
+			selectedSpatialObject->transform.position = translation;
 
-			selectedObject->transform.eulerCache = eulerDegrees;
-			selectedObject->transform.rotation = glm::quat(glm::radians(eulerDegrees));
+			selectedSpatialObject->transform.eulerCache = eulerDegrees;
+			selectedSpatialObject->transform.rotation = glm::quat(glm::radians(eulerDegrees));
 
-			selectedObject->transform.scale = scale;
+			selectedSpatialObject->transform.scale = scale;
 		}
 	}
 

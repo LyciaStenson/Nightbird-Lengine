@@ -30,10 +30,7 @@ namespace Nightbird
 		SceneObject* GetParent() const;
 		
 		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;
-
-		glm::mat4 GetLocalMatrix() const;
-		glm::mat4 GetWorldMatrix() const;
-
+		
 		void AddChild(std::unique_ptr<SceneObject> child);
 		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
 		
@@ -43,8 +40,6 @@ namespace Nightbird
 		virtual void Serialize(json& out) const;
 		virtual void Deserialize(const json& in);
 		
-		Transform transform;
-
 		SceneObject* parent = nullptr;
 		
 		RTTR_ENABLE()

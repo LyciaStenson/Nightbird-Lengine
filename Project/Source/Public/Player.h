@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 
-class Player : public Nightbird::SceneObject
+class Player : public Nightbird::SpatialObject
 {
 public:
-	using Nightbird::SceneObject::SceneObject;
+	using Nightbird::SpatialObject::SpatialObject;
 	~Player() override = default;
 
 	void EnterScene() override;
@@ -16,6 +16,6 @@ public:
 protected:
 	float movementSpeed = 5.0f;
 
-	RTTR_ENABLE(Nightbird::SceneObject)
+	RTTR_ENABLE(Nightbird::SpatialObject)
 	RTTR_REGISTRATION_FRIEND
 };

@@ -100,7 +100,7 @@ namespace Nightbird
 		std::vector<SceneObject*> allObjects = GetAllObjects();
 		for (SceneObject* object : allObjects)
 		{
-			object->transform.eulerCache = glm::degrees(glm::eulerAngles(object->transform.rotation));
+			//object->transform.eulerCache = glm::degrees(glm::eulerAngles(object->transform.rotation));
 			if (auto* prefab = dynamic_cast<PrefabInstance*>(object))
 			{
 				modelManager->LoadModelAsync(prefab->GetPrefabPath(), [this, prefab](std::shared_ptr<Model> model)
@@ -176,7 +176,7 @@ namespace Nightbird
 		rawObject->EnterScene();
 	}
 
-	SceneObject* Scene::CreateSceneObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
+	SceneObject* Scene::CreateSceneObject(const std::string& name, SceneObject* parent)
 	{
 		if (!parent)
 			parent = rootObject.get();
@@ -191,12 +191,36 @@ namespace Nightbird
 		//objectNames.insert(instanceName);
 
 		std::unique_ptr<SceneObject> object(new SceneObject(instanceName));
-		object->transform.position = position;
-		object->transform.rotation = rotation;
-		object->transform.scale = scale;
 		object->SetParent(parent);
 
 		SceneObject* objectPtr = object.get();
+
+		AddSceneObject(std::move(object), parent);
+
+		return objectPtr;
+	}
+
+	SpatialObject* Scene::CreateSpatialObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
+	{
+		if (!parent)
+			parent = rootObject.get();
+
+		std::string instanceName = name;
+		//int counter = 1;
+		//while (objectNames.count(instanceName))
+		//{
+			//instanceName = name + std::to_string(counter);
+			//++counter;
+		//}
+		//objectNames.insert(instanceName);
+
+		std::unique_ptr<SceneObject> object(new SpatialObject(instanceName));
+		SpatialObject* objectPtr = static_cast<SpatialObject*>(object.get());
+
+		objectPtr->transform.position = position;
+		objectPtr->transform.rotation = rotation;
+		objectPtr->transform.scale = scale;
+		objectPtr->SetParent(parent);
 
 		AddSceneObject(std::move(object), parent);
 
@@ -218,12 +242,12 @@ namespace Nightbird
 		//objectNames.insert(instanceName);
 
 		std::unique_ptr<SceneObject> object(new PrefabInstance(instanceName, path));
-		object->transform.position = position;
-		object->transform.rotation = rotation;
-		object->transform.scale = scale;
-		object->SetParent(parent);
-
 		PrefabInstance* prefab = static_cast<PrefabInstance*>(object.get());
+
+		prefab->transform.position = position;
+		prefab->transform.rotation = rotation;
+		prefab->transform.scale = scale;
+		prefab->SetParent(parent);
 		
 		AddSceneObject(std::move(object), parent);
 
@@ -245,12 +269,12 @@ namespace Nightbird
 		//objectNames.insert(instanceName);
 
 		std::unique_ptr<SceneObject> object(new MeshInstance(instanceName, mesh, device, descriptorPool));
-		object->transform.position = position;
-		object->transform.rotation = rotation;
-		object->transform.scale = scale;
-		object->SetParent(parent);
-
 		MeshInstance* meshInstance = static_cast<MeshInstance*>(object.get());
+
+		meshInstance->transform.position = position;
+		meshInstance->transform.rotation = rotation;
+		meshInstance->transform.scale = scale;
+		meshInstance->SetParent(parent);
 		
 		AddSceneObject(std::move(object), parent);
 
@@ -279,7 +303,7 @@ namespace Nightbird
 		glm::vec3 scale = glm::vec3(gltfScale.x(), gltfScale.y(), gltfScale.z());
 
 		SceneObject* object = nullptr;
-
+		
 		if (node.meshIndex.has_value())
 		{
 			if (node.meshIndex.value() < model->meshes.size())
@@ -289,7 +313,7 @@ namespace Nightbird
 		}
 		else
 		{
-			object = CreateSceneObject(node.name.c_str(), position, rotation, scale, parent);
+			object = CreateSpatialObject(node.name.c_str(), position, rotation, scale, parent);
 		}
 
 		for (const auto& childNodeIndex : node.children)

@@ -55,20 +55,7 @@ namespace Nightbird
 	{
 		return children;
 	}
-
-	glm::mat4 SceneObject::GetLocalMatrix() const
-	{
-		return transform.GetLocalMatrix();
-	}
-
-	glm::mat4 SceneObject::GetWorldMatrix() const
-	{
-		if (parent)
-			return parent->GetWorldMatrix() * transform.GetLocalMatrix();
-		else
-			return transform.GetLocalMatrix();
-	}
-
+	
 	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
 		child->parent = this;
@@ -207,8 +194,7 @@ RTTR_REGISTRATION
 {
 	rttr::registration::class_<Nightbird::SceneObject>("SceneObject")
 	.constructor<std::string>()
-	.property("name", &Nightbird::SceneObject::name)
-	.property("transform", &Nightbird::SceneObject::transform);
+	.property("name", &Nightbird::SceneObject::name);
 
 	rttr::registration::method("CreateSceneObject", [](const std::string& name) -> Nightbird::SceneObject*
 	{

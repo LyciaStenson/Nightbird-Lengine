@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Core/SceneObject.h>
+#include <Core/SpatialObject.h>
 #include <Core/Transform.h>
 
 namespace Nightbird
@@ -11,10 +11,10 @@ namespace Nightbird
 	class VulkanUniformBuffer;
 	class Mesh;
 
-	class PrefabInstance : public SceneObject
+	class PrefabInstance : public SpatialObject
 	{
 	public:
-		using SceneObject::SceneObject;
+		using SpatialObject::SpatialObject;
 		PrefabInstance(const char* name, const char* prefabPath = "");
 		PrefabInstance(const std::string& name, const std::string& prefabPath = "");
 		~PrefabInstance() override;
@@ -27,7 +27,7 @@ namespace Nightbird
 	protected:
 		std::string prefabPath;
 		
-		RTTR_ENABLE(Nightbird::SceneObject)
+		RTTR_ENABLE(Nightbird::SpatialObject)
 		RTTR_REGISTRATION_FRIEND
 	};
 }
