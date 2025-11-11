@@ -1,6 +1,6 @@
 # Nightbird Engine
 
-## Nightbird is a new Free and Open Source game engine.
+## A new Free and Open Source game engine.
 
 Nightbird is a C++ game engine with Vulkan rendering and a dynamic project system.
 
