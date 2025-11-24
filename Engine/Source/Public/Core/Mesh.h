@@ -7,8 +7,8 @@
 
 #include <volk.h>
 
-#include <Core/Vertex.h>
-#include <Vulkan/UniformBuffer.h>
+#include "Core/Vertex.h"
+#include "Vulkan/UniformBuffer.h"
 
 namespace Nightbird
 {

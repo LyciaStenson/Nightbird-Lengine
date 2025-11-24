@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include <Core/SpatialObject.h>
-#include <Core/Transform.h>
+#include "Core/SpatialObject.h"
+#include "Core/Transform.h"
 
 namespace Nightbird
 {

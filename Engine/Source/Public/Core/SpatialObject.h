@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/SceneObject.h>
+#include "Core/SceneObject.h"
 
 namespace Nightbird
 {

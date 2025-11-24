@@ -1,11 +1,11 @@
-#include <Inspector.h>
+#include "Inspector.h"
 
-#include <EditorUI.h>
+#include "EditorUI.h"
 
-#include <Core/SceneObject.h>
-#include <Core/Scene.h>
-#include <Core/Camera.h>
-#include <Core/PointLight.h>
+#include "Core/SceneObject.h"
+#include "Core/Scene.h"
+#include "Core/Camera.h"
+#include "Core/PointLight.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

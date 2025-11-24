@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Core/SpatialObject.h>
+#include "Core/SpatialObject.h"
 
 #include <volk.h>
 

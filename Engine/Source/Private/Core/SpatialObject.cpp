@@ -1,4 +1,4 @@
-#include <Core/SpatialObject.h>
+#include "Core/SpatialObject.h"
 
 namespace Nightbird
 {

@@ -6,7 +6,7 @@ namespace Nightbird
 {
 	struct Binding
 	{
-		enum class Type { Key, MouseButton } type;
+		enum class Type { Key, MouseButton, GamepadButton, GamepadAxis } type;
 		int code;
 	};
 	
