@@ -1,8 +1,8 @@
-#include <Core/GlfwWindow.h>
+#include "Core/GlfwWindow.h"
 
 #include <iostream>
 
-#include <Core/Renderer.h>
+#include "Core/Renderer.h"
 
 namespace Nightbird
 {

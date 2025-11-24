@@ -15,8 +15,8 @@
 #include <fastgltf/types.hpp>
 #include <fastgltf/tools.hpp>
 
-#include <Core/SceneObject.h>
-#include <Core/SpatialObject.h>
+#include "Core/SceneObject.h"
+#include "Core/SpatialObject.h"
 
 namespace Nightbird
 {

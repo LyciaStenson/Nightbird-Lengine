@@ -7,9 +7,9 @@
 
 #include <volk.h>
 
-#include <Core/SpatialObject.h>
-#include <Core/Transform.h>
-#include <Vulkan/UniformBuffer.h>
+#include "Core/SpatialObject.h"
+#include "Core/Transform.h"
+#include "Vulkan/UniformBuffer.h"
 
 namespace Nightbird
 {

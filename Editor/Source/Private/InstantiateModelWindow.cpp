@@ -1,10 +1,10 @@
-#include <InstantiateModelWindow.h>
+#include "InstantiateModelWindow.h"
 
 #include <string>
 
-#include <Core/ModelManager.h>
-#include <Core/Scene.h>
-#include <Core/Transform.h>
+#include "Core/ModelManager.h"
+#include "Core/Scene.h"
+#include "Core/Transform.h"
 
 inline float Wrap180(float angle)
 {

@@ -1,12 +1,12 @@
-#include <SceneOutliner.h>
+#include "SceneOutliner.h"
 
 #include <array>
 #include <string>
 #include <iostream>
 
-#include <EditorUI.h>
-#include <Core/Scene.h>
-#include <Core/PrefabInstance.h>
+#include "EditorUI.h"
+#include "Core/Scene.h"
+#include "Core/PrefabInstance.h"
 
 namespace Nightbird
 {

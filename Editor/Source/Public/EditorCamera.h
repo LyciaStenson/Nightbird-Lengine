@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/Camera.h>
+#include "Core/Camera.h"
 
 namespace Nightbird
 {
@@ -18,6 +18,6 @@ namespace Nightbird
 		float movementSpeed = 10.0f;
 		float lookSensitivity = 0.005f;
 
-		double lastX, lastY;
+		double lastX = 0.0, lastY = 0.0;
 	};
 }

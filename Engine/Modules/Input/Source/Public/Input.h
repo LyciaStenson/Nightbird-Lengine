@@ -25,7 +25,7 @@ namespace Nightbird
 {
 	struct InputEvent
 	{
-		enum class Type { Key, MouseButton, MouseMove } type;
+		enum class Type { Key, MouseButton, MouseMove, GamepadButton, GamepadAxis } type;
 		int code;
 		int action;
 		double x, y;

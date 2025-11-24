@@ -1,4 +1,4 @@
-#include <AboutWindow.h>
+#include "AboutWindow.h"
 
 namespace Nightbird
 {

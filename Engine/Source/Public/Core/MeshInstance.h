@@ -6,8 +6,8 @@
 
 #include <volk.h>
 
-#include <Core/SpatialObject.h>
-#include <Core/Transform.h>
+#include "Core/SpatialObject.h"
+#include "Core/Transform.h"
 
 namespace Nightbird
 {

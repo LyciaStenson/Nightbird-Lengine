@@ -15,7 +15,11 @@ public:
 
 protected:
 	float movementSpeed = 5.0f;
-
+	float lookSensitivity = 5.0f;
+	
+	double lastX = 0.0, lastY = 0.0;
+	bool firstMouse = true;
+	
 	RTTR_ENABLE(Nightbird::SpatialObject)
 	RTTR_REGISTRATION_FRIEND
 };

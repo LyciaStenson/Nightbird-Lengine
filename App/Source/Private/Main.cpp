@@ -1,9 +1,9 @@
-#include <Core/Engine.h>
+#include "Core/Engine.h"
 
-#include <Core/Renderer.h>
-#include <Core/Scene.h>
+#include "Core/Renderer.h"
+#include "Core/Scene.h"
 
-#include <AppRenderTarget.h>
+#include "AppRenderTarget.h"
 
 #include <iostream>
 
@@ -23,5 +23,7 @@ int main(int argc, char** argv)
 	AppRenderTarget renderTarget(engine.GetRenderer());
 	engine.GetRenderer()->SetRenderTarget(&renderTarget);
 	
+	engine.bSimulationRunning = true;
+
 	engine.Run();
 }

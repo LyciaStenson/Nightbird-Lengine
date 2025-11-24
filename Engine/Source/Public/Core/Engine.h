@@ -31,6 +31,8 @@ namespace Nightbird
 		
 		void Run();
 
+		bool bSimulationRunning = false;
+
 	private:
 		std::unique_ptr<GlfwWindow> glfwWindow;
 

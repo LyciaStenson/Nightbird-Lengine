@@ -1,21 +1,21 @@
-#include <Core/Engine.h>
+#include "Core/Engine.h"
 
 #include <iostream>
 #include <algorithm>
 
 #include <volk.h>
 
-#include <Core/GlfwWindow.h>
-#include <Core/ModelManager.h>
-#include <Core/Scene.h>
-#include <Core/RenderTarget.h>
-#include <Core/Renderer.h>
-#include <Vulkan/Device.h>
-#include <Vulkan/DescriptorPool.h>
-#include <Vulkan/DescriptorSetLayoutManager.h>
-#include <Vulkan/GlobalDescriptorSetManager.h>
-#include <Core/GlmRegistration.h>
-#include <Input.h>
+#include "Core/GlfwWindow.h"
+#include "Core/ModelManager.h"
+#include "Core/Scene.h"
+#include "Core/RenderTarget.h"
+#include "Core/Renderer.h"
+#include "Vulkan/Device.h"
+#include "Vulkan/DescriptorPool.h"
+#include "Vulkan/DescriptorSetLayoutManager.h"
+#include "Vulkan/GlobalDescriptorSetManager.h"
+#include "Core/GlmRegistration.h"
+#include "Input.h"
 
 namespace Nightbird
 {
@@ -82,7 +82,8 @@ namespace Nightbird
 			deltaTime = static_cast<float>(currentTime - lastTime);
 			lastTime = currentTime;
 
-			scene->Update(deltaTime);
+			if (bSimulationRunning)
+				scene->Update(deltaTime);
 
 			modelManager->ProcessUploadQueue();
 			renderer->DrawFrame(scene.get());

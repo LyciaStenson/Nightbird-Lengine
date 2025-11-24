@@ -7,7 +7,7 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/types.hpp>
 
-#include <Core/MeshPrimitive.h>
+#include "Core/MeshPrimitive.h"
 
 namespace Nightbird
 {
