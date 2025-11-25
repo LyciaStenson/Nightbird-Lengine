@@ -6,6 +6,7 @@
 #include "AppRenderTarget.h"
 
 #include <iostream>
+#include <filesystem>
 
 #include <rttr/library.h>
 
@@ -13,10 +14,19 @@ using namespace Nightbird;
 
 int main(int argc, char** argv)
 {
-	rttr::library project("Project");
-	bool projectLoad = project.load();
-	if (!projectLoad)
-		std::cout << "Failed to load Project shared library via RTTR" << std::endl;
+	if (argc > 1 || true)
+	{
+		rttr::library project(argv[1]);
+		bool projectLoad = project.load();
+		if (projectLoad)
+			std::cout << "Loaded project shared library" << std::endl;
+		else
+			std::cout << "Failed to load project shared library" << std::endl;
+	}
+	else
+	{
+		std::cout << "No project argument found" << std::endl;
+	}
 
 	Engine engine;
 	
