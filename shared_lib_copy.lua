@@ -10,7 +10,7 @@ function copy_shared_lib(name, platform, outputdir)
 		return
 	end
 
-	local shared_lib_path = path.join("%{wks.location}/Binaries", outputdir, name, shared_lib_name)
+	local shared_lib_path = path.join("%{wks.location}/Bin", outputdir, name, shared_lib_name)
 
 	postbuildcommands {
 		"{COPY} " .. shared_lib_path .. " " .. "%{cfg.targetdir}"

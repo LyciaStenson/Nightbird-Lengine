@@ -1,4 +1,4 @@
-#include "Inspector.h"
+#include "Windows/Inspector.h"
 
 #include "EditorUI.h"
 

@@ -1,4 +1,4 @@
-#include "SceneWindow.h"
+#include "Windows/SceneWindow.h"
 
 #include <array>
 #include <iostream>

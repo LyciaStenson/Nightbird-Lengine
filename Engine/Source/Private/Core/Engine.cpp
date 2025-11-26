@@ -90,4 +90,14 @@ namespace Nightbird
 		}
 		vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
 	}
+
+	void Engine::LoadProject(const std::string& path)
+	{
+		rttr::library project(path);
+		bool projectLoad = project.load();
+		if (projectLoad)
+			std::cout << "Loaded project shared library" << std::endl;
+		else
+			std::cout << "Failed to load project shared library" << std::endl;
+	}
 }

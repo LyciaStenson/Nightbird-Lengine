@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -30,6 +31,8 @@ namespace Nightbird
 		float GetDeltaTime() const;
 		
 		void Run();
+
+		void LoadProject(const std::string& path);
 
 		bool bSimulationRunning = false;
 

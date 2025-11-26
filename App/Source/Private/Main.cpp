@@ -14,7 +14,7 @@ using namespace Nightbird;
 
 int main(int argc, char** argv)
 {
-	if (argc > 1 || true)
+	if (argc > 1)
 	{
 		rttr::library project(argv[1]);
 		bool projectLoad = project.load();

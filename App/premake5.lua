@@ -5,10 +5,10 @@ project "App"
 	language "C++"
 	cppdialect "C++17"
 
-	local outBinDir = "%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}"
+	local outBinDir = "%{wks.location}/Bin/" .. outputdir .. "/%{prj.name}"
 	
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Int/" .. outputdir .. "/%{prj.name}")
 
 	debugdir (outBinDir)
 

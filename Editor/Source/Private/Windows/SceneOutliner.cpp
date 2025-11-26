@@ -1,4 +1,4 @@
-#include "SceneOutliner.h"
+#include "Windows/SceneOutliner.h"
 
 #include <array>
 #include <string>

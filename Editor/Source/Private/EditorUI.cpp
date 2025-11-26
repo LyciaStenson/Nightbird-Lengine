@@ -16,62 +16,25 @@
 #include "Core/Scene.h"
 #include "Core/ModelManager.h"
 #include "Core/Engine.h"
+#include "Core/Renderer.h"
 
-#include "ImGuiDescriptorPool.h"
-#include "SceneOutliner.h"
-#include "LoadModelWindow.h"
-#include "CreateObjectWindow.h"
-#include "InstantiateModelWindow.h"
-#include "Inspector.h"
-#include "AssetBrowser.h"
-#include "SceneWindow.h"
-#include "AboutWindow.h"
+#include "Windows/SceneOutliner.h"
+#include "Windows/LoadModelWindow.h"
+#include "Windows/CreateObjectWindow.h"
+#include "Windows/InstantiateModelWindow.h"
+#include "Windows/Inspector.h"
+#include "Windows/AssetBrowser.h"
+#include "Windows/SceneWindow.h"
+#include "Windows/AboutWindow.h"
+
 #include "EditorCamera.h"
 
 namespace Nightbird
 {
-	EditorUI::EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine)
-		: m_Window(glfwWindow), m_Scene(scene)
+	void EditorUI::Init(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, ModelManager* modelManager, Engine* engine, GLFWwindow* glfwWindow, Scene* scene)
 	{
-		m_DescriptorPool = std::make_unique<ImGuiDescriptorPool>(device);
+		m_Window = glfwWindow;
 
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& imGuiIO = ImGui::GetIO(); (void)imGuiIO;
-		imGuiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		imGuiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		
-		imGuiIO.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoFlex-Regular.ttf", 16.0f);
-		
-		ImGuiStyle& style = ImGui::GetStyle();
-		style.TabRounding = 4.0f;
-		style.FrameRounding = 4.0f;
-		style.WindowRounding = 6.0f;
-		style.WindowPadding = ImVec2(8.0f, 8.0f);
-		style.FramePadding = ImVec2(8.0f, 6.0f);
-		style.ItemSpacing = ImVec2(10.0f, 8.0f);
-		style.TabBarBorderSize = 0.0f;
-		style.WindowBorderSize = 0.0f;
-		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
-
-		ImGui_ImplGlfw_InitForVulkan(glfwWindow, true);
-
-		ImGui_ImplVulkan_InitInfo imGuiInitInfo = {};
-		imGuiInitInfo.ApiVersion = VK_API_VERSION_1_3;
-		imGuiInitInfo.Instance = instance->Get();
-		imGuiInitInfo.PhysicalDevice = device->GetPhysical();
-		imGuiInitInfo.Device = device->GetLogical();
-		imGuiInitInfo.QueueFamily = device->graphicsQueueFamily;
-		imGuiInitInfo.Queue = device->graphicsQueue;
-		imGuiInitInfo.DescriptorPool = m_DescriptorPool->Get();
-		imGuiInitInfo.RenderPass = renderPass->Get();
-		imGuiInitInfo.Subpass = 0;
-		imGuiInitInfo.MinImageCount = swapChain->GetMinImageCount();
-		imGuiInitInfo.ImageCount = swapChain->GetImageCount();
-		imGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-
-		ImGui_ImplVulkan_Init(&imGuiInitInfo);
-		
 		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
 		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
 		m_Windows["Instantiate Model Window"] = std::make_unique<InstantiateModelWindow>(modelManager, scene);
@@ -80,13 +43,6 @@ namespace Nightbird
 		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(scene, this);
 		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, this, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
 		m_Windows["About"] = std::make_unique<AboutWindow>();
-	}
-	
-	EditorUI::~EditorUI()
-	{
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
 	}
 
 	ImGuiWindow* EditorUI::GetWindow(const std::string& title)
@@ -108,8 +64,24 @@ namespace Nightbird
 		m_SelectedObject = object;
 	}
 	
-	void EditorUI::Render(VkCommandBuffer commandBuffer)
+	void EditorUI::Render(Renderer* renderer, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 	{
+		SceneWindow* sceneWindow = static_cast<SceneWindow*>(GetWindow("Scene Window"));
+		if (sceneWindow)
+		{
+			if (sceneWindow->ShouldResize())
+				sceneWindow->RecreateRenderResources();
+
+			sceneWindow->GetColorTexture()->TransitionToColor(commandBuffer);
+			
+			sceneWindow->BeginRenderPass(commandBuffer);
+			renderer->DrawScene(m_Scene, sceneWindow->GetEditorCamera(), commandBuffer, sceneWindow->GetExtent());
+			sceneWindow->EndRenderPass(commandBuffer);
+
+			sceneWindow->GetColorTexture()->TransitionToShaderRead(commandBuffer);
+		}
+
+		renderPass->Begin(commandBuffer, framebuffer, extent);
 		NewFrame();
 
 		if (ImGui::BeginMainMenuBar())
@@ -172,6 +144,12 @@ namespace Nightbird
 		}
 		
 		Draw(commandBuffer);
+		renderPass->End(commandBuffer);
+	}
+
+	bool EditorUI::ShouldClose()
+	{
+		return false;
 	}
 
 	void EditorUI::OpenWindow(const std::string& title)

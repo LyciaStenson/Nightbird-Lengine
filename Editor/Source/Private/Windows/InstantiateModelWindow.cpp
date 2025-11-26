@@ -1,4 +1,4 @@
-#include "InstantiateModelWindow.h"
+#include "Windows/InstantiateModelWindow.h"
 
 #include <string>
 

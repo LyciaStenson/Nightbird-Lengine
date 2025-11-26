@@ -5,7 +5,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "ImGuiWindow.h"
+#include "Windows/ImGuiWindow.h"
+
+#include "UIState.h"
 
 #include <volk.h>
 #include <glfw/glfw3.h>
@@ -20,38 +22,37 @@ namespace Nightbird
 	class VulkanDevice;
 	class VulkanSwapChain;
 	class VulkanRenderPass;
-	class ImGuiDescriptorPool;
+	class Renderer;
 	class SceneObject;
 	class Scene;
 	class ModelManager;
 	class Engine;
 	
-	class EditorUI
+	class EditorUI : public UIState
 	{
 	public:
-		EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine);
-		~EditorUI();
+		void Init(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, ModelManager* modelManager, Engine* engine, GLFWwindow* glfwWindow, Scene* scene);
 		
 		ImGuiWindow* GetWindow(const std::string& title);
 		
 		SceneObject* GetSelectedObject() const;
 		void SelectObject(SceneObject* object);
 		
-		void Render(VkCommandBuffer commandBuffer);
+		virtual void Render(Renderer* renderer, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent) override;
+
+		virtual bool ShouldClose() override;
 		
 		void OpenWindow(const std::string& title);
 
 	private:
-		GLFWwindow* m_Window;
-
-		std::unique_ptr<ImGuiDescriptorPool> m_DescriptorPool;
+		GLFWwindow* m_Window = nullptr;
 
 		Scene* m_Scene = nullptr;
 		SceneObject* m_SelectedObject = nullptr;
 
 		std::unordered_map<std::string, std::unique_ptr<ImGuiWindow>> m_Windows;
 		
-		void NewFrame();
-		void Draw(VkCommandBuffer commandBuffer);
+		virtual void NewFrame() override;
+		virtual void Draw(VkCommandBuffer commandBuffer) override;
 	};
 }
