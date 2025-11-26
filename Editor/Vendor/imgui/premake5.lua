@@ -2,8 +2,8 @@ project "ImGui"
 	kind "StaticLib"
 	language "C++"
 
-	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
 

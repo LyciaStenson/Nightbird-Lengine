@@ -3,8 +3,8 @@ project "rttr"
 	language "C++"
 	cppdialect "C++17"
 
-	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	defines { "RTTR_DLL_EXPORTS", "RTTR_DLL", "rttr_core_EXPORTS" }
 

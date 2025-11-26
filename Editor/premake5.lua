@@ -4,11 +4,11 @@ project "Editor"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-
-	local outBinDir = "%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}"
-
+	
+	local outBinDir = "%{wks.location}/Binaries/" .. outputdir .. "/%{prj.name}"
+	
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	debugdir (outBinDir)
 

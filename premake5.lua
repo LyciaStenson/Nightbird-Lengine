@@ -36,7 +36,3 @@ group ""
 group "Nightbird/Modules"
 	include "Engine/Modules/Input"
 group ""
-
-group "Projects"
-	include "Project"
-group ""

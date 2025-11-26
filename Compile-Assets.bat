@@ -18,10 +18,10 @@ if "%configChoice%"=="1" (
 set engine_source=Engine\Assets
 
 set app_source=App\Assets
-set app_destination=out\bin\%config%-windows-x86_64\App\Assets
+set app_destination=Binaries\%config%-windows-x86_64\App\Assets
 
 set editor_source=Editor\Assets
-set editor_destination=out\bin\%config%-windows-x86_64\Editor\Assets
+set editor_destination=Binaries\%config%-windows-x86_64\Editor\Assets
 
 if not exist "%app_destination%" (
 	mkdir "%app_destination%"
