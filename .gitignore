@@ -8,8 +8,8 @@
 *.log
 *.lastbuildstate
 
-/Binaries
-/Intermediate
+/Bin
+/Int
 
 Makefile
 *.spv
