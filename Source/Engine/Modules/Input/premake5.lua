@@ -9,13 +9,13 @@ project "Input"
 	defines { "INPUT_BUILD" }
 
 	files {
-		"Source/**.h",
-		"Source/**.cpp"
+		"Public/**.h",
+		"Private/**.cpp"
 	}
 
 	includedirs {
-		"Source/Public",
-		"%{wks.location}/Engine/Vendor/glfw/include"
+		"Public",
+		"%{wks.location}/Source/Vendor/glfw/include"
 	}
 
 	links { "glfw" }

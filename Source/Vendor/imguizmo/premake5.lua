@@ -1,19 +1,14 @@
-project "ImGui"
+project "ImGuizmo"
 	kind "StaticLib"
 	language "C++"
 
 	targetdir ("%{wks.location}/Bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/Int/" .. outputdir .. "/%{prj.name}")
 
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
-
 	files { "**.h", "**.cpp" }
 
-	includedirs
-	{
-		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
-		"%{wks.location}/Engine/Vendor/volk",
-		"%{wks.location}/Engine/Vendor/glfw/include"
+	includedirs {
+		"%{wks.location}/Source/Vendor/imgui"
 	}
 
 	filter "configurations:Debug"

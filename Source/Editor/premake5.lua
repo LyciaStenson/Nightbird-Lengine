@@ -1,4 +1,4 @@
-dofile("../shared_lib_copy.lua")
+dofile("../../shared_lib_copy.lua")
 
 project "Editor"
 	kind "ConsoleApp"
@@ -17,25 +17,25 @@ project "Editor"
 	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
 
 	files {
-		"Source/**.h",
-		"Source/**.cpp"
+		"Public/**.h",
+		"Private/**.cpp"
 	}
 
 	includedirs {
-		"Source/Public",
-		"%{wks.location}/Engine/Source/Public",
-		"%{wks.location}/Engine/Modules/Input/Source/Public",
-		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
-		"%{wks.location}/Engine/Vendor/volk",
-		"%{wks.location}/Engine/Vendor/vma",
-		"%{wks.location}/Engine/Vendor/glfw/include",
-		"%{wks.location}/Engine/Vendor/glm",
-		"%{wks.location}/Engine/Vendor/stb",
-		"%{wks.location}/Engine/Vendor/fastgltf/include",
-		"%{wks.location}/Engine/Vendor/rttr/src",
-		"%{wks.location}/Engine/Vendor/json",
-		"%{wks.location}/Editor/Vendor/imgui",
-		"%{wks.location}/Editor/Vendor/imguizmo"
+		"Public",
+		"%{wks.location}/Source/Engine/Public",
+		"%{wks.location}/Source/Engine/Modules/Input/Public",
+		"%{wks.location}/Source/Vendor/vulkan-headers/include",
+		"%{wks.location}/Source/Vendor/volk",
+		"%{wks.location}/Source/Vendor/vma",
+		"%{wks.location}/Source/Vendor/glfw/include",
+		"%{wks.location}/Source/Vendor/glm",
+		"%{wks.location}/Source/Vendor/stb",
+		"%{wks.location}/Source/Vendor/fastgltf/include",
+		"%{wks.location}/Source/Vendor/rttr/src",
+		"%{wks.location}/Source/Vendor/json",
+		"%{wks.location}/Source/Vendor/imgui",
+		"%{wks.location}/Source/Vendor/imguizmo"
 	}
 
 	defines { "EDITOR" }

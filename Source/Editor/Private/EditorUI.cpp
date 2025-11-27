@@ -34,6 +34,7 @@ namespace Nightbird
 	void EditorUI::Init(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, ModelManager* modelManager, Engine* engine, GLFWwindow* glfwWindow, Scene* scene)
 	{
 		m_Window = glfwWindow;
+		m_Scene = scene;
 
 		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
 		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
