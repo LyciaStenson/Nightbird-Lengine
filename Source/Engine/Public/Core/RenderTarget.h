@@ -9,20 +9,13 @@
 
 namespace Nightbird
 {
-	class Renderer;
-	class Scene;
-	class VulkanDescriptorSetLayoutManager;
-	class GlobalDescriptorSetManager;
+	class SceneManager;
 
 	class RenderTarget
 	{
 	public:
-		RenderTarget(Renderer* renderer);
 		virtual ~RenderTarget() = default;
 		
-		virtual void Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent) = 0;
-
-	protected:
-		Renderer* renderer = nullptr;
+		virtual void Render(SceneManager* sceneManager, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent) = 0;
 	};
 }

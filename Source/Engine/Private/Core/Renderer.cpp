@@ -13,7 +13,7 @@
 #include "Vulkan/DescriptorPool.h"
 #include "Vulkan/Sync.h"
 #include "Core/GlfwWindow.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/SceneObject.h"
 #include "Core/Renderable.h"
 #include "Core/Mesh.h"
@@ -99,7 +99,7 @@ namespace Nightbird
 		renderTarget = target;
 	}
 
-	void Renderer::DrawFrame(Scene* scene)
+	void Renderer::DrawFrame(SceneManager* sceneManager)
 	{
 		vkWaitForFences(device->GetLogical(), 1, &sync->inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -122,7 +122,7 @@ namespace Nightbird
 
 		renderPass->BeginCommandBuffer(commandBuffer);
 
-		renderTarget->Render(scene, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
+		renderTarget->Render(sceneManager, renderPass.get(), commandBuffer, swapChain->framebuffers[imageIndex], swapChain->extent);
 
 		renderPass->EndCommandBuffer(commandBuffer);
 
@@ -174,16 +174,16 @@ namespace Nightbird
 		currentFrame = (currentFrame + 1) % VulkanConfig::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Renderer::DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent)
+	void Renderer::DrawScene(SceneManager* sceneManager, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
-		scene->UpdateBuffers(currentFrame, extent);
+		sceneManager->UpdateBuffers(currentFrame, extent);
 		globalDescriptorSetManager->UpdateCamera(currentFrame, camera->GetUBO(extent));
 		
 		std::vector<Renderable> opaqueRenderables;
 		std::vector<Renderable> opaqueDoubleSidedRenderables;
 		std::vector<Renderable> transparentRenderables;
 
-		for (const auto& object : scene->GetRootObject()->GetChildren())
+		for (const auto& object : sceneManager->GetRootObject()->GetChildren())
 		{
 			CollectRenderables(object.get(), opaqueRenderables, opaqueDoubleSidedRenderables, transparentRenderables);
 		}

@@ -2,8 +2,8 @@ project "GLFW"
 	kind "SharedLib"
 	language "C"
 
-	targetdir ("%{wks.location}/Bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/Int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/Binaries/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir)
 
 	defines { "_GLFW_BUILD_DLL" }
 

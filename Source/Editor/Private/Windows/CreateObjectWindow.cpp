@@ -3,14 +3,14 @@
 #include <array>
 #include <iostream>
 
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/Transform.h"
 #include "Core/SceneObject.h"
 
 namespace Nightbird
 {
-	CreateObjectWindow::CreateObjectWindow(Scene* scene, bool open)
-		: ImGuiWindow("Create Object", open, BuildProperties()), m_Scene(scene)
+	CreateObjectWindow::CreateObjectWindow(SceneManager* sceneManager, bool open)
+		: ImGuiWindow("Create Object", open, BuildProperties()), m_Scene(sceneManager)
 	{
 
 	}

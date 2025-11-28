@@ -9,7 +9,7 @@
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/Texture.h"
 #include "Core/Engine.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/MeshInstance.h"
 #include "EditorUI.h"
 #include "EditorCamera.h"

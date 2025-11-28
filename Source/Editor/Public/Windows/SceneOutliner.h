@@ -9,19 +9,19 @@
 namespace Nightbird
 {
 	class EditorUI;
-	class Scene;
+	class SceneManager;
 	
 	class SceneOutliner : public ImGuiWindow
 	{
 	public:
-		SceneOutliner(Scene* scene, EditorUI* editorUI, bool open = true);
+		SceneOutliner(SceneManager* sceneManager, EditorUI* editorUI, bool open = true);
 
 	protected:
 		void OnRender() override;
 		
 		void SceneOutliner::DrawSceneNode(SceneObject* object, bool& dropHandled);
 
-		Scene* m_Scene = nullptr;
+		SceneManager* m_Scene = nullptr;
 		EditorUI* m_EditorUI = nullptr;
 	};
 }

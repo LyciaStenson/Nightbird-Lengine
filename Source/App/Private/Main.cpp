@@ -1,7 +1,7 @@
 #include "Core/Engine.h"
 
 #include "Core/Renderer.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 
 #include "AppRenderTarget.h"
 

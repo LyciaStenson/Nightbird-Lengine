@@ -18,7 +18,7 @@ if "%configChoice%"=="1" (
 set engine_source=Source\Engine\Assets
 
 set editor_source=Source\Editor\Assets
-set editor_destination=Bin\%config%-windows-x86_64\Editor\Assets
+set editor_destination=Binaries\%config%-windows-x86_64\Assets
 
 if not exist "%editor_destination%" (
 	mkdir "%editor_destination%"

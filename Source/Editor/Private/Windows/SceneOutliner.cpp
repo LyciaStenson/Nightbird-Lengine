@@ -5,13 +5,13 @@
 #include <iostream>
 
 #include "EditorUI.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/PrefabInstance.h"
 
 namespace Nightbird
 {
-	SceneOutliner::SceneOutliner(Scene* scene, EditorUI* editorUI, bool open)
-		: ImGuiWindow("Scene Outliner", open, ImGuiWindowProperties{true}), m_Scene(scene), m_EditorUI(editorUI)
+	SceneOutliner::SceneOutliner(SceneManager* sceneManager, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Scene Outliner", open, ImGuiWindowProperties{true}), m_Scene(sceneManager), m_EditorUI(editorUI)
 	{
 
 	}

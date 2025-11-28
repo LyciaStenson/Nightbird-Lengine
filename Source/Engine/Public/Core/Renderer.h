@@ -17,7 +17,7 @@ namespace Nightbird
 	class VulkanDescriptorPool;
 	class VulkanSync;
 	class GlfwWindow;
-	class Scene;
+	class SceneManager;
 	class SceneObject;
 	class Camera;
 	class MeshInstance;
@@ -41,9 +41,9 @@ namespace Nightbird
 		
 		void SetRenderTarget(RenderTarget* renderTarget);
 
-		void DrawFrame(Scene* scene);
+		void DrawFrame(SceneManager* sceneManager);
 
-		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
+		void DrawScene(SceneManager* sceneManager, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void FramebufferResized();
 

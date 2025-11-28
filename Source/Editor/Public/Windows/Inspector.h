@@ -9,19 +9,19 @@ namespace Nightbird
 {
 	class EditorUI;
 	class SceneObject;
-	class Scene;
+	class SceneManager;
 
 	class Inspector : public ImGuiWindow
 	{
 	public:
-		Inspector(Scene* scene, EditorUI* editorUI, bool open = true);
+		Inspector(SceneManager* sceneManager, EditorUI* editorUI, bool open = true);
 
 	protected:
 		void OnRender() override;
 		
 		void RenderProperties(rttr::instance instance);
 		
-		Scene* m_Scene = nullptr;
+		SceneManager* m_Scene = nullptr;
 		EditorUI* m_EditorUI = nullptr;
 
 		SceneObject* m_SelectedObject = nullptr;

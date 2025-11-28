@@ -14,7 +14,7 @@ namespace Nightbird
 	class GlfwWindow;
 	class ModelManager;
 	class MeshInstance;
-	class Scene;
+	class SceneManager;
 	class Renderer;
 	
 	class Engine
@@ -25,7 +25,7 @@ namespace Nightbird
 		
 		GlfwWindow* GetGlfwWindow() const;
 		Renderer* GetRenderer() const;
-		Scene* GetScene() const;
+		SceneManager* GetScene() const;
 		ModelManager* GetModelManager() const;
 
 		float GetDeltaTime() const;
@@ -41,7 +41,7 @@ namespace Nightbird
 
 		std::unique_ptr<Renderer> renderer;
 		
-		std::unique_ptr<Scene> scene;
+		std::unique_ptr<SceneManager> scene;
 		std::unique_ptr<ModelManager> modelManager;
 
 		float deltaTime = 0.0f;

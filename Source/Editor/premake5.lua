@@ -1,14 +1,12 @@
-dofile("../../shared_lib_copy.lua")
-
 project "Editor"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
 	
-	local outBinDir = "%{wks.location}/Bin/" .. outputdir .. "/%{prj.name}"
-	
+	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
+
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Int/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/Intermediate/" .. outputdir)
 
 	debugdir (outBinDir)
 
@@ -41,14 +39,3 @@ project "Editor"
 	defines { "EDITOR" }
 
 	links { "Engine", "imgui", "imguizmo" }
-
-	filter { "system:windows" }
-		links { "rttr" }
-		copy_shared_lib("rttr", "windows", outputdir)
-		copy_shared_lib("glfw", "windows", outputdir)
-		copy_shared_lib("Input", "windows", outputdir)
-	filter { "system:linux" }
-		copy_shared_lib("rttr", "linux", outputdir)
-		copy_shared_lib("glfw", "linux", outputdir)
-		copy_shared_lib("Input", "linux", outputdir)
-	filter {}

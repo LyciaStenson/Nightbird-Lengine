@@ -2,7 +2,7 @@
 
 #include "Core/Engine.h"
 #include "Core/Renderer.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Vulkan/Texture.h"
 #include "Windows/SceneWindow.h"
 #include "EditorCamera.h"
@@ -20,8 +20,8 @@
 
 namespace Nightbird
 {
-	EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine)
-		: RenderTarget(renderer)
+	EditorRenderTarget::EditorRenderTarget(Renderer* renderer, VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, SceneManager* sceneManager, ModelManager* modelManager, Engine* engine)
+		: m_Renderer(renderer), m_Window(glfwWindow)
 	{
 		m_DescriptorPool = std::make_unique<ImGuiDescriptorPool>(device);
 
@@ -63,9 +63,10 @@ namespace Nightbird
 		ImGui_ImplVulkan_Init(&imGuiInitInfo);
 		
 		m_ProjectManagerUI = std::make_unique<ProjectManagerUI>();
+		m_ProjectManagerUI->Init(engine, this);
 
 		m_EditorUI = std::make_unique<EditorUI>();
-		m_EditorUI->Init(instance, device, swapChain, renderPass, modelManager, engine, glfwWindow, scene);
+		m_EditorUI->Init(instance, device, swapChain, renderPass, modelManager, engine, glfwWindow, sceneManager);
 	}
 
 	EditorRenderTarget::~EditorRenderTarget()
@@ -75,21 +76,23 @@ namespace Nightbird
 		ImGui::DestroyContext();
 	}
 	
-	void EditorRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
+	void EditorRenderTarget::Render(SceneManager* sceneManager, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 	{
 		if (m_UIState)
 		{
-			m_UIState->Render(renderer, renderPass, commandBuffer, framebuffer, extent);
+			m_UIState->Render(m_Renderer, renderPass, commandBuffer, framebuffer, extent);
 		}
 	}
 
 	void EditorRenderTarget::StartProjectManager()
 	{
+		glfwSetWindowTitle(m_Window, "Nightbird Project Manager");
 		m_UIState = m_ProjectManagerUI.get();
 	}
 
 	void EditorRenderTarget::StartEditor()
 	{
+		glfwSetWindowTitle(m_Window, "Nightbird Editor");
 		m_UIState = m_EditorUI.get();
 	}
 }

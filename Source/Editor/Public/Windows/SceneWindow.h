@@ -14,7 +14,7 @@ namespace Nightbird
 	class VulkanRenderPass;
 	class VulkanTexture;
 	class VulkanRenderPass;
-	class Scene;
+	class SceneManager;
 	class Engine;
 	class EditorUI;
 	class EditorCamera;

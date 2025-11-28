@@ -7,7 +7,7 @@
 
 #include "Core/GlfwWindow.h"
 #include "Core/ModelManager.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/RenderTarget.h"
 #include "Core/Renderer.h"
 #include "Vulkan/Device.h"
@@ -36,7 +36,7 @@ namespace Nightbird
 
 		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
 		
-		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
+		scene = std::make_unique<SceneManager>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
 	}
 	
 	Engine::~Engine()
@@ -54,7 +54,7 @@ namespace Nightbird
 		return renderer.get();
 	}
 
-	Scene* Engine::GetScene() const
+	SceneManager* Engine::GetScene() const
 	{
 		return scene.get();
 	}

@@ -13,7 +13,7 @@
 
 #include "Core/MeshInstance.h"
 #include "Core/Camera.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/ModelManager.h"
 #include "Core/Engine.h"
 #include "Core/Renderer.h"
@@ -31,17 +31,17 @@
 
 namespace Nightbird
 {
-	void EditorUI::Init(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, ModelManager* modelManager, Engine* engine, GLFWwindow* glfwWindow, Scene* scene)
+	void EditorUI::Init(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, ModelManager* modelManager, Engine* engine, GLFWwindow* glfwWindow, SceneManager* sceneManager)
 	{
 		m_Window = glfwWindow;
-		m_Scene = scene;
+		m_Scene = sceneManager;
 
-		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
+		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(sceneManager, this);
 		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
-		m_Windows["Instantiate Model Window"] = std::make_unique<InstantiateModelWindow>(modelManager, scene);
-		m_Windows["Create Object Window"] = std::make_unique<CreateObjectWindow>(scene);
-		m_Windows["Inspector"] = std::make_unique<Inspector>(scene, this);
-		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(scene, this);
+		m_Windows["Instantiate Model Window"] = std::make_unique<InstantiateModelWindow>(modelManager, sceneManager);
+		m_Windows["Create Object Window"] = std::make_unique<CreateObjectWindow>(sceneManager);
+		m_Windows["Inspector"] = std::make_unique<Inspector>(sceneManager, this);
+		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(sceneManager, this);
 		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, this, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
 		m_Windows["About"] = std::make_unique<AboutWindow>();
 	}
@@ -147,12 +147,7 @@ namespace Nightbird
 		Draw(commandBuffer);
 		renderPass->End(commandBuffer);
 	}
-
-	bool EditorUI::ShouldClose()
-	{
-		return false;
-	}
-
+	
 	void EditorUI::OpenWindow(const std::string& title)
 	{
 		if (m_Windows.count(title))

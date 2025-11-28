@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Core/ModelManager.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/Transform.h"
 
 inline float Wrap180(float angle)
@@ -32,8 +32,8 @@ inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
 
 namespace Nightbird
 {
-	InstantiateModelWindow::InstantiateModelWindow(ModelManager* modelManager, Scene* scene, bool open)
-		: ImGuiWindow("Instantiate Model", open, BuildProperties()), m_ModelManager(modelManager), m_Scene(scene)
+	InstantiateModelWindow::InstantiateModelWindow(ModelManager* modelManager, SceneManager* sceneManager, bool open)
+		: ImGuiWindow("Instantiate Model", open, BuildProperties()), m_ModelManager(modelManager), m_Scene(sceneManager)
 	{
 
 	}

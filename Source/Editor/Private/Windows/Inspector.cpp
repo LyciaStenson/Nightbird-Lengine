@@ -3,7 +3,7 @@
 #include "EditorUI.h"
 
 #include "Core/SceneObject.h"
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 #include "Core/Camera.h"
 #include "Core/PointLight.h"
 
@@ -36,8 +36,8 @@ inline glm::vec3 RoundEulerDP(const glm::vec3& angles, int dp)
 
 namespace Nightbird
 {
-	Inspector::Inspector(Scene* scene, EditorUI* editorUI, bool open)
-		: ImGuiWindow("Inspector", open), m_Scene(scene), m_EditorUI(editorUI)
+	Inspector::Inspector(SceneManager* sceneManager, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Inspector", open), m_Scene(sceneManager), m_EditorUI(editorUI)
 	{
 
 	}

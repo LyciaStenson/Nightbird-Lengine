@@ -6,18 +6,18 @@
 
 namespace Nightbird
 {
-	class Scene;
+	class SceneManager;
 	class EditorUI;
 
 	class AssetBrowser : public ImGuiWindow
 	{
 	public:
-		AssetBrowser(Scene* scene, EditorUI* editorUI, bool open = true);
+		AssetBrowser(SceneManager* sceneManager, EditorUI* editorUI, bool open = true);
 
 	protected:
 		void OnRender() override;
 
-		Scene* m_Scene = nullptr;
+		SceneManager* m_Scene = nullptr;
 
 		EditorUI* m_EditorUI;
 		

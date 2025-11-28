@@ -6,18 +6,18 @@
 
 namespace Nightbird
 {
-	class Scene;
+	class SceneManager;
 	
 	class CreateObjectWindow : public ImGuiWindow
 	{
 	public:
-		CreateObjectWindow(Scene* scene, bool open = false);
+		CreateObjectWindow(SceneManager* sceneManager, bool open = false);
 
 	protected:
 		void OnRender() override;
 		
 		static ImGuiWindowProperties BuildProperties();
 		
-		Scene* m_Scene;
+		SceneManager* m_Scene;
 	};
 }

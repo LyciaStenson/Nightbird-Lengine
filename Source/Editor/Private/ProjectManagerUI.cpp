@@ -1,12 +1,19 @@
 #include "ProjectManagerUI.h"
 
 #include "Core/Engine.h"
+#include "EditorRenderTarget.h"
 #include "Vulkan/RenderPass.h"
 
 #include "imgui_stdlib.h"
 
 namespace Nightbird
 {
+	void ProjectManagerUI::Init(Engine* engine, EditorRenderTarget* renderTarget)
+	{
+		m_Engine = engine;
+		m_RenderTarget = renderTarget;
+	}
+	
 	void ProjectManagerUI::Render(Renderer* renderer, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 	{
 		renderPass->Begin(commandBuffer, framebuffer, extent);
@@ -32,11 +39,16 @@ namespace Nightbird
 		ImGui::Text("Project Manager");
 		
 		ImGui::InputText("Enter Project Path", &projectPath, ImGuiInputFlags_None);
+
+		if (ImGui::Button("Create Project"))
+		{
+
+		}
 		
 		if (ImGui::Button("Load Project"))
 		{
-			//m_Engine->LoadProject(projectPath);
-			m_ShouldClose = true;
+			m_Engine->LoadProject(projectPath);
+			m_RenderTarget->StartEditor();
 		}
 
 		ImGui::End();
@@ -46,12 +58,7 @@ namespace Nightbird
 		Draw(commandBuffer);
 		renderPass->End(commandBuffer);
 	}
-
-	bool ProjectManagerUI::ShouldClose()
-	{
-		return m_ShouldClose;
-	}
-
+	
 	void ProjectManagerUI::NewFrame()
 	{
 		ImGui_ImplVulkan_NewFrame();

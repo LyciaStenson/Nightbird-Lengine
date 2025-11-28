@@ -34,11 +34,11 @@ namespace Nightbird
 	struct PointLightData;
 	struct Model;
 
-	class Scene
+	class SceneManager
 	{
 	public:
-		Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool);
-		~Scene();
+		SceneManager(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool);
+		~SceneManager();
 
 		const SceneObject* GetRootObject() const;
 		SceneObject* GetRootObject();

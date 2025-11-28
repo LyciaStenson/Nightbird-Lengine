@@ -5,12 +5,12 @@
 namespace Nightbird
 {
 	class ModelManager;
-	class Scene;
+	class SceneManager;
 	
 	class InstantiateModelWindow : public ImGuiWindow
 	{
 	public:
-		InstantiateModelWindow(ModelManager* modelManager, Scene* scene, bool open = false);
+		InstantiateModelWindow(ModelManager* modelManager, SceneManager* sceneManager, bool open = false);
 
 	protected:
 		void OnRender() override;
@@ -18,6 +18,6 @@ namespace Nightbird
 		static ImGuiWindowProperties BuildProperties();
 
 		ModelManager* m_ModelManager = nullptr;
-		Scene* m_Scene = nullptr;
+		SceneManager* m_Scene = nullptr;
 	};
 }

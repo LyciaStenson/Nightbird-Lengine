@@ -26,8 +26,6 @@ namespace Nightbird
 		
 		virtual void Render(Renderer* renderer, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent) = 0;
 
-		virtual bool ShouldClose() = 0;
-	
 	private:
 		virtual void NewFrame() = 0;
 		virtual void Draw(VkCommandBuffer commandBuffer) = 0;

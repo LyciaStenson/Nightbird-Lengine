@@ -1,4 +1,4 @@
-#include "Core/Scene.h"
+#include "Core/SceneManager.h"
 
 #include <iostream>
 
@@ -26,35 +26,35 @@
 
 namespace Nightbird
 {
-	Scene::Scene(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool)
+	SceneManager::SceneManager(VulkanDevice* device, ModelManager* modelManager, GlobalDescriptorSetManager* globalDescriptorSetManager, VkDescriptorPool descriptorPool)
 		: device(device), modelManager(modelManager), globalDescriptorSetManager(globalDescriptorSetManager), descriptorPool(descriptorPool)
 	{
 		rootObject = std::make_unique<SceneObject>("Root");
 	}
 
-	Scene::~Scene()
+	SceneManager::~SceneManager()
 	{
 
 	}
 
-	const SceneObject* Scene::GetRootObject() const
+	const SceneObject* SceneManager::GetRootObject() const
 	{
 		return rootObject.get();
 	}
 	
-	SceneObject* Scene::GetRootObject()
+	SceneObject* SceneManager::GetRootObject()
 	{
 		return rootObject.get();
 	}
 
-	std::vector<SceneObject*> Scene::GetAllObjects()
+	std::vector<SceneObject*> SceneManager::GetAllObjects()
 	{
 		std::vector<SceneObject*> allObjects;
 		GetAllObjectsRecursive(rootObject.get(), allObjects);
 		return allObjects;
 	}
 
-	void Scene::GetAllObjectsRecursive(SceneObject* root, std::vector<SceneObject*>& allObjects)
+	void SceneManager::GetAllObjectsRecursive(SceneObject* root, std::vector<SceneObject*>& allObjects)
 	{
 		allObjects.push_back(root);
 		for (const auto& child : root->GetChildren())
@@ -63,7 +63,7 @@ namespace Nightbird
 		}
 	}
 
-	Camera* Scene::GetMainCamera()
+	Camera* SceneManager::GetMainCamera()
 	{
 		if (mainCamera)
 			return mainCamera;
@@ -79,12 +79,12 @@ namespace Nightbird
 		}
 	}
 
-	void Scene::SetMainCamera(Camera* camera)
+	void SceneManager::SetMainCamera(Camera* camera)
 	{
 		mainCamera = camera;
 	}
 
-	bool Scene::LoadSceneJSON(const std::string& path)
+	bool SceneManager::LoadSceneJSON(const std::string& path)
 	{
 		std::ifstream is(path);
 		if (!is.is_open())
@@ -113,7 +113,7 @@ namespace Nightbird
 		return true;
 	}
 	
-	bool Scene::SaveSceneJSON(const std::string& path) const
+	bool SceneManager::SaveSceneJSON(const std::string& path) const
 	{
 		nlohmann::json json;
 		rootObject->Serialize(json);
@@ -130,7 +130,7 @@ namespace Nightbird
 		return true;
 	}
 
-	bool Scene::LoadSceneBIN(const std::string& path)
+	bool SceneManager::LoadSceneBIN(const std::string& path)
 	{
 		std::ifstream is(path, std::ios::binary);
 		if (!is.is_open())
@@ -152,7 +152,7 @@ namespace Nightbird
 		return true;
 	}
 
-	bool Scene::SaveSceneBIN(const std::string& path) const
+	bool SceneManager::SaveSceneBIN(const std::string& path) const
 	{
 		std::ofstream os(path, std::ios::binary);
 		if (!os.is_open())
@@ -164,7 +164,7 @@ namespace Nightbird
 		return true;
 	}
 	
-	void Scene::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
+	void SceneManager::AddSceneObject(std::unique_ptr<SceneObject> object, SceneObject* parent)
 	{
 		SceneObject* rawObject = object.get();
 		
@@ -176,7 +176,7 @@ namespace Nightbird
 		rawObject->EnterScene();
 	}
 
-	SceneObject* Scene::CreateSceneObject(const std::string& name, SceneObject* parent)
+	SceneObject* SceneManager::CreateSceneObject(const std::string& name, SceneObject* parent)
 	{
 		if (!parent)
 			parent = rootObject.get();
@@ -200,7 +200,7 @@ namespace Nightbird
 		return objectPtr;
 	}
 
-	SpatialObject* Scene::CreateSpatialObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
+	SpatialObject* SceneManager::CreateSpatialObject(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 	{
 		if (!parent)
 			parent = rootObject.get();
@@ -227,7 +227,7 @@ namespace Nightbird
 		return objectPtr;
 	}
 	
-	PrefabInstance* Scene::CreatePrefabInstance(const std::string& name, const std::string& path, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
+	PrefabInstance* SceneManager::CreatePrefabInstance(const std::string& name, const std::string& path, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent)
 	{
 		if (!parent)
 			parent = rootObject.get();
@@ -254,7 +254,7 @@ namespace Nightbird
 		return prefab;
 	}
 
-	MeshInstance* Scene::CreateMeshInstance(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent, std::shared_ptr<Mesh> mesh)
+	MeshInstance* SceneManager::CreateMeshInstance(const std::string& name, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale, SceneObject* parent, std::shared_ptr<Mesh> mesh)
 	{
 		if (!parent)
 			parent = rootObject.get();
@@ -281,7 +281,7 @@ namespace Nightbird
 		return meshInstance;
 	}
 
-	void Scene::InstantiateModelNode(const std::shared_ptr<Model>& model, const fastgltf::Node& node, SceneObject* parent)
+	void SceneManager::InstantiateModelNode(const std::shared_ptr<Model>& model, const fastgltf::Node& node, SceneObject* parent)
 	{
 		fastgltf::math::fvec3 gltfTranslation(0.0f, 0.0f, 0.0f);
 		fastgltf::math::fquat gltfRotation;
@@ -324,7 +324,7 @@ namespace Nightbird
 		}
 	}
 
-	void Scene::InstantiateModel(PrefabInstance* prefab)
+	void SceneManager::InstantiateModel(PrefabInstance* prefab)
 	{
 		const auto& model = modelManager->GetModel(prefab->GetPrefabPath());
 
@@ -342,7 +342,7 @@ namespace Nightbird
 		}
 	}
 
-	PrefabInstance* Scene::InstantiateModel(const std::string& path, const Transform& transform)
+	PrefabInstance* SceneManager::InstantiateModel(const std::string& path, const Transform& transform)
 	{
 		const auto& model = modelManager->GetModel(path);
 
@@ -364,7 +364,7 @@ namespace Nightbird
 		return root;
 	}
 
-	SceneObject* Scene::FindObject(const std::string& path, SceneObject* root)
+	SceneObject* SceneManager::FindObject(const std::string& path, SceneObject* root)
 	{
 		size_t start = 0;
 		size_t end = path.find('/');
@@ -399,7 +399,7 @@ namespace Nightbird
 		return node;
 	}
 
-	void Scene::Update(float delta)
+	void SceneManager::Update(float delta)
 	{
 		for (auto& object : GetAllObjects())
 		{
@@ -407,7 +407,7 @@ namespace Nightbird
 		}
 	}
 
-	void Scene::UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent)
+	void SceneManager::UpdateBuffers(int currentFrame, VkExtent2D swapChainExtent)
 	{
 		std::vector<DirectionalLightData> directionalLightData;
 		std::vector<PointLightData> pointLightData;
@@ -418,7 +418,7 @@ namespace Nightbird
 		globalDescriptorSetManager->UpdatePointLights(currentFrame, pointLightData);
 	}
 
-	void Scene::UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<DirectionalLightData>& directionalLightData, std::vector<PointLightData>& pointLightData)
+	void SceneManager::UpdateBuffersRecursive(int currentFrame, VkExtent2D swapChainExtent, SceneObject* object, std::vector<DirectionalLightData>& directionalLightData, std::vector<PointLightData>& pointLightData)
 	{
 		if (!object)
 			return;

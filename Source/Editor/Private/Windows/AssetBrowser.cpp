@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-#include <Core/Scene.h>
+#include <Core/SceneManager.h>
 #include <EditorUI.h>
 
 namespace Nightbird
 {
-	AssetBrowser::AssetBrowser(Scene* scene, EditorUI* editorUI, bool open)
-		: ImGuiWindow("Asset Browser", open), m_Scene(scene), m_EditorUI(editorUI)
+	AssetBrowser::AssetBrowser(SceneManager* sceneManager, EditorUI* editorUI, bool open)
+		: ImGuiWindow("Asset Browser", open), m_Scene(sceneManager), m_EditorUI(editorUI)
 	{
 		m_CurrentPath = std::filesystem::path("Assets");
 	}

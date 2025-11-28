@@ -1,14 +1,14 @@
 #include <AppRenderTarget.h>
 
 #include <Core/Renderer.h>
-#include <Core/Scene.h>
+#include <Core/SceneManager.h>
 
 #include <volk.h>
 
 namespace Nightbird
 {
 	AppRenderTarget::AppRenderTarget(Renderer* renderer)
-		: RenderTarget(renderer)
+		: m_Renderer(renderer)
 	{
 
 	}
@@ -18,12 +18,12 @@ namespace Nightbird
 
 	}
 
-	void AppRenderTarget::Render(Scene* scene, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
+	void AppRenderTarget::Render(SceneManager* sceneManager, VulkanRenderPass* renderPass, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, VkExtent2D extent)
 	{
 		renderPass->Begin(commandBuffer, framebuffer, extent);
-		Camera* mainCamera = scene->GetMainCamera();
+		Camera* mainCamera = sceneManager->GetMainCamera();
 		if (mainCamera)
-			renderer->DrawScene(scene, mainCamera, commandBuffer, extent);
+			m_Renderer->DrawScene(sceneManager, mainCamera, commandBuffer, extent);
 		renderPass->End(commandBuffer);
 	}
 }
