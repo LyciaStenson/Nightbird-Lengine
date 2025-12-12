@@ -3,7 +3,7 @@ project "ImGuizmo"
 	language "C++"
 
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/imguizmo")
 
 	defines {
 		"GLFW_INCLUDE_NONE",

@@ -3,7 +3,7 @@ project "ImGui"
 	language "C++"
 
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/imgui")
 
 	defines {
 		"GLFW_INCLUDE_NONE",

@@ -3,7 +3,7 @@ project "GLFW"
 	language "C"
 
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/glfw")
 
 	defines { "_GLFW_BUILD_DLL" }
 
@@ -32,13 +32,7 @@ project "GLFW"
 
 		systemversion "latest"
 
-		links {
-			"X11",
-			"Xrandr",
-			"Xi",
-			"Xinerama",
-			"Xcursor"
-		}
+		links { "X11", "Xrandr", "Xi", "Xinerama", "Xcursor" }
 
 		files
 		{

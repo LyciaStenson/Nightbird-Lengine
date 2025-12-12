@@ -6,7 +6,7 @@ project "Editor"
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/Editor")
 
 	debugdir (outBinDir)
 
@@ -42,3 +42,6 @@ project "Editor"
 	defines { "EDITOR" }
 
 	links { "Engine", "glfw", "fastgltf", "rttr", "imgui", "imguizmo", "Input" }
+
+	filter "system:linux"
+		links { "X11", "Xrandr", "Xi", "Xinerama", "Xcursor" }

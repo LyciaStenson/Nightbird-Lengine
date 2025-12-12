@@ -6,7 +6,7 @@ project "App"
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/App")
 
 	debugdir (outBinDir)
 
@@ -37,3 +37,6 @@ project "App"
 	}
 
 	links { "Engine", "glfw", "fastgltf", "rttr", "Input" }
+
+	filter "system:linux"
+		links { "X11", "Xrandr", "Xi", "Xinerama", "Xcursor" }

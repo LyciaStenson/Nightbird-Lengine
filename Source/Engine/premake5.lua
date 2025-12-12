@@ -4,7 +4,7 @@ project "Engine"
 	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/Engine")
 
 	defines {
 		"VK_NO_PROTOTYPES",
@@ -36,4 +36,4 @@ project "Engine"
 		"%{wks.location}/Source/Vendor/json"
 	}
 
-	links { "glfw", "fastgltf", "Input", "rttr" }
+	links { "glfw", "fastgltf", "rttr", "Input" }
