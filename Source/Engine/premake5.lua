@@ -17,6 +17,8 @@ project "Engine"
 		defines { "GLFW_DLL" }
 	filter { }
 
+	pic "On"
+
 	files {
 		"Public/**.h",
 		"Private/**.cpp"
