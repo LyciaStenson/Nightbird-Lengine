@@ -1,5 +1,4 @@
 project "rttr"
-	location ("%{wks.location}/Test/rttr")
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
