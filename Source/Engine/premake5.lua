@@ -9,9 +9,13 @@ project "Engine"
 	defines {
 		"VK_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
-		"GLFW_INCLUDE_VULKAN",
-		"GLFW_DLL"
+		"GLFW_INCLUDE_NONE",
+		"GLFW_INCLUDE_VULKAN"
 	}
+
+	filter "system:windows"
+		defines { "GLFW_DLL" }
+	filter { }
 
 	files {
 		"Public/**.h",
@@ -32,8 +36,4 @@ project "Engine"
 		"%{wks.location}/Source/Vendor/json"
 	}
 
-	links { "glfw", "fastgltf", "Input" }
-
-	filter { "system:windows" }
-		links { "rttr" }
-	filter {}
+	links { "glfw", "fastgltf", "Input", "rttr" }

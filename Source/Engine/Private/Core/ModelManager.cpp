@@ -66,7 +66,7 @@ namespace Nightbird
 	{
 		static std::thread::id mainThreadId = std::this_thread::get_id();
 
-		if (std::this_thread::get_id() != mainThreadId)
+		if (!(std::this_thread::get_id() == mainThreadId))
 		{
 			std::cerr << "Model upload attempted on wrong thread" << std::endl;
 			return;

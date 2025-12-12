@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <array>
+#include <limits>
 
 #include <Vulkan/Helpers.h>
 #include <Vulkan/Image.h>

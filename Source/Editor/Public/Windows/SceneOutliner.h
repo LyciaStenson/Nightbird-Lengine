@@ -19,7 +19,7 @@ namespace Nightbird
 	protected:
 		void OnRender() override;
 		
-		void SceneOutliner::DrawSceneNode(SceneObject* object, bool& dropHandled);
+		void DrawSceneNode(SceneObject* object, bool& dropHandled);
 
 		SceneManager* m_Scene = nullptr;
 		EditorUI* m_EditorUI = nullptr;

@@ -6,7 +6,10 @@ project "Input"
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir)
 
-	defines { "INPUT_BUILD" }
+	defines {
+		"INPUT_BUILD",
+		"GLFW_INCLUDE_NONE"
+	}
 
 	files {
 		"Public/**.h",

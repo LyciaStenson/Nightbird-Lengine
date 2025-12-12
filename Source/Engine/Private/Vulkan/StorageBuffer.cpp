@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include <cstring>
+
 namespace Nightbird
 {
 	VulkanStorageBuffer::VulkanStorageBuffer(VulkanDevice* device, VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags)

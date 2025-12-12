@@ -1,5 +1,6 @@
 #include <Vulkan/Config.h>
 
+#include <cstring>
 #include <iostream>
 
 #include <volk.h>

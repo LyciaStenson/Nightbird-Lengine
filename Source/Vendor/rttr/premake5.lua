@@ -6,7 +6,14 @@ project "rttr"
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir)
 
-	defines { "RTTR_DLL_EXPORTS", "RTTR_DLL", "rttr_core_EXPORTS" }
+	defines { "rttr_core_EXPORTS" }
+
+	filter "system:windows"
+	defines {
+		"RTTR_DLL_EXPORTS",
+		"RTTR_DLL"
+	}
+	filter { }
 
 	files
 	{

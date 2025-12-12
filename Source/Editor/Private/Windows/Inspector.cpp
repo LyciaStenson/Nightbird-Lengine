@@ -1,5 +1,7 @@
 #include "Windows/Inspector.h"
 
+#include <cstring>
+
 #include "EditorUI.h"
 
 #include "Core/SceneObject.h"
@@ -88,7 +90,7 @@ namespace Nightbird
 			{
 				std::string strValue = value.get_value<std::string>();
 				char buffer[256];
-				strncpy_s(buffer, strValue.c_str(), sizeof(buffer));
+				std::strncpy(buffer, strValue.c_str(), sizeof(buffer));
 				if (ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
 					property.set_value(instance, std::string(buffer));
 			}

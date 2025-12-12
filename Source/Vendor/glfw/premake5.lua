@@ -32,6 +32,14 @@ project "GLFW"
 
 		systemversion "latest"
 
+		links {
+			"X11",
+			"Xrandr",
+			"Xi",
+			"Xinerama",
+			"Xcursor"
+		}
+
 		files
 		{
 			"src/x11_init.c",
@@ -102,13 +110,7 @@ project "GLFW"
 		runtime "Debug"
 		symbols "On"
 
-	filter { "system:windows", "configurations:Debug-AS" }
-		runtime "Debug"
-		symbols "On"
-		sanitize { "Address" }
-		flags { "NoRuntimeChecks", "NoIncrementalLink" }
-
-	filter "configurations:Release"
+		filter "configurations:Release"
 		runtime "Release"
 		optimize "Speed"
 		symbols "Off"
