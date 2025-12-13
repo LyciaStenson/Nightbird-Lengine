@@ -1,5 +1,8 @@
 #include "ProjectManagerUI.h"
 
+#include <iostream>
+#include <filesystem>
+
 #include "Core/Engine.h"
 #include "EditorRenderTarget.h"
 #include "Vulkan/RenderPass.h"
@@ -38,16 +41,17 @@ namespace Nightbird
 
 		ImGui::Text("Project Manager");
 		
-		ImGui::InputText("Enter Project Path", &projectPath, ImGuiInputFlags_None);
+		ImGui::InputText("Project Path", &m_ProjectPath, ImGuiInputFlags_None);
+		ImGui::InputText("Project Name", &m_ProjectName, ImGuiInputFlags_None);
 
 		if (ImGui::Button("Create Project"))
 		{
-
+			CreateProject(m_ProjectPath, m_ProjectName);
 		}
 		
 		if (ImGui::Button("Load Project"))
 		{
-			m_Engine->LoadProject(projectPath);
+			m_Engine->LoadProject(m_ProjectPath);
 			m_RenderTarget->StartEditor();
 		}
 
@@ -70,5 +74,43 @@ namespace Nightbird
 	{
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+	}
+
+	void ProjectManagerUI::CreateProject(const std::string& path, const std::string& name)
+	{
+		std::filesystem::path source = "../../Project";
+		std::filesystem::path destination = std::filesystem::path(path) / name;
+		
+		if (!std::filesystem::exists(source))
+		{
+			std::cerr << "Source project template not found!" << std::endl;
+			return;
+		}
+
+		if (!std::filesystem::exists(destination))
+		{
+			if (!std::filesystem::create_directories(destination))
+			{
+				std::cerr << "Failed to create project folder!" << std::endl;
+				return;
+			}
+		}
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(source))
+		{
+			const auto& relativePath = std::filesystem::relative(entry.path(), source);
+			std::filesystem::path destinationPath = destination / relativePath;
+
+			if (std::filesystem::is_directory(entry.path()))
+			{
+				std::filesystem::create_directories(destinationPath);
+			}
+			else if (std::filesystem::is_regular_file(entry.path()))
+			{
+				std::filesystem::copy_file(entry.path(), destinationPath, std::filesystem::copy_options::overwrite_existing);
+			}
+		}
+		
+		std::cout << "Project " << name << "created successfully at " << destination << std::endl;
 	}
 }
