@@ -1,5 +1,7 @@
 #include <Vulkan/Texture.h>
 
+#include <cstring>
+
 #include <iostream>
 
 #include <Vulkan/Device.h>

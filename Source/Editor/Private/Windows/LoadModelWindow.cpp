@@ -19,7 +19,7 @@ namespace Nightbird
 		static std::string path;
 		static char pathBuffer[1024];
 
-		strncpy_s(pathBuffer, path.c_str(), sizeof(pathBuffer));
+		std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
 		pathBuffer[sizeof(pathBuffer) - 1] = '\0';
 
 		ImGui::Text("Load a .glb format model.");

@@ -1,20 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <string>
-#include <unordered_map>
-
-#include "Windows/ImGuiWindow.h"
-
 #include "UIState.h"
-
-#include <volk.h>
-#include <glfw/glfw3.h>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
 
 namespace Nightbird
 {

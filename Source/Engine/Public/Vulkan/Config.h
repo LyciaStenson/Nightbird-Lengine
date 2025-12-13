@@ -4,7 +4,7 @@
 
 namespace VulkanConfig
 {
-	extern constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+	inline constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 	extern bool enableValidationLayers;
 

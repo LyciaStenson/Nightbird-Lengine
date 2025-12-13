@@ -6,13 +6,16 @@ project "Editor"
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/Editor")
 
 	debugdir (outBinDir)
 
-	defines { "VK_NO_PROTOTYPES" }
-	defines { "GLFW_INCLUDE_VULKAN" }
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
+	defines {
+		"VK_NO_PROTOTYPES",
+		"GLFW_INCLUDE_NONE",
+		"GLFW_INCLUDE_VULKAN",
+		"IMGUI_IMPL_VULKAN_USE_VOLK"
+	}
 
 	files {
 		"Public/**.h",
@@ -38,4 +41,7 @@ project "Editor"
 
 	defines { "EDITOR" }
 
-	links { "Engine", "imgui", "imguizmo" }
+	links { "Engine", "glfw", "fastgltf", "rttr", "imgui", "imguizmo", "Input" }
+
+	filter "system:linux"
+		links { "X11", "Xrandr", "Xi", "Xinerama", "Xcursor" }

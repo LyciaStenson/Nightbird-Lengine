@@ -4,7 +4,7 @@ project "fastgltf"
 	cppdialect "C++17"
 
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/fastgltf")
 
 	files
 	{

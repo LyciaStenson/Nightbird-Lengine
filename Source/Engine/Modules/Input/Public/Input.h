@@ -8,10 +8,14 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef INPUT_BUILD
-	#define INPUT_API __declspec(dllexport)
+#ifdef _WIN32
+	#ifdef INPUT_BUILD
+		#define INPUT_API __declspec(dllexport)
+	#else
+		#define INPUT_API __declspec(dllimport)
+	#endif
 #else
-	#define INPUT_API __declspec(dllimport)
+	#define INPUT_API
 #endif
 
 extern "C"

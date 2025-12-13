@@ -6,13 +6,15 @@ project "App"
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/App")
 
 	debugdir (outBinDir)
 
-	defines { "VK_NO_PROTOTYPES" }
-	defines { "GLFW_INCLUDE_VULKAN" }
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
+	defines {
+		"VK_NO_PROTOTYPES",
+		"GLFW_INCLUDE_NONE",
+		"GLFW_INCLUDE_VULKAN"
+	}
 
 	files {
 		"Public/**.h",
@@ -34,4 +36,7 @@ project "App"
 		"%{wks.location}/Source/Vendor/json"
 	}
 
-	links { "Engine" }
+	links { "Engine", "glfw", "fastgltf", "rttr", "Input" }
+
+	filter "system:linux"
+		links { "X11", "Xrandr", "Xi", "Xinerama", "Xcursor" }

@@ -3,7 +3,13 @@ project "ImGuizmo"
 	language "C++"
 
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
-	objdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/imguizmo")
+
+	defines {
+		"GLFW_INCLUDE_NONE",
+		"GLFW_INCLUDE_VULKAN",
+		"IMGUI_IMPL_VULKAN_USE_VOLK"
+	}
 
 	files { "**.h", "**.cpp" }
 
