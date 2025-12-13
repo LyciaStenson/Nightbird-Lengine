@@ -15,6 +15,8 @@ project "rttr"
 	}
 	filter { }
 
+	pic "On"
+
 	files
 	{
 		"src/**.h",

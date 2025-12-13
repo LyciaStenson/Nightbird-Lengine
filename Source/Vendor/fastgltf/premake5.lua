@@ -6,6 +6,8 @@ project "fastgltf"
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/fastgltf")
 
+	pic "On"
+
 	files
 	{
 		"**.h",

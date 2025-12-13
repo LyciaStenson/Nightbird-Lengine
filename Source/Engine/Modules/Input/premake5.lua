@@ -11,6 +11,8 @@ project "Input"
 		"GLFW_INCLUDE_NONE"
 	}
 
+	pic "On"
+
 	files {
 		"Public/**.h",
 		"Private/**.cpp"

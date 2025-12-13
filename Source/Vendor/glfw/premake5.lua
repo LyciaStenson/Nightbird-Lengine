@@ -7,6 +7,8 @@ project "GLFW"
 
 	defines { "_GLFW_BUILD_DLL" }
 
+	pic "On"
+
 	files
 	{
 		"include/GLFW/glfw3.h",
