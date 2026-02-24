@@ -1,4 +1,5 @@
 .vs
+.vscode
 
 *.sln
 *vcxproj
@@ -8,7 +9,9 @@
 *.log
 *.lastbuildstate
 
-/out
+/Binaries
+/Intermediate
 
 Makefile
+*.make
 *.spv
