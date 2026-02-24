@@ -24,4 +24,4 @@ project "App"
 		"%{wks.location}/Engine/Source/Public"
 	}
 
-	links { "Engine" }
+	links { }
