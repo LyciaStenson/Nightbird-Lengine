@@ -9,12 +9,14 @@ project "Engine"
 	defines { }
 
 	files {
-		"Source/**.h",
-		"Source/**.cpp"
+		"Source/Public/**.h",
+		"Source/Private/**.h",
+		"Source/Private**.cpp"
 	}
 
 	includedirs {
-		"Source/Public"
+		"Source/Public",
+		"Source/Private"
 	}
 
 	links { }
