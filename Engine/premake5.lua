@@ -19,4 +19,8 @@ project "Engine"
 		"Source/Private"
 	}
 
-	links { }
+	filter { "platforms:Desktop" }
+		includedirs { "Vendor/glfw/include" }
+		links { "GLFW" }
+	
+	filter { }

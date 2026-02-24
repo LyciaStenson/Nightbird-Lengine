@@ -1,8 +1,14 @@
 workspace "Nightbird"
-	architecture "x86_64"
-	startproject "Editor"
-
 	configurations { "Debug", "Release" }
+	platforms { "Desktop", "WiiU", "3DS" }
+
+	filter { "platforms:Desktop" }
+		architecture "x86_64"
+	
+	filter { }
+
+	startproject "Editor"
+	defaultplatform "Desktop"
 
 	filter { "configurations:Debug"}
 		defines { "DEBUG" }
@@ -17,7 +23,11 @@ workspace "Nightbird"
 
 	filter { }
 
-	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
+
+group "Dependencies"
+	include "Engine/Vendor/GLFW"
+group ""
 
 group "Nightbird"
 	include "Engine"

@@ -26,4 +26,4 @@ project "Editor"
 
 	defines { "EDITOR" }
 
-	links { }
+	links { "Engine" }
