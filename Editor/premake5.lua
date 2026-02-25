@@ -27,3 +27,7 @@ project "Editor"
 	defines { "EDITOR" }
 
 	links { "Engine" }
+
+	filter { "platforms:Desktop" }
+		links { "GlfwPlatform", "VulkanRenderer" }
+	filter { }

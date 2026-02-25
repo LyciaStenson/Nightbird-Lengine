@@ -5,25 +5,21 @@
 
 namespace Nightbird
 {
-	Engine::Engine(Platform* platform, Renderer* renderer)
-		: m_Platform(platform), m_Renderer(renderer)
+	Engine::Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer)
+		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
 
 	}
-
-	Engine::~Engine()
-	{
-		delete m_Platform;
-		m_Platform = nullptr;
-
-		delete m_Renderer;
-		m_Renderer = nullptr;
-	}
-
+	
 	void Engine::Run()
 	{
 		m_Platform->Initialize();
 		m_Renderer->Initialize();
+
+		MainLoop();
+
+		m_Renderer->Shutdown();
+		m_Platform->Shutdown();
 	}
 
 	void Engine::MainLoop()

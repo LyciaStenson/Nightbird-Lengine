@@ -1,19 +1,23 @@
 #pragma once
 
+#include <memory>
+
 namespace Nightbird
 {
+	class Platform;
+	class Renderer;
+
 	class Engine
 	{
 	public:
-		Engine(class Platform* platform, class Renderer* renderer);
-		~Engine();
+		Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer);
 
 		void Run();
 
 	private:
 		void MainLoop();
 
-		Platform* m_Platform;
-		Renderer* m_Renderer;
+		std::unique_ptr<Platform> m_Platform;
+		std::unique_ptr<Renderer> m_Renderer;
 	};
 }

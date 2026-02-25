@@ -25,3 +25,11 @@ project "App"
 	}
 
 	links { "Engine" }
+
+	filter { "platforms:Desktop" }
+		links { "GlfwPlatform", "VulkanRenderer", "GLFW" }
+	filter { }
+
+	filter { "platforms:WiiU" }
+		links { "WiiUBackend" }
+	filter { }

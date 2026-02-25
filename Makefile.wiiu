@@ -20,12 +20,15 @@ include $(DEVKITPRO)/wut/share/wut_rules
 TARGET		:=	App
 BUILD		:=	Intermediate
 SOURCES		:=	App/Source/Private \
-				Engine/Source/Private
+				Engine/Source/Private \
+				Engine/Source/Private/Core \
+				Backends/WiiUBackend/Source/Private
 DATA		:=	data
 INCLUDES	:=	App/Source/Public \
 				App/Source/Private \
 				Engine/Source/Public \
-				Engine/Source/Private
+				Engine/Source/Private \
+				Backends/WiiUBackend/Source/Public
 
 #-------------------------------------------------------------------------------
 # options for code generation
