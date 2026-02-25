@@ -26,11 +26,17 @@ workspace "Nightbird"
 	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "Dependencies"
-	include "Engine/Vendor/GLFW"
+	include "Backends/GlfwPlatform/Vendor/GLFW"
 group ""
 
 group "Nightbird"
 	include "Engine"
 	include "App"
 	include "Editor"
+group ""
+
+group "Nightbird/Backends"
+		include "Backends/GlfwPlatform"
+		include "Backends/VulkanRenderer"
+		include "Backends/WiiUBackend"
 group ""

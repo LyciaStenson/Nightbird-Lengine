@@ -1,6 +1,6 @@
 #include "WiiUPlatform.h"
 
-#include <wgb/proc.h>
+#include <whb/proc.h>
 
 namespace Nightbird
 {
@@ -11,7 +11,7 @@ namespace Nightbird
 
 	void WiiUPlatform::Shutdown()
 	{
-		WHNProcShutdown();
+		WHBProcShutdown();
 	}
 
 	void WiiUPlatform::PollEvents()
