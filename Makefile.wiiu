@@ -18,14 +18,14 @@ include $(DEVKITPRO)/wut/share/wut_rules
 # INCLUDES is a list of directories containing header files
 #-------------------------------------------------------------------------------
 TARGET		:=	App
-BUILD		:=	build
-SOURCES		:=	Source/Private \
-				../Engine/Source/Private
+BUILD		:=	Intermediate
+SOURCES		:=	App/Source/Private \
+				Engine/Source/Private
 DATA		:=	data
-INCLUDES	:=	Source/Public \
-				Source/Private \
-				../Engine/Source/Public \
-				../Engine/Source/Private
+INCLUDES	:=	App/Source/Public \
+				App/Source/Private \
+				Engine/Source/Public \
+				Engine/Source/Private
 
 #-------------------------------------------------------------------------------
 # options for code generation
@@ -56,7 +56,7 @@ LIBDIRS	:= $(PORTLIBS) $(WUT_ROOT)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #-------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/Binaries/wiiu/$(TARGET)
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -101,12 +101,13 @@ all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
+	@[ -d Binaries/wiiu ] || mkdir -p Binaries/wiiu
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.wiiu
 
 #-------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).rpx $(TARGET).elf
+	@rm -fr $(BUILD) Binaries/wiiu/$(TARGET).rpx Binaries/wiiu/$(TARGET).elf
 
 #-------------------------------------------------------------------------------
 else

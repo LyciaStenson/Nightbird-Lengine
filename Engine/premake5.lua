@@ -10,8 +10,8 @@ project "Engine"
 	
 	files {
 		"Source/Public/**.h",
-		"Source/Private/**.h",
-		"Source/Private/**.cpp"
+		"Source/Private/Core/**.h",
+		"Source/Private/Core/**.cpp"
 	}
 
 	includedirs {
@@ -20,7 +20,19 @@ project "Engine"
 	}
 
 	filter { "platforms:Desktop" }
+		files {
+			"Source/Private/GLFW/**.h",
+			"Source/Private/GLFW/**.cpp",
+			"Source/Private/Vulkan/**.h",
+			"Source/Private/Vulkan/*.cpp"
+		}
 		includedirs { "Vendor/glfw/include" }
 		links { "GLFW" }
 	
+	filter { "platforms:WiiU" }
+		files {
+			"Source/Private/WiiU/**.h",
+			"Source/Private/WiiU/**.cpp"
+		}
+		
 	filter { }
