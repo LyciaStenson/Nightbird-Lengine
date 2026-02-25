@@ -6,7 +6,10 @@ project "VulkanRenderer"
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
-	defines { }
+	defines {
+		"VK_NO_PROTOTYPES",
+		"VMA_DYNAMIC_VULKAN_FUNCTIONS"
+	}
 	
 	files {
 		"Source/Public/**.h",
@@ -17,7 +20,10 @@ project "VulkanRenderer"
 	includedirs {
 		"Source/Public",
 		"Source/Private",
-		"%{wks.location}/Engine/Source/Public"
+		"%{wks.location}/Engine/Source/Public",
+		"Vendor/vulkan-headers/include",
+		"Vendor/volk",
+		"Vendor/vma"
 	}
 	
 	links { "Engine" }
