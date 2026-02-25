@@ -1,0 +1,23 @@
+@echo off
+echo Building Wii U...
+
+set MSYS2_SHELL=C:\devkitPro\msys2\msys2_shell.cmd
+
+if not exist "%MSYS2_SHELL%" (
+	echo devkitPro MSYS2 not found at "%MSYS2_SHELL%"
+	echo Please ensure devkitPro is installed at C:\devkitPro
+	exit /b 1
+)
+
+set PROJECT_DIR=%~dp0
+set PROJECT_DIR=%PROJECT_DIR:\=/%
+
+"%MSYS2_SHELL%" -defterm -here -no-start -msys -c "cd '%PROJECT_DIR%App' && make -f Makefile.wiiu"
+
+if %errorlevel% neq 0 (
+	echo Wii U build failed.
+	exit /b %errorlevel%
+)
+
+echo Wii U build successful.
+pause
