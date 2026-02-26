@@ -2,11 +2,11 @@
 
 #include "Core/Platform.h"
 
-#include <GLFW/glfw3.h>
+#include "InputProvider.h"
 
-namespace Nightbird
+namespace Nightbird::WiiU
 {
-	class GlfwPlatform : public Platform
+	class Platform : public Nightbird::Platform
 	{
 	public:
 		virtual void Initialize() override;
@@ -16,9 +16,9 @@ namespace Nightbird
 		virtual bool ShouldClose() const override;
 		virtual void GetFramebufferSize(int* width, int* height) const override;
 
-		GLFWwindow* GetWindow() const;
+		Input::Provider& GetInputProvider() override;
 
 	private:
-		GLFWwindow* m_Window = nullptr;
+		InputProvider m_InputProvider;
 	};
 }

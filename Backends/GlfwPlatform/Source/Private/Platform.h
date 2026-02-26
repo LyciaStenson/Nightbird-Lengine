@@ -1,10 +1,15 @@
 #pragma once
 
+#include "InputProvider.h"
 #include "Core/Platform.h"
 
-namespace Nightbird
+#include <GLFW/glfw3.h>
+
+#include <memory>
+
+namespace Nightbird::Glfw
 {
-	class WiiUPlatform : public Platform
+	class Platform : public Nightbird::Platform
 	{
 	public:
 		virtual void Initialize() override;
@@ -13,5 +18,14 @@ namespace Nightbird
 		virtual void WaitEvents() override;
 		virtual bool ShouldClose() const override;
 		virtual void GetFramebufferSize(int* width, int* height) const override;
+
+		Input::Provider& GetInputProvider() override;
+
+		GLFWwindow* GetWindow() const;
+
+	private:
+		std::unique_ptr<Input::Provider> m_InputProvider;
+
+		GLFWwindow* m_Window = nullptr;
 	};
 }

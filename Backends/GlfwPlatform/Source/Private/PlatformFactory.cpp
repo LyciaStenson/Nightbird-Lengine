@@ -1,11 +1,11 @@
 #include "Core/PlatformFactory.h"
 
-#include "GlfwPlatform.h"
+#include "Platform.h"
 
 namespace Nightbird
 {
-	std::unique_ptr<Platform> CreatePlatform()
+	std::unique_ptr<Nightbird::Platform> CreatePlatform()
 	{
-		return std::make_unique<GlfwPlatform>();
+		return std::make_unique<Glfw::Platform>();
 	}
 }

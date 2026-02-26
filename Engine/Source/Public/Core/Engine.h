@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "Input/System.h"
+
 namespace Nightbird
 {
 	class Platform;
@@ -15,6 +17,8 @@ namespace Nightbird
 
 		void Run();
 
+		Input::System& GetInputSystem();
+
 	private:
 		void MainLoop();
 
@@ -22,5 +26,7 @@ namespace Nightbird
 		std::unique_ptr<Renderer> m_Renderer;
 
 		std::unique_ptr<Scene> m_Scene;
+
+		Input::System m_InputSystem;
 	};
 }

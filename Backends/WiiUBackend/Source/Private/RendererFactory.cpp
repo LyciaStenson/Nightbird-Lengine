@@ -1,11 +1,11 @@
 #include "Core/RendererFactory.h"
 
-#include "WiiURenderer.h"
+#include "Renderer.h"
 
 namespace Nightbird
 {
-	std::unique_ptr<Renderer> CreateRenderer()
+	std::unique_ptr<Nightbird::Renderer> CreateRenderer()
 	{
-		return std::make_unique<WiiURenderer>();
+		return std::make_unique<WiiU::Renderer>();
 	}
 }

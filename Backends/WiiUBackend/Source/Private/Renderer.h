@@ -2,9 +2,9 @@
 
 #include "Core/Renderer.h"
 
-namespace Nightbird
+namespace Nightbird::WiiU
 {
-	class VulkanRenderer : public Renderer
+	class Renderer : public Nightbird::Renderer
 	{
 	public:
 		void Initialize() override;

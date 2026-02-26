@@ -1,5 +1,10 @@
 #pragma once
 
+namespace Nightbird::Input
+{
+	class Provider;
+}
+
 namespace Nightbird
 {
 	class Platform
@@ -13,5 +18,7 @@ namespace Nightbird
 		virtual void WaitEvents() = 0;
 		virtual bool ShouldClose() const = 0;
 		virtual void GetFramebufferSize(int* width, int* height) const = 0;
+
+		virtual Input::Provider& GetInputProvider() = 0;
 	};
 }

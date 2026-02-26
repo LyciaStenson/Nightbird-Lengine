@@ -1,11 +1,11 @@
 #include "Core/RendererFactory.h"
 
-#include "VulkanRenderer.h"
+#include "Renderer.h"
 
 namespace Nightbird
 {
-	std::unique_ptr<Renderer> CreateRenderer()
+	std::unique_ptr<Nightbird::Renderer> CreateRenderer()
 	{
-		return std::make_unique<VulkanRenderer>();
+		return std::make_unique<Vulkan::Renderer>();
 	}
 }

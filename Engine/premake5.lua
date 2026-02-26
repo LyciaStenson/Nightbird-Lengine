@@ -10,8 +10,8 @@ project "Engine"
 	
 	files {
 		"Source/Public/**.h",
-		"Source/Private/Core/**.h",
-		"Source/Private/Core/**.cpp"
+		"Source/Private/**.h",
+		"Source/Private/**.cpp"
 	}
 
 	includedirs {
