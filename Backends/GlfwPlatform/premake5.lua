@@ -18,6 +18,7 @@ project "GlfwPlatform"
 		"Source/Public",
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Vendor/glm",
 		"Vendor/glfw/include"
 	}
 	

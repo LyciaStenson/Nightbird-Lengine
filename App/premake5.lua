@@ -21,7 +21,8 @@ project "App"
 	includedirs {
 		"Source/Public",
 		"Source/Private",
-		"%{wks.location}/Engine/Source/Public"
+		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Vendor/glm",
 	}
 
 	links { "Engine" }

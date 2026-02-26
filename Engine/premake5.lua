@@ -16,23 +16,6 @@ project "Engine"
 
 	includedirs {
 		"Source/Public",
-		"Source/Private"
+		"Source/Private",
+		"Vendor/glm"
 	}
-
-	filter { "platforms:Desktop" }
-		files {
-			"Source/Private/GLFW/**.h",
-			"Source/Private/GLFW/**.cpp",
-			"Source/Private/Vulkan/**.h",
-			"Source/Private/Vulkan/*.cpp"
-		}
-		includedirs { "Vendor/glfw/include" }
-		links { "GLFW" }
-	
-	filter { "platforms:WiiU" }
-		files {
-			"Source/Private/WiiU/**.h",
-			"Source/Private/WiiU/**.cpp"
-		}
-		
-	filter { }

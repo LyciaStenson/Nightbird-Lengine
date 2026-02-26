@@ -18,6 +18,7 @@ project "WiiUBackend"
 		"Source/Public",
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Vendor/glm",
 		"C:/devkitPro/wut/include"
 	}
 	

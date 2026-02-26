@@ -28,7 +28,8 @@ INCLUDES	:=	App/Source/Public \
 				App/Source/Private \
 				Engine/Source/Public \
 				Engine/Source/Private \
-				Backends/WiiUBackend/Source/Public
+				Backends/WiiUBackend/Source/Public \
+				Engine/Vendor/glm
 
 #-------------------------------------------------------------------------------
 # options for code generation
