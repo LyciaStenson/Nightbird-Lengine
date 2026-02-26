@@ -6,6 +6,7 @@ namespace Nightbird
 {
 	class Platform;
 	class Renderer;
+	class Scene;
 
 	class Engine
 	{
@@ -19,5 +20,7 @@ namespace Nightbird
 
 		std::unique_ptr<Platform> m_Platform;
 		std::unique_ptr<Renderer> m_Renderer;
+
+		std::unique_ptr<Scene> m_Scene;
 	};
 }
