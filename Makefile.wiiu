@@ -18,7 +18,8 @@ include $(DEVKITPRO)/wut/share/wut_rules
 # INCLUDES is a list of directories containing header files
 #-------------------------------------------------------------------------------
 TARGET		:=	App
-BUILD		:=	Intermediate
+BUILD		:=	Intermediate/wiiu
+BUILD_DIR	:=	wiiu
 SOURCES		:=	App/Source/Private \
 				Engine/Source/Private \
 				Engine/Source/Private/Core \
@@ -57,7 +58,7 @@ LIBDIRS	:= $(PORTLIBS) $(WUT_ROOT)
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
 #-------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
+ifneq ($(BUILD_DIR),$(notdir $(CURDIR)))
 #-------------------------------------------------------------------------------
 
 export OUTPUT	:=	$(CURDIR)/Binaries/wiiu/$(TARGET)
@@ -106,7 +107,7 @@ all: $(BUILD)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@[ -d Binaries/wiiu ] || mkdir -p Binaries/wiiu
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.wiiu
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(TOPDIR)/Makefile.wiiu
 
 #-------------------------------------------------------------------------------
 clean:

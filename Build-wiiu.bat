@@ -1,5 +1,5 @@
 @echo off
-echo Building Wii U...
+echo Building for Wii U...
 
 set MSYS2_SHELL=C:\devkitPro\msys2\msys2_shell.cmd
 
@@ -12,7 +12,7 @@ if not exist "%MSYS2_SHELL%" (
 set PROJECT_DIR=%~dp0
 set PROJECT_DIR=%PROJECT_DIR:\=/%
 
-"%MSYS2_SHELL%" -defterm -here -no-start -msys -c "cd '%PROJECT_DIR%' && make -f Makefile.wiiu"
+"%MSYS2_SHELL%" -defterm -here -no-start -msys -c "cd '%PROJECT_DIR%' && make -f Makefile.wiiu %*"
 
 if %errorlevel% neq 0 (
 	echo Wii U build failed.
