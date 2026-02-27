@@ -5,9 +5,9 @@
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
 
-#include "Input/Provider.h"
+#include "Core/Log.h"
 
-#include <iostream>
+#include "Input/Provider.h"
 
 namespace Nightbird
 {
@@ -37,7 +37,7 @@ namespace Nightbird
 			m_InputSystem.Update(m_Platform->GetInputProvider());
 
 			if (m_InputSystem.WasButtonPressed(Input::Button::A))
-				std::cout << "A Pressed!" << std::endl;
+				Log::Info("A Pressed");
 
 			m_Scene->Update(0.001f); // Replace with delta calculation
 

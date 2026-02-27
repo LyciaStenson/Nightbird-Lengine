@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-#include <whb/log_console.h>
+//#include <whb/log_console.h>
 
 namespace Nightbird::WiiU
 {
@@ -16,6 +16,6 @@ namespace Nightbird::WiiU
 
 	void Renderer::DrawFrame()
 	{
-		WHBLogConsoleDraw();
+		//WHBLogConsoleDraw();
 	}
 }
