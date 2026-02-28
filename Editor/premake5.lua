@@ -21,7 +21,8 @@ project "Editor"
 	includedirs {
 		"Source/Public",
 		"Source/Private",
-		"%{wks.location}/Engine/Source/Public"
+		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Engine/Vendor/glm"
 	}
 
 	defines { "EDITOR" }
@@ -29,5 +30,5 @@ project "Editor"
 	links { "Engine" }
 
 	filter { "platforms:Desktop" }
-		links { "GlfwPlatform", "VulkanRenderer" }
+		links { "GlfwVulkanBackend", "GLFW" }
 	filter { }

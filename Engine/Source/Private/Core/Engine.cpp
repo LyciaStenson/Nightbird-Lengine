@@ -36,10 +36,12 @@ namespace Nightbird::Core
 
 			m_InputSystem.Update(m_Platform->GetInputProvider());
 
+			m_Scene->Update(0.001f); // Replace with delta calculation
+
 			if (m_InputSystem.WasButtonPressed(Input::Button::A))
 				Log::Info("A Pressed");
 
-			m_Scene->Update(0.001f); // Replace with delta calculation
+			m_Renderer->SubmitScene(*m_Scene);
 
 			m_Renderer->DrawFrame();
 		}

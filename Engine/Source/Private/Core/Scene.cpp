@@ -9,18 +9,28 @@ namespace Nightbird::Core
 	{
 		m_Root = std::make_unique<SceneObject>("Root");
 	}
-
-	SceneObject* Scene::GetRoot()
-	{
-		return m_Root.get();
-	}
-
+	
 	void Scene::Update(float delta)
 	{
 		for (const auto& child : m_Root->GetChildren())
 		{
 			child->Tick(delta);
 		}
+	}
+
+	SceneObject* Scene::GetRoot()
+	{
+		return m_Root.get();
+	}
+
+	Camera* Scene::GetActiveCamera() const
+	{
+		return m_ActiveCamera;
+	}
+
+	void Scene::SetActiveCamera(Camera* camera)
+	{
+		m_ActiveCamera = camera;
 	}
 
 	std::vector<Renderable> Scene::CollectRenderables() const

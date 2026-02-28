@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-//#include <whb/log_console.h>
+#include "Core/Scene.h"
 
 namespace Nightbird::WiiU
 {
@@ -14,8 +14,13 @@ namespace Nightbird::WiiU
 
 	}
 
+	void Renderer::SubmitScene(const Core::Scene& scene)
+	{
+
+	}
+
 	void Renderer::DrawFrame()
 	{
-		//WHBLogConsoleDraw();
+
 	}
 }

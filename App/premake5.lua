@@ -22,13 +22,13 @@ project "App"
 		"Source/Public",
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
-		"%{wks.location}/Engine/Vendor/glm",
+		"%{wks.location}/Engine/Vendor/glm"
 	}
 
 	links { "Engine" }
 
 	filter { "platforms:Desktop" }
-		links { "GlfwPlatform", "VulkanRenderer", "GLFW" }
+		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW" }
 	filter { }
 
 	filter { "platforms:WiiU" }

@@ -4,7 +4,6 @@ workspace "Nightbird"
 
 	filter { "platforms:Desktop" }
 		architecture "x86_64"
-	
 	filter { }
 
 	startproject "Editor"
@@ -26,7 +25,7 @@ workspace "Nightbird"
 	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "Dependencies"
-	include "Backends/GlfwPlatform/Vendor/GLFW"
+	include "Backends/Libraries/GlfwPlatform/Vendor/GLFW"
 group ""
 
 group "Nightbird"
@@ -36,7 +35,11 @@ group "Nightbird"
 group ""
 
 group "Nightbird/Backends"
-		include "Backends/GlfwPlatform"
-		include "Backends/VulkanRenderer"
-		include "Backends/WiiUBackend"
+	include "Backends/GlfwVulkanBackend"
+	include "Backends/WiiUBackend"
+group ""
+
+group "Nightbird/Backends/Libraries"
+	include "Backends/Libraries/GlfwPlatform"
+	include "Backends/Libraries/VulkanRenderer"
 group ""
