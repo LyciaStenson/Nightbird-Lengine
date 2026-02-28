@@ -6,7 +6,7 @@
 
 namespace Nightbird::WiiU
 {
-	class Platform : public Nightbird::Platform
+	class Platform : public Core::Platform
 	{
 	public:
 		virtual void Initialize() override;

@@ -1,6 +1,6 @@
 #include "Core/SceneObject.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	SceneObject::SceneObject(const std::string& name)
 		: m_Name(name)

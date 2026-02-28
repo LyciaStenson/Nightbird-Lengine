@@ -1,6 +1,6 @@
 #include "Core/MeshInstance.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	MeshInstance::MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh)
 		: SpatialObject(name), m_Mesh(std::move(mesh))

@@ -7,7 +7,7 @@
 
 int main()
 {
-	Nightbird::Engine engine(Nightbird::CreatePlatform(), Nightbird::CreateRenderer());
+	Nightbird::Core::Engine engine(Nightbird::Core::CreatePlatform(), Nightbird::Core::CreateRenderer());
 
 	engine.Run();
 

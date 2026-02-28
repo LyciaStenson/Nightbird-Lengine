@@ -9,7 +9,7 @@
 
 #include "Input/Provider.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	Engine::Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer)
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))

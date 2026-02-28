@@ -2,9 +2,9 @@
 
 #include "Platform.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
-	std::unique_ptr<Nightbird::Platform> CreatePlatform()
+	std::unique_ptr<Core::Platform> CreatePlatform()
 	{
 		return std::make_unique<Glfw::Platform>();
 	}

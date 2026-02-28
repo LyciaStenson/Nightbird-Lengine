@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class MeshPrimitive;
 

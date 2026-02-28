@@ -1,6 +1,6 @@
 #include "Core/SpatialObject.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{

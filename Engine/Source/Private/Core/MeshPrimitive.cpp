@@ -1,9 +1,9 @@
 #include "Core/MeshPrimitive.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
-	MeshPrimitive::MeshPrimitive(std::vector<Vertex> vertices, std::vector<uint16_t> indices, Material material)
-		: m_Vertices(std::move(vertices)), m_Indices(std::move(indices)), m_Material(std::move(material))
+	MeshPrimitive::MeshPrimitive(std::vector<Vertex> vertices, std::vector<uint16_t> indices, std::shared_ptr<Material> material)
+		: m_Vertices(std::move(vertices)), m_Indices(std::move(indices)), m_Material(material)
 	{
 
 	}
@@ -18,7 +18,7 @@ namespace Nightbird
 		return m_Indices;
 	}
 	
-	const Material& MeshPrimitive::GetMaterial() const
+	const std::shared_ptr<Material>& MeshPrimitive::GetMaterial() const
 	{
 		return m_Material;
 	}

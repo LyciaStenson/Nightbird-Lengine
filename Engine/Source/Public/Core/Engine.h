@@ -4,7 +4,7 @@
 
 #include "Input/System.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Platform;
 	class Renderer;

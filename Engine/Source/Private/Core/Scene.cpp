@@ -3,7 +3,7 @@
 #include "Core/SceneObject.h"
 #include "Core/MeshInstance.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	Scene::Scene()
 	{

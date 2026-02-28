@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Buffer.h"
+
 #include <volk.h>
 
 #include <memory>
 
 namespace Nightbird::Vulkan
 {
-	class Buffer;
 	class Device;
 
 	class UniformBuffer

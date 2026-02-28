@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Texture
 	{

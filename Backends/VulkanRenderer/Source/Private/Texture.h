@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Texture;
 }
@@ -19,7 +19,7 @@ namespace Nightbird::Vulkan
 	{
 	public:
 		// Create from CPU texture data
-		Texture(Device* device, const Nightbird::Texture& texture, bool sRGB = true);
+		Texture(Device* device, const Core::Texture& texture, bool sRGB = true);
 		// Create for render target
 		Texture(Device* device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImageAspectFlags aspectFlags);
 		~Texture();

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class MeshInstance : public SpatialObject
 	{

@@ -1,23 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-
 #include <volk.h>
-
-namespace Nightbird
-{
-	struct Renderable;
-	class Mesh;
-	class Camera;
-}
 
 namespace Nightbird::Vulkan
 {
 	class Device;
 	class RenderPass;
 	class DescriptorSetLayoutManager;
-	class GlobalDescriptorSetManager;
 
 	enum class PipelineType
 	{
@@ -28,29 +17,19 @@ namespace Nightbird::Vulkan
 	class Pipeline
 	{
 	public:
-		Pipeline(Device* device, RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type, bool doubleSided);
+		Pipeline(Device* device, RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided);
 		~Pipeline();
 
-		void SetDescriptorPool(VkDescriptorPool pool);
+		void Bind(VkCommandBuffer commandBuffer) const;
 
-		void Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<Renderable>& renderables, Camera* camera);
-		void RenderSingle(VkCommandBuffer commandBuffer, uint32_t currentFrame, const Renderable& renderable, Camera* camera);
+		VkPipelineLayout GetLayout() const;
 
 	private:
-		void CreateGraphicsPipeline(DescriptorSetLayoutManager* layoutManager);
+		VkPipeline m_Pipeline;
+		VkPipelineLayout m_PipelineLayout;
 
-		VkPipeline pipeline;
-		VkPipelineLayout pipelineLayout;
+		Device* m_Device;
 
-		VkDescriptorPool descriptorPool;
-
-		PipelineType type;
-		bool doubleSided;
-
-		RenderPass* renderPass;
-
-		GlobalDescriptorSetManager* globalDescriptorSetManager;
-
-		Device* device;
+		void CreateGraphicsPipeline(RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided);
 	};
 }

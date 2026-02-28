@@ -1,6 +1,6 @@
 #include "Core/Transform.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	Transform::Transform()
 		: position(0.0f), rotation(), scale(1.0f)

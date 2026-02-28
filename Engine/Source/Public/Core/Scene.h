@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class MeshInstance;
 	class SceneObject;

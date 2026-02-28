@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	std::unique_ptr<Platform> CreatePlatform();
 }

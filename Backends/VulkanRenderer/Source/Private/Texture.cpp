@@ -10,7 +10,7 @@
 
 namespace Nightbird::Vulkan
 {
-	Texture::Texture(Device* device, const Nightbird::Texture& texture, bool sRGB)
+	Texture::Texture(Device* device, const Core::Texture& texture, bool sRGB)
 		: m_Device(device)
 	{
 		CreateFromPixels(texture.GetPixels().data(), texture.GetWidth(), texture.GetHeight(), sRGB);

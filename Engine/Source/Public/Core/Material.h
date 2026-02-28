@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Texture;
 

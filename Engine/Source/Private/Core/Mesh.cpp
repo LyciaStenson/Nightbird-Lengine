@@ -1,6 +1,6 @@
 #include "Core/Mesh.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	Mesh::Mesh(std::vector<MeshPrimitive> primitives)
 		: m_Primitives(std::move(primitives))

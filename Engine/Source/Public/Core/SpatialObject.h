@@ -3,7 +3,7 @@
 #include "Core/SceneObject.h"
 #include "Core/Transform.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class SpatialObject : public SceneObject
 	{

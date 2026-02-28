@@ -1,53 +1,56 @@
 #include "Pipeline.h"
 
-#include <iostream>
-#include <array>
-
-#include <glm/glm.hpp>
-
-#include "Shader.h"
-#include "Core/Vertex.h"
-#include "Core/Renderable.h"
-#include "Core/MeshInstance.h"
-#include "Core/Mesh.h"
-#include "Core/MeshPrimitive.h"
-#include "Core/Renderable.h"
-//#include <Core/Camera.h>
 #include "Device.h"
-#include "SwapChain.h"
 #include "RenderPass.h"
 #include "DescriptorSetLayoutManager.h"
-#include "GlobalDescriptorSetManager.h"
+#include "Shader.h"
+#include "VertexInput.h"
+
+//#include "Core/Vertex.h"
+
+#include "Core/Log.h"
+
+#include <array>
 
 namespace Nightbird::Vulkan
 {
-	Pipeline::Pipeline(Device* device, RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, GlobalDescriptorSetManager* globalDescriptorSetManager, PipelineType type, bool doubleSided)
-		: device(device), renderPass(renderPass), globalDescriptorSetManager(globalDescriptorSetManager), type(type), doubleSided(doubleSided)
+	Pipeline::Pipeline(Device* device, RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided)
+		: m_Device(device)
 	{
-		CreateGraphicsPipeline(descriptorSetLayoutManager);
+		CreateGraphicsPipeline(renderPass, descriptorSetLayoutManager, type, doubleSided);
 	}
 
 	Pipeline::~Pipeline()
 	{
-		vkDestroyPipeline(device->GetLogical(), pipeline, nullptr);
-		vkDestroyPipelineLayout(device->GetLogical(), pipelineLayout, nullptr);
+		vkDestroyPipeline(m_Device->GetLogical(), m_Pipeline, nullptr);
+		vkDestroyPipelineLayout(m_Device->GetLogical(), m_PipelineLayout, nullptr);
 	}
-
-	void Pipeline::SetDescriptorPool(VkDescriptorPool pool)
+	
+	void Pipeline::CreateGraphicsPipeline(RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided)
 	{
-		descriptorPool = pool;
-	}
-
-	void Pipeline::CreateGraphicsPipeline(DescriptorSetLayoutManager* descriptorSetLayoutManager)
-	{
-		Shader vertShader(device->GetLogical(), "Assets/Shaders/Vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		Shader fragShader(device->GetLogical(), "Assets/Shaders/Frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		Shader vertShader(m_Device->GetLogical(), "Assets/Shaders/Vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		Shader fragShader(m_Device->GetLogical(), "Assets/Shaders/Frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		VkPipelineShaderStageCreateInfo shaderStages[] =
 		{
 			vertShader.GetStageCreateInfo(),
 			fragShader.GetStageCreateInfo()
 		};
+		
+		auto bindingDescription = VertexInput::GetBindingDescription();
+		auto attributeDescriptions = VertexInput::GetAttributeDescriptions();
+
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+		inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+		inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
 		std::vector<VkDynamicState> dynamicStates =
 		{
@@ -59,21 +62,6 @@ namespace Nightbird::Vulkan
 		dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 		dynamicStateInfo.pDynamicStates = dynamicStates.data();
-
-		//auto bindingDescription = Vertex::GetBindingDescription();
-		//auto attributeDescriptions = Vertex::GetAttributeDescriptions();
-
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = 1;
-		//vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-		//vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-		//vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
-		inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-		inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-		inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
 		VkPipelineViewportStateCreateInfo viewportStateInfo{};
 		viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -164,10 +152,8 @@ namespace Nightbird::Vulkan
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-		if (vkCreatePipelineLayout(device->GetLogical(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-		{
-			std::cerr << "Failed to create pipeline layout" << std::endl;
-		}
+		if (vkCreatePipelineLayout(m_Device->GetLogical(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
+			Core::Log::Error("Failed to create pipeline layout");
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -181,56 +167,13 @@ namespace Nightbird::Vulkan
 		pipelineInfo.pDepthStencilState = &depthStencilInfo;
 		pipelineInfo.pColorBlendState = &colorBlendStateInfo;
 		pipelineInfo.pDynamicState = &dynamicStateInfo;
-		pipelineInfo.layout = pipelineLayout;
+		pipelineInfo.layout = m_PipelineLayout;
 		pipelineInfo.renderPass = renderPass->Get();
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
-		if (vkCreateGraphicsPipelines(device->GetLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
-		{
-			std::cerr << "Failed to create graphics pipeline" << std::endl;
-		}
-	}
-
-	void Pipeline::Render(VkCommandBuffer commandBuffer, uint32_t currentFrame, const std::vector<Renderable>& renderables, Camera* camera)
-	{
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-
-		for (const auto& renderable : renderables)
-		{
-			//VkBuffer vertexBuffers[] = {renderable.primitive->vertexBuffer->Get()};
-			VkDeviceSize offsets[] = {0};
-
-			// Bind vertex and index buffers of mesh
-			//vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-			//vkCmdBindIndexBuffer(commandBuffer, renderable.primitive->indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT16);
-
-			// Bind camera (view & proj matrices) and mesh (model matrix & textures) descriptor sets
-			//std::array<VkDescriptorSet, 3> descriptorSets = {globalDescriptorSetManager->GetDescriptorSets()[currentFrame], renderable.instance->GetUniformDescriptorSets()[currentFrame], renderable.primitive->GetMaterialDescriptorSets()[currentFrame]};
-			//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
-
-			// Draw the mesh
-			//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderable.primitive->GetIndicesSize()), 1, 0, 0, 0);
-		}
-	}
-
-	void Pipeline::RenderSingle(VkCommandBuffer commandBuffer, uint32_t currentFrame, const Renderable& renderable, Camera* camera)
-	{
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-
-		//VkBuffer vertexBuffers[] = {renderable.primitive->vertexBuffer->Get()};
-		VkDeviceSize offsets[] = {0};
-
-		// Bind vertex and index buffers of mesh
-		//vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		//vkCmdBindIndexBuffer(commandBuffer, renderable.primitive->indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT16);
-
-		// Bind camera (view & proj matrices) and mesh (model matrix & textures) descriptor sets
-		//std::array<VkDescriptorSet, 3> descriptorSets = {globalDescriptorSetManager->GetDescriptorSets()[currentFrame], renderable.instance->GetUniformDescriptorSets()[currentFrame], renderable.primitive->GetMaterialDescriptorSets()[currentFrame]};
-		//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
-
-		// Draw the mesh
-		//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderable.primitive->GetIndicesSize()), 1, 0, 0, 0);
+		if (vkCreateGraphicsPipelines(m_Device->GetLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
+			Core::Log::Error("Failed to create graphics pipeline");
 	}
 }

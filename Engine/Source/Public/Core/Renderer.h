@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Renderer
 	{

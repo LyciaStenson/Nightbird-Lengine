@@ -1,6 +1,6 @@
 #include "Core/Texture.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	Texture::Texture(uint32_t width, uint32_t height, std::vector<uint8_t> pixels)
 		: m_Width(width), m_Height(height), m_Pixels(std::move(pixels))

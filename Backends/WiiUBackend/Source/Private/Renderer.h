@@ -4,7 +4,7 @@
 
 namespace Nightbird::WiiU
 {
-	class Renderer : public Nightbird::Renderer
+	class Renderer : public Core::Renderer
 	{
 	public:
 		void Initialize() override;

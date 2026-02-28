@@ -5,7 +5,7 @@ namespace Nightbird::Input
 	class Provider;
 }
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	class Platform
 	{
