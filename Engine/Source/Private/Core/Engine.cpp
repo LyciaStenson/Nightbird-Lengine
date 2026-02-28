@@ -51,4 +51,9 @@ namespace Nightbird::Core
 	{
 		return m_InputSystem;
 	}
+
+	Scene& Engine::GetScene()
+	{
+		return *m_Scene;
+	}
 }

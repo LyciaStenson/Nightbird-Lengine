@@ -5,8 +5,7 @@
 #include "Vulkan/BufferUtils.h"
 
 #include "Core/Texture.h"
-
-#include <iostream>
+#include "Core/Log.h"
 
 namespace Nightbird::Vulkan
 {
@@ -95,6 +94,6 @@ namespace Nightbird::Vulkan
 		samplerInfo.maxLod = 0.0f;
 
 		if (vkCreateSampler(m_Device->GetLogical(), &samplerInfo, nullptr, &m_Sampler) != VK_SUCCESS)
-			std::cerr << "Failed to create texture sampler" << std::endl;
+			Core::Log::Error("Failed to create texture sampler");
 	}
 }

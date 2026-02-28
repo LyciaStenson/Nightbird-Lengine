@@ -9,7 +9,9 @@ namespace Nightbird::Vulkan
 {
 	Geometry::Geometry(Device* device, const Core::MeshPrimitive& primitive)
 	{
-
+		m_IndexCount = static_cast<uint32_t>(primitive.GetIndices().size());
+		CreateVertexBuffer(device, primitive);
+		CreateIndexBuffer(device, primitive);
 	}
 
 	void Geometry::CreateVertexBuffer(Device* device, const Core::MeshPrimitive& primitive)

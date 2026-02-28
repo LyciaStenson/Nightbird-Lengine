@@ -5,6 +5,7 @@
 #include "Core/MeshPrimitive.h"
 #include "Core/Material.h"
 #include "Core/MeshInstance.h"
+#include "Core/Texture.h"
 
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
@@ -75,10 +76,14 @@ namespace Nightbird::Vulkan
 
 		uint32_t m_CurrentFrame = 0;
 
+		std::shared_ptr<Core::Texture> m_DefaultTexture;
+
 		void DrawScene(VkCommandBuffer commandBuffer);
 		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&);
 
 		void CreateDescriptorPool();
+
+		std::shared_ptr<Core::Texture> CreateDefaultTexture();
 
 		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 		Material& GetOrCreateMaterial(const Core::Material* material);

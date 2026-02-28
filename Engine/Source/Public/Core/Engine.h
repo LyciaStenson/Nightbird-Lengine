@@ -19,6 +19,8 @@ namespace Nightbird::Core
 
 		Input::System& GetInputSystem();
 
+		Scene& GetScene();
+
 	private:
 		void MainLoop();
 

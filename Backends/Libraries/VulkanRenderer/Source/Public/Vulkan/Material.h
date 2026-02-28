@@ -21,7 +21,7 @@ namespace Nightbird::Vulkan
 	class Material
 	{
 	public:
-		Material(Device* device, const Core::Material& material, VkDescriptorPool descriptorPool, DescriptorSetLayoutManager* descriptorSetLayoutManager);
+		Material(Device* device, const Core::Material& material, VkDescriptorPool descriptorPool, DescriptorSetLayoutManager* descriptorSetLayoutManager, const Core::Texture& defaultTexture);
 		~Material() = default;
 
 		Material(Material&&) = default;
@@ -38,7 +38,7 @@ namespace Nightbird::Vulkan
 
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
-		void CreateTextures(Device* device, const Core::Material& material);
+		void CreateTextures(Device* device, const Core::Material& material, const Core::Texture& defaultTexture);
 		void CreateFactorsBuffer(Device* device, const Core::Material& material);
 		void CreateDescriptorSets(Device* device, const Core::Material& material, VkDescriptorPool descriptorPool, DescriptorSetLayoutManager* descriptorSetLayoutManager);
 	};

@@ -20,21 +20,18 @@ namespace Nightbird::Vulkan
 		alignas(16) glm::vec3 metallicRoughness;
 	};
 
-	Material::Material(Device* device, const Core::Material& material, VkDescriptorPool descriptorPool, DescriptorSetLayoutManager* descriptorSetLayoutManager)
+	Material::Material(Device* device, const Core::Material& material, VkDescriptorPool descriptorPool, DescriptorSetLayoutManager* descriptorSetLayoutManager, const Core::Texture& defaultTexture)
 	{
-		CreateTextures(device, material);
+		CreateTextures(device, material, defaultTexture);
 		CreateFactorsBuffer(device, material);
 		CreateDescriptorSets(device, material, descriptorPool, descriptorSetLayoutManager);
 	}
 
-	void Material::CreateTextures(Device* device, const Core::Material& material)
+	void Material::CreateTextures(Device* device, const Core::Material& material, const Core::Texture& defaultTexture)
 	{
-		if (material.baseColorTexture)
-			m_BaseColorTexture = std::make_unique<Texture>(device, *material.baseColorTexture, true);
-		if (material.metallicRoughnessTexture)
-			m_MetallicRoughnessTexture = std::make_unique<Texture>(device, *material.metallicRoughnessTexture, false);
-		if (material.normalTexture)
-			m_NormalTexture = std::make_unique<Texture>(device, *material.normalTexture, false);
+		m_BaseColorTexture = std::make_unique<Texture>(device, material.baseColorTexture ? *material.baseColorTexture : defaultTexture, true);
+		m_MetallicRoughnessTexture = std::make_unique<Texture>(device, material.metallicRoughnessTexture ? *material.metallicRoughnessTexture : defaultTexture, false);
+		m_NormalTexture = std::make_unique<Texture>(device, material.normalTexture ? *material.normalTexture : defaultTexture, false);
 	}
 
 	void Material::CreateFactorsBuffer(Device* device, const Core::Material& material)

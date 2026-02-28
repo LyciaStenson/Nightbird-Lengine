@@ -22,6 +22,8 @@ namespace Nightbird::Vulkan
 
 	void Renderer::Initialize()
 	{
+		m_DefaultTexture = CreateDefaultTexture();
+
 		m_Instance = std::make_unique<Instance>(m_Extensions);
 		m_Surface = m_SurfaceCreator(m_Instance->Get());
 
@@ -50,6 +52,9 @@ namespace Nightbird::Vulkan
 	void Renderer::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetLogical());
+
+		m_GeometryCache.clear();
+		m_MaterialCache.clear();
 
 		m_TransformPool.reset();
 
@@ -83,7 +88,7 @@ namespace Nightbird::Vulkan
 
 		uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(m_Device->GetLogical(), m_SwapChain->Get(), UINT64_MAX, m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
-
+		
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
 			// Should recreate swap chain
@@ -101,21 +106,6 @@ namespace Nightbird::Vulkan
 		vkResetCommandBuffer(commandBuffer, 0);
 
 		m_RenderPass->BeginCommandBuffer(commandBuffer);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(m_SwapChain->m_Extent.width);
-		viewport.height = static_cast<float>(m_SwapChain->m_Extent.height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = m_SwapChain->m_Extent;
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
 		m_RenderPass->Begin(commandBuffer, m_SwapChain->m_Framebuffers[imageIndex], m_SwapChain->m_Extent);
 
 		DrawScene(commandBuffer);
@@ -171,7 +161,10 @@ namespace Nightbird::Vulkan
 	void Renderer::DrawScene(VkCommandBuffer commandBuffer)
 	{
 		if (!m_ActiveCamera)
+		{
+			Core::Log::Warning("No active camera");
 			return;
+		}
 
 		m_TransformPool->Reset();
 
@@ -258,6 +251,12 @@ namespace Nightbird::Vulkan
 		}
 	}
 
+	std::shared_ptr<Core::Texture> Renderer::CreateDefaultTexture()
+	{
+		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
+		return std::make_shared<Core::Texture>(1, 1, pixels);
+	}
+
 	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
 	{
 		auto it = m_GeometryCache.find(primitive);
@@ -274,7 +273,7 @@ namespace Nightbird::Vulkan
 		if (it != m_MaterialCache.end())
 			return it->second;
 
-		m_MaterialCache.emplace(material, Material(m_Device.get(), *material, m_DescriptorPool, m_DescriptorSetLayoutManager.get()));
+		m_MaterialCache.emplace(material, Material(m_Device.get(), *material, m_DescriptorPool, m_DescriptorSetLayoutManager.get(), *m_DefaultTexture));
 		return m_MaterialCache.at(material);
 	}
 }

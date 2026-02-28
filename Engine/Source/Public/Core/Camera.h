@@ -9,6 +9,8 @@ namespace Nightbird::Core
 	class Camera : public SpatialObject
 	{
 	public:
+		using SpatialObject::SpatialObject;
+
 		float fov = 70.0f;
 
 		glm::mat4 GetViewMatrix() const;
