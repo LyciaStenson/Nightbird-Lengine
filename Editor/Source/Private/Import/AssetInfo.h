@@ -1,5 +1,6 @@
 #pragma once
 
+#include <uuid.h>
 #include <toml.hpp>
 
 #include <string>
@@ -9,7 +10,7 @@ namespace Nightbird::Editor
 {
 	struct AssetInfo
 	{
-		std::string uuid;
+		uuids::uuid uuid;
 		std::string importer;
 		std::filesystem::path sourcePath;
 		toml::table params;

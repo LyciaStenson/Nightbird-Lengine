@@ -17,5 +17,7 @@ project "Engine"
 	includedirs {
 		"Source/Public",
 		"Source/Private",
-		"Vendor/glm"
+		"Vendor/glm",
+		"Vendor/stb",
+		"Vendor/stduuid"
 	}

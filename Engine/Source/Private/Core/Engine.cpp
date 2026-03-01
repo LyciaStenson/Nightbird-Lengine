@@ -9,6 +9,8 @@
 
 #include "Input/Provider.h"
 
+#include <chrono>
+
 namespace Nightbird::Core
 {
 	Engine::Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer)
@@ -30,14 +32,20 @@ namespace Nightbird::Core
 
 	void Engine::MainLoop()
 	{
+		auto lastTime = std::chrono::high_resolution_clock::now();
+		
 		while (!m_Platform->ShouldClose())
 		{
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+			lastTime = currentTime;
+
 			m_Platform->PollEvents();
 
 			m_InputSystem.Update(m_Platform->GetInputProvider());
-
-			m_Scene->Update(0.001f); // Replace with delta calculation
-
+			
+			m_Scene->Update(deltaTime);
+			
 			if (m_InputSystem.WasButtonPressed(Input::Button::A))
 				Log::Info("A Pressed");
 

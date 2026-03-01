@@ -5,6 +5,8 @@
 
 #include "Core/Log.h"
 
+#include <toml.hpp>
+
 #include <random>
 
 namespace Nightbird::Editor
@@ -77,27 +79,17 @@ namespace Nightbird::Editor
 		return nullptr;
 	}
 
-	std::string ImportManager::GenerateUUID() const
+	uuids::uuid ImportManager::GenerateUUID() const
 	{
 		std::random_device randomDevice;
-		std::mt19937_64 gen(randomDevice());
-		std::uniform_int_distribution<uint64_t> dis;
 
-		uint64_t high = dis(gen);
-		uint64_t low = dis(gen);
+		auto seedData = std::array<int, std::mt19937::state_size>{};
+		std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+		std::seed_seq seq(std::begin(seedData), std::end(seedData));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{generator};
 
-		high = (high & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
-		low = (low & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
-
-		std::ostringstream stream;
-		stream << std::hex << std::setfill('0');
-		stream << std::setw(8) << ((high >> 32) & 0xFFFFFFFF) << '-';
-		stream << std::setw(4) << ((high >> 16) & 0xFFFF) << '-';
-		stream << std::setw(4) << (high & 0xFFFF) << '-';
-		stream << std::setw(4) << ((low >> 48) & 0xFFFF) << '-';
-		stream << std::setw(12) << (low & 0xFFFFFFFFFFFFULL);
-
-		return stream.str();
+		return gen();
 	}
 
 	std::string ImportManager::FindImporter(const std::filesystem::path& sourcePath)
@@ -116,10 +108,10 @@ namespace Nightbird::Editor
 		if (importerName.empty())
 			return;
 
-		std::string uuid = GenerateUUID();
+		uuids::uuid uuid = GenerateUUID();
 
 		toml::table info;
-		info.insert("uuid", uuid);
+		info.insert("uuid", uuids::to_string(uuid));
 		info.insert("importer", importerName);
 		info.insert("importer_version", 1);
 		info.insert("source_file", sourcePath.string());
@@ -146,22 +138,31 @@ namespace Nightbird::Editor
 			return;
 		}
 
-		toml::table table = toml::parse_file(assetInfoPath.string());
+		toml::parse_result result = toml::parse_file(assetInfoPath.string());
+		if (!result)
+		{
+			Core::Log::Error("Failed to parse .assetinfo: " + assetInfoPath.string());
+			return;
+		}
 		
+		toml::table table = result.table();
+		
+		std::string uuidString = table["info"]["uuid"].value_or(std::string{});
+		auto uuid = uuids::uuid::from_string(uuidString);
+		if (!uuid)
+		{
+			Core::Log::Warning("Invalid UUID in: " + assetInfoPath.string());
+			return;
+		}
+
 		AssetInfo assetInfo;
-		assetInfo.uuid = table["info"]["uuid"].value_or(std::string{});
+		assetInfo.uuid = *uuid;
 		assetInfo.importer = table["info"]["importer"].value_or(std::string{});
 		assetInfo.sourcePath = table["info"]["source_file"].value_or(std::string{});
 		
 		if (table.contains("params"))
 			assetInfo.params = *table["params"].as_table();
-
-		if (assetInfo.uuid.empty())
-		{
-			Core::Log::Warning("Missing UUID in: " + assetInfoPath.string());
-			return;
-		}
-
+		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
 	}
 }

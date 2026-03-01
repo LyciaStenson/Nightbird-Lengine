@@ -25,7 +25,8 @@ project "Editor"
 		"Vendor/fastgltf/include",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
-		"%{wks.location}/Engine/Vendor/stb"
+		"%{wks.location}/Engine/Vendor/stb",
+		"%{wks.location}/Engine/Vendor/stduuid"
 	}
 
 	defines { "EDITOR" }

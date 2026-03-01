@@ -2,7 +2,7 @@
 
 #include "Core/SpatialObject.h"
 
-#include <toml.hpp>
+#include <uuid.h>
 
 #include <filesystem>
 #include <unordered_map>
@@ -24,10 +24,10 @@ namespace Nightbird::Editor
 	private:
 		std::filesystem::path m_AssetsDir;
 		std::filesystem::path m_CookedDir;
-		std::unordered_map<std::string, AssetInfo> m_AssetInfos;
+		std::unordered_map<uuids::uuid, AssetInfo> m_AssetInfos;
 		std::vector<std::unique_ptr<Importer>> m_Importers;
 
-		std::string GenerateUUID() const;
+		uuids::uuid GenerateUUID() const;
 
 		std::string FindImporter(const std::filesystem::path& sourcePath);
 		
