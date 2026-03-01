@@ -30,6 +30,8 @@ namespace Nightbird::Core
 	class Platform;
 	class Scene;
 	class Camera;
+	class DirectionalLight;
+	class PointLight;
 	struct Renderable;
 }
 
@@ -71,15 +73,18 @@ namespace Nightbird::Vulkan
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
 
-		std::vector<Core::Renderable> m_Renderables;
 		Core::Camera* m_ActiveCamera = nullptr;
+
+		std::vector<Core::Renderable> m_Renderables;
+		std::vector<Core::DirectionalLight*> m_DirectionalLights;
+		std::vector<Core::PointLight*> m_PointLights;
 
 		uint32_t m_CurrentFrame = 0;
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
 
 		void DrawScene(VkCommandBuffer commandBuffer);
-		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&);
+		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&, Pipeline* currentPipeline);
 
 		void CreateDescriptorPool();
 

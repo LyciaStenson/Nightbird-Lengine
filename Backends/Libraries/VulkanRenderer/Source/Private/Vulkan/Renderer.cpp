@@ -4,8 +4,11 @@
 #include "Core/Scene.h"
 #include "Core/Camera.h"
 #include "Core/Renderable.h"
+#include "Core/DirectionalLight.h"
+#include "Core/PointLight.h"
 
 #include "Vulkan/CameraUBO.h"
+#include "Vulkan/LightData.h"
 #include "Vulkan/Config.h"
 
 #include "Core/Log.h"
@@ -78,8 +81,10 @@ namespace Nightbird::Vulkan
 
 	void Renderer::SubmitScene(const Core::Scene& scene)
 	{
-		m_Renderables = scene.CollectRenderables();
 		m_ActiveCamera = scene.GetActiveCamera();
+		m_Renderables = scene.CollectRenderables();
+		m_DirectionalLights = scene.CollectDirectionalLights();
+		m_PointLights = scene.CollectPointLights();
 	}
 
 	void Renderer::DrawFrame()
@@ -165,7 +170,30 @@ namespace Nightbird::Vulkan
 			Core::Log::Warning("No active camera");
 			return;
 		}
+
+		std::vector<DirectionalLightData> directionalLightData;
+		for (const auto* directionalLight : m_DirectionalLights)
+		{
+			DirectionalLightData data{};
+			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
+			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
+			data.direction = glm::vec4(forward, 0.0f);
+			data.colorIntensity = glm::vec4(directionalLight->color, directionalLight->intensity);
+			directionalLightData.push_back(data);
+		}
+		m_GlobalDescriptorSetManager->UpdateDirectionalLights(m_CurrentFrame, directionalLightData);
 		
+		std::vector<PointLightData> pointLightData;
+		for (const auto* pointLight : m_PointLights)
+		{
+			PointLightData data{};
+			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
+			data.positionRadius = glm::vec4(worldPos, pointLight->radius);
+			data.colorIntensity = glm::vec4(pointLight->color, pointLight->intensity);
+			pointLightData.push_back(data);
+		}
+		m_GlobalDescriptorSetManager->UpdatePointLights(m_CurrentFrame, pointLightData);
+
 		m_TransformPool->Reset();
 
 		CameraUBO cameraUBO{};
@@ -185,7 +213,7 @@ namespace Nightbird::Vulkan
 			if (renderable.primitive->GetMaterial()->transparencyEnabled)
 				transparentRenderables.push_back(&renderable);
 			else
-				transparentRenderables.push_back(&renderable);
+				opaqueRenderables.push_back(&renderable);
 		}
 
 		glm::vec3 cameraPos = glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]);
@@ -197,25 +225,23 @@ namespace Nightbird::Vulkan
 				return distA > distB;
 			}
 		);
-
+		
 		m_OpaquePipeline->Bind(commandBuffer);
 		for (const auto* renderable : opaqueRenderables)
-			DrawRenderable(commandBuffer, *renderable);
+			DrawRenderable(commandBuffer, *renderable, m_OpaquePipeline.get());
 
 		m_TransparentPipeline->Bind(commandBuffer);
 		for (const auto* renderable : transparentRenderables)
-			DrawRenderable(commandBuffer, *renderable);
+			DrawRenderable(commandBuffer, *renderable, m_TransparentPipeline.get());
 	}
 
-	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable)
+	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline)
 	{
 		Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
 		Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
 
 		VkDescriptorSet transformDescriptorSet = m_TransformPool->Acquire(renderable.transform, m_CurrentFrame);
-
-		//Core::Log::Info("Drawing: verts=" + std::to_string(renderable.primitive->GetVertices().size()) + " indices=" + std::to_string(renderable.primitive->GetIndices().size()));
-
+		
 		VkBuffer vertexBuffers[] = { geometry.GetVertexBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
@@ -226,7 +252,7 @@ namespace Nightbird::Vulkan
 			m_GlobalDescriptorSetManager->GetDescriptorSets()[m_CurrentFrame], transformDescriptorSet, material.GetDescriptorSets()[m_CurrentFrame]
 		};
 
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_OpaquePipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
 
 		vkCmdDrawIndexed(commandBuffer, geometry.GetIndexCount(), 1, 0, 0, 0);
 	}

@@ -37,10 +37,22 @@ namespace Nightbird::Core
 	std::vector<Renderable> Scene::CollectRenderables() const
 	{
 		std::vector<Renderable> renderables;
-
 		CollectRenderablesRecursive(m_Root.get(), renderables);
-
 		return renderables;
+	}
+
+	std::vector<DirectionalLight*> Scene::CollectDirectionalLights() const
+	{
+		std::vector<DirectionalLight*> directionalLights;
+		CollectDirectionalLightsRecursive(m_Root.get(), directionalLights);
+		return directionalLights;
+	}
+
+	std::vector<PointLight*> Scene::CollectPointLights() const
+	{
+		std::vector<PointLight*> pointLights;
+		CollectPointLightsRecursive(m_Root.get(), pointLights);
+		return pointLights;
 	}
 
 	void Scene::CollectRenderablesRecursive(SceneObject* object, std::vector<Renderable>& renderables) const
@@ -62,5 +74,29 @@ namespace Nightbird::Core
 
 		for (const auto& child : object->GetChildren())
 			CollectRenderablesRecursive(child.get(), renderables);
+	}
+
+	void Scene::CollectDirectionalLightsRecursive(SceneObject* object, std::vector<DirectionalLight*>& directionalLights) const
+	{
+		if (!object)
+			return;
+
+		if (auto* directionalLight = dynamic_cast<DirectionalLight*>(object))
+			directionalLights.push_back(directionalLight);
+
+		for (const auto& child : object->GetChildren())
+			CollectDirectionalLightsRecursive(child.get(), directionalLights);
+	}
+	
+	void Scene::CollectPointLightsRecursive(SceneObject* object, std::vector<PointLight*>& pointLights) const
+	{
+		if (!object)
+			return;
+
+		if (auto* pointLight = dynamic_cast<PointLight*>(object))
+			pointLights.push_back(pointLight);
+
+		for (const auto& child : object->GetChildren())
+			CollectPointLightsRecursive(child.get(), pointLights);
 	}
 }
