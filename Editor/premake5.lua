@@ -22,8 +22,10 @@ project "Editor"
 		"Source/Public",
 		"Source/Private",
 		"Vendor/tomlplusplus",
+		"Vendor/fastgltf/include",
 		"%{wks.location}/Engine/Source/Public",
-		"%{wks.location}/Engine/Vendor/glm"
+		"%{wks.location}/Engine/Vendor/glm",
+		"%{wks.location}/Engine/Vendor/stb"
 	}
 
 	defines { "EDITOR" }
@@ -31,5 +33,5 @@ project "Editor"
 	links { "Engine" }
 
 	filter { "platforms:Desktop" }
-		links { "GlfwVulkanBackend", "GLFW" }
+		links { "GlfwVulkanBackend", "GLFW", "fastgltf" }
 	filter { }

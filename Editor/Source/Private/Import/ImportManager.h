@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/SceneObject.h"
+
 #include <toml.hpp>
 
 #include <filesystem>
@@ -8,14 +10,7 @@
 
 namespace Nightbird::Editor
 {
-	struct ImportedAsset
-	{
-		std::string uuid;
-		std::string importer;
-		std::filesystem::path sourcePath;
-		toml::table params;
-	};
-
+	struct AssetInfo;
 	class Importer;
 
 	class ImportManager
@@ -24,12 +19,19 @@ namespace Nightbird::Editor
 		ImportManager(const std::filesystem::path& assetsDir);
 
 		void Scan();
-		void Import(const std::filesystem::path& sourcePath);
+		std::unique_ptr<Core::SceneObject> Import(const std::filesystem::path& sourcePath);
 
 	private:
 		std::filesystem::path m_AssetsDir;
 		std::filesystem::path m_CookedDir;
-		std::unordered_map<std::string, ImportedAsset> m_Assets;
+		std::unordered_map<std::string, AssetInfo> m_AssetInfos;
 		std::vector<std::unique_ptr<Importer>> m_Importers;
+
+		std::string GenerateUUID() const;
+
+		std::string FindImporter(const std::filesystem::path& sourcePath);
+		
+		void GenerateAssetInfoFile(const std::filesystem::path& sourcePath);
+		void ReadAssetInfoFile(const std::filesystem::path& assetInfoPath);
 	};
 }

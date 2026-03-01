@@ -1,6 +1,13 @@
 workspace "Nightbird"
 	configurations { "Debug", "Release" }
 	platforms { "Desktop", "WiiU", "3DS" }
+	exceptionhandling "Off"
+
+	defines { "TOML_COMPILER_HAS_EXCEPTIONS=0" }
+
+	filter { "action:vs*" }
+		buildoptions { "/EHs-c-" }
+	filter { }
 
 	filter { "platforms:Desktop" }
 		architecture "x86_64"
@@ -26,6 +33,7 @@ workspace "Nightbird"
 
 group "Dependencies"
 	include "Backends/Libraries/GlfwPlatform/Vendor/GLFW"
+	include "Editor/Vendor/fastgltf"
 group ""
 
 group "Nightbird"

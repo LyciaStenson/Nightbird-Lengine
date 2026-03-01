@@ -10,9 +10,8 @@ project "fastgltf"
 
 	files
 	{
-		"**.h",
-		"**.hpp",
-		"**.cpp"
+		"include/**.hpp",
+		"src/**.cpp"
 	}
 
 	includedirs
