@@ -21,6 +21,7 @@ project "Editor"
 	includedirs {
 		"Source/Public",
 		"Source/Private",
+		"Vendor/tomlplusplus",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm"
 	}
