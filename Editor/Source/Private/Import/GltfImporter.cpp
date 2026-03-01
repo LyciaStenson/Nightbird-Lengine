@@ -56,9 +56,7 @@ namespace Nightbird::Editor
 		if (gltfAsset.defaultScene.has_value())
 		{
 			const fastgltf::Scene& scene = gltfAsset.scenes[gltfAsset.defaultScene.value()];
-
-			Core::Log::Info("Scene node count: " + std::to_string(scene.nodeIndices.size()));
-
+			
 			for (size_t nodeIndex : scene.nodeIndices)
 			{
 				ProcessNode(gltfAsset, nodeIndex, root.get(), materials);
@@ -68,9 +66,7 @@ namespace Nightbird::Editor
 		{
 			Core::Log::Warning("No default scene found in glTF file");
 		}
-
-		Core::Log::Info("Imported glTF: " + assetInfo.sourcePath.string());
-
+		
 		return root;
 	}
 
