@@ -165,7 +165,7 @@ namespace Nightbird::Vulkan
 			Core::Log::Warning("No active camera");
 			return;
 		}
-
+		
 		m_TransformPool->Reset();
 
 		CameraUBO cameraUBO{};
@@ -213,6 +213,8 @@ namespace Nightbird::Vulkan
 		Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
 
 		VkDescriptorSet transformDescriptorSet = m_TransformPool->Acquire(renderable.transform, m_CurrentFrame);
+
+		//Core::Log::Info("Drawing: verts=" + std::to_string(renderable.primitive->GetVertices().size()) + " indices=" + std::to_string(renderable.primitive->GetIndices().size()));
 
 		VkBuffer vertexBuffers[] = { geometry.GetVertexBuffer() };
 		VkDeviceSize offsets[] = { 0 };

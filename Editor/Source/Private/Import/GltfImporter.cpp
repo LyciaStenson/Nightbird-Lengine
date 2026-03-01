@@ -25,10 +25,10 @@ namespace Nightbird::Editor
 
 	bool GltfImporter::SupportsExtension(const std::string& extension) const
 	{
-		return extension == "glb" || extension == "gltf";
+		return extension == ".glb" || extension == ".gltf";
 	}
 	
-	std::unique_ptr<Core::SceneObject> GltfImporter::Import(const AssetInfo& assetInfo)
+	std::unique_ptr<Core::SpatialObject> GltfImporter::Import(const AssetInfo& assetInfo)
 	{
 		fastgltf::Parser parser;
 
@@ -51,36 +51,56 @@ namespace Nightbird::Editor
 		auto textures = LoadTextures(gltfAsset);
 		auto materials = LoadMaterials(gltfAsset, textures);
 
-		auto root = std::make_unique<Core::SceneObject>("Root");
+		auto root = std::make_unique<Core::SpatialObject>("ImportedModel");
 
 		if (gltfAsset.defaultScene.has_value())
 		{
 			const fastgltf::Scene& scene = gltfAsset.scenes[gltfAsset.defaultScene.value()];
 
+			Core::Log::Info("Scene node count: " + std::to_string(scene.nodeIndices.size()));
+
 			for (size_t nodeIndex : scene.nodeIndices)
 			{
-				const fastgltf::Node& node = gltfAsset.nodes[nodeIndex];
-
-				if (node.meshIndex.has_value())
-				{
-					auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
-					auto meshInstance = std::make_unique<Core::MeshInstance>("MeshInstance", mesh);
-
-					if (auto* transform = std::get_if<fastgltf::TRS>(&node.transform))
-					{
-						meshInstance->transform.position = glm::vec3(transform->translation.x(), transform->translation.y(), transform->translation.z());
-						meshInstance->transform.rotation = glm::quat(transform->rotation.w(), transform->rotation.x(), transform->rotation.y(), transform->rotation.z());
-						meshInstance->transform.scale = glm::vec3(transform->translation.x(), transform->translation.y(), transform->translation.z());
-					}
-
-					root->AddChild(std::move(meshInstance));
-				}
+				ProcessNode(gltfAsset, nodeIndex, root.get(), materials);
 			}
+		}
+		else
+		{
+			Core::Log::Warning("No default scene found in glTF file");
 		}
 
 		Core::Log::Info("Imported glTF: " + assetInfo.sourcePath.string());
 
 		return root;
+	}
+
+	void GltfImporter::ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SpatialObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials)
+	{
+		const fastgltf::Node& node = gltfAsset.nodes[nodeIndex];
+		
+		auto spatialNode = std::make_unique<Core::SpatialObject>(std::string(node.name));
+
+		if (auto* transform = std::get_if<fastgltf::TRS>(&node.transform))
+		{
+			spatialNode->transform.position = glm::vec3(transform->translation.x(), transform->translation.y(), transform->translation.z());
+			spatialNode->transform.rotation = glm::quat(transform->rotation.w(), transform->rotation.x(), transform->rotation.y(), transform->rotation.z());
+			spatialNode->transform.scale = glm::vec3(transform->scale.x(), transform->scale.y(), transform->scale.z());
+		}
+
+		Core::SpatialObject* target = spatialNode.get();
+
+		if (node.meshIndex.has_value())
+		{
+			auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
+			auto meshInstance = std::make_unique<Core::MeshInstance>(std::string(node.name), mesh);
+			
+			spatialNode->AddChild(std::move(meshInstance));
+		}
+
+		for (size_t childIndex : node.children)
+			ProcessNode(gltfAsset, childIndex, target, materials);
+
+		parent->AddChild(std::move(spatialNode));
 	}
 	
 	std::vector<std::shared_ptr<Core::Texture>> GltfImporter::LoadTextures(const fastgltf::Asset& gltfAsset)

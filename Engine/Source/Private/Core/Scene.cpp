@@ -2,6 +2,7 @@
 
 #include "Core/SceneObject.h"
 #include "Core/MeshInstance.h"
+#include "Core/Log.h"
 
 namespace Nightbird::Core
 {
@@ -46,7 +47,7 @@ namespace Nightbird::Core
 	{
 		if (!object)
 			return;
-
+		
 		if (auto* meshInstance = dynamic_cast<MeshInstance*>(object))
 		{
 			const Mesh* mesh = meshInstance->GetMesh().get();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/SceneObject.h"
+#include "Core/SpatialObject.h"
 
 #include <toml.hpp>
 
@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 		ImportManager(const std::filesystem::path& assetsDir);
 
 		void Scan();
-		std::unique_ptr<Core::SceneObject> Import(const std::filesystem::path& sourcePath);
+		std::unique_ptr<Core::SpatialObject> Import(const std::filesystem::path& sourcePath);
 
 	private:
 		std::filesystem::path m_AssetsDir;
