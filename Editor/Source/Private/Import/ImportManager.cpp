@@ -42,7 +42,7 @@ namespace Nightbird::Editor
 		}
 	}
 
-	std::unique_ptr<Core::SpatialObject> ImportManager::Import(const std::filesystem::path& sourcePath)
+	std::unique_ptr<Core::SceneInstance> ImportManager::Import(const std::filesystem::path& sourcePath)
 	{
 		std::filesystem::path infoPath = sourcePath.string() + ".assetInfo";
 		if (!std::filesystem::exists(infoPath))
@@ -114,7 +114,6 @@ namespace Nightbird::Editor
 		info.insert("uuid", uuids::to_string(uuid));
 		info.insert("importer", importerName);
 		info.insert("importer_version", 1);
-		info.insert("source_file", sourcePath.string());
 
 		toml::table table;
 		table.insert("info", info);
@@ -158,11 +157,21 @@ namespace Nightbird::Editor
 		AssetInfo assetInfo;
 		assetInfo.uuid = *uuid;
 		assetInfo.importer = table["info"]["importer"].value_or(std::string{});
-		assetInfo.sourcePath = table["info"]["source_file"].value_or(std::string{});
+
+		std::string assetInfoPathString = assetInfoPath.string();
+		assetInfo.sourcePath = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
 		
 		if (table.contains("params"))
 			assetInfo.params = *table["params"].as_table();
 		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
+	}
+
+	const AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid) const
+	{
+		auto it = m_AssetInfos.find(uuid);
+		if (it != m_AssetInfos.end())
+			return &it->second;
+		return nullptr;
 	}
 }

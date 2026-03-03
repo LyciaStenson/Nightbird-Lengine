@@ -28,7 +28,7 @@ namespace Nightbird::Editor
 		return extension == ".glb" || extension == ".gltf";
 	}
 	
-	std::unique_ptr<Core::SpatialObject> GltfImporter::Import(const AssetInfo& assetInfo)
+	std::unique_ptr<Core::SceneInstance> GltfImporter::Import(const AssetInfo& assetInfo)
 	{
 		fastgltf::Parser parser;
 
@@ -51,7 +51,7 @@ namespace Nightbird::Editor
 		auto textures = LoadTextures(gltfAsset);
 		auto materials = LoadMaterials(gltfAsset, textures);
 
-		auto root = std::make_unique<Core::SpatialObject>("ImportedModel");
+		auto root = std::make_unique<Core::SceneInstance>("ImportedModel", assetInfo.uuid);
 
 		if (gltfAsset.defaultScene.has_value())
 		{
@@ -74,24 +74,26 @@ namespace Nightbird::Editor
 	{
 		const fastgltf::Node& node = gltfAsset.nodes[nodeIndex];
 		
-		auto spatialNode = std::make_unique<Core::SpatialObject>(std::string(node.name));
-
-		if (auto* transform = std::get_if<fastgltf::TRS>(&node.transform))
-		{
-			spatialNode->transform.position = glm::vec3(transform->translation.x(), transform->translation.y(), transform->translation.z());
-			spatialNode->transform.rotation = glm::quat(transform->rotation.w(), transform->rotation.x(), transform->rotation.y(), transform->rotation.z());
-			spatialNode->transform.scale = glm::vec3(transform->scale.x(), transform->scale.y(), transform->scale.z());
-		}
-
-		Core::SpatialObject* target = spatialNode.get();
+		std::unique_ptr<Core::SpatialObject> spatialNode;
 
 		if (node.meshIndex.has_value())
 		{
 			auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
-			auto meshInstance = std::make_unique<Core::MeshInstance>(std::string(node.name), mesh);
-			
-			spatialNode->AddChild(std::move(meshInstance));
+			spatialNode = std::make_unique<Core::MeshInstance>(std::string(node.name), mesh);
 		}
+		else
+		{
+			spatialNode = std::make_unique<Core::SpatialObject>(std::string(node.name));
+		}
+		
+		if (auto* trs = std::get_if<fastgltf::TRS>(&node.transform))
+		{
+			spatialNode->transform.position = glm::vec3(trs->translation.x(), trs->translation.y(), trs->translation.z());
+			spatialNode->transform.rotation = glm::quat(trs->rotation.w(), trs->rotation.x(), trs->rotation.y(), trs->rotation.z());
+			spatialNode->transform.scale = glm::vec3(trs->scale.x(), trs->scale.y(), trs->scale.z());
+		}
+		
+		Core::SpatialObject* target = spatialNode.get();
 
 		for (size_t childIndex : node.children)
 			ProcessNode(gltfAsset, childIndex, target, materials);

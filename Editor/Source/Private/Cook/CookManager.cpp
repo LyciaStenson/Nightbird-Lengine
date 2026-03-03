@@ -1,6 +1,7 @@
 #include "Cook/CookManager.h"
 
 #include "Core/SceneObject.h"
+#include "Core/SceneInstance.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
 #include "Core/Material.h"
@@ -15,7 +16,7 @@ namespace Nightbird::Editor
 
 	}
 
-	void CookManager::Cook(Core::SceneObject* root, const uuids::uuid& assetUUID, CookTarget target)
+	void CookManager::Cook(Core::SceneObject* root, CookTarget target)
 	{
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
@@ -24,15 +25,32 @@ namespace Nightbird::Editor
 		Endianness endianness = GetEndianness(target);
 		std::filesystem::path outputDir = GetOutputDir(target);
 
+		uuids::uuid sceneUUID;
+		std::string sceneName = root->GetName();
+		Core::SceneObject* sceneRoot = root;
+
+		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(root))
+		{
+			sceneUUID = sceneInstance->GetSceneUUID();
+			sceneRoot = sceneInstance;
+		}
+		else
+		{
+			sceneUUID = GenerateUUID();
+		}
+
 		CollectAssets(root);
 
 		Core::Log::Info("Cooking " + std::to_string(m_TextureUUIDs.size()) + " textures, "
 			+ std::to_string(m_MaterialUUIDs.size()) + " materials"
 			+ std::to_string(m_MeshUUIDs.size()) + " meshes");
-
+		
 		CookTextures(outputDir, endianness);
 		CookMaterials(outputDir, endianness);
-		//CookMeshes(outputDir, endianness);
+		CookMeshes(outputDir, endianness);
+
+		//std::filesystem::path ntScenePath = outputDir / (uuids::to_string(sceneUUID) + ".ntscene");
+		//m_TextSceneWriter.Write(sceneRoot, sceneName, sceneUUID, ntScenePath, m_MeshUUIDs);
 	}
 
 	void CookManager::CollectAssets(Core::SceneObject* object)

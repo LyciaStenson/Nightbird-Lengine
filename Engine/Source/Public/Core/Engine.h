@@ -20,6 +20,7 @@ namespace Nightbird::Core
 		Input::System& GetInputSystem();
 
 		Scene& GetScene();
+		void SetScene(std::unique_ptr<Scene> scene);
 
 	private:
 		void MainLoop();

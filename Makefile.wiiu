@@ -31,7 +31,9 @@ INCLUDES	:=	App/Source/Public \
 				Engine/Source/Public \
 				Engine/Source/Private \
 				Backends/WiiUBackend/Source/Public \
-				Engine/Vendor/glm
+				Engine/Vendor/glm \
+				Engine/Vendor/stb \
+				Engine/Vendor/stduuid
 
 #-------------------------------------------------------------------------------
 # options for code generation

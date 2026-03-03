@@ -4,6 +4,8 @@
 #include "Cook/MaterialCooker.h"
 #include "Cook/MeshCooker.h"
 
+#include "Scene/TextSceneWriter.h"
+
 #include <uuid.h>
 
 #include <filesystem>
@@ -28,10 +30,12 @@ namespace Nightbird::Editor
 	public:
 		CookManager(const std::filesystem::path& outputDir);
 
-		void Cook(Core::SceneObject* root, const uuids::uuid& assetUUID, CookTarget target);
+		void Cook(Core::SceneObject* root, CookTarget target);
 
 	private:
 		std::filesystem::path m_OutputDir;
+
+		TextSceneWriter m_TextSceneWriter;
 
 		TextureCooker m_TextureCooker;
 		MaterialCooker m_MaterialCooker;
