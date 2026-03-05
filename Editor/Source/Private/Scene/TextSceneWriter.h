@@ -29,7 +29,7 @@ namespace Nightbird::Editor
 
 		void AssignNodeUUIDs(Core::SceneObject* object);
 
-		void SerializeNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray);
+		void WriteNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray);
 
 		uuids::uuid GenerateUUID() const;
 	};

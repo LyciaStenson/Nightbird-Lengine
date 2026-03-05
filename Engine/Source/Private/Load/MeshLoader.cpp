@@ -70,6 +70,8 @@ namespace Nightbird::Load
 
 			primitives.emplace_back(std::move(vertices), std::move(indices), material);
 		}
+
+		return std::make_shared<Core::Mesh>(std::move(primitives));
 	}
 
 	std::shared_ptr<Core::Material> MeshLoader::LoadMaterial(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)

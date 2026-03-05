@@ -32,7 +32,7 @@ namespace Nightbird::Editor
 
 		toml::array nodesArray;
 		for (const auto& child : scene.GetRoot()->GetChildren())
-			SerializeNode(child.get(), nullptr, nodesArray);
+			WriteNode(child.get(), nullptr, nodesArray);
 
 		document.insert("nodes", nodesArray);
 
@@ -58,7 +58,7 @@ namespace Nightbird::Editor
 			AssignNodeUUIDs(child.get());
 	}
 
-	void TextSceneWriter::SerializeNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray)
+	void TextSceneWriter::WriteNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray)
 	{
 		if (!object)
 			return;
@@ -152,7 +152,7 @@ namespace Nightbird::Editor
 		nodesArray.push_back(node);
 
 		for (const auto& child : object->GetChildren())
-			SerializeNode(child.get(), object, nodesArray);
+			WriteNode(child.get(), object, nodesArray);
 	}
 
 	uuids::uuid TextSceneWriter::GenerateUUID() const

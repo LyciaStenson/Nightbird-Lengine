@@ -20,23 +20,31 @@ namespace Nightbird::Core
 
 namespace Nightbird::Editor
 {
+	class ImportManager;
+
 	enum class CookTarget
 	{
 		Desktop, WiiU
 	};
 
+	struct ManifestEntry
+	{
+		uuids::uuid uuid;
+		std::string type;
+		std::filesystem::path filePath;
+	};
+
 	class CookManager
 	{
 	public:
-		CookManager(const std::filesystem::path& outputDir);
+		CookManager(const std::filesystem::path& outputDir, ImportManager& importManager);
 
-		void Cook(Core::SceneObject* root, CookTarget target);
+		void Cook(const std::filesystem::path& textScenePath, CookTarget target);
 
 	private:
 		std::filesystem::path m_OutputDir;
-
-		TextSceneWriter m_TextSceneWriter;
-
+		ImportManager& m_ImportManager;
+		
 		TextureCooker m_TextureCooker;
 		MaterialCooker m_MaterialCooker;
 		MeshCooker m_MeshCooker;
@@ -45,14 +53,16 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::Material*, uuids::uuid> m_MaterialUUIDs;
 		std::unordered_map<const Core::Mesh*, uuids::uuid> m_MeshUUIDs;
 
-		uuids::uuid GenerateUUID() const;
-		Endianness GetEndianness(CookTarget target) const;
-		std::filesystem::path GetOutputDir(CookTarget target) const;
-
+		std::vector<ManifestEntry> m_Manifest;
+		
 		void CollectAssets(Core::SceneObject* object);
 
 		void CookTextures(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMaterials(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMeshes(const std::filesystem::path& outputDir, Endianness endianness);
+
+		uuids::uuid GenerateUUID() const;
+		Endianness GetEndianness(CookTarget target) const;
+		std::filesystem::path GetOutputDir(CookTarget target) const;
 	};
 }

@@ -1,5 +1,6 @@
 #include "Cook/CookManager.h"
 
+#include "Core/Scene.h"
 #include "Core/SceneObject.h"
 #include "Core/SceneInstance.h"
 #include "Core/MeshInstance.h"
@@ -8,49 +9,59 @@
 #include "Core/Mesh.h"
 #include "Core/Log.h"
 
+#include "Import/ImportManager.h"
+#include "Scene/TextSceneReader.h"
+
 namespace Nightbird::Editor
 {
-	CookManager::CookManager(const std::filesystem::path& outputDir)
-		: m_OutputDir(outputDir)
+	CookManager::CookManager(const std::filesystem::path& outputDir, ImportManager& importManager)
+		: m_OutputDir(outputDir), m_ImportManager(importManager)
 	{
 
 	}
 
-	void CookManager::Cook(Core::SceneObject* root, CookTarget target)
+	void CookManager::Cook(const std::filesystem::path& textScenePath, CookTarget target)
 	{
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
 		m_MeshUUIDs.clear();
-
-		Endianness endianness = GetEndianness(target);
-		std::filesystem::path outputDir = GetOutputDir(target);
-
-		uuids::uuid sceneUUID;
-		std::string sceneName = root->GetName();
-		Core::SceneObject* sceneRoot = root;
-
-		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(root))
+		m_Manifest.clear();
+		
+		TextSceneReader sceneReader(m_ImportManager);
+		auto scene = sceneReader.Read(textScenePath);
+		if (!scene)
 		{
-			sceneUUID = sceneInstance->GetSceneUUID();
-			sceneRoot = sceneInstance;
-		}
-		else
-		{
-			sceneUUID = GenerateUUID();
+			Core::Log::Error("CookManager: Failed to read text scene: " + textScenePath.string());
+			return;
 		}
 
-		CollectAssets(root);
-
-		Core::Log::Info("Cooking " + std::to_string(m_TextureUUIDs.size()) + " textures, "
-			+ std::to_string(m_MaterialUUIDs.size()) + " materials"
-			+ std::to_string(m_MeshUUIDs.size()) + " meshes");
+		auto endianness = GetEndianness(target);
+		auto outputDir = GetOutputDir(target);
+		std::filesystem::create_directories(outputDir);
+		
+		CollectAssets(scene->GetRoot());
 		
 		CookTextures(outputDir, endianness);
 		CookMaterials(outputDir, endianness);
 		CookMeshes(outputDir, endianness);
 
-		//std::filesystem::path ntScenePath = outputDir / (uuids::to_string(sceneUUID) + ".ntscene");
-		//m_TextSceneWriter.Write(sceneRoot, sceneName, sceneUUID, ntScenePath, m_MeshUUIDs);
+		//uuids::uuid sceneUUID;
+		//std::string sceneName = root->GetName();
+		//Core::SceneObject* sceneRoot = root;
+
+		//if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(root))
+		//{
+			//sceneUUID = sceneInstance->GetSceneUUID();
+			//sceneRoot = sceneInstance;
+		//}
+		//else
+		//{
+			//sceneUUID = GenerateUUID();
+		//}
+
+		//Core::Log::Info("Cooking " + std::to_string(m_TextureUUIDs.size()) + " textures, "
+			//+ std::to_string(m_MaterialUUIDs.size()) + " materials"
+			//+ std::to_string(m_MeshUUIDs.size()) + " meshes");
 	}
 
 	void CookManager::CollectAssets(Core::SceneObject* object)
@@ -108,7 +119,7 @@ namespace Nightbird::Editor
 		for (const auto& [mesh, uuid] : m_MeshUUIDs)
 			m_MeshCooker.Cook(*mesh, uuid, outputDir, endianness, m_MaterialUUIDs);
 	}
-
+	
 	uuids::uuid CookManager::GenerateUUID() const
 	{
 		std::random_device randomDevice;
