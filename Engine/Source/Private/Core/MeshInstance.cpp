@@ -12,4 +12,9 @@ namespace Nightbird::Core
 	{
 		return m_Mesh;
 	}
+
+	void MeshInstance::SetMesh(std::shared_ptr<Mesh> mesh)
+	{
+		m_Mesh = mesh;
+	}
 }

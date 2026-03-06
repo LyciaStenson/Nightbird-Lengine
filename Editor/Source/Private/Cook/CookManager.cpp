@@ -11,6 +11,7 @@
 
 #include "Import/ImportManager.h"
 #include "Scene/TextSceneReader.h"
+#include "Scene/BinarySceneWriter.h"
 
 namespace Nightbird::Editor
 {
@@ -28,8 +29,8 @@ namespace Nightbird::Editor
 		m_Manifest.clear();
 		
 		TextSceneReader sceneReader(m_ImportManager);
-		auto scene = sceneReader.Read(textScenePath);
-		if (!scene)
+		SceneReadResult sceneReadResult = sceneReader.Read(textScenePath);
+		if (!sceneReadResult.scene)
 		{
 			Core::Log::Error("CookManager: Failed to read text scene: " + textScenePath.string());
 			return;
@@ -39,29 +40,23 @@ namespace Nightbird::Editor
 		auto outputDir = GetOutputDir(target);
 		std::filesystem::create_directories(outputDir);
 		
-		CollectAssets(scene->GetRoot());
+		CollectAssets(sceneReadResult.scene->GetRoot());
 		
 		CookTextures(outputDir, endianness);
 		CookMaterials(outputDir, endianness);
 		CookMeshes(outputDir, endianness);
 
-		//uuids::uuid sceneUUID;
-		//std::string sceneName = root->GetName();
-		//Core::SceneObject* sceneRoot = root;
+		WriteBinaryScene(*sceneReadResult.scene, sceneReadResult.uuid, outputDir, endianness);
+	}
 
-		//if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(root))
-		//{
-			//sceneUUID = sceneInstance->GetSceneUUID();
-			//sceneRoot = sceneInstance;
-		//}
-		//else
-		//{
-			//sceneUUID = GenerateUUID();
-		//}
-
-		//Core::Log::Info("Cooking " + std::to_string(m_TextureUUIDs.size()) + " textures, "
-			//+ std::to_string(m_MaterialUUIDs.size()) + " materials"
-			//+ std::to_string(m_MeshUUIDs.size()) + " meshes");
+	void CookManager::WriteBinaryScene(Core::Scene& scene, const uuids::uuid& sceneUUID,
+		const std::filesystem::path& outputDir, Endianness endianness)
+	{
+		BinarySceneWriter sceneWriter;
+		auto outputPath = outputDir / (uuids::to_string(sceneUUID) + ".nbscene");
+		sceneWriter.Write(scene, sceneUUID, m_MeshUUIDs, outputPath, endianness);
+		m_Manifest.push_back({ sceneUUID, "scene", outputPath });
+		Core::Log::Info("CookManager: Written binary scene: " + outputPath.string());
 	}
 
 	void CookManager::CollectAssets(Core::SceneObject* object)

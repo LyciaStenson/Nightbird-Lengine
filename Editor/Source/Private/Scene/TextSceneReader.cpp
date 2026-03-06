@@ -23,22 +23,24 @@ namespace Nightbird::Editor
 
 	}
 
-	std::unique_ptr<Core::Scene> TextSceneReader::Read(const std::filesystem::path& path)
+	SceneReadResult TextSceneReader::Read(const std::filesystem::path& path)
 	{
+		SceneReadResult sceneReadResult;
+
 		if (!std::filesystem::exists(path))
 		{
 			Core::Log::Error("TextSceneReader: File not found: " + path.string());
-			return nullptr;
+			return sceneReadResult;
 		}
 
-		toml::parse_result result = toml::parse_file(path.string());
-		if (!result)
+		toml::parse_result tomlParseResult = toml::parse_file(path.string());
+		if (!tomlParseResult)
 		{
 			Core::Log::Error("TextSceneReader: Failed to parse: " + path.string());
-			return nullptr;
+			return sceneReadResult;
 		}
 
-		toml::table& document = result.table();
+		toml::table& document = tomlParseResult.table();
 
 		std::string sceneName = document["scene"]["name"].value_or(std::string{});
 		std::string sceneUUIDString = document["scene"]["uuid"].value_or(std::string{});
@@ -46,20 +48,21 @@ namespace Nightbird::Editor
 		if (!sceneUUID)
 		{
 			Core::Log::Error("TextSceneReader: Invalid scene UUID in: " + path.string());
-			return nullptr;
+			return sceneReadResult;
 		}
 
-		auto scene = std::make_unique<Core::Scene>();
+		sceneReadResult.scene = std::make_unique<Core::Scene>();
+		sceneReadResult.uuid = sceneUUID.value_or(uuids::uuid{});
 
-		std::unordered_map<uuids::uuid, Core::SpatialObject*> nodeMap;
-		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SpatialObject>> ownedNodesMap;
+		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
+		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> ownedNodesMap;
 		std::unordered_map<uuids::uuid, uuids::uuid> parentMap;
 
 		auto* nodesArray = document["nodes"].as_array();
 		if (!nodesArray)
 		{
 			Core::Log::Warning("TextSceneReader: No nodes found in: " + path.string());
-			return scene;
+			return sceneReadResult;
 		}
 
 		for (auto& nodeValue : *nodesArray)
@@ -176,7 +179,7 @@ namespace Nightbird::Editor
 			object->transform.rotation = rotation;
 			object->transform.scale = scale;
 
-			Core::SpatialObject* objectPtr = object.get();
+			Core::SceneObject* objectPtr = object.get();
 			nodeMap[*uuid] = objectPtr;
 			ownedNodesMap[*uuid] = std::move(object);
 
@@ -207,11 +210,11 @@ namespace Nightbird::Editor
 				if (parentUUID && nodeMap.count(*parentUUID))
 					nodeMap[*parentUUID]->AddChild(std::move(ownedNodesMap[*uuid]));
 				else
-					scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
+					sceneReadResult.scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
 			}
 			else
 			{
-				scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
+				sceneReadResult.scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
 			}
 		}
 
@@ -221,10 +224,10 @@ namespace Nightbird::Editor
 		{
 			auto* camera = dynamic_cast<Core::Camera*>(nodeMap[*activeCameraUUID]);
 			if (camera)
-				scene->SetActiveCamera(camera);
+				sceneReadResult.scene->SetActiveCamera(camera);
 		}
 
 		Core::Log::Info("TextSceneReader: Loaded scene: " + sceneName);
-		return scene;
+		return sceneReadResult;
 	}
 }

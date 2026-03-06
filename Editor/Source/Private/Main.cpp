@@ -18,16 +18,20 @@
 #include "Scene/TextSceneWriter.h"
 #include "Scene/TextSceneReader.h"
 
+#include "Cook/CookManager.h"
+
 using namespace Nightbird;
 
 uuids::uuid GenerateUUID()
 {
-	std::random_device rd;
+	std::random_device randomDevice;
+
 	auto seedData = std::array<int, std::mt19937::state_size>{};
-	std::generate(std::begin(seedData), std::end(seedData), std::ref(rd));
+	std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
 	std::seed_seq seq(std::begin(seedData), std::end(seedData));
 	std::mt19937 generator(seq);
 	uuids::uuid_random_generator gen{generator};
+
 	return gen();
 }
 
@@ -51,7 +55,7 @@ int main()
 	//}
 
 	Editor::TextSceneReader sceneReader(importManager);
-	engine.SetScene(sceneReader.Read("Assets/Scenes/Main.ntscene"));
+	engine.SetScene(sceneReader.Read("Assets/Scenes/Main.ntscene").scene);
 	
 	//auto directionalLight = std::make_unique<Core::DirectionalLight>("DirectionalLight");
 	//directionalLight->transform.rotation = glm::quat(glm::vec3(glm::radians(-45.0f), glm::radians(45.0f), 0.0f));
@@ -76,6 +80,9 @@ int main()
 	//
 	//Editor::TextSceneWriter sceneWriter;
 	//sceneWriter.Write(engine.GetScene(), "MainScene", GenerateUUID(), "Assets/Scenes/Main.ntscene");
+
+	Editor::CookManager cookManager("Cooked", importManager);
+	cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::Desktop);
 
 	engine.Run();
 

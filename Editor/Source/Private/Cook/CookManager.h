@@ -54,6 +54,9 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::Mesh*, uuids::uuid> m_MeshUUIDs;
 
 		std::vector<ManifestEntry> m_Manifest;
+
+		void WriteBinaryScene(Core::Scene& scene, const uuids::uuid& sceneUUID,
+			const std::filesystem::path& outputDir, Endianness endianness);
 		
 		void CollectAssets(Core::SceneObject* object);
 

@@ -12,15 +12,13 @@
 #include "Core/Log.h"
 
 #include "Cook/BinaryWriter.h"
-#include "Cook/Endianness.h"
-
 #include "Scene/SceneObjectType.h"
 
 namespace Nightbird::Editor
 {
 	void BinarySceneWriter::Write(Core::Scene& scene, const uuids::uuid& sceneUUID,
 		const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs,
-		const std::filesystem::path& outputPath)
+		const std::filesystem::path& outputPath, Endianness endianness)
 	{
 		m_NodeUUIDs.clear();
 		m_MeshUUIDs = &meshUUIDs;
@@ -28,7 +26,7 @@ namespace Nightbird::Editor
 		AssignNodeUUIDs(scene.GetRoot());
 
 		std::filesystem::create_directories(outputPath.parent_path());
-		BinaryWriter writer(outputPath, Endianness::Little);
+		BinaryWriter writer(outputPath, endianness);
 
 		// Type
 		writer.WriteUInt8('S');
@@ -62,7 +60,7 @@ namespace Nightbird::Editor
 		}
 		
 		// Node count
-		writer.WriteUInt32(static_cast<uint32_t>(m_NodeUUIDs.size()));
+		writer.WriteUInt32(static_cast<uint32_t>(m_NodeUUIDs.size() - 1));
 
 		for (const auto& child : scene.GetRoot()->GetChildren())
 			WriteNode(child.get(), uuids::uuid{}, writer);

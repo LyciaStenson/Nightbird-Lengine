@@ -14,6 +14,7 @@ namespace Nightbird::Core
 		~MeshInstance() override = default;
 
 		std::shared_ptr<const Mesh> GetMesh() const;
+		void SetMesh(std::shared_ptr<Mesh> mesh);
 
 	private:
 		std::shared_ptr<Mesh> m_Mesh;

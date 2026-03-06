@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cook/Endianness.h"
+
 #include <uuid.h>
 
 #include <filesystem>
@@ -22,7 +24,7 @@ namespace Nightbird::Editor
 	public:
 		void Write(Core::Scene& scene, const uuids::uuid& sceneUUID,
 			const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs,
-			const std::filesystem::path& outputPath);
+			const std::filesystem::path& outputPath, Endianness endianness);
 
 	private:
 		std::unordered_map<const Core::SceneObject*, uuids::uuid> m_NodeUUIDs;
