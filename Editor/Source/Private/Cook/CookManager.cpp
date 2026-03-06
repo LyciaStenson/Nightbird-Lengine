@@ -10,13 +10,14 @@
 #include "Core/Log.h"
 
 #include "Import/ImportManager.h"
+#include "Import/AssetInfo.h"
 #include "Scene/TextSceneReader.h"
 #include "Scene/BinarySceneWriter.h"
 
 namespace Nightbird::Editor
 {
 	CookManager::CookManager(const std::filesystem::path& outputDir, ImportManager& importManager)
-		: m_OutputDir(outputDir), m_ImportManager(importManager)
+		: m_RootOutputDir(outputDir), m_ImportManager(importManager)
 	{
 
 	}
@@ -26,7 +27,9 @@ namespace Nightbird::Editor
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
 		m_MeshUUIDs.clear();
-		m_Manifest.clear();
+		m_ImportedScenes.clear();
+		m_CookedSceneUUIDs.clear();
+		//m_Manifest.clear();
 		
 		TextSceneReader sceneReader(m_ImportManager);
 		SceneReadResult sceneReadResult = sceneReader.Read(textScenePath);
@@ -36,26 +39,29 @@ namespace Nightbird::Editor
 			return;
 		}
 
-		auto endianness = GetEndianness(target);
-		auto outputDir = GetOutputDir(target);
-		std::filesystem::create_directories(outputDir);
+		m_Endianness = GetEndianness(target);
+		m_CookOutputDir = GetOutputDir(target);
+		std::filesystem::create_directories(m_CookOutputDir);
 		
 		CollectAssets(sceneReadResult.scene->GetRoot());
 		
-		CookTextures(outputDir, endianness);
-		CookMaterials(outputDir, endianness);
-		CookMeshes(outputDir, endianness);
+		CookTextures(m_CookOutputDir, m_Endianness);
+		CookMaterials(m_CookOutputDir, m_Endianness);
+		CookMeshes(m_CookOutputDir, m_Endianness);
 
-		WriteBinaryScene(*sceneReadResult.scene, sceneReadResult.uuid, outputDir, endianness);
+		for (auto& [uuid, importedRoot] : m_ImportedScenes)
+			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
+
+		WriteBinaryScene(sceneReadResult.scene->GetRoot(), sceneReadResult.uuid, m_CookOutputDir, m_Endianness, sceneReadResult.scene->GetActiveCamera());
 	}
 
-	void CookManager::WriteBinaryScene(Core::Scene& scene, const uuids::uuid& sceneUUID,
-		const std::filesystem::path& outputDir, Endianness endianness)
+	void CookManager::WriteBinaryScene(Core::SceneObject* root, const uuids::uuid& sceneUUID,
+		const std::filesystem::path& outputDir, Endianness endianness, Core::Camera* activeCamera)
 	{
 		BinarySceneWriter sceneWriter;
 		auto outputPath = outputDir / (uuids::to_string(sceneUUID) + ".nbscene");
-		sceneWriter.Write(scene, sceneUUID, m_MeshUUIDs, outputPath, endianness);
-		m_Manifest.push_back({ sceneUUID, "scene", outputPath });
+		sceneWriter.Write(root, sceneUUID, m_MeshUUIDs, outputPath, endianness, activeCamera);
+		//m_Manifest.push_back({ sceneUUID, "scene", outputPath });
 		Core::Log::Info("CookManager: Written binary scene: " + outputPath.string());
 	}
 
@@ -64,8 +70,33 @@ namespace Nightbird::Editor
 		if (!object)
 			return;
 
-		if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+		Core::Log::Info("CookManager: CollectAssets visiting: " + object->GetName());
+
+		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(object))
 		{
+			if (m_CookedSceneUUIDs.count(sceneInstance->GetSceneUUID()))
+				return;
+			m_CookedSceneUUIDs.insert(sceneInstance->GetSceneUUID());
+
+			const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(sceneInstance->GetSceneUUID());
+			if (!assetInfo)
+			{
+				Core::Log::Warning("CookManager: Asset info not found for scene instance: " + sceneInstance->GetName());
+				return;
+			}
+
+			auto importedRoot = m_ImportManager.Import(assetInfo->sourcePath);
+
+			for (const auto& child : importedRoot->GetChildren())
+				CollectAssets(child.get());
+			
+			m_ImportedScenes[sceneInstance->GetSceneUUID()] = std::move(importedRoot);
+			return;
+		}
+		else if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+		{
+			Core::Log::Info("CookManager: Found MeshInstance: " + object->GetName());
+
 			const auto& mesh = meshInstance->GetMesh();
 			if (mesh && m_MeshUUIDs.find(mesh.get()) == m_MeshUUIDs.end())
 			{
@@ -146,11 +177,11 @@ namespace Nightbird::Editor
 		switch (target)
 		{
 		case CookTarget::Desktop:
-			return m_OutputDir / "Desktop";
+			return m_RootOutputDir / "Desktop";
 		case CookTarget::WiiU:
-			return m_OutputDir / "WiiU";
+			return m_RootOutputDir / "WiiU";
 		default:
-			return m_OutputDir / "Desktop";
+			return m_RootOutputDir / "Desktop";
 		}
 	}
 }

@@ -9,10 +9,14 @@
 #include <uuid.h>
 
 #include <filesystem>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace Nightbird::Core
 {
 	class SceneObject;
+	class SceneInstance;
+	class Camera;
 	class Texture;
 	struct Material;
 	class Mesh;
@@ -27,12 +31,12 @@ namespace Nightbird::Editor
 		Desktop, WiiU
 	};
 
-	struct ManifestEntry
-	{
-		uuids::uuid uuid;
-		std::string type;
-		std::filesystem::path filePath;
-	};
+	//struct ManifestEntry
+	//{
+		//uuids::uuid uuid;
+		//std::string type;
+		//std::filesystem::path filePath;
+	//};
 
 	class CookManager
 	{
@@ -42,7 +46,11 @@ namespace Nightbird::Editor
 		void Cook(const std::filesystem::path& textScenePath, CookTarget target);
 
 	private:
-		std::filesystem::path m_OutputDir;
+		std::filesystem::path m_RootOutputDir;
+		std::filesystem::path m_CookOutputDir;
+
+		Endianness m_Endianness = Endianness::Little;
+
 		ImportManager& m_ImportManager;
 		
 		TextureCooker m_TextureCooker;
@@ -52,11 +60,15 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::Texture*, uuids::uuid> m_TextureUUIDs;
 		std::unordered_map<const Core::Material*, uuids::uuid> m_MaterialUUIDs;
 		std::unordered_map<const Core::Mesh*, uuids::uuid> m_MeshUUIDs;
+		
+		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneInstance>> m_ImportedScenes;
 
-		std::vector<ManifestEntry> m_Manifest;
+		std::unordered_set<uuids::uuid> m_CookedSceneUUIDs;
 
-		void WriteBinaryScene(Core::Scene& scene, const uuids::uuid& sceneUUID,
-			const std::filesystem::path& outputDir, Endianness endianness);
+		//std::vector<ManifestEntry> m_Manifest;
+
+		void WriteBinaryScene(Core::SceneObject* scene, const uuids::uuid& sceneUUID,
+			const std::filesystem::path& outputDir, Endianness endianness, Core::Camera* activeCamera = nullptr);
 		
 		void CollectAssets(Core::SceneObject* object);
 

@@ -16,14 +16,15 @@
 
 namespace Nightbird::Editor
 {
-	void BinarySceneWriter::Write(Core::Scene& scene, const uuids::uuid& sceneUUID,
+	void BinarySceneWriter::Write(Core::SceneObject* root, const uuids::uuid& sceneUUID,
 		const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs,
-		const std::filesystem::path& outputPath, Endianness endianness)
+		const std::filesystem::path& outputPath, Endianness endianness,
+		Core::Camera* activeCamera)
 	{
 		m_NodeUUIDs.clear();
 		m_MeshUUIDs = &meshUUIDs;
 
-		AssignNodeUUIDs(scene.GetRoot());
+		AssignNodeUUIDs(root);
 
 		std::filesystem::create_directories(outputPath.parent_path());
 		BinaryWriter writer(outputPath, endianness);
@@ -38,7 +39,7 @@ namespace Nightbird::Editor
 		writer.WriteUInt32(1);
 		
 		// Scene name
-		std::string name = scene.GetRoot()->GetName();
+		std::string name = root->GetName();
 		writer.WriteUInt32(static_cast<uint32_t>(name.size()));
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(name.data()), name.size());
 
@@ -47,7 +48,6 @@ namespace Nightbird::Editor
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(sceneUUIDBytes.data()), 16);
 
 		// Active camera UUID
-		Core::Camera* activeCamera = scene.GetActiveCamera();
 		if (activeCamera && m_NodeUUIDs.count(activeCamera))
 		{
 			auto cameraUUIDBytes = m_NodeUUIDs[activeCamera].as_bytes();
@@ -62,24 +62,24 @@ namespace Nightbird::Editor
 		// Node count
 		writer.WriteUInt32(static_cast<uint32_t>(m_NodeUUIDs.size() - 1));
 
-		for (const auto& child : scene.GetRoot()->GetChildren())
+		for (const auto& child : root->GetChildren())
 			WriteNode(child.get(), uuids::uuid{}, writer);
 
 		Core::Log::Info("BinarySceneWriter: Written binary scene: " + outputPath.string());
 	}
 
-	void BinarySceneWriter::AssignNodeUUIDs(Core::SceneObject* object)
+	void BinarySceneWriter::AssignNodeUUIDs(Core::SceneObject* object, bool isRoot)
 	{
 		if (!object)
 			return;
 
 		m_NodeUUIDs[object] = GenerateUUID();
 
-		if (dynamic_cast<Core::SceneInstance*>(object))
+		if (isRoot && dynamic_cast<Core::SceneInstance*>(object))
 			return;
 
 		for (const auto& child : object->GetChildren())
-			AssignNodeUUIDs(child.get());
+			AssignNodeUUIDs(child.get(), false);
 	}
 
 	void BinarySceneWriter::WriteNode(Core::SceneObject* object, const uuids::uuid& parentUUID, BinaryWriter& writer)

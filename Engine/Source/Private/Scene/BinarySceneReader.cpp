@@ -90,6 +90,8 @@ namespace Nightbird::Load
 		// Node count
 		uint32_t nodeCount = reader.ReadUInt32();
 
+		Core::Log::Info("BinarySceneReader: Node count: " + std::to_string(nodeCount));
+
 		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
 		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> ownedNodeMap;
 		std::unordered_map<uuids::uuid, uuids::uuid> parentMap;

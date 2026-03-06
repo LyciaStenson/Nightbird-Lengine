@@ -9,8 +9,8 @@
 
 namespace Nightbird::Core
 {
-	class Scene;
 	class SceneObject;
+	class Camera;
 	class Mesh;
 	struct Transform;
 }
@@ -22,15 +22,16 @@ namespace Nightbird::Editor
 	class BinarySceneWriter
 	{
 	public:
-		void Write(Core::Scene& scene, const uuids::uuid& sceneUUID,
+		void Write(Core::SceneObject* root, const uuids::uuid& sceneUUID,
 			const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs,
-			const std::filesystem::path& outputPath, Endianness endianness);
+			const std::filesystem::path& outputPath, Endianness endianness,
+			Core::Camera* activeCamera = nullptr);
 
 	private:
 		std::unordered_map<const Core::SceneObject*, uuids::uuid> m_NodeUUIDs;
 		const std::unordered_map<const Core::Mesh*, uuids::uuid>* m_MeshUUIDs = nullptr;
 
-		void AssignNodeUUIDs(Core::SceneObject* object);
+		void AssignNodeUUIDs(Core::SceneObject* object, bool isRoot = true);
 
 		void WriteNode(Core::SceneObject* object, const uuids::uuid& parentUUID, BinaryWriter& writer);
 
