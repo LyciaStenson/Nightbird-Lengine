@@ -24,6 +24,8 @@ SOURCES		:=	App/Source/Private \
 				Engine/Source/Private \
 				Engine/Source/Private/Core \
 				Engine/Source/Private/Input \
+				Engine/Source/Private/Load \
+				Engine/Source/Private/Scene \
 				Backends/WiiUBackend/Source/Private
 DATA		:=	data
 INCLUDES	:=	App/Source/Public \

@@ -9,7 +9,6 @@
 namespace Nightbird::Core
 {
 	class Scene;
-	class SceneInstance;
 	class Mesh;
 }
 
@@ -24,9 +23,8 @@ namespace Nightbird::Load
 	{
 	public:
 		AssetLoader(const std::filesystem::path& cookedDir);
-
+		
 		std::unique_ptr<Core::Scene> LoadScene(const uuids::uuid& uuid);
-		std::unique_ptr<Core::SceneInstance> LoadSceneInstance(const uuids::uuid& uuid);
 
 		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
 

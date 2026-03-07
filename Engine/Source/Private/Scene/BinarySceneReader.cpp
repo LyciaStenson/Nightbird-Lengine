@@ -21,7 +21,7 @@ namespace Nightbird::Load
 	{
 
 	}
-
+	
 	std::unique_ptr<Core::Scene> BinarySceneReader::ReadScene(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
 	{
 		auto nodesRead = ReadNodes(cookedDir, uuid);
@@ -31,15 +31,6 @@ namespace Nightbird::Load
 		if (nodesRead.activeCamera)
 			scene->SetActiveCamera(nodesRead.activeCamera);
 		return scene;
-	}
-	
-	std::unique_ptr<Core::SceneInstance> BinarySceneReader::ReadSceneInstance(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
-	{
-		auto nodesRead = ReadNodes(cookedDir, uuid);
-		auto sceneInstance = std::make_unique<Core::SceneInstance>(nodesRead.sceneName, nodesRead.sceneUUID);
-		for (auto& child : nodesRead.rootChildren)
-			sceneInstance->AddChild(std::move(child));
-		return sceneInstance;
 	}
 
 	BinarySceneReader::ReadNodesResult BinarySceneReader::ReadNodes(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
@@ -90,8 +81,6 @@ namespace Nightbird::Load
 		// Node count
 		uint32_t nodeCount = reader.ReadUInt32();
 
-		Core::Log::Info("BinarySceneReader: Node count: " + std::to_string(nodeCount));
-
 		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
 		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> ownedNodeMap;
 		std::unordered_map<uuids::uuid, uuids::uuid> parentMap;
@@ -114,10 +103,17 @@ namespace Nightbird::Load
 			std::string nodeName(nodeNameLength, '\0');
 			reader.ReadRawBytes(reinterpret_cast<uint8_t*>(nodeName.data()), nodeNameLength);
 
+			uint8_t hasSceneUUID = reader.ReadUInt8();
+			uuids::uuid sourceSceneUUID;
+			if (hasSceneUUID)
+			{
+				std::array<uint8_t, 16> sceneUUIDBytes;
+				reader.ReadRawBytes(sceneUUIDBytes.data(), 16);
+				sourceSceneUUID = uuids::uuid(sceneUUIDBytes);
+			}
+
 			// Type
 			Core::SceneObjectType type = static_cast<Core::SceneObjectType>(reader.ReadUInt8());
-
-			Core::Log::Info("BinarySceneReader: Reading node '" + nodeName + "' type: " + std::to_string(static_cast<int>(type)));
 
 			std::unique_ptr<Core::SceneObject> object;
 
@@ -133,29 +129,6 @@ namespace Nightbird::Load
 				auto spatialObject = std::make_unique<Core::SpatialObject>(nodeName);
 				ReadTransform(spatialObject->transform, reader);
 				object = std::move(spatialObject);
-				break;
-			}
-			case Core::SceneObjectType::SceneInstance:
-			{
-				Core::Transform transform{};
-				ReadTransform(transform, reader);
-
-				std::array<uint8_t, 16> instancedSceneUUIDbytes;
-				reader.ReadRawBytes(instancedSceneUUIDbytes.data(), 16);
-				uuids::uuid instancedSceneUUID(instancedSceneUUIDbytes);
-				
-				auto sceneInstance = m_AssetLoader.LoadSceneInstance(instancedSceneUUID);
-				if (sceneInstance)
-				{
-					sceneInstance->transform = transform;
-					object = std::move(sceneInstance);
-				}
-				else
-				{
-					Core::Log::Warning("BinarySceneReader: Failed to load instanced scene: " + uuids::to_string(instancedSceneUUID));
-					object = std::make_unique<Core::SceneObject>(nodeName);
-				}
-				
 				break;
 			}
 			case Core::SceneObjectType::MeshInstance:
@@ -222,6 +195,14 @@ namespace Nightbird::Load
 				object = std::make_unique<Core::SceneObject>(nodeName);
 				break;
 			}
+			}
+
+			if (hasSceneUUID)
+			{
+				object->SetSourceSceneUUID(sourceSceneUUID);
+				auto instancedNodesResult = ReadNodes(cookedDir, sourceSceneUUID);
+				for (auto& child : instancedNodesResult.rootChildren)
+					object->AddChild(std::move(child));
 			}
 
 			Core::SceneObject* objectPtr = object.get();

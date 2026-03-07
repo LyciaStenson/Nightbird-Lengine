@@ -42,7 +42,7 @@ namespace Nightbird::Editor
 		}
 	}
 
-	std::unique_ptr<Core::SceneInstance> ImportManager::Import(const std::filesystem::path& sourcePath)
+	std::unique_ptr<Core::SceneObject> ImportManager::Import(const std::filesystem::path& sourcePath)
 	{
 		std::filesystem::path infoPath = sourcePath.string() + ".assetInfo";
 		if (!std::filesystem::exists(infoPath))

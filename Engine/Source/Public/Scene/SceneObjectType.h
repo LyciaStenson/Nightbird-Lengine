@@ -8,10 +8,9 @@ namespace Nightbird::Core
 	{
 		SceneObject = 0,
 		SpatialObject = 1,
-		SceneInstance = 2,
-		Camera = 3,
-		MeshInstance = 4,
-		DirectionalLight = 5,
-		PointLight = 6
+		Camera = 2,
+		MeshInstance = 3,
+		DirectionalLight = 4,
+		PointLight = 5
 	};
 }

@@ -52,6 +52,7 @@ namespace Nightbird::Load
 		material->baseColorFactor.b = reader.ReadFloat();
 		material->baseColorFactor.a = reader.ReadFloat();
 		material->metallicFactor = reader.ReadFloat();
+		material->roughnessFactor = reader.ReadFloat();
 		material->transparencyEnabled = reader.ReadUInt8();
 		material->doubleSided = reader.ReadUInt8();
 

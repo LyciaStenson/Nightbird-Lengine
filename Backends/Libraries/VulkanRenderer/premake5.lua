@@ -22,6 +22,8 @@ project "VulkanRenderer"
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
+		"%{wks.location}/Engine/Vendor/stb",
+		"%{wks.location}/Engine/Vendor/stduuid",
 		"Vendor/vulkan-headers/include",
 		"Vendor/volk",
 		"Vendor/vma"

@@ -2,6 +2,7 @@
 
 #include "Import/AssetInfo.h"
 
+#include "Core/SpatialObject.h"
 #include "Core/MeshPrimitive.h"
 #include "Core/MeshInstance.h"
 #include "Core/Transform.h"
@@ -28,7 +29,7 @@ namespace Nightbird::Editor
 		return extension == ".glb" || extension == ".gltf";
 	}
 	
-	std::unique_ptr<Core::SceneInstance> GltfImporter::Import(const AssetInfo& assetInfo)
+	std::unique_ptr<Core::SceneObject> GltfImporter::Import(const AssetInfo& assetInfo)
 	{
 		fastgltf::Parser parser;
 
@@ -51,7 +52,8 @@ namespace Nightbird::Editor
 		auto textures = LoadTextures(gltfAsset);
 		auto materials = LoadMaterials(gltfAsset, textures);
 
-		auto root = std::make_unique<Core::SceneInstance>("ImportedModel", assetInfo.uuid);
+		auto root = std::make_unique<Core::SpatialObject>("ImportedModel");
+		root->SetSourceSceneUUID(assetInfo.uuid);
 
 		if (gltfAsset.defaultScene.has_value())
 		{

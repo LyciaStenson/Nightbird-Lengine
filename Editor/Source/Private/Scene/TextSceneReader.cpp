@@ -10,7 +10,6 @@
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
 #include "Core/Camera.h"
-#include "Core/SceneInstance.h"
 #include "Core/Log.h"
 
 #include <toml.hpp>
@@ -107,41 +106,30 @@ namespace Nightbird::Editor
 				scale.z = nodeScale->get(2)->value_or(1.0f);
 			}
 
-			std::unique_ptr<Core::SpatialObject> object;
-
-			if (type == "scene_instance")
+			std::unique_ptr<Core::SceneObject> object;
+			
+			if (type == "spatial_object")
 			{
-				std::string sceneUUIDString = (*nodeTable)["scene"].value_or(std::string{});
-				auto sceneUUID = uuids::uuid::from_string(sceneUUIDString);
-				if (!sceneUUID)
-				{
-					Core::Log::Warning("TextSceneReader: Skipping SceneInstance with invalid UUID");
-					continue;
-				}
-
-				const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(*sceneUUID);
-				if (!assetInfo)
-				{
-					Core::Log::Warning("TextSceneReader: Asset not found for UUID: " + sceneUUIDString);
-					continue;
-				}
-
-				auto sceneInstance = m_ImportManager.Import(assetInfo->sourcePath);
-				if (!sceneInstance)
-				{
-					Core::Log::Warning("TextSceneReader: Failed to import asset: " + assetInfo->sourcePath.string());
-					continue;
-				}
-				
-				object = std::move(sceneInstance);
+				auto spatialObject = std::make_unique<Core::SpatialObject>(name);
+				spatialObject->transform.position = position;
+				spatialObject->transform.rotation = rotation;
+				spatialObject->transform.scale = scale;
+				object = std::move(spatialObject);
 			}
 			else if (type == "mesh_instance")
 			{
-				object = std::make_unique<Core::MeshInstance>(name, nullptr);
+				auto meshInstance = std::make_unique<Core::MeshInstance>(name, nullptr);
+				meshInstance->transform.position = position;
+				meshInstance->transform.rotation = rotation;
+				meshInstance->transform.scale = scale;
+				object = std::move(meshInstance);
 			}
 			else if (type == "directional_light")
 			{
 				auto directionalLight = std::make_unique<Core::DirectionalLight>(name);
+				directionalLight->transform.position = position;
+				directionalLight->transform.rotation = rotation;
+				directionalLight->transform.scale = scale;
 				if (auto* color = (*nodeTable)["color"].as_array())
 				{
 					directionalLight->color.r = color->get(0)->value_or(1.0f);
@@ -154,6 +142,9 @@ namespace Nightbird::Editor
 			else if (type == "point_light")
 			{
 				auto pointLight = std::make_unique<Core::PointLight>(name);
+				pointLight->transform.position = position;
+				pointLight->transform.rotation = rotation;
+				pointLight->transform.scale = scale;
 				if (auto* color = (*nodeTable)["color"].as_array())
 				{
 					pointLight->color.r = color->get(0)->value_or(1.0f);
@@ -167,18 +158,42 @@ namespace Nightbird::Editor
 			else if (type == "camera")
 			{
 				auto camera = std::make_unique<Core::Camera>(name);
+				camera->transform.position = position;
+				camera->transform.rotation = rotation;
+				camera->transform.scale = scale;
 				camera->fov = (*nodeTable)["fov"].value_or(70.0f);
 				object = std::move(camera);
 			}
 			else
 			{
-				object = std::make_unique<Core::SpatialObject>(name);
+				object = std::make_unique<Core::SceneObject>(name);
 			}
 
-			object->transform.position = position;
-			object->transform.rotation = rotation;
-			object->transform.scale = scale;
+			std::string sceneUUIDString = (*nodeTable)["scene_uuid"].value_or(std::string{});
+			if (!sceneUUIDString.empty())
+			{
+				auto sceneUUID = uuids::uuid::from_string(sceneUUIDString);
+				if (sceneUUID)
+				{
+					object->SetSourceSceneUUID(*sceneUUID);
 
+					const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(*sceneUUID);
+					if (assetInfo)
+					{
+						auto importedRoot = m_ImportManager.Import(assetInfo->sourcePath);
+						if (importedRoot)
+						{
+							for (auto& child : importedRoot->GetChildren())
+								object->AddChild(std::move(child));
+						}
+					}
+					else
+					{
+						Core::Log::Warning("TextSceneReader: Assetinfo not found for scene UUID: " + sceneUUIDString);
+					}
+				}
+			}
+			
 			Core::SceneObject* objectPtr = object.get();
 			nodeMap[*uuid] = objectPtr;
 			ownedNodesMap[*uuid] = std::move(object);

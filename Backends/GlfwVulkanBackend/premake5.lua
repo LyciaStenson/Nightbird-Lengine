@@ -23,6 +23,8 @@ project "GlfwVulkanBackend"
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
+		"%{wks.location}/Engine/Vendor/stb",
+		"%{wks.location}/Engine/Vendor/stduuid",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Source/Public",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/glfw/include",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Source/Public",

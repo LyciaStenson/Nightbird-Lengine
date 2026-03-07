@@ -7,7 +7,6 @@
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
 #include "Core/Camera.h"
-#include "Core/SceneInstance.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Editor
@@ -50,10 +49,10 @@ namespace Nightbird::Editor
 			return;
 
 		m_NodeUUIDs[object] = GenerateUUID();
-
-		if (dynamic_cast<Core::SceneInstance*>(object))
+		
+		if (object->HasSourceScene())
 			return;
-
+		
 		for (const auto& child : object->GetChildren())
 			AssignNodeUUIDs(child.get());
 	}
@@ -94,25 +93,8 @@ namespace Nightbird::Editor
 			scale.push_back(spatialObject->transform.scale.z);
 			node.insert("scale", scale);
 		}
-
-		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(object))
-		{
-			node.insert("type", std::string("scene_instance"));
-			node.insert("scene", uuids::to_string(sceneInstance->GetSceneUUID()));
-			nodesArray.push_back(node);
-			return; // Don't serialize children of SceneInstance
-		}
-		//else if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
-		//{
-		//	node.insert("type", std::string("mesh_instance"));
-		//	if (meshInstance->GetMesh())
-		//	{
-		//		auto it = m_MeshUUIDs->find(meshInstance->GetMesh().get());
-		//		if (it != m_MeshUUIDs->end())
-		//			node.insert("mesh", uuids::to_string(it->second));
-		//	}
-		//}
-		else if (auto* directionalLight = dynamic_cast<Core::DirectionalLight*>(object))
+		
+		if (auto* directionalLight = dynamic_cast<Core::DirectionalLight*>(object))
 		{
 			node.insert("type", std::string("directional_light"));
 
@@ -147,6 +129,13 @@ namespace Nightbird::Editor
 		else
 		{
 			node.insert("type", std::string("scene_object"));
+		}
+
+		if (object->HasSourceScene())
+		{
+			node.insert("scene_uuid", uuids::to_string(object->GetSourceSceneUUID().value()));
+			nodesArray.push_back(node);
+			return; // Do not serialize children of scene instance
 		}
 
 		nodesArray.push_back(node);

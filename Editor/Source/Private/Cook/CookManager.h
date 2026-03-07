@@ -15,7 +15,6 @@
 namespace Nightbird::Core
 {
 	class SceneObject;
-	class SceneInstance;
 	class Camera;
 	class Texture;
 	struct Material;
@@ -61,7 +60,7 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::Material*, uuids::uuid> m_MaterialUUIDs;
 		std::unordered_map<const Core::Mesh*, uuids::uuid> m_MeshUUIDs;
 		
-		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneInstance>> m_ImportedScenes;
+		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> m_ImportedSceneRoots;
 
 		std::unordered_set<uuids::uuid> m_CookedSceneUUIDs;
 

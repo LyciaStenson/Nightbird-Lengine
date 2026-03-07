@@ -8,7 +8,6 @@
 #include "Core/MeshInstance.h"
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
-#include "Core/SceneInstance.h"
 #include "Core/Log.h"
 
 #include "Cook/BinaryWriter.h"
@@ -24,7 +23,7 @@ namespace Nightbird::Editor
 		m_NodeUUIDs.clear();
 		m_MeshUUIDs = &meshUUIDs;
 
-		AssignNodeUUIDs(root);
+		AssignNodeUUIDs(root, true);
 
 		std::filesystem::create_directories(outputPath.parent_path());
 		BinaryWriter writer(outputPath, endianness);
@@ -63,7 +62,12 @@ namespace Nightbird::Editor
 		writer.WriteUInt32(static_cast<uint32_t>(m_NodeUUIDs.size() - 1));
 
 		for (const auto& child : root->GetChildren())
+		{
+			Core::Log::Info("BinarySceneWriter: Root name: " + std::string(root->GetName()));
+			Core::Log::Info("BinarySceneWriter: Node count before -1: " + std::to_string(m_NodeUUIDs.size()));
+			Core::Log::Info("BinarySceneWriter: Children count: " + std::to_string(root->GetChildren().size()));
 			WriteNode(child.get(), uuids::uuid{}, writer);
+		}
 
 		Core::Log::Info("BinarySceneWriter: Written binary scene: " + outputPath.string());
 	}
@@ -75,11 +79,11 @@ namespace Nightbird::Editor
 
 		m_NodeUUIDs[object] = GenerateUUID();
 
-		if (isRoot && dynamic_cast<Core::SceneInstance*>(object))
+		if (!isRoot && object->HasSourceScene())
 			return;
-
+		
 		for (const auto& child : object->GetChildren())
-			AssignNodeUUIDs(child.get(), false);
+			AssignNodeUUIDs(child.get());
 	}
 
 	void BinarySceneWriter::WriteNode(Core::SceneObject* object, const uuids::uuid& parentUUID, BinaryWriter& writer)
@@ -100,15 +104,22 @@ namespace Nightbird::Editor
 		writer.WriteUInt32(static_cast<uint32_t>(name.size()));
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(name.data()), name.size());
 		
-		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(object))
+		if (object->HasSourceScene())
 		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SceneInstance));
-			WriteTransform(sceneInstance->transform, writer);
-			auto uuidBytes = sceneInstance->GetSceneUUID().as_bytes();
+			// Has Scene UUID (true)
+			writer.WriteUInt8(1);
+			// Scene UUID
+			auto uuidBytes = object->GetSourceSceneUUID().value().as_bytes();
 			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(uuidBytes.data()), 16);
-			return; // Do not recurse children of SceneInstance
 		}
-		else if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+		else
+		{
+			// Has Scene UUID (false)
+			writer.WriteUInt8(0);
+		}
+		
+		// Node type
+		if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
 			WriteTransform(meshInstance->transform, writer);
@@ -158,6 +169,9 @@ namespace Nightbird::Editor
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SceneObject));
 		}
 
+		if (object->HasSourceScene())
+			return; // Do not serialize children of scene instance
+		
 		for (const auto& child : object->GetChildren())
 			WriteNode(child.get(), m_NodeUUIDs[object], writer);
 	}

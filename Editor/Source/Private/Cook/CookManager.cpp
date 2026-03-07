@@ -2,7 +2,6 @@
 
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
-#include "Core/SceneInstance.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
 #include "Core/Material.h"
@@ -27,7 +26,7 @@ namespace Nightbird::Editor
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
 		m_MeshUUIDs.clear();
-		m_ImportedScenes.clear();
+		m_ImportedSceneRoots.clear();
 		m_CookedSceneUUIDs.clear();
 		//m_Manifest.clear();
 		
@@ -49,7 +48,7 @@ namespace Nightbird::Editor
 		CookMaterials(m_CookOutputDir, m_Endianness);
 		CookMeshes(m_CookOutputDir, m_Endianness);
 
-		for (auto& [uuid, importedRoot] : m_ImportedScenes)
+		for (auto& [uuid, importedRoot] : m_ImportedSceneRoots)
 			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
 
 		WriteBinaryScene(sceneReadResult.scene->GetRoot(), sceneReadResult.uuid, m_CookOutputDir, m_Endianness, sceneReadResult.scene->GetActiveCamera());
@@ -71,17 +70,17 @@ namespace Nightbird::Editor
 			return;
 
 		Core::Log::Info("CookManager: CollectAssets visiting: " + object->GetName());
-
-		if (auto* sceneInstance = dynamic_cast<Core::SceneInstance*>(object))
+		
+		if (object->HasSourceScene())
 		{
-			if (m_CookedSceneUUIDs.count(sceneInstance->GetSceneUUID()))
+			if (m_CookedSceneUUIDs.count(object->GetSourceSceneUUID().value()))
 				return;
-			m_CookedSceneUUIDs.insert(sceneInstance->GetSceneUUID());
+			m_CookedSceneUUIDs.insert(object->GetSourceSceneUUID().value());
 
-			const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(sceneInstance->GetSceneUUID());
+			const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(object->GetSourceSceneUUID().value());
 			if (!assetInfo)
 			{
-				Core::Log::Warning("CookManager: Asset info not found for scene instance: " + sceneInstance->GetName());
+				Core::Log::Warning("CookManager: Asset info not found for scene instance: " + object->GetName());
 				return;
 			}
 
@@ -89,11 +88,12 @@ namespace Nightbird::Editor
 
 			for (const auto& child : importedRoot->GetChildren())
 				CollectAssets(child.get());
-			
-			m_ImportedScenes[sceneInstance->GetSceneUUID()] = std::move(importedRoot);
+
+			m_ImportedSceneRoots[object->GetSourceSceneUUID().value()] = std::move(importedRoot);
 			return;
 		}
-		else if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+
+		if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
 		{
 			Core::Log::Info("CookManager: Found MeshInstance: " + object->GetName());
 

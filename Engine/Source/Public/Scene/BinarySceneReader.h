@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Scene.h"
-#include "Core/SceneInstance.h"
 
 #include <uuid.h>
 
@@ -10,7 +9,6 @@
 
 namespace Nightbird::Core
 {
-	class SceneObject;
 	class Camera;
 	struct Transform;
 }
@@ -24,9 +22,8 @@ namespace Nightbird::Load
 	{
 	public:
 		BinarySceneReader(AssetLoader& assetLoader);
-
+		
 		std::unique_ptr<Core::Scene> ReadScene(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
-		std::unique_ptr<Core::SceneInstance> ReadSceneInstance(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
 
 	private:
 		AssetLoader& m_AssetLoader;

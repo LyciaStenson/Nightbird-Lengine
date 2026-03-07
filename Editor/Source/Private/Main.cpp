@@ -4,6 +4,7 @@
 #include "Core/SceneObject.h"
 #include "Input/Provider.h"
 
+#include "Core/SpatialObject.h"
 #include "Core/Vertex.h"
 #include "Core/Material.h"
 #include "Core/Mesh.h"
@@ -17,6 +18,8 @@
 
 #include "Scene/TextSceneWriter.h"
 #include "Scene/TextSceneReader.h"
+
+#include "Scene/BinarySceneReader.h"
 
 #include "Cook/CookManager.h"
 
@@ -46,10 +49,10 @@ int main()
 	importManager.Scan();
 
 	//auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
-	//if (result)
+	//if (auto* witchTreehouse = dynamic_cast<Core::SpatialObject*>(result.get()))
 	//{
-	//	result->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	//	result->transform.scale = glm::vec3(0.001f);
+	//	witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	//	witchTreehouse->transform.scale = glm::vec3(0.001f);
 	//	
 	//	engine.GetScene().GetRoot()->AddChild(std::move(result));
 	//}
@@ -74,10 +77,10 @@ int main()
 	//camera->transform.position = glm::vec3(0.0f, 1.5f, 5.0f);
 
 	//Core::Camera* cameraPtr = camera.get();
-	//
+	
 	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
 	//engine.GetScene().SetActiveCamera(cameraPtr);
-	//
+	
 	//Editor::TextSceneWriter sceneWriter;
 	//sceneWriter.Write(engine.GetScene(), "MainScene", GenerateUUID(), "Assets/Scenes/Main.ntscene");
 

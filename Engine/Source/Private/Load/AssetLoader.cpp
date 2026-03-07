@@ -6,6 +6,7 @@
 #include "Load/MaterialLoader.h"
 #include "Load/MeshLoader.h"
 
+#include "Core/Scene.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Load
@@ -35,14 +36,9 @@ namespace Nightbird::Load
 		m_MeshCache[uuid] = mesh;
 		return mesh;
 	}
-
+	
 	std::unique_ptr<Core::Scene> AssetLoader::LoadScene(const uuids::uuid& uuid)
 	{
 		return m_SceneReader->ReadScene(m_CookedDir, uuid);
-	}
-
-	std::unique_ptr<Core::SceneInstance> AssetLoader::LoadSceneInstance(const uuids::uuid& uuid)
-	{
-		return m_SceneReader->ReadSceneInstance(m_CookedDir, uuid);
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/SceneInstance.h"
+#include "Core/SceneObject.h"
 
 #include <uuid.h>
 
@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 		ImportManager(const std::filesystem::path& assetsDir);
 
 		void Scan();
-		std::unique_ptr<Core::SceneInstance> Import(const std::filesystem::path& sourcePath);
+		std::unique_ptr<Core::SceneObject> Import(const std::filesystem::path& sourcePath);
 
 		const AssetInfo* GetAssetInfo(const uuids::uuid& uuid) const;
 

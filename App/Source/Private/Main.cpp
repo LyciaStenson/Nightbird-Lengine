@@ -44,7 +44,7 @@ int main()
 	//auto mesh = std::make_shared<Core::Mesh>(primitives);
 
 	//auto meshInstance = std::make_unique<Core::MeshInstance>("MeshInstance", mesh);
-	//
+	
 	//auto camera = std::make_unique<Core::Camera>("Camera");
 	//camera->transform.position = glm::vec3(0.0f, 0.0f, 5.0f);
 
@@ -56,7 +56,7 @@ int main()
 
 	Load::AssetLoader assetLoader("Cooked/Desktop");
 
-	auto sceneUUID = uuids::uuid::from_string("df7d18af-fc6b-4b96-bf57-198dbad27486");
+	auto sceneUUID = uuids::uuid::from_string("e6d023d0-64b4-4651-9d16-3610a39fbfa4");
 	if (!sceneUUID)
 	{
 		Core::Log::Error("Invalid scene UUID");

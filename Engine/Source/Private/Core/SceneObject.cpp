@@ -28,6 +28,11 @@ namespace Nightbird::Core
 		return m_Children;
 	}
 
+	std::vector<std::unique_ptr<SceneObject>>& SceneObject::GetChildren()
+	{
+		return m_Children;
+	}
+
 	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
 		child->SetParent(this);
@@ -48,6 +53,21 @@ namespace Nightbird::Core
 		}
 
 		return nullptr;
+	}
+
+	bool SceneObject::HasSourceScene() const
+	{
+		return m_SourceSceneUUID.has_value();
+	}
+
+	const std::optional<uuids::uuid>& SceneObject::GetSourceSceneUUID() const
+	{
+		return m_SourceSceneUUID;
+	}
+
+	void SceneObject::SetSourceSceneUUID(const uuids::uuid& uuid)
+	{
+		m_SourceSceneUUID = uuid;
 	}
 
 	void SceneObject::EnterScene()

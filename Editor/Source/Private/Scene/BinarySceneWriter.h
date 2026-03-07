@@ -31,7 +31,7 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::SceneObject*, uuids::uuid> m_NodeUUIDs;
 		const std::unordered_map<const Core::Mesh*, uuids::uuid>* m_MeshUUIDs = nullptr;
 
-		void AssignNodeUUIDs(Core::SceneObject* object, bool isRoot = true);
+		void AssignNodeUUIDs(Core::SceneObject* object, bool isRoot = false);
 
 		void WriteNode(Core::SceneObject* object, const uuids::uuid& parentUUID, BinaryWriter& writer);
 
