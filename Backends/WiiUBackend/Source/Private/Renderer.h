@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Core/Renderer.h"
+#include "Core/Renderable.h"
+
+#include <vector>
 
 namespace Nightbird::Core
 {
@@ -16,5 +19,8 @@ namespace Nightbird::WiiU
 		void Shutdown() override;
 		void SubmitScene(const Core::Scene& scene) override;
 		void DrawFrame() override;
+
+	private:
+		std::vector<Core::Renderable> m_Renderables;
 	};
 }

@@ -16,7 +16,7 @@ namespace Nightbird::WiiU
 
 	void Renderer::SubmitScene(const Core::Scene& scene)
 	{
-
+		m_Renderables = scene.CollectRenderables();
 	}
 
 	void Renderer::DrawFrame()

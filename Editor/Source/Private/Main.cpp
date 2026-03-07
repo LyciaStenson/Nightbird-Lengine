@@ -84,8 +84,8 @@ int main()
 	//Editor::TextSceneWriter sceneWriter;
 	//sceneWriter.Write(engine.GetScene(), "MainScene", GenerateUUID(), "Assets/Scenes/Main.ntscene");
 
-	Editor::CookManager cookManager("Cooked", importManager);
-	cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::Desktop);
+	//Editor::CookManager cookManager("Cooked", importManager);
+	//cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::Desktop);
 
 	engine.Run();
 
