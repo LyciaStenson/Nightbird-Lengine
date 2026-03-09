@@ -7,6 +7,8 @@
 #include "Core/Texture.h"
 #include "Core/Log.h"
 
+#include <cstring>
+
 namespace Nightbird::Vulkan
 {
 	Texture::Texture(Device* device, const Core::Texture& texture, bool sRGB)

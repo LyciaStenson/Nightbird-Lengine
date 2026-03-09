@@ -6,6 +6,8 @@
 
 #include "Core/Log.h"
 
+#include <cstring>
+
 namespace Nightbird::Vulkan
 {
 	struct alignas(16) TransformUBO

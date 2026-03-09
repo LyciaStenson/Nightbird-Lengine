@@ -6,6 +6,9 @@
 #include "Core/Material.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
+#include "Core/Renderable.h"
+#include "Core/DirectionalLight.h"
+#include "Core/PointLight.h"
 
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
@@ -30,9 +33,6 @@ namespace Nightbird::Core
 	class Platform;
 	class Scene;
 	class Camera;
-	class DirectionalLight;
-	class PointLight;
-	struct Renderable;
 }
 
 namespace Nightbird::Vulkan

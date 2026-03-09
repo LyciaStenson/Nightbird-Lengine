@@ -3,9 +3,6 @@
 #include "Core/Platform.h"
 #include "Core/Scene.h"
 #include "Core/Camera.h"
-#include "Core/Renderable.h"
-#include "Core/DirectionalLight.h"
-#include "Core/PointLight.h"
 
 #include "Vulkan/CameraUBO.h"
 #include "Vulkan/LightData.h"

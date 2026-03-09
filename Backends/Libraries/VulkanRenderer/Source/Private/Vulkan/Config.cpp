@@ -1,5 +1,7 @@
 #include "Vulkan/Config.h"
 
+#include "Core/Log.h"
+
 #include <volk.h>
 
 #include <cstring>
@@ -47,7 +49,7 @@ namespace Nightbird::Vulkan
 	{
 		if (enableValidationLayers && !CheckValidationLayerSupport())
 		{
-			std::cout << "Validation layers requested but not available. Disabling validation layers for compatibility." << std::endl;
+			Core::Log::Warning("Validation layers requested but not available. Disabling validation layers for compatibility.");
 			enableValidationLayers = false;
 		}
 	}

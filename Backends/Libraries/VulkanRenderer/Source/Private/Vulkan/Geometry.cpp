@@ -5,6 +5,8 @@
 
 #include "Core/MeshPrimitive.h"
 
+#include <cstring>
+
 namespace Nightbird::Vulkan
 {
 	Geometry::Geometry(Device* device, const Core::MeshPrimitive& primitive)

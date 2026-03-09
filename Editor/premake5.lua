@@ -31,8 +31,6 @@ project "Editor"
 
 	defines { "EDITOR" }
 
-	links { "Engine" }
-
 	filter { "platforms:Desktop" }
-		links { "GlfwVulkanBackend", "GLFW", "fastgltf" }
+		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "fastgltf", "Engine" }
 	filter { }

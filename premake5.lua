@@ -32,7 +32,7 @@ workspace "Nightbird"
 	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "Dependencies"
-	include "Backends/Libraries/GlfwPlatform/Vendor/GLFW"
+	include "Backends/Libraries/GlfwPlatform/Vendor/glfw"
 	include "Editor/Vendor/fastgltf"
 group ""
 

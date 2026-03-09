@@ -1,5 +1,7 @@
 #include "Platform.h"
 
+#include "Core/Log.h"
+
 #include <whb/proc.h>
 
 #include <whb/log_cafe.h>
@@ -10,6 +12,10 @@ namespace Nightbird::WiiU
 	{
 		WHBProcInit();
 		WHBLogCafeInit();
+
+		Log::SetInfoFunc([](const std::string& message) { WHBLogPrintf("[Info] %s", message.c_str()); });
+		Log::SetWarningFunc([](const std::string& message) { WHBLogPrintf("[Warning] %s", message.c_str()); });
+		Log::SetErrorFunc([](const std::string& message) { WHBLogPrintf("[Error] %s", message.c_str()); });
 	}
 
 	void Platform::Shutdown()

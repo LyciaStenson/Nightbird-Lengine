@@ -12,6 +12,8 @@
 
 #include <array>
 
+#include <cstring>
+
 namespace Nightbird::Vulkan
 {
 	struct alignas(16) MaterialFactorsUBO
@@ -29,9 +31,14 @@ namespace Nightbird::Vulkan
 
 	void Material::CreateTextures(Device* device, const Core::Material& material, const Core::Texture& defaultTexture)
 	{
-		m_BaseColorTexture = std::make_unique<Texture>(device, material.baseColorTexture ? *material.baseColorTexture : defaultTexture, true);
-		m_MetallicRoughnessTexture = std::make_unique<Texture>(device, material.metallicRoughnessTexture ? *material.metallicRoughnessTexture : defaultTexture, false);
-		m_NormalTexture = std::make_unique<Texture>(device, material.normalTexture ? *material.normalTexture : defaultTexture, false);
+		const Core::Texture& baseColorTexture = material.baseColorTexture ? static_cast<const Core::Texture&>(*material.baseColorTexture) : defaultTexture;
+		m_BaseColorTexture = std::make_unique<Texture>(device, baseColorTexture, true);
+
+		const Core::Texture& metallicRoughnessTexture = material.metallicRoughnessTexture ? static_cast<const Core::Texture&>(*material.metallicRoughnessTexture) : defaultTexture;
+		m_MetallicRoughnessTexture = std::make_unique<Texture>(device, metallicRoughnessTexture, false);
+
+		const Core::Texture& normalTexture = material.normalTexture ? static_cast<const Core::Texture&>(*material.normalTexture) : defaultTexture;
+		m_NormalTexture = std::make_unique<Texture>(device, normalTexture, false);
 	}
 
 	void Material::CreateFactorsBuffer(Device* device, const Core::Material& material)

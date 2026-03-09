@@ -2,6 +2,8 @@
 
 #include "Core/Vertex.h"
 
+#include <cstring>
+
 namespace Nightbird::Editor
 {
 	BinaryWriter::BinaryWriter(const std::filesystem::path& path, Endianness endianness)

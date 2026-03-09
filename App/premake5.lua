@@ -27,12 +27,10 @@ project "App"
 		"%{wks.location}/Engine/Vendor/stduuid"
 	}
 
-	links { "Engine" }
-
 	filter { "platforms:Desktop" }
-		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW" }
+		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "Engine" }
 	filter { }
 
 	filter { "platforms:WiiU" }
-		links { "WiiUBackend" }
+		links { "WiiUBackend", "Engine" }
 	filter { }
