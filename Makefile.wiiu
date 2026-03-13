@@ -27,7 +27,8 @@ SOURCES		:=	App/Source/Private \
 				Engine/Source/Private/Load \
 				Engine/Source/Private/Scene \
 				Backends/WiiUBackend/Source/Private
-DATA		:=	data
+DATA		:=	data \
+			Intermediate/wiiu
 INCLUDES	:=	App/Source/Public \
 				App/Source/Private \
 				Engine/Source/Public \
@@ -140,6 +141,10 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 #-------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
 #-------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+%.gsh.o %_gsh.h :	%.gsh
 	@echo $(notdir $<)
 	@$(bin2o)
 

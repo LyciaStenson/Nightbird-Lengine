@@ -1,7 +1,12 @@
 #pragma once
 
 #include "Core/Renderer.h"
+
 #include "Core/Renderable.h"
+
+#include <gx2/shaders.h>
+#include <gx2r/buffer.h>
+#include <whb/gfx.h>
 
 #include <vector>
 
@@ -21,6 +26,12 @@ namespace Nightbird::WiiU
 		void DrawFrame() override;
 
 	private:
+		void DrawScene();
+
 		std::vector<Core::Renderable> m_Renderables;
+
+		WHBGfxShaderGroup m_ShaderGroup = {};
+
+		GX2RBuffer m_PositionBuffer = {};
 	};
 }

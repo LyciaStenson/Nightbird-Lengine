@@ -6,6 +6,18 @@ if [ -z "$DEVKITPRO" ]; then
     exit 1
 fi
 
+echo "Compiling shaders..."
+mkdir -p Intermediate/wiiu
+Tools/glslcompiler.elf \
+    -vs Backends/WiiUBackend/Shaders/Shader.vert \
+    -ps Backends/WiiUBackend/Shaders/Shader.frag \
+    -o Intermediate/wiiu/Shader.gsh
+
+if [ $? -ne 0 ]; then
+    echo "Shader compilation failed."
+    exit 1
+fi
+
 make -f Makefile.wiiu "$@"
 
 if [ $? -ne 0 ]; then
