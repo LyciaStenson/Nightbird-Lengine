@@ -1,17 +1,20 @@
+local shaderDir = "%{wks.location}/Backends/Libraries/VulkanRenderer/Shaders/"
+local outDir = "%{wks.location}/Binaries/" .. outputdir .. "/"
+
 project "GlfwVulkanBackend"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 
-	targetdir ("%{wks.location}/Binaries/" .. outputdir)
+	targetdir (outDir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
-	
+
 	defines {
 		"VK_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
 		"GLFW_INCLUDE_VULKAN"
 	}
-	
+
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
@@ -32,5 +35,19 @@ project "GlfwVulkanBackend"
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/volk",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/vma"
 	}
-	
+
 	links { "GlfwPlatform", "VulkanRenderer" }
+
+	filter { "system:windows" }
+		postbuildcommands {
+			"%{wks.location}/Tools/glslc.exe " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
+			"%{wks.location}/Tools/glslc.exe " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+		}
+
+	filter { "system:linux" }
+		postbuildcommands {
+			"%{wks.location}/Tools/glslc " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
+			"%{wks.location}/Tools/glslc " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+		}
+
+	filter { }

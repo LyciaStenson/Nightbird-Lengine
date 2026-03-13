@@ -31,8 +31,8 @@ namespace Nightbird::Vulkan
 	
 	void Pipeline::CreateGraphicsPipeline(RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided)
 	{
-		Shader vertShader(m_Device->GetLogical(), "Assets/Shaders/Vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		Shader fragShader(m_Device->GetLogical(), "Assets/Shaders/Frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		Shader vertShader(m_Device->GetLogical(), "Pbr.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+		Shader fragShader(m_Device->GetLogical(), "Pbr.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		VkPipelineShaderStageCreateInfo shaderStages[] =
 		{
