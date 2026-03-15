@@ -17,7 +17,7 @@ namespace Nightbird::Core
 	{
 		return m_Indices;
 	}
-	
+
 	const std::shared_ptr<Material>& MeshPrimitive::GetMaterial() const
 	{
 		return m_Material;

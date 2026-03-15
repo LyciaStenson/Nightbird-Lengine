@@ -1,11 +1,20 @@
 #include "Renderer.h"
 
 #include "Core/Scene.h"
+#include "Core/Camera.h"
 #include "Core/Log.h"
 
+#include <coreinit/memdefaultheap.h>
 #include <gfd.h>
+#include <gx2/registers.h>
 #include <gx2/draw.h>
+#include <gx2/event.h>
+#include <gx2/state.h>
+#include <gx2/mem.h>
 #include <gx2r/draw.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <cstring>
 
@@ -13,46 +22,74 @@
 
 namespace Nightbird::WiiU
 {
-	static const float sPositionData[] =
+	static inline float swapF32(float f)
 	{
-		 0.0f,  0.5f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f
-	};
+		uint32_t i;
+		memcpy(&i, &f, sizeof(i));
+		i = __builtin_bswap32(i);
+		memcpy(&f, &i, sizeof(f));
+		return f;
+	}
+
+	static void UploadMatrix(float* dest, const glm::mat4& src)
+	{
+		const float* data = glm::value_ptr(src);
+		for (int i = 0; i < 16; i++)
+			dest[i] = swapF32(data[i]);
+	}
+
+	static void UploadVec4(float* dest, const glm::vec4& src)
+	{
+		dest[0] = swapF32(src.x);
+		dest[1] = swapF32(src.y);
+		dest[2] = swapF32(src.z);
+		dest[3] = swapF32(src.w);
+	}
 
 	void Renderer::Initialize()
 	{
 		WHBGfxInit();
 
 		WHBGfxLoadGFDShaderGroup(&m_ShaderGroup, 0, Shader_gsh);
+		GX2Invalidate(GX2_INVALIDATE_MODE_CPU_SHADER, m_ShaderGroup.vertexShader->program, m_ShaderGroup.vertexShader->size);
+		GX2Invalidate(GX2_INVALIDATE_MODE_CPU_SHADER, m_ShaderGroup.pixelShader->program, m_ShaderGroup.pixelShader->size);
+
 		WHBGfxInitShaderAttribute(&m_ShaderGroup, "aPosition", 0, 0, GX2_ATTRIB_FORMAT_FLOAT_32_32_32_32);
 		WHBGfxInitFetchShader(&m_ShaderGroup);
 
-		m_PositionBuffer.flags = GX2R_RESOURCE_BIND_VERTEX_BUFFER |
-								 GX2R_RESOURCE_USAGE_CPU_READ |
-								 GX2R_RESOURCE_USAGE_CPU_WRITE |
-								 GX2R_RESOURCE_USAGE_GPU_READ;
+		for (uint32_t i = 0; i < m_ShaderGroup.vertexShader->uniformBlockCount; i++)
+		{
+			auto& b = m_ShaderGroup.vertexShader->uniformBlocks[i];
+			Core::Log::Info("Block " + std::to_string(i) + " name=" + std::string(b.name) + " offset=" + std::to_string(b.offset));
+			if (std::string(b.name) == "CameraUBO")
+				m_CameraBlockLocation = b.offset;
+			else if (std::string(b.name) == "ModelUBO")
+				m_ModelBlockLocation = b.offset;
+		}
 
-		m_PositionBuffer.elemSize = 4 * sizeof(float);
-		m_PositionBuffer.elemCount = 3;
-		GX2RCreateBuffer(&m_PositionBuffer);
+		// CameraUBO: view(16) + projection(16) + position(4) = 36 floats
+		m_CameraData = (float*)MEMAllocFromDefaultHeapEx(36 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 
-		void* buffer = GX2RLockBufferEx(&m_PositionBuffer, GX2R_RESOURCE_BIND_NONE);
-		memcpy(buffer, sPositionData, m_PositionBuffer.elemSize * m_PositionBuffer.elemCount);
-		GX2RUnlockBufferEx(&m_PositionBuffer, GX2R_RESOURCE_BIND_NONE);
-
-		Core::Log::Info("WiiU Renderer Initialized");
+		// ModelUBO: model(16) = 16 floats
+		m_ModelData = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 	}
 
 	void Renderer::Shutdown()
 	{
-		GX2RDestroyBufferEx(&m_PositionBuffer, GX2R_RESOURCE_BIND_NONE);
+		GX2DrawDone();
+
+		MEMFreeToDefaultHeap(m_CameraData);
+		MEMFreeToDefaultHeap(m_ModelData);
+
+		m_GeometryCache.clear();
+
 		WHBGfxFreeShaderGroup(&m_ShaderGroup);
 		WHBGfxShutdown();
 	}
 
 	void Renderer::SubmitScene(const Core::Scene& scene)
 	{
+		m_ActiveCamera = scene.GetActiveCamera();
 		m_Renderables = scene.CollectRenderables();
 	}
 
@@ -61,24 +98,70 @@ namespace Nightbird::WiiU
 		WHBGfxBeginRender();
 
 		WHBGfxBeginRenderTV();
-		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		DrawScene();
+		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawScene(1920.0f, 1080.0f);
 		WHBGfxFinishRenderTV();
 
 		WHBGfxBeginRenderDRC();
-		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		DrawScene();
+		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawScene(854.0f, 480.0f);
 		WHBGfxFinishRenderDRC();
 
 		WHBGfxFinishRender();
 	}
 
-	void Renderer::DrawScene()
+	void Renderer::DrawScene(float width, float height)
 	{
+		if (!m_ActiveCamera)
+			return;
+
+		GX2SetShaderMode(GX2_SHADER_MODE_UNIFORM_BLOCK);
 		GX2SetFetchShader(&m_ShaderGroup.fetchShader);
 		GX2SetVertexShader(m_ShaderGroup.vertexShader);
 		GX2SetPixelShader(m_ShaderGroup.pixelShader);
-		GX2RSetAttributeBuffer(&m_PositionBuffer, 0, m_PositionBuffer.elemSize, 0);
-		GX2DrawEx(GX2_PRIMITIVE_MODE_TRIANGLES, 3, 0, 1);
+
+		GX2SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
+		GX2SetScissor(0, 0, (uint32_t)width, (uint32_t)height);
+
+		GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_FUNC_LESS);
+		GX2SetColorControl(GX2_LOGIC_OP_COPY, 0, GX2_DISABLE, GX2_ENABLE);
+		GX2SetTargetChannelMasks(
+			GX2_CHANNEL_MASK_RGBA,
+			(GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0,
+			(GX2ChannelMask)0, (GX2ChannelMask)0, (GX2ChannelMask)0,
+			(GX2ChannelMask)0
+		);
+
+		glm::vec4 cameraPos = glm::vec4(glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]), 1.0f);
+		UploadMatrix(m_CameraData, m_ActiveCamera->GetViewMatrix());
+		UploadMatrix(m_CameraData + 16, m_ActiveCamera->GetProjectionMatrix(width, height));
+		UploadVec4(m_CameraData + 32, cameraPos);
+
+		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);
+		GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_CameraData, 36 * sizeof(float));
+
+		for (const auto& renderable : m_Renderables)
+		{
+			UploadMatrix(m_ModelData, renderable.transform);
+
+			GX2SetVertexUniformBlock(m_ModelBlockLocation, 16 * sizeof(float), m_ModelData);
+			GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_ModelData, 16 * sizeof(float));
+
+			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
+
+			GX2RSetAttributeBuffer(&geometry.GetPositionBuffer(), 0, geometry.GetPositionBuffer().elemSize, 0);
+			GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, geometry.GetIndexCount(), GX2_INDEX_TYPE_U16, geometry.GetIndexBuffer().buffer, 0, 1);
+		}
+	}
+
+	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
+	{
+		auto it = m_GeometryCache.find(primitive);
+		if (it != m_GeometryCache.end())
+			return it->second;
+
+		// Create and add to cache if does not exist
+		m_GeometryCache.emplace(primitive, Geometry(*primitive));
+		return m_GeometryCache.at(primitive);
 	}
 }

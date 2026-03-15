@@ -4,15 +4,18 @@
 
 #include "Core/Renderable.h"
 
+#include "Geometry.h"
+
 #include <gx2/shaders.h>
-#include <gx2r/buffer.h>
 #include <whb/gfx.h>
 
 #include <vector>
+#include <unordered_map>
 
 namespace Nightbird::Core
 {
 	class Scene;
+	class Camera;
 }
 
 namespace Nightbird::WiiU
@@ -26,12 +29,20 @@ namespace Nightbird::WiiU
 		void DrawFrame() override;
 
 	private:
-		void DrawScene();
+		void DrawScene(float width, float height);
+
+		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 
 		std::vector<Core::Renderable> m_Renderables;
+		Core::Camera* m_ActiveCamera = nullptr;
+		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 
 		WHBGfxShaderGroup m_ShaderGroup = {};
 
-		GX2RBuffer m_PositionBuffer = {};
+		uint32_t m_CameraBlockLocation = 0;
+		uint32_t m_ModelBlockLocation = 0;
+
+		float* m_CameraData = nullptr;
+		float* m_ModelData = nullptr;
 	};
 }
