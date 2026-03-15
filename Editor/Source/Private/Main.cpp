@@ -48,18 +48,22 @@ int main()
 	Editor::ImportManager importManager("Assets");
 	importManager.Scan();
 
-	//auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
-	//if (auto* witchTreehouse = dynamic_cast<Core::SpatialObject*>(result.get()))
-	//{
-	//	witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	//	witchTreehouse->transform.scale = glm::vec3(0.001f);
-	//	
-	//	engine.GetScene().GetRoot()->AddChild(std::move(result));
-	//}
+	auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
+	if (auto* witchTreehouse = dynamic_cast<Core::SpatialObject*>(result.get()))
+	{
+		witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		witchTreehouse->transform.scale = glm::vec3(0.001f);
+
+		engine.GetScene().GetRoot()->AddChild(std::move(result));
+	}
+	else
+	{
+		Core::Log::Error("Failed to import model");
+	}
 
 	Editor::TextSceneReader sceneReader(importManager);
 	engine.SetScene(sceneReader.Read("Assets/Scenes/Main.ntscene").scene);
-	
+
 	//auto directionalLight = std::make_unique<Core::DirectionalLight>("DirectionalLight");
 	//directionalLight->transform.rotation = glm::quat(glm::vec3(glm::radians(-45.0f), glm::radians(45.0f), 0.0f));
 	//directionalLight->color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -72,20 +76,21 @@ int main()
 	//pointLight->intensity = 1.0f;
 	//pointLight->radius = 5.0f;
 	//engine.GetScene().GetRoot()->AddChild(std::move(pointLight));
-	//
+
 	//auto camera = std::make_unique<Core::Camera>("Camera");
 	//camera->transform.position = glm::vec3(0.0f, 1.5f, 5.0f);
 
 	//Core::Camera* cameraPtr = camera.get();
-	
+
 	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
 	//engine.GetScene().SetActiveCamera(cameraPtr);
-	
+
 	//Editor::TextSceneWriter sceneWriter;
 	//sceneWriter.Write(engine.GetScene(), "MainScene", GenerateUUID(), "Assets/Scenes/Main.ntscene");
 
 	//Editor::CookManager cookManager("Cooked", importManager);
 	//cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::Desktop);
+	//cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::WiiU);
 
 	engine.Run();
 

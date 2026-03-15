@@ -44,7 +44,7 @@ namespace Nightbird::Editor
 
 	std::unique_ptr<Core::SceneObject> ImportManager::Import(const std::filesystem::path& sourcePath)
 	{
-		std::filesystem::path infoPath = sourcePath.string() + ".assetInfo";
+		std::filesystem::path infoPath = sourcePath.string() + ".assetinfo";
 		if (!std::filesystem::exists(infoPath))
 		{
 			Core::Log::Warning("No .assetinfo file found for " + sourcePath.string());

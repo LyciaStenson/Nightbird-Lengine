@@ -26,7 +26,9 @@ SOURCES		:=	App/Source/Private \
 				Engine/Source/Private/Input \
 				Engine/Source/Private/Load \
 				Engine/Source/Private/Scene \
-				Backends/WiiUBackend/Source/Private
+				Backends/WiiUBackend/Source/Private \
+				Backends/WiiUBackend/Source/Private/WiiU \
+				Backends/WiiUBackend/Source/Private/GX2
 DATA		:=	data \
 			Intermediate/wiiu
 INCLUDES	:=	App/Source/Public \
@@ -34,6 +36,9 @@ INCLUDES	:=	App/Source/Public \
 				Engine/Source/Public \
 				Engine/Source/Private \
 				Backends/WiiUBackend/Source/Public \
+				Backends/WiiUBackend/Source/Private \
+				Backends/WiiUBackend/Source/Private/WiiU \
+				Backends/WiiUBackend/Source/Private/GX2 \
 				Engine/Vendor/glm \
 				Engine/Vendor/stb \
 				Engine/Vendor/stduuid

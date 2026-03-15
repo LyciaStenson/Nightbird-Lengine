@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 namespace Nightbird::Input
 {
 	class Provider;
@@ -18,6 +20,8 @@ namespace Nightbird::Core
 		virtual void WaitEvents() = 0;
 		virtual bool ShouldClose() const = 0;
 		virtual void GetFramebufferSize(int* width, int* height) const = 0;
+
+		virtual std::filesystem::path GetCookedAssetsPath() const = 0;
 
 		virtual Input::Provider& GetInputProvider() = 0;
 	};

@@ -1,7 +1,7 @@
 #include "Core/BackendFactory.h"
 
-#include "Platform.h"
-#include "Renderer.h"
+#include "WiiU/Platform.h"
+#include "GX2/GX2Renderer.h"
 
 namespace Nightbird::Core
 {
@@ -12,6 +12,6 @@ namespace Nightbird::Core
 
 	std::unique_ptr<Core::Renderer> CreateRenderer()
 	{
-		return std::make_unique<WiiU::Renderer>();
+		return std::make_unique<GX2::Renderer>();
 	}
 }

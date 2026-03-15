@@ -1,7 +1,9 @@
-#include "Renderer.h"
+#include "GX2Renderer.h"
 
 #include "Core/Scene.h"
 #include "Core/Camera.h"
+#include "Core/MeshPrimitive.h"
+#include "Core/Material.h"
 #include "Core/Log.h"
 
 #include <coreinit/memdefaultheap.h>
@@ -20,7 +22,7 @@
 
 #include "Shader_gsh.h"
 
-namespace Nightbird::WiiU
+namespace Nightbird::GX2
 {
 	static inline float swapF32(float f)
 	{
@@ -55,12 +57,12 @@ namespace Nightbird::WiiU
 		GX2Invalidate(GX2_INVALIDATE_MODE_CPU_SHADER, m_ShaderGroup.pixelShader->program, m_ShaderGroup.pixelShader->size);
 
 		WHBGfxInitShaderAttribute(&m_ShaderGroup, "aPosition", 0, 0, GX2_ATTRIB_FORMAT_FLOAT_32_32_32_32);
+		WHBGfxInitShaderAttribute(&m_ShaderGroup, "aBaseColorTexCoord", 1, 0, GX2_ATTRIB_FORMAT_FLOAT_32_32);
 		WHBGfxInitFetchShader(&m_ShaderGroup);
 
 		for (uint32_t i = 0; i < m_ShaderGroup.vertexShader->uniformBlockCount; i++)
 		{
 			auto& b = m_ShaderGroup.vertexShader->uniformBlocks[i];
-			Core::Log::Info("Block " + std::to_string(i) + " name=" + std::string(b.name) + " offset=" + std::to_string(b.offset));
 			if (std::string(b.name) == "CameraUBO")
 				m_CameraBlockLocation = b.offset;
 			else if (std::string(b.name) == "ModelUBO")
@@ -72,6 +74,9 @@ namespace Nightbird::WiiU
 
 		// ModelUBO: model(16) = 16 floats
 		m_ModelData = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
+
+		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
+		m_DefaultTexture = std::make_shared<Core::Texture>(1, 1, pixels);
 	}
 
 	void Renderer::Shutdown()
@@ -81,6 +86,7 @@ namespace Nightbird::WiiU
 		MEMFreeToDefaultHeap(m_CameraData);
 		MEMFreeToDefaultHeap(m_ModelData);
 
+		m_MaterialCache.clear();
 		m_GeometryCache.clear();
 
 		WHBGfxFreeShaderGroup(&m_ShaderGroup);
@@ -148,8 +154,13 @@ namespace Nightbird::WiiU
 			GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_ModelData, 16 * sizeof(float));
 
 			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
+			Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
+
+			GX2SetPixelTexture(&material.GetBaseColorTexture().GetTexture(), 3);
+			GX2SetPixelSampler(&material.GetBaseColorTexture().GetSampler(), 3);
 
 			GX2RSetAttributeBuffer(&geometry.GetPositionBuffer(), 0, geometry.GetPositionBuffer().elemSize, 0);
+			GX2RSetAttributeBuffer(&geometry.GetTexCoordBuffer(), 1, geometry.GetTexCoordBuffer().elemSize, 0);
 			GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, geometry.GetIndexCount(), GX2_INDEX_TYPE_U16, geometry.GetIndexBuffer().buffer, 0, 1);
 		}
 	}
@@ -163,5 +174,16 @@ namespace Nightbird::WiiU
 		// Create and add to cache if does not exist
 		m_GeometryCache.emplace(primitive, Geometry(*primitive));
 		return m_GeometryCache.at(primitive);
+	}
+
+	Material& Renderer::GetOrCreateMaterial(const Core::Material* material)
+	{
+		auto it = m_MaterialCache.find(material);
+		if (it != m_MaterialCache.end())
+			return it->second;
+
+		// Create and add to cache if does not exist
+		m_MaterialCache.emplace(material, Material(*material, *m_DefaultTexture));
+		return m_MaterialCache.at(material);
 	}
 }
