@@ -5,16 +5,18 @@
 #include "Core/Texture.h"
 #include "Core/Log.h"
 
+#include <cstdint>
+
 namespace Nightbird::Load
 {
-	std::shared_ptr<Core::Texture> TextureLoader::Load(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::Texture> TextureLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		auto path = cookedDir / (uuids::to_string(uuid) + ".nbtexture");
+		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbtexture";
 
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("TextureLoader: Failed to open: " + path.string());
+			Core::Log::Error("TextureLoader: Failed to open: " + path);
 			return nullptr;
 		}
 
@@ -23,7 +25,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'T' || type[1] != 'E' || type[2] != 'X' || type[3] != 'T')
 		{
-			Core::Log::Error("TextureLoader: Invalid type signature in: " + path.string());
+			Core::Log::Error("TextureLoader: Invalid type signature in: " + path);
 			return nullptr;
 		}
 

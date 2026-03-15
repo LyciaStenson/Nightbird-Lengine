@@ -55,7 +55,7 @@ namespace Nightbird::WiiU
 		*height = 1080;
 	}
 
-	std::filesystem::path Platform::GetCookedAssetsPath() const
+	std::string Platform::GetCookedAssetsPath() const
 	{
 		return std::string(WHBGetSdCardMountPath()) + "/Nightbird/Cooked";
 	}

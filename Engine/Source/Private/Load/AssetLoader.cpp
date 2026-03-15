@@ -11,7 +11,7 @@
 
 namespace Nightbird::Load
 {
-	AssetLoader::AssetLoader(const std::filesystem::path& cookedDir)
+	AssetLoader::AssetLoader(const std::string& cookedDir)
 		: m_CookedDir(cookedDir)
 	{
 		m_SceneReader = std::make_unique<BinarySceneReader>(*this);

@@ -17,7 +17,7 @@ namespace Nightbird::WiiU
 		virtual bool ShouldClose() const override;
 		virtual void GetFramebufferSize(int* width, int* height) const override;
 
-		virtual std::filesystem::path GetCookedAssetsPath() const override;
+		virtual std::string GetCookedAssetsPath() const override;
 
 		Input::Provider& GetInputProvider() override;
 

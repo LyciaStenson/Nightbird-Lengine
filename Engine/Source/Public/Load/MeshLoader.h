@@ -3,7 +3,7 @@
 #include <uuid.h>
 
 #include <memory>
-#include <filesystem>
+#include <string>
 
 namespace Nightbird::Core
 {
@@ -20,12 +20,12 @@ namespace Nightbird::Load
 	public:
 		MeshLoader(MaterialLoader& materialLoader);
 
-		std::shared_ptr<Core::Mesh> Load(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Core::Mesh> Load(const std::string& cookedDir, const uuids::uuid& uuid);
 
 	private:
 		MaterialLoader& m_MaterialLoader;
 		std::unordered_map<uuids::uuid, std::shared_ptr<Core::Material>> m_MaterialCache;
 
-		std::shared_ptr<Core::Material> LoadMaterial(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Core::Material> LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid);
 	};
 }

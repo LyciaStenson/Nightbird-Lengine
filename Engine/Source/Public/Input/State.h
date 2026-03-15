@@ -20,6 +20,7 @@ namespace Nightbird::Input
 		Start = Plus,
 		Minus,
 		Back = Minus,
+		Select = Minus,
 		Home,
 		Up, Down, Left, Right,
 		UNKNOWN, SIZE

@@ -5,7 +5,7 @@
 #include <uuid.h>
 
 #include <memory>
-#include <filesystem>
+#include <string>
 
 namespace Nightbird::Core
 {
@@ -23,7 +23,7 @@ namespace Nightbird::Load
 	public:
 		BinarySceneReader(AssetLoader& assetLoader);
 		
-		std::unique_ptr<Core::Scene> ReadScene(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
+		std::unique_ptr<Core::Scene> ReadScene(const std::string& cookedDir, const uuids::uuid& uuid);
 
 	private:
 		AssetLoader& m_AssetLoader;
@@ -36,7 +36,7 @@ namespace Nightbird::Load
 			std::vector<std::unique_ptr<Core::SceneObject>> rootChildren;
 		};
 
-		ReadNodesResult ReadNodes(const std::filesystem::path& cookedDir, const uuids::uuid& uuid);
+		ReadNodesResult ReadNodes(const std::string& cookedDir, const uuids::uuid& uuid);
 
 		void ReadTransform(Core::Transform& transform, BinaryReader& reader);
 	};

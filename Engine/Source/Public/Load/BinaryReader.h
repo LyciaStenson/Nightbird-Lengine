@@ -1,8 +1,9 @@
 #pragma once
 
-#include <filesystem>
+#include <string>
 #include <vector>
 #include <fstream>
+#include <cstdint>
 
 namespace Nightbird::Core
 {
@@ -14,7 +15,7 @@ namespace Nightbird::Load
 	class BinaryReader
 	{
 	public:
-		BinaryReader(const std::filesystem::path& path);
+		BinaryReader(const std::string& path);
 		bool IsValid() const;
 
 		uint8_t ReadUInt8();

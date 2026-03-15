@@ -22,7 +22,7 @@ namespace Nightbird::Load
 
 	}
 	
-	std::unique_ptr<Core::Scene> BinarySceneReader::ReadScene(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::unique_ptr<Core::Scene> BinarySceneReader::ReadScene(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		auto nodesRead = ReadNodes(cookedDir, uuid);
 		auto scene = std::make_unique<Core::Scene>();
@@ -33,16 +33,16 @@ namespace Nightbird::Load
 		return scene;
 	}
 
-	BinarySceneReader::ReadNodesResult BinarySceneReader::ReadNodes(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	BinarySceneReader::ReadNodesResult BinarySceneReader::ReadNodes(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		ReadNodesResult readNodesResult;
 
-		auto path = cookedDir / (uuids::to_string(uuid) + ".nbscene");
+		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbscene";
 
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("BinarySceneReader: Failed to open: " + path.string());
+			Core::Log::Error("BinarySceneReader: Failed to open: " + path);
 			return readNodesResult;
 		}
 
@@ -51,7 +51,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'S' || type[1] != 'C' || type[2] != 'N' || type[3] != 'E')
 		{
-			Core::Log::Error("BinarySceneReader: Invalid type signature in: " + path.string());
+			Core::Log::Error("BinarySceneReader: Invalid type signature in: " + path);
 			return readNodesResult;
 		}
 
@@ -226,7 +226,7 @@ namespace Nightbird::Load
 				readNodesResult.rootChildren.push_back(std::move(ownedNodeMap[nodeUUID]));
 		}
 		
-		Core::Log::Info("BinarySceneReader: Loaded scene: " + path.string());
+		Core::Log::Info("BinarySceneReader: Loaded scene: " + path);
 		return readNodesResult;
 	}
 	

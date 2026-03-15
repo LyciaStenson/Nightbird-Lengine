@@ -36,7 +36,7 @@ namespace Nightbird::Glfw
 		glfwGetFramebufferSize(m_Window, width, height);
 	}
 
-	std::filesystem::path Platform::GetCookedAssetsPath() const
+	std::string Platform::GetCookedAssetsPath() const
 	{
 		return "Cooked/Desktop";
 	}

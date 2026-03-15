@@ -8,6 +8,7 @@
 #include "Core/Log.h"
 
 #include <array>
+#include <cstdint>
 
 namespace Nightbird::Load
 {
@@ -17,14 +18,14 @@ namespace Nightbird::Load
 
 	}
 
-	std::shared_ptr<Core::Mesh> MeshLoader::Load(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::Mesh> MeshLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		auto path = cookedDir / (uuids::to_string(uuid) + ".nbmesh");
+		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbmesh";
 		
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("MeshLoader: Failed to open: " + path.string());
+			Core::Log::Error("MeshLoader: Failed to open: " + path);
 			return nullptr;
 		}
 
@@ -33,7 +34,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'M' || type[1] != 'E' || type[2] != 'S' || type[3] != 'H')
 		{
-			Core::Log::Error("MeshLoader: Invalid type signature in: " + path.string());
+			Core::Log::Error("MeshLoader: Invalid type signature in: " + path);
 			return nullptr;
 		}
 
@@ -74,7 +75,7 @@ namespace Nightbird::Load
 		return std::make_shared<Core::Mesh>(std::move(primitives));
 	}
 
-	std::shared_ptr<Core::Material> MeshLoader::LoadMaterial(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::Material> MeshLoader::LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		auto it = m_MaterialCache.find(uuid);
 		if (it != m_MaterialCache.end())

@@ -4,7 +4,7 @@
 
 namespace Nightbird::Load
 {
-	BinaryReader::BinaryReader(const std::filesystem::path& path)
+	BinaryReader::BinaryReader(const std::string& path)
 		: m_File(path, std::ios::binary | std::ios::in)
 	{
 

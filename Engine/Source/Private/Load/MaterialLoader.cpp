@@ -8,6 +8,7 @@
 #include "Core/Log.h"
 
 #include <array>
+#include <cstdint>
 
 namespace Nightbird::Load
 {
@@ -17,14 +18,14 @@ namespace Nightbird::Load
 
 	}
 
-	std::shared_ptr<Core::Material> MaterialLoader::Load(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::Material> MaterialLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		auto path = cookedDir / (uuids::to_string(uuid) + ".nbmaterial");
+		std::string path = cookedDir  + "/" + uuids::to_string(uuid) + ".nbmaterial";
 
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("MaterialLoader: Failed to open: " + path.string());
+			Core::Log::Error("MaterialLoader: Failed to open: " + path);
 			return nullptr;
 		}
 
@@ -33,7 +34,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'M' || type[1] != 'A' || type[2] != 'T' || type[3] != 'L')
 		{
-			Core::Log::Error("MaterialLoader: Invalid type signature in: " + path.string());
+			Core::Log::Error("MaterialLoader: Invalid type signature in: " + path);
 			return nullptr;
 		}
 
@@ -86,7 +87,7 @@ namespace Nightbird::Load
 		return material;
 	}
 
-	std::shared_ptr<Core::Texture> MaterialLoader::LoadTexture(const std::filesystem::path& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::Texture> MaterialLoader::LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		auto it = m_TextureCache.find(uuid);
 		if (it != m_TextureCache.end())

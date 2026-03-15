@@ -2,7 +2,7 @@
 
 #include <uuid.h>
 
-#include <filesystem>
+#include <string>
 #include <memory>
 #include <unordered_map>
 
@@ -22,14 +22,14 @@ namespace Nightbird::Load
 	class AssetLoader
 	{
 	public:
-		AssetLoader(const std::filesystem::path& cookedDir);
+		AssetLoader(const std::string& cookedDir);
 		
 		std::unique_ptr<Core::Scene> LoadScene(const uuids::uuid& uuid);
 
 		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
 
 	private:
-		std::filesystem::path m_CookedDir;
+		std::string m_CookedDir;
 
 		std::unique_ptr<BinarySceneReader> m_SceneReader;
 		std::unique_ptr<TextureLoader> m_TextureLoader;

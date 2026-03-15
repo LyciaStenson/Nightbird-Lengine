@@ -1,6 +1,6 @@
 #pragma once
 
-#include <filesystem>
+#include <string>
 
 namespace Nightbird::Input
 {
@@ -21,7 +21,7 @@ namespace Nightbird::Core
 		virtual bool ShouldClose() const = 0;
 		virtual void GetFramebufferSize(int* width, int* height) const = 0;
 
-		virtual std::filesystem::path GetCookedAssetsPath() const = 0;
+		virtual std::string GetCookedAssetsPath() const = 0;
 
 		virtual Input::Provider& GetInputProvider() = 0;
 	};

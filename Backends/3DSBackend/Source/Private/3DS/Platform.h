@@ -2,19 +2,16 @@
 
 #include "Core/Platform.h"
 
-#include "InputProvider.h"
+#include "3DS/InputProvider.h"
 
-#include <GLFW/glfw3.h>
-
-#include <vector>
-#include <memory>
 #include <string>
 
-namespace Nightbird::Glfw
+namespace Nightbird::N3DS
 {
 	class Platform : public Core::Platform
 	{
 	public:
+		Platform();
 		virtual void Initialize() override;
 		virtual void Shutdown() override;
 		virtual void PollEvents() override;
@@ -26,13 +23,7 @@ namespace Nightbird::Glfw
 
 		Input::Provider& GetInputProvider() override;
 
-		std::vector<const char*> GetRequiredExtensions() const;
-
-		GLFWwindow* GetWindow() const;
-
 	private:
-		std::unique_ptr<Input::Provider> m_InputProvider;
-
-		GLFWwindow* m_Window = nullptr;
+		InputProvider m_InputProvider;
 	};
 }
