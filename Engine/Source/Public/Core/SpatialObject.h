@@ -8,6 +8,9 @@ namespace Nightbird::Core
 	class SpatialObject : public SceneObject
 	{
 	public:
+		static const TypeInfo s_TypeInfo;
+		const TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+
 		using SceneObject::SceneObject;
 		~SpatialObject() override = default;
 

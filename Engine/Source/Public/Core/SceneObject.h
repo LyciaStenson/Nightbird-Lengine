@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/TypeInfo.h"
+
 #include <uuid.h>
 
 #include <string>
@@ -12,6 +14,28 @@ namespace Nightbird::Core
 	class SceneObject
 	{
 	public:
+		static const TypeInfo s_TypeInfo;
+		virtual const TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
+
+		template<typename T>
+		bool IsA() const { return GetTypeInfo()->IsA(&T::s_TypeInfo); }
+
+		template<typename T>
+		T* Cast()
+		{
+			if (IsA<T>())
+				return static_cast<T*>(this);
+			return nullptr;
+		}
+
+		template<typename T>
+		const T* Cast() const
+		{
+			if (IsA<T>())
+				return static_cast<const T*>(this);
+			return nullptr;
+		}
+
 		SceneObject(const std::string& name);
 		virtual ~SceneObject() = default;
 

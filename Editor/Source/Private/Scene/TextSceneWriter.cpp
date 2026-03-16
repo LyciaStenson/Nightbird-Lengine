@@ -72,7 +72,7 @@ namespace Nightbird::Editor
 		else
 			node.insert("parent", std::string{});
 
-		if (auto* spatialObject = dynamic_cast<Core::SpatialObject*>(object))
+		if (auto* spatialObject = object->Cast<Core::SpatialObject>())
 		{
 			toml::array position;
 			position.push_back(spatialObject->transform.position.x);
@@ -94,7 +94,7 @@ namespace Nightbird::Editor
 			node.insert("scale", scale);
 		}
 		
-		if (auto* directionalLight = dynamic_cast<Core::DirectionalLight*>(object))
+		if (auto* directionalLight = object->Cast<Core::DirectionalLight>())
 		{
 			node.insert("type", std::string("directional_light"));
 
@@ -105,7 +105,7 @@ namespace Nightbird::Editor
 			node.insert("color", color);
 			node.insert("intensity", directionalLight->intensity);
 		}
-		else if (auto* pointLight = dynamic_cast<Core::PointLight*>(object))
+		else if (auto* pointLight = object->Cast<Core::PointLight>())
 		{
 			node.insert("type", std::string("point_light"));
 
@@ -117,12 +117,12 @@ namespace Nightbird::Editor
 			node.insert("intensity", pointLight->intensity);
 			node.insert("radius", pointLight->radius);
 		}
-		else if (auto* camera = dynamic_cast<Core::Camera*>(object))
+		else if (auto* camera = object->Cast<Core::Camera>())
 		{
 			node.insert("type", std::string("camera"));
 			node.insert("fov", camera->fov);
 		}
-		else if (dynamic_cast<Core::SceneObject*>(object))
+		else if (object->Cast<Core::SceneObject>())
 		{
 			node.insert("type", std::string("spatial_object"));
 		}

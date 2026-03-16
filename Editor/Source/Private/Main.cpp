@@ -49,7 +49,7 @@ int main()
 	importManager.Scan();
 
 	auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
-	if (auto* witchTreehouse = dynamic_cast<Core::SpatialObject*>(result.get()))
+	if (auto* witchTreehouse = result.get()->Cast<Core::SpatialObject>())
 	{
 		witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 		witchTreehouse->transform.scale = glm::vec3(0.001f);

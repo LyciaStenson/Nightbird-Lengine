@@ -10,6 +10,9 @@ namespace Nightbird::Core
 	class MeshInstance : public SpatialObject
 	{
 	public:
+		static const TypeInfo s_TypeInfo;
+		const TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+
 		MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh);
 		~MeshInstance() override = default;
 

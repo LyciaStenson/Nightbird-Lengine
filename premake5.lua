@@ -2,6 +2,7 @@ workspace "Nightbird"
 	configurations { "Debug", "Release" }
 	platforms { "Desktop", "WiiU", "3DS" }
 	exceptionhandling "Off"
+	rtti "Off"
 
 	defines { "TOML_COMPILER_HAS_EXCEPTIONS=0" }
 

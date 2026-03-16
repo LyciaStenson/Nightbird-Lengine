@@ -93,7 +93,7 @@ namespace Nightbird::Editor
 			return;
 		}
 
-		if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+		if (auto* meshInstance = object->Cast<Core::MeshInstance>())
 		{
 			Core::Log::Info("CookManager: Found MeshInstance: " + object->GetName());
 

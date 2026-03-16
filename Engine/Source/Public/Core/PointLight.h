@@ -7,6 +7,9 @@ namespace Nightbird::Core
 	class PointLight : public SpatialObject
 	{
 	public:
+		static const TypeInfo s_TypeInfo;
+		const TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+
 		using SpatialObject::SpatialObject;
 
 		glm::vec3 color = glm::vec3(1.0f);

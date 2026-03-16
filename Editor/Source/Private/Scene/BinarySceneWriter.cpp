@@ -119,7 +119,7 @@ namespace Nightbird::Editor
 		}
 		
 		// Node type
-		if (auto* meshInstance = dynamic_cast<Core::MeshInstance*>(object))
+		if (auto* meshInstance = object->Cast<Core::MeshInstance>())
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
 			WriteTransform(meshInstance->transform, writer);
@@ -134,7 +134,7 @@ namespace Nightbird::Editor
 				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
 			}
 		}
-		else if (auto* directionalLight = dynamic_cast<Core::DirectionalLight*>(object))
+		else if (auto* directionalLight = object->Cast<Core::DirectionalLight>())
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::DirectionalLight));
 			WriteTransform(directionalLight->transform, writer);
@@ -143,7 +143,7 @@ namespace Nightbird::Editor
 			writer.WriteFloat(directionalLight->color.b);
 			writer.WriteFloat(directionalLight->intensity);
 		}
-		else if (auto* pointLight = dynamic_cast<Core::PointLight*>(object))
+		else if (auto* pointLight = object->Cast<Core::PointLight>())
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::PointLight));
 			WriteTransform(pointLight->transform, writer);
@@ -153,13 +153,13 @@ namespace Nightbird::Editor
 			writer.WriteFloat(pointLight->intensity);
 			writer.WriteFloat(pointLight->radius);
 		}
-		else if (auto* camera = dynamic_cast<Core::Camera*>(object))
+		else if (auto* camera = object->Cast<Core::Camera>())
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
 			WriteTransform(camera->transform, writer);
 			writer.WriteFloat(camera->fov);
 		}
-		else if (auto* spatialObject = dynamic_cast<Core::SpatialObject*>(object))
+		else if (auto* spatialObject = object->Cast<Core::SpatialObject>())
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SpatialObject));
 			WriteTransform(spatialObject->transform, writer);
