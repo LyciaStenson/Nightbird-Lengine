@@ -2,5 +2,5 @@
 
 namespace Nightbird::Core
 {
-    const TypeInfo PointLight::s_TypeInfo = { "PointLight", &SpatialObject::s_TypeInfo };
+    NB_OBJECT_IMPL(PointLight, SpatialObject);
 }

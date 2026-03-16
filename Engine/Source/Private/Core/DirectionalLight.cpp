@@ -2,5 +2,5 @@
 
 namespace Nightbird::Core
 {
-	const TypeInfo DirectionalLight::s_TypeInfo = { "DirectionalLight", &SpatialObject::s_TypeInfo };
+	NB_OBJECT_IMPL(DirectionalLight, SpatialObject);
 }

@@ -9,8 +9,7 @@ namespace Nightbird::Core
 	class Camera : public SpatialObject
 	{
 	public:
-		static const TypeInfo s_TypeInfo;
-		const TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+		NB_OBJECT(Camera, SpatialObject)
 
 		using SpatialObject::SpatialObject;
 

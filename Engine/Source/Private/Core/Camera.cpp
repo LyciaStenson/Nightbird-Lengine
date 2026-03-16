@@ -4,7 +4,7 @@
 
 namespace Nightbird::Core
 {
-	const TypeInfo Camera::s_TypeInfo = { "Camera", &SpatialObject::s_TypeInfo };
+	NB_OBJECT_IMPL(Camera, SpatialObject);
 
 	glm::mat4 Camera::GetViewMatrix() const
 	{

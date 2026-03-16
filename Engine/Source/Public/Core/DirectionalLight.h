@@ -7,8 +7,7 @@ namespace Nightbird::Core
 	class DirectionalLight : public SpatialObject
 	{
 	public:
-		static const TypeInfo s_TypeInfo;
-		const TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+		NB_OBJECT(DirectionalLight, SpatialObject)
 
 		using SpatialObject::SpatialObject;
 

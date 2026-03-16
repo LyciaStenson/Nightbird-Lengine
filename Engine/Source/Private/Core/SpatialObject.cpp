@@ -2,7 +2,7 @@
 
 namespace Nightbird::Core
 {
-	const TypeInfo SpatialObject::s_TypeInfo = { "SpatialObject", &SceneObject::s_TypeInfo };
+	NB_OBJECT_IMPL(SpatialObject, SceneObject);
 
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{

@@ -20,3 +20,17 @@ namespace Nightbird::Core
 		}
 	};
 }
+
+#define NB_OBJECT(ClassName, ParentClass) \
+	static const ::Nightbird::Core::TypeInfo s_TypeInfo; \
+	const ::Nightbird::Core::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+
+#define NB_OBJECT_BASE(ClassName) \
+	static const ::Nightbird::Core::TypeInfo s_TypeInfo; \
+	virtual const ::Nightbird::Core::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
+
+#define NB_OBJECT_IMPL(ClassName, ParentClass) \
+	const ::Nightbird::Core::TypeInfo ClassName::s_TypeInfo = { #ClassName, &ParentClass::s_TypeInfo };
+
+#define NB_OBJECT_BASE_IMPL(ClassName) \
+	const ::Nightbird::Core::TypeInfo ClassName::s_TypeInfo = { #ClassName, nullptr };

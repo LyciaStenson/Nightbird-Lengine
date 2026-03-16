@@ -2,7 +2,7 @@
 
 namespace Nightbird::Core
 {
-	const TypeInfo SceneObject::s_TypeInfo = { "SceneObject", nullptr };
+	NB_OBJECT_BASE_IMPL(SceneObject)
 
 	SceneObject::SceneObject(const std::string& name)
 		: m_Name(name)

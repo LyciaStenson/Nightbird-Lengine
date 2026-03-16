@@ -14,8 +14,7 @@ namespace Nightbird::Core
 	class SceneObject
 	{
 	public:
-		static const TypeInfo s_TypeInfo;
-		virtual const TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
+		NB_OBJECT_BASE(SceneObject)
 
 		template<typename T>
 		bool IsA() const { return GetTypeInfo()->IsA(&T::s_TypeInfo); }
