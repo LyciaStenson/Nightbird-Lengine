@@ -48,18 +48,18 @@ int main()
 	Editor::ImportManager importManager("Assets");
 	importManager.Scan();
 
-	auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
-	if (auto* witchTreehouse = result.get()->Cast<Core::SpatialObject>())
-	{
-		witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-		witchTreehouse->transform.scale = glm::vec3(0.001f);
+	//auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
+	//if (auto* witchTreehouse = result.get()->Cast<Core::SpatialObject>())
+	//{
+	//	witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	//	witchTreehouse->transform.scale = glm::vec3(0.001f);
 
-		engine.GetScene().GetRoot()->AddChild(std::move(result));
-	}
-	else
-	{
-		Core::Log::Error("Failed to import model");
-	}
+	//	engine.GetScene().GetRoot()->AddChild(std::move(result));
+	//}
+	//else
+	//{
+	//	Core::Log::Error("Failed to import model");
+	//}
 
 	Editor::TextSceneReader sceneReader(importManager);
 	engine.SetScene(sceneReader.Read("Assets/Scenes/Main.ntscene").scene);
