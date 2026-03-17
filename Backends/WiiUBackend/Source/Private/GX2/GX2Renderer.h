@@ -39,10 +39,10 @@ namespace Nightbird::GX2
 		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 		Material& GetOrCreateMaterial(const Core::Material* material);
 
-		std::vector<Core::Renderable> m_Renderables;
 		Core::Camera* m_ActiveCamera = nullptr;
-		std::unordered_map<const Core::MeshPrimitive*, GX2::Geometry> m_GeometryCache;
-		std::unordered_map<const Core::Material*, GX2::Material> m_MaterialCache;
+		std::vector<Core::Renderable> m_Renderables;
+		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
+		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
 

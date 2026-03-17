@@ -31,50 +31,50 @@ int main()
 
 	Core::Engine engine(std::move(platform), std::move(renderer));
 
-	//std::vector<Core::Vertex> vertices =
+	std::vector<Core::Vertex> vertices =
+	{
+		{ glm::vec3( 0.0f,  0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.5f, 0.0f), glm::vec2(0), glm::vec2(0) },
+		{ glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(0), glm::vec2(0) },
+		{ glm::vec3( 0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0), glm::vec2(0) }
+	};
+
+	std::vector<uint16_t> indices = { 0, 1, 2 };
+
+	auto material = std::make_shared<Core::Material>();
+	material->baseColorFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	std::vector<Core::MeshPrimitive> primitives = { Core::MeshPrimitive(vertices, indices, material) };
+	auto mesh = std::make_shared<Core::Mesh>(primitives);
+
+	auto meshInstance = std::make_unique<Core::MeshInstance>("MeshInstance", mesh);
+	meshInstance->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	auto camera = std::make_unique<Core::Camera>("Camera");
+	camera->transform.position = glm::vec3(0.0f, 0.0f, 5.0f);
+
+	Core::Camera* cameraPtr = camera.get();
+
+	engine.GetScene().GetRoot()->AddChild(std::move(meshInstance));
+	engine.GetScene().GetRoot()->AddChild(std::move(camera));
+	engine.GetScene().SetActiveCamera(cameraPtr);
+
+	//Load::AssetLoader assetLoader(cookedPath);
+
+	//auto sceneUUID = uuids::uuid::from_string("d03b5517-eb4b-4415-9327-b82a355d9497");
+	//if (!sceneUUID)
 	//{
-		//{ glm::vec3( 0.0f,  0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.5f, 0.0f), glm::vec2(0), glm::vec2(0) },
-		//{ glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(0), glm::vec2(0) },
-		//{ glm::vec3( 0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0), glm::vec2(0) }
-	//};
+		//Core::Log::Error("Invalid scene UUID");
+		//return -1;
+	//}
 
-	//std::vector<uint16_t> indices = { 0, 1, 2 };
+	//auto scene = assetLoader.LoadScene(*sceneUUID);
+	//if (!scene)
+	//{
+		//Core::Log::Error("Failed to load scene");
+		//return -1;
+	//}
 
-	//auto material = std::make_shared<Core::Material>();
-	//material->baseColorFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	//std::vector<Core::MeshPrimitive> primitives = { Core::MeshPrimitive(vertices, indices, material) };
-	//auto mesh = std::make_shared<Core::Mesh>(primitives);
-
-	//auto meshInstance = std::make_unique<Core::MeshInstance>("MeshInstance", mesh);
-	//meshInstance->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	//auto camera = std::make_unique<Core::Camera>("Camera");
-	//camera->transform.position = glm::vec3(0.0f, 0.0f, 5.0f);
-
-	//Core::Camera* cameraPtr = camera.get();
-
-	//engine.GetScene().GetRoot()->AddChild(std::move(meshInstance));
-	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
-	//engine.GetScene().SetActiveCamera(cameraPtr);
-
-	Load::AssetLoader assetLoader(cookedPath);
-
-	auto sceneUUID = uuids::uuid::from_string("d03b5517-eb4b-4415-9327-b82a355d9497");
-	if (!sceneUUID)
-	{
-		Core::Log::Error("Invalid scene UUID");
-		return -1;
-	}
-
-	auto scene = assetLoader.LoadScene(*sceneUUID);
-	if (!scene)
-	{
-		Core::Log::Error("Failed to load scene");
-		return -1;
-	}
-
-	engine.SetScene(std::move(scene));
+	//engine.SetScene(std::move(scene));
 
 	engine.Run();
 

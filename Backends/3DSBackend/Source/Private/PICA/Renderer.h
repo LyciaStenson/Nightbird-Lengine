@@ -4,14 +4,18 @@
 
 #include "Core/Renderable.h"
 
+#include "PICA/Geometry.h"
+
 #include <citro3d.h>
 
 #include <vector>
+#include <unordered_map>
 
 namespace Nightbird::Core
 {
 	class Scene;
 	class Camera;
+	class MeshPrimitive;
 }
 
 namespace Nightbird::PICA
@@ -27,8 +31,11 @@ namespace Nightbird::PICA
 	private:
 		void DrawScene();
 
-		std::vector<Core::Renderable> m_Renderables;
+		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
+
 		Core::Camera* m_ActiveCamera = nullptr;
+		std::vector<Core::Renderable> m_Renderables;
+		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 
 		C3D_RenderTarget* m_TopTarget = nullptr;
 
@@ -36,7 +43,5 @@ namespace Nightbird::PICA
 		shaderProgram_s m_ShaderProgram = {};
 		int m_ULocProjection = -1;
 		int m_ULocModelView = -1;
-
-		void* m_VertexBuffer = nullptr;
 	};
 }

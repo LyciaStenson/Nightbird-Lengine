@@ -14,25 +14,13 @@
 	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
 	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
-typedef struct
-{
-	float x, y, z;
-} vertex;
-
-static const vertex triangleVertices[] =
-{
-	{  0.0f,  0.5f, 0.5f },
-	{ -0.5f, -0.5f, 0.5f },
-	{  0.5f, -0.5f, 0.5f }
-};
-
 namespace Nightbird::PICA
 {
 	void Renderer::Initialize()
 	{
 		C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
-		m_TopTarget = C3D_RenderTargetCreate(240, 480, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+		m_TopTarget = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
 		C3D_RenderTargetSetOutput(m_TopTarget, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 
 		m_ShaderDvlb = DVLB_ParseFile((u32*)Shader_v_pica_shbin, Shader_v_pica_shbin_size);
@@ -49,13 +37,6 @@ namespace Nightbird::PICA
 		AttrInfo_AddFixed(attrInfo, 1); // v1 color
 		C3D_FixedAttribSet(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
-		m_VertexBuffer = linearAlloc(sizeof(triangleVertices));
-		memcpy(m_VertexBuffer, triangleVertices, sizeof(triangleVertices));
-
-		C3D_BufInfo* bufInfo = C3D_GetBufInfo();
-		BufInfo_Init(bufInfo);
-		BufInfo_Add(bufInfo, m_VertexBuffer, sizeof(vertex), 1, 0x0);
-
 		C3D_TexEnv* env = C3D_GetTexEnv(0);
 		C3D_TexEnvInit(env);
 		C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR);
@@ -66,7 +47,8 @@ namespace Nightbird::PICA
 
 	void Renderer::Shutdown()
 	{
-		linearFree(m_VertexBuffer);
+		m_GeometryCache.clear();
+
 		shaderProgramFree(&m_ShaderProgram);
 		DVLB_Free(m_ShaderDvlb);
 		C3D_RenderTargetDelete(m_TopTarget);
@@ -92,16 +74,47 @@ namespace Nightbird::PICA
 
 	void Renderer::DrawScene()
 	{
-		C3D_Mtx projection;
-		Mtx_PerspTilt(&projection, C3D_AngleFromDegrees(60.0f), C3D_AspectRatioTop, 0.01f, 1000.0f, false);
+		if (!m_ActiveCamera)
+			return;
 
-		C3D_Mtx modelView;
-		Mtx_Identity(&modelView);
-		Mtx_Translate(&modelView, 0.0f, 0.0f, -2.0f, true);
+		C3D_Mtx projection;
+		Mtx_PerspTilt(&projection, C3D_AngleFromDegrees(m_ActiveCamera->fov), C3D_AspectRatioTop, 0.01f, 1000.0f, false);
 
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, m_ULocProjection, &projection);
-		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, m_ULocModelView, &modelView);
 
-		C3D_DrawArrays(GPU_TRIANGLES, 0, 3);
+		for (const auto& renderable : m_Renderables)
+		{
+			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
+
+			C3D_Mtx modelView;
+
+			glm::mat4 mv = m_ActiveCamera->GetViewMatrix() * renderable.transform;
+			for (int row = 0; row < 4; row++)
+			{
+				modelView.r[row].c[0] = mv[3][row]; // w = col3
+				modelView.r[row].c[1] = mv[2][row]; // z = col2
+				modelView.r[row].c[2] = mv[1][row]; // y = col1
+				modelView.r[row].c[3] = mv[0][row]; // x = col0
+			}
+
+			C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, m_ULocModelView, &modelView);
+
+			C3D_BufInfo* bufInfo = C3D_GetBufInfo();
+			BufInfo_Init(bufInfo);
+			BufInfo_Add(bufInfo, geometry.GetVertexBuffer(), sizeof(PICA::Vertex), 1, 0x0);
+
+			C3D_DrawElements(GPU_TRIANGLES, geometry.GetIndexCount(), C3D_UNSIGNED_SHORT, geometry.GetIndexBuffer());
+		}
+	}
+
+	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
+	{
+		auto it = m_GeometryCache.find(primitive);
+		if (it != m_GeometryCache.end())
+			return it->second;
+
+		// Create and add to cache if does not exist
+		m_GeometryCache.emplace(primitive, Geometry(*primitive));
+		return m_GeometryCache.at(primitive);
 	}
 }
