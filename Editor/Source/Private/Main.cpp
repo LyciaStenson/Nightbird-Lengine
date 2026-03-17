@@ -61,36 +61,50 @@ int main()
 	//	Core::Log::Error("Failed to import model");
 	//}
 
+	// auto result = importManager.Import("Assets/Models/serena.glb");
+	// if (auto* serena = result.get()->Cast<Core::SpatialObject>())
+	// {
+	// 	serena->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	// 	serena->transform.scale = glm::vec3(0.03f);
+
+	// 	engine.GetScene().GetRoot()->AddChild(std::move(result));
+	// }
+	// else
+	// {
+	// 	Core::Log::Error("Failed to import model");
+	// }
+
 	Editor::TextSceneReader sceneReader(importManager);
-	engine.SetScene(sceneReader.Read("Assets/Scenes/Main.ntscene").scene);
+	engine.SetScene(sceneReader.Read("Assets/Scenes/Serena.ntscene").scene);
 
-	//auto directionalLight = std::make_unique<Core::DirectionalLight>("DirectionalLight");
-	//directionalLight->transform.rotation = glm::quat(glm::vec3(glm::radians(-45.0f), glm::radians(45.0f), 0.0f));
-	//directionalLight->color = glm::vec3(1.0f, 1.0f, 1.0f);
-	//directionalLight->intensity = 1.0f;
-	//engine.GetScene().GetRoot()->AddChild(std::move(directionalLight));
+	// auto directionalLight = std::make_unique<Core::DirectionalLight>("DirectionalLight");
+	// directionalLight->transform.rotation = glm::quat(glm::vec3(glm::radians(-45.0f), glm::radians(45.0f), 0.0f));
+	// directionalLight->color = glm::vec3(1.0f, 1.0f, 1.0f);
+	// directionalLight->intensity = 1.0f;
+	// engine.GetScene().GetRoot()->AddChild(std::move(directionalLight));
 
-	//auto pointLight = std::make_unique<Core::PointLight>("PointLight");
-	//pointLight->transform.position = glm::vec3(0.0f, 5.0f, 1.0f);
-	//pointLight->color = glm::vec3(1.0f, 0.1f, 0.7f);
-	//pointLight->intensity = 1.0f;
-	//pointLight->radius = 5.0f;
-	//engine.GetScene().GetRoot()->AddChild(std::move(pointLight));
+	// auto pointLight = std::make_unique<Core::PointLight>("PointLight");
+	// pointLight->transform.position = glm::vec3(0.0f, 5.0f, 1.0f);
+	// pointLight->color = glm::vec3(1.0f, 0.1f, 0.7f);
+	// pointLight->intensity = 1.0f;
+	// pointLight->radius = 5.0f;
+	// engine.GetScene().GetRoot()->AddChild(std::move(pointLight));
 
-	//auto camera = std::make_unique<Core::Camera>("Camera");
-	//camera->transform.position = glm::vec3(0.0f, 1.5f, 5.0f);
+	// auto camera = std::make_unique<Core::Camera>("Camera");
+	// camera->transform.position = glm::vec3(0.0f, 1.5f, 5.0f);
 
-	//Core::Camera* cameraPtr = camera.get();
+	// Core::Camera* cameraPtr = camera.get();
 
-	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
-	//engine.GetScene().SetActiveCamera(cameraPtr);
+	// engine.GetScene().GetRoot()->AddChild(std::move(camera));
+	// engine.GetScene().SetActiveCamera(cameraPtr);
 
-	//Editor::TextSceneWriter sceneWriter;
-	//sceneWriter.Write(engine.GetScene(), "MainScene", GenerateUUID(), "Assets/Scenes/Main.ntscene");
+	// Editor::TextSceneWriter sceneWriter;
+	// sceneWriter.Write(engine.GetScene(), "Serena", GenerateUUID(), "Assets/Scenes/Serena.ntscene");
 
 	Editor::CookManager cookManager("Cooked", importManager);
-	cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::Desktop);
-	cookManager.Cook("Assets/Scenes/Main.ntscene", Editor::CookTarget::WiiU);
+	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::Desktop);
+	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::WiiU);
+	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::N3DS);
 
 	engine.Run();
 

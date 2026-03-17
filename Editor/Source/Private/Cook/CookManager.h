@@ -27,7 +27,7 @@ namespace Nightbird::Editor
 
 	enum class CookTarget
 	{
-		Desktop, WiiU
+		Desktop, WiiU, N3DS
 	};
 
 	//struct ManifestEntry

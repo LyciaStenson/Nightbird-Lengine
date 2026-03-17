@@ -167,6 +167,8 @@ namespace Nightbird::Editor
 			return Endianness::Little;
 		case CookTarget::WiiU:
 			return Endianness::Big;
+		case CookTarget::N3DS:
+			return Endianness::Little;
 		default:
 			return Endianness::Little;
 		}
@@ -180,6 +182,8 @@ namespace Nightbird::Editor
 			return m_RootOutputDir / "Desktop";
 		case CookTarget::WiiU:
 			return m_RootOutputDir / "WiiU";
+		case CookTarget::N3DS:
+			return m_RootOutputDir / "3DS";
 		default:
 			return m_RootOutputDir / "Desktop";
 		}
