@@ -37,13 +37,20 @@ namespace Nightbird::Load
 			return nullptr;
 		}
 
+		// Dimensions
 		uint32_t width = reader.ReadUInt32();
 		uint32_t height = reader.ReadUInt32();
-		uint32_t pixelCount = width * height * 4;
-		std::vector<uint8_t> pixels(pixelCount);
-		reader.ReadRawBytes(pixels.data(), pixelCount);
 
-		auto texture = std::make_shared<Core::Texture>(width, height, std::move(pixels));
-		return texture;
+		// Format
+		Core::TextureFormat format = static_cast<Core::TextureFormat>(reader.ReadUInt32());
+
+		// Data size
+		uint32_t dataSize = reader.ReadUInt32();
+
+		// Data
+		std::vector<uint8_t> data(dataSize);
+		reader.ReadRawBytes(data.data(), dataSize);
+
+		return std::make_shared<Core::Texture>(width, height, format, std::move(data));
 	}
 }

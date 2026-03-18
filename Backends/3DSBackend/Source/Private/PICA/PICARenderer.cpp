@@ -1,7 +1,10 @@
-#include "PICA/Renderer.h"
+#include "PICA/PICARenderer.h"
 
 #include "Core/Scene.h"
 #include "Core/Camera.h"
+#include "Core/MeshPrimitive.h"
+#include "Core/Material.h"
+#include "Core/Texture.h"
 #include "Core/Log.h"
 
 #include <3ds.h>
@@ -33,20 +36,32 @@ namespace Nightbird::PICA
 
 		C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
 		AttrInfo_Init(attrInfo);
-		AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3); //v0 position
-		AttrInfo_AddFixed(attrInfo, 1); // v1 color
-		C3D_FixedAttribSet(1, 1.0f, 1.0f, 1.0f, 1.0f);
+		AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3); // v0 position
+		AttrInfo_AddLoader(attrInfo, 1, GPU_FLOAT, 2); // v1 texcoord
 
 		C3D_TexEnv* env = C3D_GetTexEnv(0);
 		C3D_TexEnvInit(env);
-		C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR);
-		C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+		C3D_TexEnvSrc(env, C3D_RGB, GPU_TEXTURE0, GPU_CONSTANT, GPU_CONSTANT);
+		C3D_TexEnvFunc(env, C3D_RGB, GPU_REPLACE); // Multiply vertex and texture color
+
+		C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, GPU_CONSTANT, GPU_CONSTANT);
+		C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE); // Multiply vertex and texture color
+
+		C3D_TexEnvColor(env, 0xFFFFFF);
+
+		uint8_t pixels[8*8*4]; // 8x8 RGBA
+		for (int i = 0; i < 8*8*4; i++)
+			pixels[i] = 255;
+
+		m_DefaultTexture = std::make_shared<Texture>();
+		m_DefaultTexture->InitFromPixels(8, 8, pixels);
 
 		Core::Log::Info("Renderer initialized");
 	}
 
 	void Renderer::Shutdown()
 	{
+		m_MaterialCache.clear();
 		m_GeometryCache.clear();
 
 		shaderProgramFree(&m_ShaderProgram);
@@ -85,6 +100,10 @@ namespace Nightbird::PICA
 		for (const auto& renderable : m_Renderables)
 		{
 			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
+			Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
+
+			C3D_TexBind(0, material.GetBaseColorTexture()->GetTexture());
+			//C3D_TexSetFilter(material.GetBaseColorTexture()->GetTexture(), GPU_LINEAR, GPU_NEAREST);
 
 			C3D_Mtx modelView;
 
@@ -101,7 +120,7 @@ namespace Nightbird::PICA
 
 			C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 			BufInfo_Init(bufInfo);
-			BufInfo_Add(bufInfo, geometry.GetVertexBuffer(), sizeof(PICA::Vertex), 1, 0x0);
+			BufInfo_Add(bufInfo, geometry.GetVertexBuffer(), sizeof(PICA::Vertex), 2, 0x10);
 
 			C3D_DrawElements(GPU_TRIANGLES, geometry.GetIndexCount(), C3D_UNSIGNED_SHORT, geometry.GetIndexBuffer());
 		}
@@ -116,5 +135,34 @@ namespace Nightbird::PICA
 		// Create and add to cache if does not exist
 		m_GeometryCache.emplace(primitive, Geometry(*primitive));
 		return m_GeometryCache.at(primitive);
+	}
+
+	Material& Renderer::GetOrCreateMaterial(const Core::Material* material)
+	{
+		auto it = m_MaterialCache.find(material);
+		if (it != m_MaterialCache.end())
+			return it->second;
+
+		std::shared_ptr<PICA::Texture> tex;
+		if (material->baseColorTexture)
+			tex = GetOrCreateTexture(material->baseColorTexture.get());
+		else
+			tex = m_DefaultTexture;
+
+		// Create and add to cache if does not exist
+		m_MaterialCache.emplace(material, Material(*material, tex));
+		return m_MaterialCache.at(material);
+	}
+
+	std::shared_ptr<Texture> Renderer::GetOrCreateTexture(const Core::Texture* texture)
+	{
+		auto it = m_TextureCache.find(texture);
+		if (it != m_TextureCache.end())
+			return it->second;
+
+		// Create and add to cache if does not exist
+		auto tex = std::make_shared<PICA::Texture>(*texture);
+		m_TextureCache.emplace(texture, tex);
+		return m_TextureCache.at(texture);
 	}
 }

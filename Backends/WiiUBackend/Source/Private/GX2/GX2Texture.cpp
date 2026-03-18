@@ -34,9 +34,19 @@ namespace Nightbird::GX2
 			return;
 		}
 
-		const auto& pixels = texture.GetPixels();
-		memset(m_ImageData, 0, m_Texture.surface.imageSize);
-		memcpy(m_ImageData, pixels.data(), pixels.size());
+		switch (texture.GetFormat())
+		{
+		case Core::TextureFormat::RGBA8:
+		{
+			const auto& data = texture.GetData();
+			memset(m_ImageData, 0, m_Texture.surface.imageSize);
+			memcpy(m_ImageData, data.data(), data.size());
+			break;
+		}
+		default:
+			Core::Log::Error("Unsupported GX2 texture format");
+			break;
+		}
 
 		m_Texture.surface.image = m_ImageData;
 

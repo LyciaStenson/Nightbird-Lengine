@@ -1,7 +1,7 @@
 #include "Core/BackendFactory.h"
 
 #include "3DS/Platform.h"
-#include "PICA/Renderer.h"
+#include "PICA/PICARenderer.h"
 
 namespace Nightbird::Core
 {

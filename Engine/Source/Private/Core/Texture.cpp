@@ -2,8 +2,8 @@
 
 namespace Nightbird::Core
 {
-	Texture::Texture(uint32_t width, uint32_t height, std::vector<uint8_t> pixels)
-		: m_Width(width), m_Height(height), m_Pixels(std::move(pixels))
+	Texture::Texture(uint32_t width, uint32_t height, TextureFormat format, std::vector<uint8_t> data)
+		: m_Width(width), m_Height(height), m_Format(format), m_Data(std::move(data))
 	{
 
 	}
@@ -18,8 +18,13 @@ namespace Nightbird::Core
 		return m_Height;
 	}
 
-	const std::vector<uint8_t>& Texture::GetPixels() const
+	TextureFormat Texture::GetFormat() const
 	{
-		return m_Pixels;
+		return m_Format;
+	}
+
+	const std::vector<uint8_t>& Texture::GetData() const
+	{
+		return m_Data;
 	}
 }

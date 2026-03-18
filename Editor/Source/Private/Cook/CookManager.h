@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cook/Target.h"
 #include "Cook/TextureCooker.h"
 #include "Cook/MaterialCooker.h"
 #include "Cook/MeshCooker.h"
@@ -24,11 +25,6 @@ namespace Nightbird::Core
 namespace Nightbird::Editor
 {
 	class ImportManager;
-
-	enum class CookTarget
-	{
-		Desktop, WiiU, N3DS
-	};
 
 	//struct ManifestEntry
 	//{
@@ -71,7 +67,7 @@ namespace Nightbird::Editor
 		
 		void CollectAssets(Core::SceneObject* object);
 
-		void CookTextures(const std::filesystem::path& outputDir, Endianness endianness);
+		void CookTextures(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness);
 		void CookMaterials(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMeshes(const std::filesystem::path& outputDir, Endianness endianness);
 

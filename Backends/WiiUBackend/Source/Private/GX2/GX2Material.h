@@ -2,8 +2,6 @@
 
 #include "GX2/GX2Texture.h"
 
-#include <memory>
-
 namespace Nightbird::Core
 {
 	class Texture;

@@ -14,7 +14,16 @@ namespace Nightbird::Vulkan
 	Texture::Texture(Device* device, const Core::Texture& texture, bool sRGB)
 		: m_Device(device)
 	{
-		CreateFromPixels(texture.GetPixels().data(), texture.GetWidth(), texture.GetHeight(), sRGB);
+		switch (texture.GetFormat())
+		{
+		case Core::TextureFormat::RGBA8:
+			CreateFromPixels(texture.GetData().data(), texture.GetWidth(), texture.GetHeight(), sRGB);
+			break;
+		default:
+			Core::Log::Error("Unsupported Vulkan texture format");
+			break;
+		}
+
 		CreateTextureSampler();
 	}
 

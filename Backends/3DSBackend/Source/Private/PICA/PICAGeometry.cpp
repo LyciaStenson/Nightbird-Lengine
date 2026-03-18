@@ -1,4 +1,4 @@
-#include "PICA/Geometry.h"
+#include "PICA/PICAGeometry.h"
 
 #include "Core/MeshPrimitive.h"
 #include "Core/Vertex.h"
@@ -24,6 +24,9 @@ namespace Nightbird::PICA
 			picaVertices[i].x = vertices[i].position.x;
 			picaVertices[i].y = vertices[i].position.y;
 			picaVertices[i].z = vertices[i].position.z;
+
+			picaVertices[i].u = vertices[i].baseColorTexCoord.x;
+			picaVertices[i].v = 1.0f - vertices[i].baseColorTexCoord.y;
 		}
 
 		m_IndexBuffer = linearAlloc(m_IndexCount * sizeof(uint16_t));
@@ -41,7 +44,6 @@ namespace Nightbird::PICA
 	Geometry::Geometry(Geometry&& other) noexcept
 		: m_VertexBuffer(other.m_VertexBuffer), m_IndexBuffer(other.m_IndexBuffer)
 		, m_VertexCount(other.m_VertexCount), m_IndexCount(other.m_IndexCount)
-
 	{
 		other.m_VertexBuffer = nullptr;
 		other.m_IndexBuffer = nullptr;

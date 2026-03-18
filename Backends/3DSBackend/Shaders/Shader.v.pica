@@ -10,9 +10,11 @@
 ; Outputs
 .out outpos position
 .out outclr color
+.out outtc0 texcoord0
 
 ; Inputs (defined as aliases for convenience)
 .alias inpos v0
+.alias intex v1
 
 .proc main
 	; Force the w component of inpos to be 1.0
@@ -32,6 +34,9 @@
 
 	; outclr = ones
 	mov outclr, ones
+
+	; Pass texture coordinates
+	mov outtc0, intex
 
 	; We're finished
 	end

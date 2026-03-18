@@ -279,7 +279,7 @@ namespace Nightbird::Vulkan
 	std::shared_ptr<Core::Texture> Renderer::CreateDefaultTexture()
 	{
 		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
-		return std::make_shared<Core::Texture>(1, 1, pixels);
+		return std::make_shared<Core::Texture>(1, 1, Core::TextureFormat::RGBA8, pixels);
 	}
 
 	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)

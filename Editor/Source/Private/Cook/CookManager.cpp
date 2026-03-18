@@ -44,7 +44,7 @@ namespace Nightbird::Editor
 		
 		CollectAssets(sceneReadResult.scene->GetRoot());
 		
-		CookTextures(m_CookOutputDir, m_Endianness);
+		CookTextures(m_CookOutputDir, target, m_Endianness);
 		CookMaterials(m_CookOutputDir, m_Endianness);
 		CookMeshes(m_CookOutputDir, m_Endianness);
 
@@ -128,10 +128,10 @@ namespace Nightbird::Editor
 			CollectAssets(child.get());
 	}
 
-	void CookManager::CookTextures(const std::filesystem::path& outputDir, Endianness endianness)
+	void CookManager::CookTextures(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
 		for (const auto& [texture, uuid] : m_TextureUUIDs)
-			m_TextureCooker.Cook(*texture, uuid, outputDir, endianness);
+			m_TextureCooker.Cook(*texture, uuid, outputDir, target, endianness);
 	}
 
 	void CookManager::CookMaterials(const std::filesystem::path& outputDir, Endianness endianness)

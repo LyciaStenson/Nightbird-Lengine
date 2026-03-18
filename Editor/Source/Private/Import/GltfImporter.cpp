@@ -129,7 +129,7 @@ namespace Nightbird::Editor
 				continue;
 
 			auto& [pixels, width, height] = it->second;
-			textures[i] = std::make_shared<Core::Texture>(static_cast<uint32_t>(width), static_cast<uint32_t>(height), pixels);
+			textures[i] = std::make_shared<Core::Texture>(static_cast<uint32_t>(width), static_cast<uint32_t>(height), Core::TextureFormat::RGBA8, pixels);
 		}
 
 		return textures;
