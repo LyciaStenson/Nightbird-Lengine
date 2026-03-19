@@ -44,11 +44,8 @@ namespace Nightbird::PICA
 
 		C3D_TexEnv* env = C3D_GetTexEnv(0);
 		C3D_TexEnvInit(env);
-		C3D_TexEnvSrc(env, C3D_RGB, GPU_TEXTURE0, GPU_CONSTANT, GPU_CONSTANT);
-		C3D_TexEnvFunc(env, C3D_RGB, GPU_REPLACE); // Multiply vertex and texture color
-
-		C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, GPU_CONSTANT, GPU_CONSTANT);
-		C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE); // Multiply vertex and texture color
+		C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR);
+		C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE); // Multiply vertex and texture color
 
 		C3D_TexEnvColor(env, 0xFFFFFF);
 

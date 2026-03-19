@@ -40,7 +40,7 @@ namespace Nightbird::PICA
 
 			Tex3DS_TextureFree(t3x);
 
-			C3D_TexSetWrap(&m_Texture, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+			C3D_TexSetWrap(&m_Texture, GPU_REPEAT, GPU_REPEAT);
 			C3D_TexSetFilter(&m_Texture, GPU_LINEAR, GPU_NEAREST);
 
 			m_Initialized = true;
