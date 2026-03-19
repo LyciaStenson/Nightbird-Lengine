@@ -31,6 +31,9 @@ namespace Nightbird::PICA
 
 		m_IndexBuffer = linearAlloc(m_IndexCount * sizeof(uint16_t));
 		memcpy(m_IndexBuffer, indices.data(), m_IndexCount * sizeof(uint16_t));
+
+		GSPGPU_FlushDataCache(m_VertexBuffer, m_VertexCount * sizeof(Vertex));
+		GSPGPU_FlushDataCache(m_IndexBuffer, m_IndexCount * sizeof(uint16_t));
 	}
 
 	Geometry::~Geometry()

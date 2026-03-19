@@ -21,7 +21,17 @@ namespace Nightbird::PICA
 				return;
 			}
 
-			Tex3DS_Texture t3x = Tex3DS_TextureImport(data.data(), data.size(), &m_Texture, nullptr, false);
+			void* linearData = linearAlloc(data.size());
+			if (!linearData)
+			{
+				Core::Log::Error("PICA::Texture: Failed to allocate linear memory");
+				return;
+			}
+
+			memcpy(linearData, data.data(), data.size());
+			Tex3DS_Texture t3x = Tex3DS_TextureImport(linearData, data.size(), &m_Texture, nullptr, false);
+			linearFree(linearData);
+
 			if (!t3x)
 			{
 				Core::Log::Error("PICA::Texture: Failed to import texture");
@@ -58,6 +68,7 @@ namespace Nightbird::PICA
 
 		C3D_TexInit(&m_Texture, width, height, GPU_RGBA8);
 		C3D_TexUpload(&m_Texture, pixels);
+		GSPGPU_FlushDataCache(m_Texture.data, m_Texture.size);
 
 		C3D_TexSetWrap(&m_Texture, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 		C3D_TexSetFilter(&m_Texture, GPU_LINEAR, GPU_NEAREST);

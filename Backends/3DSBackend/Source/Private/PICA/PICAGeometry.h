@@ -11,7 +11,7 @@ namespace Nightbird::Core
 
 namespace Nightbird::PICA
 {
-	struct alignas(16) Vertex
+	struct Vertex
 	{
 		float x, y, z; // position
 		float u, v; // texcoords

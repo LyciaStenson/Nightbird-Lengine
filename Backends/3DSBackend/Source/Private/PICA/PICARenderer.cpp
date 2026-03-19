@@ -7,6 +7,9 @@
 #include "Core/Texture.h"
 #include "Core/Log.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <3ds.h>
 
 #include "Shader_v_pica_shbin.h"
@@ -106,6 +109,7 @@ namespace Nightbird::PICA
 			//C3D_TexSetFilter(material.GetBaseColorTexture()->GetTexture(), GPU_LINEAR, GPU_NEAREST);
 
 			C3D_Mtx modelView;
+			Mtx_Identity(&modelView);
 
 			glm::mat4 mv = m_ActiveCamera->GetViewMatrix() * renderable.transform;
 			for (int row = 0; row < 4; row++)

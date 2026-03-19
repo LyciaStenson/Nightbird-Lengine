@@ -92,13 +92,15 @@ namespace Nightbird::Editor
 			pixels[i + 3] = 255;
 		}
 
+		Core::Log::Info("Cook3DS: " + std::to_string(texture.GetWidth()) + "x" + std::to_string(texture.GetHeight()));
+
 		if (!WritePNG(inputPath, texture.GetWidth(), texture.GetHeight(), pixels))
 		{
 			Core::Log::Error("Failed to write temporator PNG for tex3ds.");
 			return {};
 		}
 
-		std::string command = "tex3ds \"" + inputPath.string() + "\" -f rgba8 -o \"" + outputPath.string() + "\"";
+		std::string command = "tex3ds \"" + inputPath.string() + "\" -f rgba5551 -z auto -o \"" + outputPath.string() + "\"";
 
 		int result = std::system(command.c_str());
 		if (result != 0)

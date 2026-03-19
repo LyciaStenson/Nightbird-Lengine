@@ -27,7 +27,7 @@ namespace Nightbird::PICA
 		C3D_Tex* GetTexture();
 
 	private:
-		alignas(16) C3D_Tex m_Texture = {};
+		C3D_Tex m_Texture = {};
 		bool m_Initialized = false;
 	};
 }
