@@ -86,18 +86,6 @@ namespace Nightbird::Core
 		engine->GetAudioProvider().Resume(m_Handle);
 	}
 
-	void AudioSource::SetVolume(float volume)
-	{
-		if (m_Handle == Audio::InvalidHandle)
-			return;
-
-		Engine* engine = GetEngine();
-		if (!engine)
-			return;
-
-		engine->GetAudioProvider().SetVolume(m_Handle, volume);
-	}
-
 	bool AudioSource::IsPlaying() const
 	{
 		if (m_Handle == Audio::InvalidHandle)
@@ -110,19 +98,26 @@ namespace Nightbird::Core
 		return engine->GetAudioProvider().IsPlaying(m_Handle);
 	}
 
+	float AudioSource::GetVolume() const
+	{
+		return m_Volume;
+	}
+
+	void AudioSource::SetVolume(float volume)
+	{
+		if (m_Handle == Audio::InvalidHandle)
+			return;
+
+		Engine* engine = GetEngine();
+		if (!engine)
+			return;
+
+		engine->GetAudioProvider().SetVolume(m_Handle, volume);
+	}
+
 	const std::shared_ptr<AudioAsset>& AudioSource::GetAudioAsset() const
 	{
 		return m_AudioAsset;
-	}
-
-	bool AudioSource::GetLoop() const
-	{
-		return m_Loop;
-	}
-
-	bool AudioSource::GetPlayOnStart() const
-	{
-		return m_PlayOnStart;
 	}
 
 	void AudioSource::SetAudioAsset(std::shared_ptr<AudioAsset> asset)
@@ -130,13 +125,33 @@ namespace Nightbird::Core
 		m_AudioAsset = std::move(asset);
 	}
 
+	bool AudioSource::GetLoop() const
+	{
+		return m_Loop;
+	}
+
 	void AudioSource::SetLoop(bool loop)
 	{
 		m_Loop = loop;
 	}
 
+	bool AudioSource::GetPlayOnStart() const
+	{
+		return m_PlayOnStart;
+	}
+
 	void AudioSource::SetPlayOnStart(bool playOnStart)
 	{
 		m_PlayOnStart = playOnStart;
+	}
+
+	const uuids::uuid& AudioSource::GetAudioUUID() const
+	{
+		return m_AudioUUID;
+	}
+
+	void AudioSource::SetAudioUUID(const uuids::uuid& uuid)
+	{
+		m_AudioUUID = uuid;
 	}
 }

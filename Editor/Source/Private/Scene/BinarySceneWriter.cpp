@@ -8,6 +8,7 @@
 #include "Core/MeshInstance.h"
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 #include "Cook/BinaryWriter.h"
@@ -158,6 +159,15 @@ namespace Nightbird::Editor
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
 			WriteTransform(camera->transform, writer);
 			writer.WriteFloat(camera->fov);
+		}
+		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		{
+			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::AudioSource));
+			auto audioUUIDBytes = audioSource->GetAudioUUID().as_bytes();
+			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(audioUUIDBytes.data()), 16);
+			writer.WriteUInt8(audioSource->GetLoop() ? 1 : 0);
+			writer.WriteUInt8(audioSource->GetPlayOnStart() ? 1 : 0);
+			writer.WriteUInt8(audioSource->GetVolume());
 		}
 		else if (auto* spatialObject = object->Cast<Core::SpatialObject>())
 		{

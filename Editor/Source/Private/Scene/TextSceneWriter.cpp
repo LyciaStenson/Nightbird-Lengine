@@ -7,6 +7,7 @@
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
 #include "Core/Camera.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Editor
@@ -121,6 +122,14 @@ namespace Nightbird::Editor
 		{
 			node.insert("type", std::string("camera"));
 			node.insert("fov", camera->fov);
+		}
+		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		{
+			node.insert("type", std::string("audio_source"));
+			node.insert("audio_uuid", uuids::to_string(audioSource->GetAudioUUID()));
+			node.insert("loop", audioSource->GetLoop());
+			node.insert("play_on_start", audioSource->GetPlayOnStart());
+			node.insert("volume", audioSource->GetVolume());
 		}
 		else if (object->Cast<Core::SceneObject>())
 		{

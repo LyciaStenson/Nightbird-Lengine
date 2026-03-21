@@ -18,21 +18,15 @@ namespace Nightbird::Core
 {
 	class SceneObject;
 	class Camera;
+	class AudioSource;
+	class Mesh;
 	class Texture;
 	struct Material;
-	class Mesh;
 }
 
 namespace Nightbird::Editor
 {
 	class ImportManager;
-
-	//struct ManifestEntry
-	//{
-		//uuids::uuid uuid;
-		//std::string type;
-		//std::filesystem::path filePath;
-	//};
 
 	class CookManager
 	{
@@ -57,12 +51,12 @@ namespace Nightbird::Editor
 		std::unordered_map<const Core::Texture*, uuids::uuid> m_TextureUUIDs;
 		std::unordered_map<const Core::Material*, uuids::uuid> m_MaterialUUIDs;
 		std::unordered_map<const Core::Mesh*, uuids::uuid> m_MeshUUIDs;
-		
+
+		std::unordered_map<uuids::uuid, std::filesystem::path> m_AudioPathUUIDs;
+
 		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> m_ImportedSceneRoots;
 
 		std::unordered_set<uuids::uuid> m_CookedSceneUUIDs;
-
-		//std::vector<ManifestEntry> m_Manifest;
 
 		void WriteBinaryScene(Core::SceneObject* scene, const uuids::uuid& sceneUUID,
 			const std::filesystem::path& outputDir, Endianness endianness, Core::Camera* activeCamera = nullptr);

@@ -10,6 +10,7 @@
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
 #include "Core/Camera.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 #include <toml.hpp>
@@ -163,6 +164,18 @@ namespace Nightbird::Editor
 				camera->transform.scale = scale;
 				camera->fov = (*nodeTable)["fov"].value_or(70.0f);
 				object = std::move(camera);
+			}
+			else if (type == "audio_source")
+			{
+				auto audioSource = std::make_unique<Core::AudioSource>(name);
+				std::string audioUUIDString = (*nodeTable)["audio_uuid"].value_or(std::string{});
+				auto audioUUID = uuids::uuid::from_string(audioUUIDString);
+				if (audioUUID)
+					audioSource->SetAudioUUID(*audioUUID);
+				audioSource->SetLoop((*nodeTable)["loop"].value_or(false));
+				audioSource->SetPlayOnStart((*nodeTable)["play_on_start"].value_or(true));
+				audioSource->SetVolume(static_cast<float>((*nodeTable)["volume"].value_or(1.0f)));
+				object = std::move(audioSource);
 			}
 			else
 			{

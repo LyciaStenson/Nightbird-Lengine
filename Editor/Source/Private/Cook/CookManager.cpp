@@ -2,6 +2,7 @@
 
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
+#include "Core/AudioSource.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
 #include "Core/Material.h"
@@ -26,9 +27,9 @@ namespace Nightbird::Editor
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
 		m_MeshUUIDs.clear();
+		m_AudioPathUUIDs.clear();
 		m_ImportedSceneRoots.clear();
 		m_CookedSceneUUIDs.clear();
-		//m_Manifest.clear();
 		
 		TextSceneReader sceneReader(m_ImportManager);
 		SceneReadResult sceneReadResult = sceneReader.Read(textScenePath);
@@ -61,7 +62,6 @@ namespace Nightbird::Editor
 		BinarySceneWriter sceneWriter;
 		auto outputPath = outputDir / (uuids::to_string(sceneUUID) + ".nbscene");
 		sceneWriter.Write(root, sceneUUID, m_MeshUUIDs, outputPath, endianness, activeCamera);
-		//m_Manifest.push_back({ sceneUUID, "scene", outputPath });
 		Core::Log::Info("CookManager: Written binary scene: " + outputPath.string());
 	}
 
@@ -124,6 +124,21 @@ namespace Nightbird::Editor
 				}
 			}
 		}
+		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		{
+			Core::Log::Info("CookManager: Found AudioSouce: " + object->GetName());
+			uuids::uuid audioUUID = audioSource->GetAudioUUID();
+			Core::Log::Info("CookManager: Audio UUID: " + uuids::to_string(audioUUID));
+			if (!audioUUID.is_nil() && m_AudioPathUUIDs.find(audioUUID) == m_AudioPathUUIDs.end())
+			{
+				const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(audioUUID);
+				Core::Log::Info("CookManager: AssetInfo found: " + std::to_string(assetInfo != nullptr));
+				if (assetInfo)
+					m_AudioPathUUIDs[audioUUID] = assetInfo->sourcePath;
+				else
+					Core::Log::Warning("CookManager: No asset info found for: " + uuids::to_string(audioUUID));
+			}
+		}
 
 		for (const auto& child : object->GetChildren())
 			CollectAssets(child.get());
@@ -149,9 +164,8 @@ namespace Nightbird::Editor
 
 	void CookManager::CookAudio(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
-		auto uuid = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
-		if (uuid)
-			m_AudioCooker.Cook("Assets/Audio/epf.flac", *uuid, outputDir, target, endianness);
+		for (const auto& [uuid, sourcePath] : m_AudioPathUUIDs)
+			m_AudioCooker.Cook(sourcePath, uuid, outputDir, target, endianness);
 	}
 	
 	uuids::uuid CookManager::GenerateUUID() const

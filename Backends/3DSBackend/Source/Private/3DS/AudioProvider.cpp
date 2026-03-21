@@ -97,7 +97,7 @@ namespace Nightbird::N3DS
 		for (uint8_t channel = 0; channel < channelCount; channel++)
 			m_ActiveChannels[startChannel + channel] = true;
 
-		sound.buffer.Play(startChannel);
+		sound.buffer.Play(startChannel, loop);
 
 		Audio::Handle handle = sound.handle;
 		m_ActiveSounds.push_back(std::move(sound));
@@ -133,7 +133,7 @@ namespace Nightbird::N3DS
 		for (uint8_t channel = 0; channel < channelCount; channel++)
 			m_ActiveChannels[startChannel + channel] = true;
 
-		sound.buffer.Play(startChannel);
+		sound.buffer.Play(startChannel, false);
 		m_ActiveSounds.push_back(std::move(sound));
 	}
 

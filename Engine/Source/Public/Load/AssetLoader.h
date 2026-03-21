@@ -10,6 +10,7 @@ namespace Nightbird::Core
 {
 	class Scene;
 	class Mesh;
+	class AudioAsset;
 }
 
 namespace Nightbird::Load
@@ -18,6 +19,7 @@ namespace Nightbird::Load
 	class TextureLoader;
 	class MaterialLoader;
 	class MeshLoader;
+	class AudioLoader;
 
 	class AssetLoader
 	{
@@ -27,6 +29,7 @@ namespace Nightbird::Load
 		std::unique_ptr<Core::Scene> LoadScene(const uuids::uuid& uuid);
 
 		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
+		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);
 
 	private:
 		std::string m_CookedDir;
@@ -35,7 +38,9 @@ namespace Nightbird::Load
 		std::unique_ptr<TextureLoader> m_TextureLoader;
 		std::unique_ptr<MaterialLoader> m_MaterialLoader;
 		std::unique_ptr<MeshLoader> m_MeshLoader;
+		std::unique_ptr<AudioLoader> m_AudioLoader;
 
 		std::unordered_map<uuids::uuid, std::shared_ptr<Core::Mesh>> m_MeshCache;
+		std::unordered_map<uuids::uuid, std::shared_ptr<Core::AudioAsset>> m_AudioCache;
 	};
 }

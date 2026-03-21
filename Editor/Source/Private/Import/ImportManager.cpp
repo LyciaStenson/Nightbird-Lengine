@@ -2,6 +2,7 @@
 
 #include "Import/AssetInfo.h"
 #include "Import/GltfImporter.h"
+#include "Import/AudioImporter.h"
 
 #include "Core/Log.h"
 
@@ -15,6 +16,7 @@ namespace Nightbird::Editor
 		: m_AssetsDir(assetsDir)
 	{
 		m_Importers.push_back(std::make_unique<GltfImporter>());
+		m_Importers.push_back(std::make_unique<AudioImporter>());
 	}
 
 	void ImportManager::Scan()

@@ -4,6 +4,8 @@
 
 #include "Audio/AudioHandle.h"
 
+#include <uuid.h>
+
 #include <memory>
 
 namespace Nightbird::Core
@@ -25,19 +27,25 @@ namespace Nightbird::Core
 		void Pause();
 		void Resume();
 
-		void SetVolume(float volume);
-
 		bool IsPlaying() const;
 
-		const std::shared_ptr<AudioAsset>& GetAudioAsset() const;
-		bool GetLoop() const;
-		bool GetPlayOnStart() const;
+		float GetVolume() const;
+		void SetVolume(float volume);
 
+		const std::shared_ptr<AudioAsset>& GetAudioAsset() const;
 		void SetAudioAsset(std::shared_ptr<AudioAsset> asset);
+
+		bool GetLoop() const;
 		void SetLoop(bool loop);
+
+		bool GetPlayOnStart() const;
 		void SetPlayOnStart(bool playOnStart);
 
+		const uuids::uuid& GetAudioUUID() const;
+		void SetAudioUUID(const uuids::uuid& uuid);
+
 	private:
+		uuids::uuid m_AudioUUID;
 		std::shared_ptr<AudioAsset> m_AudioAsset;
 		Audio::Handle m_Handle = Audio::InvalidHandle;
 		bool m_Loop = false;

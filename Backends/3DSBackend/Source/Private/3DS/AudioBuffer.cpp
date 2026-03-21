@@ -119,7 +119,7 @@ namespace Nightbird::N3DS
 		return true;
 	}
 
-	void AudioBuffer::Play(int startChannel)
+	void AudioBuffer::Play(int startChannel, bool loop)
 	{
 		if (!m_Initialized)
 			return;
@@ -128,6 +128,8 @@ namespace Nightbird::N3DS
 		{
 			int ndspChannel = startChannel + channel;
 			ChannelBuffer& buffer = m_ChannelBuffers[channel];
+
+			buffer.waveBuf.looping = loop;
 
 			ndspChnSetInterp(ndspChannel, NDSP_INTERP_LINEAR);
 			ndspChnSetRate(ndspChannel, static_cast<float>(buffer.sampleRate));

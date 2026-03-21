@@ -10,6 +10,7 @@
 #include "Core/Mesh.h"
 #include "Core/MeshInstance.h"
 #include "Core/Camera.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 #include "Import/ImportManager.h"
@@ -22,6 +23,8 @@
 #include "Scene/BinarySceneReader.h"
 
 #include "Cook/CookManager.h"
+
+#include "Load/AudioLoader.h"
 
 using namespace Nightbird;
 
@@ -77,6 +80,19 @@ int main()
 	Editor::TextSceneReader sceneReader(importManager);
 	engine.SetScene(sceneReader.Read("Assets/Scenes/Serena.ntscene").scene);
 
+	//auto audioUUID = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
+	//if (!audioUUID)
+	//{
+		//Core::Log::Error("Invalid audio UUID");
+		//return -1;
+	//}
+
+	//auto audioSource = std::make_unique<Core::AudioSource>("EPF");
+	//audioSource->SetAudioUUID(*audioUUID);
+	//audioSource->SetLoop(true);
+	//audioSource->SetPlayOnStart(true);
+	//engine.GetScene().GetRoot()->AddChild(std::move(audioSource));
+
 	// auto directionalLight = std::make_unique<Core::DirectionalLight>("DirectionalLight");
 	// directionalLight->transform.rotation = glm::quat(glm::vec3(glm::radians(-45.0f), glm::radians(45.0f), 0.0f));
 	// directionalLight->color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -98,13 +114,13 @@ int main()
 	// engine.GetScene().GetRoot()->AddChild(std::move(camera));
 	// engine.GetScene().SetActiveCamera(cameraPtr);
 
-	// Editor::TextSceneWriter sceneWriter;
-	// sceneWriter.Write(engine.GetScene(), "Serena", GenerateUUID(), "Assets/Scenes/Serena.ntscene");
+	//Editor::TextSceneWriter sceneWriter;
+	//sceneWriter.Write(engine.GetScene(), "Serena", GenerateUUID(), "Assets/Scenes/Serena2.ntscene");
 
 	Editor::CookManager cookManager("Cooked", importManager);
-	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::Desktop);
-	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::WiiU);
-	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::N3DS);
+	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::Desktop);
+	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::WiiU);
+	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::N3DS);
 
 	engine.Initialize();
 	engine.RunLoop();

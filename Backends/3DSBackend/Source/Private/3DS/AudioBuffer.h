@@ -23,7 +23,7 @@ namespace Nightbird::N3DS
 		AudioBuffer& operator=(AudioBuffer&& other) noexcept;
 
 		bool Load(const Core::AudioAsset& audio);
-		void Play(int startChannel);
+		void Play(int startChannel, bool loop);
 		void Stop(int startChannel);
 
 		bool IsInitialized() const;

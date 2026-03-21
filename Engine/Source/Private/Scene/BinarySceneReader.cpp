@@ -12,6 +12,7 @@
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
 #include "Core/Camera.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Load
@@ -187,6 +188,30 @@ namespace Nightbird::Load
 					readNodesResult.activeCamera = camera.get();
 
 				object = std::move(camera);
+				break;
+			}
+			case Core::SceneObjectType::AudioSource:
+			{
+				auto audioSource = std::make_unique<Core::AudioSource>(nodeName);
+				std::array<uint8_t, 16> audioUUIDBytes;
+				reader.ReadRawBytes(audioUUIDBytes.data(), 16);
+				uuids::uuid audioUUID(audioUUIDBytes);
+				bool loop = reader.ReadUInt8() != 0;
+				bool playOnStart = reader.ReadUInt8() != 0;
+				float volume = reader.ReadFloat();
+				audioSource->SetLoop(loop);
+				audioSource->SetPlayOnStart(playOnStart);
+				audioSource->SetVolume(volume);
+				audioSource->SetAudioUUID(audioUUID);
+				if (!audioUUID.is_nil())
+				{
+					auto audio = m_AssetLoader.LoadAudio(audioUUID);
+					if (audio)
+						audioSource->SetAudioAsset(audio);
+					else
+						Core::Log::Warning("BinarySceneReader: Failed to load audio: " + uuids::to_string(audioUUID));
+				}
+				object = std::move(audioSource);
 				break;
 			}
 			default:

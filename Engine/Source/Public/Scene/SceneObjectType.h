@@ -11,6 +11,7 @@ namespace Nightbird::Core
 		Camera = 2,
 		MeshInstance = 3,
 		DirectionalLight = 4,
-		PointLight = 5
+		PointLight = 5,
+		AudioSource = 6
 	};
 }

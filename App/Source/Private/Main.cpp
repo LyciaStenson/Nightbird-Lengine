@@ -38,7 +38,7 @@ int main()
 
 	engine.Initialize();
 
-	auto sceneUUID = uuids::uuid::from_string("84b3db8c-2ce5-4053-9d2b-aced7bda4f03");
+	auto sceneUUID = uuids::uuid::from_string("664cd96f-2a3d-4eef-b0bd-3fc0b0efdab7");
 	if (!sceneUUID)
 	{
 		Core::Log::Error("Invalid scene UUID");
@@ -53,27 +53,6 @@ int main()
 		Core::Log::Error("Failed to load scene");
 		return -1;
 	}
-
-	auto audioUUID = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
-	if (!audioUUID)
-	{
-		Core::Log::Error("Invalid audio UUID");
-		return -1;
-	}
-
-	Load::AudioLoader audioLoader;
-	auto audio = audioLoader.Load(cookedPath, *audioUUID);
-	if (!audio)
-	{
-		Core::Log::Error("Failed to load audio");
-		return -1;
-	}
-
-	auto audioSource = std::make_unique<Core::AudioSource>("EPF");
-	audioSource->SetAudioAsset(audio);
-	audioSource->SetLoop(true);
-	audioSource->SetPlayOnStart(true);
-	scene->GetRoot()->AddChild(std::move(audioSource));
 
 	engine.SetScene(std::move(scene));
 
