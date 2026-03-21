@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Input/Provider.h"
-#include "Input/State.h"
+#include "Input/InputState.h"
 
 namespace Nightbird::Input
 {

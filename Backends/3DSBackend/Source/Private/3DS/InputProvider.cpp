@@ -17,7 +17,6 @@ namespace Nightbird::N3DS
 		{
 			size_t idx = static_cast<size_t>(button);
 			bool isDown = kHeld & key;
-			//bool wasDown = state.buttonsDown[idx];
 			state.buttonsDown[idx] = isDown;
 			if (kDown & key)
 				state.buttonsPressed[idx] = true;

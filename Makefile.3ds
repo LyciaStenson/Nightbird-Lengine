@@ -41,6 +41,7 @@ SOURCES		:=	App/Source/Private \
 			Engine/Source/Private \
 			Engine/Source/Private/Core \
 			Engine/Source/Private/Input \
+			Engine/Source/Private/Audio \
 			Engine/Source/Private/Load \
 			Engine/Source/Private/Scene \
 			Backends/3DSBackend/Source/Private \

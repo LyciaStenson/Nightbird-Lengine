@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "Input/System.h"
+#include "Input/InputSystem.h"
 
 namespace Nightbird::Core
 {

@@ -34,7 +34,7 @@ namespace Nightbird::WiiU
 		WHBProcShutdown();
 	}
 
-	void Platform::PollEvents()
+	void Platform::Update()
 	{
 
 	}

@@ -47,6 +47,7 @@ namespace Nightbird::Editor
 		CookTextures(m_CookOutputDir, target, m_Endianness);
 		CookMaterials(m_CookOutputDir, m_Endianness);
 		CookMeshes(m_CookOutputDir, m_Endianness);
+		CookAudio(m_CookOutputDir, target, m_Endianness);
 
 		for (auto& [uuid, importedRoot] : m_ImportedSceneRoots)
 			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
@@ -144,6 +145,13 @@ namespace Nightbird::Editor
 	{
 		for (const auto& [mesh, uuid] : m_MeshUUIDs)
 			m_MeshCooker.Cook(*mesh, uuid, outputDir, endianness, m_MaterialUUIDs);
+	}
+
+	void CookManager::CookAudio(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
+	{
+		auto uuid = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
+		if (uuid)
+			m_AudioCooker.Cook("Assets/Audio/epf.flac", *uuid, outputDir, target, endianness);
 	}
 	
 	uuids::uuid CookManager::GenerateUUID() const

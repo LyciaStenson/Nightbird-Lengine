@@ -4,6 +4,7 @@
 #include "Cook/TextureCooker.h"
 #include "Cook/MaterialCooker.h"
 #include "Cook/MeshCooker.h"
+#include "Cook/AudioCooker.h"
 
 #include "Scene/TextSceneWriter.h"
 
@@ -51,6 +52,7 @@ namespace Nightbird::Editor
 		TextureCooker m_TextureCooker;
 		MaterialCooker m_MaterialCooker;
 		MeshCooker m_MeshCooker;
+		AudioCooker m_AudioCooker;
 
 		std::unordered_map<const Core::Texture*, uuids::uuid> m_TextureUUIDs;
 		std::unordered_map<const Core::Material*, uuids::uuid> m_MaterialUUIDs;
@@ -70,6 +72,7 @@ namespace Nightbird::Editor
 		void CookTextures(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness);
 		void CookMaterials(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMeshes(const std::filesystem::path& outputDir, Endianness endianness);
+		void CookAudio(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness);
 
 		uuids::uuid GenerateUUID() const;
 		Endianness GetEndianness(CookTarget target) const;

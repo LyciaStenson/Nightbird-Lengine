@@ -43,6 +43,12 @@ namespace Nightbird::Editor
 			break;
 		}
 
+		if (data.empty())
+		{
+			Core::Log::Error("TextureCooker: Failed to cook: " + outputPath.string());
+			return;
+		}
+
 		BinaryWriter writer(outputPath, endianness);
 
 		// Type
@@ -67,7 +73,7 @@ namespace Nightbird::Editor
 		// Pixels
 		writer.WriteRawBytes(data.data(), data.size());
 
-		Core::Log::Info("Cooked texture: " + outputPath.string());
+		Core::Log::Info("TextureCooker: Cooked texture: " + outputPath.string());
 	}
 
 	std::vector<uint8_t> TextureCooker::CookRGBA(const Core::Texture& texture)
@@ -96,7 +102,7 @@ namespace Nightbird::Editor
 
 		if (!WritePNG(inputPath, texture.GetWidth(), texture.GetHeight(), pixels))
 		{
-			Core::Log::Error("Failed to write temporator PNG for tex3ds.");
+			Core::Log::Error("TextureCooker: Failed to write temporator PNG for tex3ds.");
 			return {};
 		}
 
@@ -105,14 +111,14 @@ namespace Nightbird::Editor
 		int result = std::system(command.c_str());
 		if (result != 0)
 		{
-			Core::Log::Error("tex3ds failed.");
+			Core::Log::Error("TextureCooker: tex3ds failed.");
 			return {};
 		}
 
 		std::ifstream file(outputPath, std::ios::binary);
 		if (!file)
 		{
-			Core::Log::Error("Failed to open tex3ds output.");
+			Core::Log::Error("TextureCooker: Failed to open tex3ds output.");
 			return {};
 		}
 

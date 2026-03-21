@@ -23,6 +23,7 @@ project "Editor"
 		"Source/Private",
 		"Vendor/tomlplusplus",
 		"Vendor/fastgltf/include",
+		"Vendor/dr_libs",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",

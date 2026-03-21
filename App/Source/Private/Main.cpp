@@ -2,7 +2,7 @@
 #include "Core/BackendFactory.h"
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
-#include "Input/Provider.h"
+#include "Input/InputProvider.h"
 
 #include "Core/Vertex.h"
 #include "Core/Material.h"

@@ -7,7 +7,7 @@
 
 #include "Core/Log.h"
 
-#include "Input/Provider.h"
+#include "Input/InputProvider.h"
 
 #include <chrono>
 
@@ -40,7 +40,7 @@ namespace Nightbird::Core
 			float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 			lastTime = currentTime;
 
-			m_Platform->PollEvents();
+			m_Platform->Update();
 
 			m_InputSystem.Update(m_Platform->GetInputProvider());
 			

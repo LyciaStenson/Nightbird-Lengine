@@ -1,4 +1,6 @@
-#include "Input/System.h"
+#include "Input/InputSystem.h"
+
+#include "Input/InputProvider.h"
 
 #include <glm/glm.hpp>
 

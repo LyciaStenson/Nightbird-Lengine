@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Input/Provider.h"
-#include "Input/State.h"
+#include "Input/InputProvider.h"
+#include "Input/InputState.h"
 
 #include <vpad/input.h>
 

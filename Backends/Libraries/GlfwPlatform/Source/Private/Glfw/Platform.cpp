@@ -16,7 +16,7 @@ namespace Nightbird::Glfw
 		glfwTerminate();
 	}
 
-	void Platform::PollEvents()
+	void Platform::Update()
 	{
 		glfwPollEvents();
 	}
