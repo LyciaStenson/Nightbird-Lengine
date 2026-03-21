@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "Input/InputSystem.h"
+#include "Audio/AudioProvider.h"
+#include "Core/AudioAsset.h"
 
 namespace Nightbird::Core
 {
@@ -15,9 +17,12 @@ namespace Nightbird::Core
 	public:
 		Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer);
 
-		void Run();
+		void Initialize();
+		void RunLoop();
+		void Shutdown();
 
 		Input::System& GetInputSystem();
+		Audio::Provider& GetAudioProvider();
 
 		Scene& GetScene();
 		void SetScene(std::unique_ptr<Scene> scene);

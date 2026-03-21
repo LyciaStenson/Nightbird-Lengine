@@ -17,15 +17,22 @@ namespace Nightbird::Core
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
 		m_Scene = std::make_unique<Scene>();
+		m_Scene->SetEngine(this);
 	}
-	
-	void Engine::Run()
+
+	void Engine::Initialize()
 	{
 		m_Platform->Initialize();
 		m_Renderer->Initialize();
+	}
 
+	void Engine::RunLoop()
+	{
 		MainLoop();
+	}
 
+	void Engine::Shutdown()
+	{
 		m_Renderer->Shutdown();
 		m_Platform->Shutdown();
 	}
@@ -60,6 +67,11 @@ namespace Nightbird::Core
 		return m_InputSystem;
 	}
 
+	Audio::Provider& Engine::GetAudioProvider()
+	{
+		return m_Platform->GetAudioProvider();
+	}
+
 	Scene& Engine::GetScene()
 	{
 		return *m_Scene;
@@ -68,5 +80,6 @@ namespace Nightbird::Core
 	void Engine::SetScene(std::unique_ptr<Scene> scene)
 	{
 		m_Scene = std::move(scene);
+		m_Scene->SetEngine(this);
 	}
 }

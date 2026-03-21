@@ -46,6 +46,11 @@ namespace Nightbird::Glfw
 		return *m_InputProvider;
 	}
 
+	Audio::Provider& Platform::GetAudioProvider()
+	{
+		return m_AudioProvider;
+	}
+
 	std::vector<const char*> Platform::GetRequiredExtensions() const
 	{
 		uint32_t count = 0;

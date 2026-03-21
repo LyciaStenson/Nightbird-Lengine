@@ -11,6 +11,9 @@
 
 namespace Nightbird::Core
 {
+	class Engine;
+	class Scene;
+
 	class SceneObject
 	{
 	public:
@@ -40,6 +43,9 @@ namespace Nightbird::Core
 
 		const std::string& GetName() const;
 
+		Engine* GetEngine() const;
+		void SetScene(Scene* scene);
+
 		void SetParent(SceneObject* parent);
 		SceneObject* GetParent() const;
 		
@@ -52,11 +58,14 @@ namespace Nightbird::Core
 		const std::optional<uuids::uuid>& GetSourceSceneUUID() const;
 		void SetSourceSceneUUID(const uuids::uuid& uuid);
 
+		void EnterSceneRecursive();
+
 		virtual void EnterScene();
 		virtual void Tick(float delta);
 
 	protected:
 		std::string m_Name;
+		Scene* m_Scene = nullptr;
 		SceneObject* m_Parent = nullptr;
 		std::vector<std::unique_ptr<SceneObject>> m_Children;
 

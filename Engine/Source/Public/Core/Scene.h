@@ -9,6 +9,7 @@
 
 namespace Nightbird::Core
 {
+	class Scene;
 	class MeshInstance;
 	class SceneObject;
 	class Camera;
@@ -20,6 +21,9 @@ namespace Nightbird::Core
 
 		void Update(float delta);
 
+		Engine* GetEngine() const;
+		void SetEngine(Engine* engine);
+
 		SceneObject* GetRoot();
 
 		Camera* GetActiveCamera() const;
@@ -30,9 +34,13 @@ namespace Nightbird::Core
 		std::vector<PointLight*> CollectPointLights() const;
 
 	private:
+		Engine* m_Engine = nullptr;
+
 		std::unique_ptr<SceneObject> m_Root;
 
 		Camera* m_ActiveCamera = nullptr;
+
+		void UpdateRecursive(SceneObject* object, float delta);
 
 		void CollectRenderablesRecursive(SceneObject* object, std::vector<Renderable>& renderables) const;
 		void CollectDirectionalLightsRecursive(SceneObject* object, std::vector<DirectionalLight*>& directionalLights) const;

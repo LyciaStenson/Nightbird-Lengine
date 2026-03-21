@@ -2,7 +2,8 @@
 
 #include "Core/Platform.h"
 
-#include "InputProvider.h"
+#include "Glfw/InputProvider.h"
+#include "Glfw/AudioProvider.h"
 
 #include <GLFW/glfw3.h>
 
@@ -25,6 +26,7 @@ namespace Nightbird::Glfw
 		virtual std::string GetCookedAssetsPath() const override;
 
 		Input::Provider& GetInputProvider() override;
+		Audio::Provider& GetAudioProvider() override;
 
 		std::vector<const char*> GetRequiredExtensions() const;
 
@@ -32,6 +34,7 @@ namespace Nightbird::Glfw
 
 	private:
 		std::unique_ptr<Input::Provider> m_InputProvider;
+		AudioProvider m_AudioProvider;
 
 		GLFWwindow* m_Window = nullptr;
 	};

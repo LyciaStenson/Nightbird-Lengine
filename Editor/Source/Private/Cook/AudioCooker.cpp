@@ -2,7 +2,7 @@
 
 #include "Cook/BinaryWriter.h"
 
-#include "Core/Audio.h"
+#include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
 #define DR_WAV_IMPLEMENTATION

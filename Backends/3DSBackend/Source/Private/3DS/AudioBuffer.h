@@ -6,7 +6,7 @@
 
 namespace Nightbird::Core
 {
-	class Audio;
+	class AudioAsset;
 }
 
 namespace Nightbird::N3DS
@@ -22,7 +22,7 @@ namespace Nightbird::N3DS
 		AudioBuffer(AudioBuffer&& other) noexcept;
 		AudioBuffer& operator=(AudioBuffer&& other) noexcept;
 
-		bool Load(const Core::Audio& audio);
+		bool Load(const Core::AudioAsset& audio);
 		void Play(int startChannel);
 		void Stop(int startChannel);
 

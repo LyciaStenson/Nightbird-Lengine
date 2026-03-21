@@ -2,19 +2,24 @@
 #include "Core/BackendFactory.h"
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
+
 #include "Input/InputProvider.h"
+#include "Audio/AudioProvider.h"
+#include "Core/AudioAsset.h"
 
 #include "Core/Vertex.h"
 #include "Core/Material.h"
 #include "Core/Mesh.h"
 #include "Core/MeshInstance.h"
 #include "Core/Camera.h"
+#include "Core/AudioSource.h"
 #include "Core/Log.h"
 
 #include "Load/AssetLoader.h"
 #include "Load/MeshLoader.h"
 #include "Load/MaterialLoader.h"
 #include "Load/TextureLoader.h"
+#include "Load/AudioLoader.h"
 #include "Scene/BinarySceneReader.h"
 
 #include <uuid.h>
@@ -31,34 +36,7 @@ int main()
 
 	Core::Engine engine(std::move(platform), std::move(renderer));
 
-	//std::vector<Core::Vertex> vertices =
-	//{
-		//{ glm::vec3( 0.0f,  0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.5f, 0.0f), glm::vec2(0), glm::vec2(0) },
-		//{ glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec2(0), glm::vec2(0) },
-		//{ glm::vec3( 0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0), glm::vec2(0) }
-	//};
-
-	//std::vector<uint16_t> indices = { 0, 1, 2 };
-
-	//auto material = std::make_shared<Core::Material>();
-	//material->baseColorFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	//std::vector<Core::MeshPrimitive> primitives = { Core::MeshPrimitive(vertices, indices, material) };
-	//auto mesh = std::make_shared<Core::Mesh>(primitives);
-
-	//auto meshInstance = std::make_unique<Core::MeshInstance>("MeshInstance", mesh);
-	//meshInstance->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	//auto camera = std::make_unique<Core::Camera>("Camera");
-	//camera->transform.position = glm::vec3(0.0f, 0.0f, 5.0f);
-
-	//Core::Camera* cameraPtr = camera.get();
-
-	//engine.GetScene().GetRoot()->AddChild(std::move(meshInstance));
-	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
-	//engine.GetScene().SetActiveCamera(cameraPtr);
-
-	Load::AssetLoader assetLoader(cookedPath);
+	engine.Initialize();
 
 	auto sceneUUID = uuids::uuid::from_string("84b3db8c-2ce5-4053-9d2b-aced7bda4f03");
 	if (!sceneUUID)
@@ -67,6 +45,8 @@ int main()
 		return -1;
 	}
 
+	Load::AssetLoader assetLoader(cookedPath);
+
 	auto scene = assetLoader.LoadScene(*sceneUUID);
 	if (!scene)
 	{
@@ -74,9 +54,31 @@ int main()
 		return -1;
 	}
 
+	auto audioUUID = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
+	if (!audioUUID)
+	{
+		Core::Log::Error("Invalid audio UUID");
+		return -1;
+	}
+
+	Load::AudioLoader audioLoader;
+	auto audio = audioLoader.Load(cookedPath, *audioUUID);
+	if (!audio)
+	{
+		Core::Log::Error("Failed to load audio");
+		return -1;
+	}
+
+	auto audioSource = std::make_unique<Core::AudioSource>("EPF");
+	audioSource->SetAudioAsset(audio);
+	audioSource->SetLoop(true);
+	audioSource->SetPlayOnStart(true);
+	scene->GetRoot()->AddChild(std::move(audioSource));
+
 	engine.SetScene(std::move(scene));
 
-	engine.Run();
+	engine.RunLoop();
+	engine.Shutdown();
 
 	return 0;
 }

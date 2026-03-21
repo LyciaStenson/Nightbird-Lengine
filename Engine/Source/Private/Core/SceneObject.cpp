@@ -1,5 +1,9 @@
 #include "Core/SceneObject.h"
 
+#include "Core/Engine.h"
+#include "Core/Scene.h"
+#include "Core/Log.h"
+
 namespace Nightbird::Core
 {
 	NB_OBJECT_BASE_IMPL(SceneObject)
@@ -13,6 +17,18 @@ namespace Nightbird::Core
 	const std::string& SceneObject::GetName() const
 	{
 		return m_Name;
+	}
+
+	Engine* SceneObject::GetEngine() const
+	{
+		return m_Scene ? m_Scene->GetEngine() : nullptr;
+	}
+
+	void SceneObject::SetScene(Scene* scene)
+	{
+		m_Scene = scene;
+		for (auto& child : m_Children)
+			child->SetScene(scene);
 	}
 
 	void SceneObject::SetParent(SceneObject* parent)
@@ -37,8 +53,12 @@ namespace Nightbird::Core
 
 	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
+		child->SetScene(m_Scene);
 		child->SetParent(this);
 		m_Children.push_back(std::move(child));
+
+		if (m_Scene && m_Scene->GetEngine())
+			m_Children.back()->EnterSceneRecursive();
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::DetachChild(SceneObject* child)
@@ -70,6 +90,13 @@ namespace Nightbird::Core
 	void SceneObject::SetSourceSceneUUID(const uuids::uuid& uuid)
 	{
 		m_SourceSceneUUID = uuid;
+	}
+
+	void SceneObject::EnterSceneRecursive()
+	{
+		EnterScene();
+		for (const auto& child : m_Children)
+			child->EnterSceneRecursive();
 	}
 
 	void SceneObject::EnterScene()

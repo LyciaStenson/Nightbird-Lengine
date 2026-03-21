@@ -23,6 +23,7 @@ namespace Nightbird::N3DS
 		virtual std::string GetCookedAssetsPath() const override;
 
 		Input::Provider& GetInputProvider() override;
+		Audio::Provider& GetAudioProvider() override;
 
 	private:
 		InputProvider m_InputProvider;

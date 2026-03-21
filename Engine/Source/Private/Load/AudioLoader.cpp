@@ -2,12 +2,12 @@
 
 #include "Load/BinaryReader.h"
 
-#include "Core/Audio.h"
+#include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Load
 {
-	std::shared_ptr<Core::Audio> AudioLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Core::AudioAsset> AudioLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbaudio";
 		BinaryReader reader(path);
@@ -56,6 +56,6 @@ namespace Nightbird::Load
 			reader.ReadRawBytes(channelData[channel].data(), channelSizes[channel]);
 		}
 
-		return std::make_shared<Core::Audio>(sampleRate, frameCount, channels, encoding, std::move(channelData));
+		return std::make_shared<Core::AudioAsset>(sampleRate, frameCount, channels, encoding, std::move(channelData));
 	}
 }

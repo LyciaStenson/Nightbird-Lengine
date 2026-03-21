@@ -1,6 +1,6 @@
 #include "3DS/AudioBuffer.h"
 
-#include "Core/Audio.h"
+#include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
 #include <cstring>
@@ -52,7 +52,7 @@ namespace Nightbird::N3DS
 		return *this;
 	}
 
-	bool AudioBuffer::Load(const Core::Audio& audio)
+	bool AudioBuffer::Load(const Core::AudioAsset& audio)
 	{
 		Cleanup();
 

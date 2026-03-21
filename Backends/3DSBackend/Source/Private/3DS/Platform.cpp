@@ -62,4 +62,9 @@ namespace Nightbird::N3DS
 	{
 		return m_InputProvider;
 	}
+
+	Audio::Provider& Platform::GetAudioProvider()
+	{
+		return m_AudioProvider;
+	}
 }

@@ -11,10 +11,10 @@ namespace Nightbird::Core
 		DSP_ADPCM = 1
 	};
 
-	class Audio
+	class AudioAsset
 	{
 	public:
-		Audio(uint32_t sampleRate, uint32_t frameCount, uint8_t channels, AudioEncoding encoding, std::vector<std::vector<uint8_t>> channelData);
+		AudioAsset(uint32_t sampleRate, uint32_t frameCount, uint8_t channels, AudioEncoding encoding, std::vector<std::vector<uint8_t>> channelData);
 
 		uint32_t GetSampleRate() const;
 		uint32_t GetFrameCount() const;

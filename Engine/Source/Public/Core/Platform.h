@@ -7,6 +7,11 @@ namespace Nightbird::Input
 	class Provider;
 }
 
+namespace Nightbird::Audio
+{
+	class Provider;
+}
+
 namespace Nightbird::Core
 {
 	class Platform
@@ -24,5 +29,6 @@ namespace Nightbird::Core
 		virtual std::string GetCookedAssetsPath() const = 0;
 
 		virtual Input::Provider& GetInputProvider() = 0;
+		virtual Audio::Provider& GetAudioProvider() = 0;
 	};
 }

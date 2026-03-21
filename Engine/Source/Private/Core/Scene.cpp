@@ -1,5 +1,6 @@
 #include "Core/Scene.h"
 
+#include "Core/Engine.h"
 #include "Core/SceneObject.h"
 #include "Core/MeshInstance.h"
 #include "Core/Log.h"
@@ -13,10 +14,19 @@ namespace Nightbird::Core
 	
 	void Scene::Update(float delta)
 	{
-		for (const auto& child : m_Root->GetChildren())
-		{
-			child->Tick(delta);
-		}
+		UpdateRecursive(m_Root.get(), delta);
+	}
+
+	Engine* Scene::GetEngine() const
+	{
+		return m_Engine;
+	}
+
+	void Scene::SetEngine(Engine* engine)
+	{
+		m_Engine = engine;
+		m_Root->SetScene(this);
+		m_Root->EnterSceneRecursive();
 	}
 
 	SceneObject* Scene::GetRoot()
@@ -53,6 +63,16 @@ namespace Nightbird::Core
 		std::vector<PointLight*> pointLights;
 		CollectPointLightsRecursive(m_Root.get(), pointLights);
 		return pointLights;
+	}
+
+	void Scene::UpdateRecursive(SceneObject* object, float delta)
+	{
+		if (!object)
+			return;
+
+		object->Tick(delta);
+		for (const auto& child : object->GetChildren())
+			UpdateRecursive(child.get(), delta);
 	}
 
 	void Scene::CollectRenderablesRecursive(SceneObject* object, std::vector<Renderable>& renderables) const

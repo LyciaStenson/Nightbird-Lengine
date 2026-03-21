@@ -106,7 +106,9 @@ int main()
 	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::WiiU);
 	cookManager.Cook("Assets/Scenes/Serena.ntscene", Editor::CookTarget::N3DS);
 
-	engine.Run();
+	engine.Initialize();
+	engine.RunLoop();
+	engine.Shutdown();
 
 	return 0;
 }

@@ -7,7 +7,7 @@
 
 namespace Nightbird::Core
 {
-	class Audio;
+	class AudioAsset;
 }
 
 namespace Nightbird::Load
@@ -15,6 +15,6 @@ namespace Nightbird::Load
 	class AudioLoader
 	{
 	public:
-		std::shared_ptr<Core::Audio> Load(const std::string& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Core::AudioAsset> Load(const std::string& cookedDir, const uuids::uuid& uuid);
 	};
 }
