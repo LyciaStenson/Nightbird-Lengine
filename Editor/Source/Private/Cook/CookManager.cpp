@@ -85,7 +85,7 @@ namespace Nightbird::Editor
 				return;
 			}
 
-			auto importedRoot = m_ImportManager.Import(assetInfo->sourcePath);
+			auto importedRoot = m_ImportManager.LoadScene(assetInfo->uuid);
 
 			for (const auto& child : importedRoot->GetChildren())
 				CollectAssets(child.get());

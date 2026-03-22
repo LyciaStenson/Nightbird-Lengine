@@ -1,4 +1,4 @@
-#include "Import/GltfImporter.h"
+#include "Import/GltfSceneImporter.h"
 
 #include "Import/AssetInfo.h"
 
@@ -19,17 +19,12 @@
 
 namespace Nightbird::Editor
 {
-	std::string GltfImporter::GetName() const
-	{
-		return "gltf";
-	}
-
-	bool GltfImporter::SupportsExtension(const std::string& extension) const
+	bool GltfSceneImporter::SupportsExtension(const std::string& extension) const
 	{
 		return extension == ".glb" || extension == ".gltf";
 	}
 	
-	std::unique_ptr<Core::SceneObject> GltfImporter::Import(const AssetInfo& assetInfo)
+	std::unique_ptr<Core::SceneObject> GltfSceneImporter::Load(const AssetInfo& assetInfo)
 	{
 		fastgltf::Parser parser;
 
@@ -72,7 +67,7 @@ namespace Nightbird::Editor
 		return root;
 	}
 
-	void GltfImporter::ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SpatialObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials)
+	void GltfSceneImporter::ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SpatialObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials)
 	{
 		const fastgltf::Node& node = gltfAsset.nodes[nodeIndex];
 		
@@ -103,7 +98,7 @@ namespace Nightbird::Editor
 		parent->AddChild(std::move(spatialNode));
 	}
 	
-	std::vector<std::shared_ptr<Core::Texture>> GltfImporter::LoadTextures(const fastgltf::Asset& gltfAsset)
+	std::vector<std::shared_ptr<Core::Texture>> GltfSceneImporter::LoadTextures(const fastgltf::Asset& gltfAsset)
 	{
 		std::unordered_map<size_t, std::tuple<std::vector<uint8_t>, int, int>> decodedImages;
 		for (size_t i = 0; i < gltfAsset.images.size(); ++i)
@@ -135,7 +130,7 @@ namespace Nightbird::Editor
 		return textures;
 	}
 	
-	std::vector<std::shared_ptr<Core::Material>> GltfImporter::LoadMaterials(const fastgltf::Asset& gltfAsset, const std::vector<std::shared_ptr<Core::Texture>>& textures)
+	std::vector<std::shared_ptr<Core::Material>> GltfSceneImporter::LoadMaterials(const fastgltf::Asset& gltfAsset, const std::vector<std::shared_ptr<Core::Texture>>& textures)
 	{
 		std::vector<std::shared_ptr<Core::Material>> materials(gltfAsset.materials.size());
 
@@ -178,7 +173,7 @@ namespace Nightbird::Editor
 		return materials;
 	}
 	
-	std::shared_ptr<Core::Mesh> GltfImporter::LoadMesh(const fastgltf::Asset& gltfAsset, const fastgltf::Mesh& gltfMesh, const std::vector<std::shared_ptr<Core::Material>>& materials)
+	std::shared_ptr<Core::Mesh> GltfSceneImporter::LoadMesh(const fastgltf::Asset& gltfAsset, const fastgltf::Mesh& gltfMesh, const std::vector<std::shared_ptr<Core::Material>>& materials)
 	{
 		std::vector<Core::MeshPrimitive> primitives;
 
@@ -287,7 +282,7 @@ namespace Nightbird::Editor
 		return std::make_shared<Core::Mesh>(std::move(primitives));
 	}
 	
-	bool GltfImporter::DecodeImage(const fastgltf::Asset& gltfAsset, const fastgltf::Image& image, std::vector<uint8_t>& outPixels, int& outWidth, int& outHeight)
+	bool GltfSceneImporter::DecodeImage(const fastgltf::Asset& gltfAsset, const fastgltf::Image& image, std::vector<uint8_t>& outPixels, int& outWidth, int& outHeight)
 	{
 		bool decoded = false;
 

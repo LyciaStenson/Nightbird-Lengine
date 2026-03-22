@@ -17,13 +17,15 @@ namespace Nightbird::Core
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
 		m_Scene = std::make_unique<Scene>();
-		m_Scene->SetEngine(this);
 	}
 
 	void Engine::Initialize()
 	{
 		m_Platform->Initialize();
 		m_Renderer->Initialize();
+
+		if (m_Scene)
+			m_Scene->SetEngine(this);
 	}
 
 	void Engine::RunLoop()

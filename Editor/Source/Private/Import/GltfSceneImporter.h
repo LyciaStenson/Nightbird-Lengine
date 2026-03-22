@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Import/Importer.h"
+#include "Import/SceneImporter.h"
 
 #include "Core/SceneObject.h"
 #include "Core/Mesh.h"
@@ -21,12 +21,12 @@ namespace Nightbird::Core
 
 namespace Nightbird::Editor
 {
-	class GltfImporter : public Importer
+	class GltfSceneImporter : public SceneImporter
 	{
 	public:
-		std::string GetName() const override;
+		std::string GetName() const override { return "gltf"; }
 		bool SupportsExtension(const std::string& extensions) const override;
-		std::unique_ptr<Core::SceneObject> Import(const AssetInfo& assetInfo) override;
+		std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) override;
 
 	private:
 		void ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SpatialObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials);

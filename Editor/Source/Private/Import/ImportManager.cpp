@@ -1,8 +1,9 @@
 #include "Import/ImportManager.h"
 
 #include "Import/AssetInfo.h"
-#include "Import/GltfImporter.h"
-#include "Import/AudioImporter.h"
+#include "Import/AssetType.h"
+#include "Import/GltfSceneImporter.h"
+#include "Import/DrLibsAudioImporter.h"
 
 #include "Core/Log.h"
 
@@ -15,8 +16,8 @@ namespace Nightbird::Editor
 	ImportManager::ImportManager(const std::filesystem::path& assetsDir)
 		: m_AssetsDir(assetsDir)
 	{
-		m_Importers.push_back(std::make_unique<GltfImporter>());
-		m_Importers.push_back(std::make_unique<AudioImporter>());
+		m_Importers.push_back(std::make_unique<GltfSceneImporter>());
+		m_Importers.push_back(std::make_unique<DrLibsAudioImporter>());
 	}
 
 	void ImportManager::Scan()
@@ -44,40 +45,69 @@ namespace Nightbird::Editor
 		}
 	}
 
-	std::unique_ptr<Core::SceneObject> ImportManager::Import(const std::filesystem::path& sourcePath)
+	AssetType ImportManager::GetAssetType(const uuids::uuid& uuid) const
 	{
-		std::filesystem::path infoPath = sourcePath.string() + ".assetinfo";
-		if (!std::filesystem::exists(infoPath))
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+			return AssetType::Unknown;
+
+		for (const auto& importer : m_Importers)
 		{
-			Core::Log::Warning("No .assetinfo file found for " + sourcePath.string());
-			return nullptr;
+			if (importer->GetName() == assetInfo->importer)
+				return importer->GetAssetType();
 		}
+		return AssetType::Unknown;
+	}
 
-		ReadAssetInfoFile(infoPath);
+	const AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid) const
+	{
+		auto it = m_AssetInfos.find(uuid);
+		if (it != m_AssetInfos.end())
+			return &it->second;
+		return nullptr;
+	}
 
-		AssetInfo* foundAsset = nullptr;
-		for (auto& [uuid, assetInfo] : m_AssetInfos)
+	std::unique_ptr<Core::SceneObject> ImportManager::LoadScene(const uuids::uuid& uuid)
+	{
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
 		{
-			if (assetInfo.sourcePath == sourcePath)
-			{
-				foundAsset = &assetInfo;
-				break;
-			}
-		}
-
-		if (!foundAsset)
-		{
-			Core::Log::Warning("Failed to find asser info for: " + sourcePath.string());
+			Core::Log::Warning("ImportManager: AssetInfo not found for scene UUID: " + uuids::to_string(uuid));
 			return nullptr;
 		}
 
 		for (const auto& importer : m_Importers)
 		{
-			if (importer->GetName() == foundAsset->importer)
-				return importer->Import(*foundAsset);
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (importer->GetAssetType() == AssetType::Scene)
+					return static_cast<SceneImporter*>(importer.get())->Load(*assetInfo);
+			}
 		}
 
-		Core::Log::Warning("No importer found for: " + foundAsset->importer);
+		Core::Log::Warning("ImportManager: No scene importer found for: " + assetInfo->importer);
+		return nullptr;
+	}
+
+	std::shared_ptr<Core::AudioAsset> ImportManager::LoadAudio(const uuids::uuid& uuid)
+	{
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+		{
+			Core::Log::Warning("ImportManager: AssetInfo not found for audio UUID: " + uuids::to_string(uuid));
+			return nullptr;
+		}
+
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (importer->GetAssetType() == AssetType::Audio)
+					return static_cast<AudioImporter*>(importer.get())->Load(*assetInfo);
+			}
+		}
+
+		Core::Log::Warning("ImportManager: No audio importer found for: " + assetInfo->importer);
 		return nullptr;
 	}
 
@@ -94,7 +124,7 @@ namespace Nightbird::Editor
 		return gen();
 	}
 
-	std::string ImportManager::FindImporter(const std::filesystem::path& sourcePath)
+	std::string ImportManager::FindImporterName(const std::filesystem::path& sourcePath)
 	{
 		for (const auto& importer : m_Importers)
 		{
@@ -106,7 +136,7 @@ namespace Nightbird::Editor
 
 	void ImportManager::GenerateAssetInfoFile(const std::filesystem::path& sourcePath)
 	{
-		std::string importerName = FindImporter(sourcePath);
+		std::string importerName = FindImporterName(sourcePath);
 		if (importerName.empty())
 			return;
 
@@ -126,7 +156,7 @@ namespace Nightbird::Editor
 		file << table;
 		file.close();
 
-		Core::Log::Info("Generated .assetinfo file: " + assetInfoPath.string());
+		Core::Log::Info("Generated .assetinfo: " + assetInfoPath.string());
 
 		ReadAssetInfoFile(assetInfoPath);
 	}
@@ -135,7 +165,7 @@ namespace Nightbird::Editor
 	{
 		if (!std::filesystem::exists(assetInfoPath) || std::filesystem::file_size(assetInfoPath) == 0)
 		{
-			Core::Log::Error("Invalid .assetinfo file: " + assetInfoPath.string());
+			Core::Log::Error("Invalid .assetinfo: " + assetInfoPath.string());
 			return;
 		}
 
@@ -162,18 +192,10 @@ namespace Nightbird::Editor
 
 		std::string assetInfoPathString = assetInfoPath.string();
 		assetInfo.sourcePath = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
-		
+
 		if (table.contains("params"))
 			assetInfo.params = *table["params"].as_table();
 		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
-	}
-
-	const AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid) const
-	{
-		auto it = m_AssetInfos.find(uuid);
-		if (it != m_AssetInfos.end())
-			return &it->second;
-		return nullptr;
 	}
 }

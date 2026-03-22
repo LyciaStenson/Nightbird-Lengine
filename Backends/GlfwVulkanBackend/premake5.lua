@@ -30,6 +30,7 @@ project "GlfwVulkanBackend"
 		"%{wks.location}/Engine/Vendor/stduuid",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Source/Public",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/glfw/include",
+		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/miniaudio",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Source/Public",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/vulkan-headers/include",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/volk",

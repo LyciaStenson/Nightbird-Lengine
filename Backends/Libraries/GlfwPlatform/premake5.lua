@@ -21,7 +21,8 @@ project "GlfwPlatform"
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",
-		"Vendor/glfw/include"
+		"Vendor/glfw/include",
+		"Vendor/miniaudio"
 	}
 	
 	links { "Engine", "GLFW" }

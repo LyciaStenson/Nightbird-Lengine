@@ -16,8 +16,6 @@ namespace Nightbird::N3DS
 		Core::Log::SetInfoFunc([](const std::string& message) { printf("[Info] %s\n", message.c_str()); });
 		Core::Log::SetWarningFunc([](const std::string& message) { printf("[Warning] %s\n", message.c_str()); });
 		Core::Log::SetErrorFunc([](const std::string& message) { printf("[Error] %s\n", message.c_str()); });
-
-		Core::Log::Info("Platform initialized");
 	}
 
 	void Platform::Initialize()

@@ -55,8 +55,6 @@ namespace Nightbird::PICA
 
 		m_DefaultTexture = std::make_shared<Texture>();
 		m_DefaultTexture->InitFromPixels(8, 8, pixels);
-
-		Core::Log::Info("Renderer initialized");
 	}
 
 	void Renderer::Shutdown()

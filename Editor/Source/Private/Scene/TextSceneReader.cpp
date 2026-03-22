@@ -171,7 +171,14 @@ namespace Nightbird::Editor
 				std::string audioUUIDString = (*nodeTable)["audio_uuid"].value_or(std::string{});
 				auto audioUUID = uuids::uuid::from_string(audioUUIDString);
 				if (audioUUID)
+				{
 					audioSource->SetAudioUUID(*audioUUID);
+					auto audioAsset = m_ImportManager.LoadAudio(*audioUUID);
+					if (audioAsset)
+						audioSource->SetAudioAsset(audioAsset);
+					else
+						Core::Log::Error("TextSceneReader: Failed to load audio: " + audioUUIDString);
+				}
 				audioSource->SetLoop((*nodeTable)["loop"].value_or(false));
 				audioSource->SetPlayOnStart((*nodeTable)["play_on_start"].value_or(true));
 				audioSource->SetVolume(static_cast<float>((*nodeTable)["volume"].value_or(1.0f)));
@@ -189,16 +196,11 @@ namespace Nightbird::Editor
 				if (sceneUUID)
 				{
 					object->SetSourceSceneUUID(*sceneUUID);
-
-					const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(*sceneUUID);
-					if (assetInfo)
+					auto importedRoot = m_ImportManager.LoadScene(*sceneUUID);
+					if (importedRoot)
 					{
-						auto importedRoot = m_ImportManager.Import(assetInfo->sourcePath);
-						if (importedRoot)
-						{
-							for (auto& child : importedRoot->GetChildren())
-								object->AddChild(std::move(child));
-						}
+						for (auto& child : importedRoot->GetChildren())
+							object->AddChild(std::move(child));
 					}
 					else
 					{

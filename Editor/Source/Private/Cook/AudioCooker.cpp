@@ -5,9 +5,7 @@
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
-#define DR_WAV_IMPLEMENTATION
 #include <dr_wav.h>
-#define DR_FLAC_IMPLEMENTATION
 #include <dr_flac.h>
 
 #include <fstream>
@@ -122,12 +120,11 @@ namespace Nightbird::Editor
 
 			uint32_t dataSize = static_cast<uint32_t>(frameCount * channels * sizeof(drwav_int16));
 
-			std::vector<uint8_t> result(4 + dataSize);
-			std::memcpy(result.data(), &dataSize, 4);
-			std::memcpy(result.data() + 4, decoded, dataSize);
+			std::vector<uint8_t> result;
+			result.insert(result.end(), reinterpret_cast<uint8_t*>(&dataSize), reinterpret_cast<uint8_t*>(&dataSize) + 4);
+			result.insert(result.end(), reinterpret_cast<const uint8_t*>(decoded), reinterpret_cast<const uint8_t*>(decoded) + dataSize);
 
 			drwav_free(decoded, nullptr);
-
 			return result;
 		}
 		else if (extension == ".flac")
@@ -148,12 +145,11 @@ namespace Nightbird::Editor
 
 			uint32_t dataSize = static_cast<uint32_t>(frameCount * channels * sizeof(drflac_int16));
 
-			std::vector<uint8_t> result(4 + dataSize);
-			std::memcpy(result.data(), &dataSize, 4);
-			std::memcpy(result.data() + 4, decoded, dataSize);
+			std::vector<uint8_t> result;
+			result.insert(result.end(), reinterpret_cast<uint8_t*>(&dataSize), reinterpret_cast<uint8_t*>(&dataSize) + 4);
+			result.insert(result.end(), reinterpret_cast<const uint8_t*>(decoded), reinterpret_cast<const uint8_t*>(decoded) + dataSize);
 
 			drflac_free(decoded, nullptr);
-
 			return result;
 		}
 

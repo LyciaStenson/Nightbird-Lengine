@@ -8,16 +8,22 @@ namespace Nightbird::Glfw
 		m_Window = glfwCreateWindow(1280, 720, "Nightbird", nullptr, nullptr);
 
 		m_InputProvider = std::make_unique<InputProvider>(m_Window);
+
+		m_AudioProvider.Initialize();
 	}
 
 	void Platform::Shutdown()
 	{
+		m_AudioProvider.Shutdown();
+
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
 	void Platform::Update()
 	{
+		m_AudioProvider.Update();
+
 		glfwPollEvents();
 	}
 

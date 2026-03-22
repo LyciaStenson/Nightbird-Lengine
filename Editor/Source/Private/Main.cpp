@@ -51,7 +51,7 @@ int main()
 	Editor::ImportManager importManager("Assets");
 	importManager.Scan();
 
-	//auto result = importManager.Import("Assets/Models/witch_treehouse.glb");
+	//auto result = importManager.LoadScene("Assets/Models/witch_treehouse.glb");
 	//if (auto* witchTreehouse = result.get()->Cast<Core::SpatialObject>())
 	//{
 	//	witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -64,7 +64,7 @@ int main()
 	//	Core::Log::Error("Failed to import model");
 	//}
 
-	// auto result = importManager.Import("Assets/Models/serena.glb");
+	// auto result = importManager.LoadScene("Assets/Models/serena.glb");
 	// if (auto* serena = result.get()->Cast<Core::SpatialObject>())
 	// {
 	// 	serena->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -78,7 +78,7 @@ int main()
 	// }
 
 	Editor::TextSceneReader sceneReader(importManager);
-	engine.SetScene(sceneReader.Read("Assets/Scenes/Serena.ntscene").scene);
+	engine.SetScene(sceneReader.Read("Assets/Scenes/Serena2.ntscene").scene);
 
 	//auto audioUUID = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
 	//if (!audioUUID)

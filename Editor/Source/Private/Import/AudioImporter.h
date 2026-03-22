@@ -2,13 +2,21 @@
 
 #include "Import/Importer.h"
 
+#include <memory>
+
+namespace Nightbird::Core
+{
+	class AudioAsset;
+}
+
 namespace Nightbird::Editor
 {
+	struct AssetInfo;
+
 	class AudioImporter : public Importer
 	{
 	public:
-		std::string GetName() const override;
-		bool SupportsExtension(const std::string& extension) const override;
-		std::unique_ptr<Core::SceneObject> Import(const AssetInfo& assetInfo) override;
+		AssetType GetAssetType() const override { return AssetType::Audio; }
+		virtual std::shared_ptr<Core::AudioAsset> Load(const AssetInfo& assetInfo) = 0;
 	};
 }
