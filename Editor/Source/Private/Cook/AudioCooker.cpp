@@ -26,6 +26,15 @@ namespace Nightbird::Editor
 		return std::vector<uint8_t>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 	}
 
+	static void ByteSwapPCM16(int16_t* data, uint64_t sampleCount)
+	{
+		for (uint64_t i = 0; i < sampleCount; i++)
+		{
+			uint8_t* bytes = reinterpret_cast<uint8_t*>(&data[i]);
+			std::swap(bytes[0], bytes[1]);
+		}
+	}
+
 	void AudioCooker::Cook(const std::filesystem::path& sourcePath, const uuids::uuid& uuid, const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
 		std::filesystem::create_directories(outputDir);
@@ -35,24 +44,28 @@ namespace Nightbird::Editor
 		uint32_t frameCount = 0;
 		uint8_t channels = 0;
 		Core::AudioEncoding encoding;
+		bool planar = false;
 		std::vector<uint8_t> data;
 
 		switch (target)
 		{
 			case CookTarget::Desktop:
-				// Faill through
+				encoding = Core::AudioEncoding::PCM16;
+				planar = false;
+				data = CookPCM16(sourcePath, sampleRate, frameCount, channels, endianness, planar);
+				break;
 			case CookTarget::WiiU:
 				encoding = Core::AudioEncoding::PCM16;
-				data = CookPCM16(sourcePath, sampleRate, frameCount, channels);
+				planar = true;
+				data = CookPCM16(sourcePath, sampleRate, frameCount, channels, endianness, planar);
 				break;
 			case CookTarget::N3DS:
 				encoding = Core::AudioEncoding::DSP_ADPCM;
 				data = CookDSPADPCM(sourcePath, uuid, sampleRate, frameCount, channels);
 				break;
 			default:
-				encoding = Core::AudioEncoding::PCM16;
-				data = CookPCM16(sourcePath, sampleRate, frameCount, channels);
-				break;
+				Core::Log::Error("AudioCooker: Unknown target");
+				return;
 		}
 
 		if (data.empty())
@@ -78,8 +91,11 @@ namespace Nightbird::Editor
 		// Channels
 		writer.WriteUInt8(channels);
 
+		// Planar
+		writer.WriteUInt8(planar ? 1 : 0);
+
 		// Padding
-		writer.WriteUInt16(0);
+		writer.WriteUInt8(0);
 
 		// Sample rate
 		writer.WriteUInt32(sampleRate);
@@ -93,7 +109,7 @@ namespace Nightbird::Editor
 		Core::Log::Info("Cooked audio: " + outputPath.string());
 	}
 
-	std::vector<uint8_t> AudioCooker::CookPCM16(const std::filesystem::path& sourcePath, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels)
+	std::vector<uint8_t> AudioCooker::CookPCM16(const std::filesystem::path& sourcePath, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels, Endianness endianness, bool planar)
 	{
 		std::string extension = sourcePath.extension().string();
 		for (auto& c : extension)
@@ -101,60 +117,66 @@ namespace Nightbird::Editor
 
 		unsigned int channels, sampleRate;
 
+		uint64_t frameCount = 0;
+		int16_t* decoded = nullptr;
+
 		// Collect metadata
 		if (extension == ".wav")
 		{
-			drwav_uint64 frameCount;
-
-			drwav_int16* decoded = drwav_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
-
-			if (!decoded)
-			{
-				Core::Log::Error("AudioCooker: Failed to decode WAV: " + sourcePath.string());
-				return {};
-			}
-
-			outSampleRate = sampleRate;
-			outFrameCount = static_cast<uint32_t>(frameCount);
-			outChannels = static_cast<uint8_t>(channels);
-
-			uint32_t dataSize = static_cast<uint32_t>(frameCount * channels * sizeof(drwav_int16));
-
-			std::vector<uint8_t> result;
-			result.insert(result.end(), reinterpret_cast<uint8_t*>(&dataSize), reinterpret_cast<uint8_t*>(&dataSize) + 4);
-			result.insert(result.end(), reinterpret_cast<const uint8_t*>(decoded), reinterpret_cast<const uint8_t*>(decoded) + dataSize);
-
-			drwav_free(decoded, nullptr);
-			return result;
+			decoded = drwav_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drwav_uint64*>(&frameCount), nullptr);
 		}
 		else if (extension == ".flac")
 		{
-			drflac_uint64 frameCount;
-
-			drflac_int16* decoded = drflac_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drflac_uint64*>(&frameCount), nullptr);
-
-			if (!decoded)
-			{
-				Core::Log::Error("AudioCooker: Failed to decode FLAC: " + sourcePath.string());
-				return {};
-			}
-
-			outSampleRate = sampleRate;
-			outFrameCount = static_cast<uint32_t>(frameCount);
-			outChannels = static_cast<uint8_t>(channels);
-
-			uint32_t dataSize = static_cast<uint32_t>(frameCount * channels * sizeof(drflac_int16));
-
-			std::vector<uint8_t> result;
-			result.insert(result.end(), reinterpret_cast<uint8_t*>(&dataSize), reinterpret_cast<uint8_t*>(&dataSize) + 4);
-			result.insert(result.end(), reinterpret_cast<const uint8_t*>(decoded), reinterpret_cast<const uint8_t*>(decoded) + dataSize);
-
-			drflac_free(decoded, nullptr);
-			return result;
+			decoded = drflac_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drflac_uint64*>(&frameCount), nullptr);
+		}
+		else
+		{
+			Core::Log::Error("AudioCooker: Unsupported format for PCM16 cooking: " + extension);
+			return {};
 		}
 
-		Core::Log::Error("AudioCooker: Unsupported format for PCM16 cooking: " + extension);
-		return {};
+		if (!decoded)
+		{
+			Core::Log::Error("AudioCooker: Failed to decode audio: " + sourcePath.string());
+			return {};
+		}
+
+		outSampleRate = sampleRate;
+		outFrameCount = static_cast<uint32_t>(frameCount);
+		outChannels = static_cast<uint8_t>(channels);
+
+		uint64_t totalSamples = frameCount * channels;
+
+		if (endianness == Endianness::Big)
+			ByteSwapPCM16(decoded, totalSamples);
+
+		std::vector<uint8_t> result;
+		result.resize(totalSamples * sizeof(int16_t));
+
+		if (planar && channels > 1)
+		{
+			int16_t* planarPtr = reinterpret_cast<int16_t*>(result.data());
+			for (uint32_t frame = 0; frame < frameCount; ++frame)
+			{
+				for (uint8_t channel = 0; channel < channels; ++channel)
+				{
+					planarPtr[channel * frameCount + frame] = decoded[frame * channels + channel];
+				}
+			}
+		}
+		else
+		{
+			std::memcpy(result.data(), decoded, totalSamples * sizeof(int16_t));
+		}
+
+		if (extension == ".wav")
+			drwav_free(decoded, nullptr);
+		else if (extension == ".flac")
+			drflac_free(decoded, nullptr);
+		else
+			free(decoded);
+
+		return result;
 	}
 
 	std::vector<uint8_t> AudioCooker::CookDSPADPCM(const std::filesystem::path& sourcePath, const uuids::uuid& uuid, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels)
@@ -234,7 +256,7 @@ namespace Nightbird::Editor
 
 		for (uint8_t channel = 0; channel < outChannels; channel++)
 		{
-			std::filesystem::path dspPath = tempDir / (uuidString + "_ch" + std::to_string(channel) + ".dsp");
+			std::filesystem::path dspPath = tempDir / (uuidString + "_channel" + std::to_string(channel) + ".dsp");
 
 			std::string command = vgaudio +
 				" -i:" + std::to_string(channel) +

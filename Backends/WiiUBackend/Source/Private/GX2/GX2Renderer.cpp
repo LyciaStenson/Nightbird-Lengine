@@ -4,6 +4,7 @@
 #include "Core/Camera.h"
 #include "Core/MeshPrimitive.h"
 #include "Core/Material.h"
+#include "Core/Texture.h"
 #include "Core/Log.h"
 
 #include <coreinit/memdefaultheap.h>
@@ -76,7 +77,7 @@ namespace Nightbird::GX2
 		m_ModelData = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 
 		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
-		m_DefaultTexture = std::make_shared<Core::Texture>(1, 1, pixels);
+		m_DefaultTexture = std::make_shared<Core::Texture>(1, 1, Core::TextureFormat::RGBA8, pixels);
 	}
 
 	void Renderer::Shutdown()

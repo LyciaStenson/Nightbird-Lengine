@@ -26,12 +26,14 @@ namespace Nightbird::N3DS
 	void Platform::Shutdown()
 	{
 		m_AudioProvider.Shutdown();
+
 		gfxExit();
 	}
 
 	void Platform::Update()
 	{
 		hidScanInput();
+
 		m_AudioProvider.Update();
 	}
 

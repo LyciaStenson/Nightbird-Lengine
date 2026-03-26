@@ -5,16 +5,14 @@
 
 #include "Core/AudioAsset.h"
 
-#include <miniaudio.h>
+#include <sndcore2/core.h>
+#include <sndcore2/voice.h>
+#include <sndcore2/device.h>
 
+#include <vector>
 #include <memory>
 
-namespace Nightbird::Core
-{
-	class AudioAsset;
-}
-
-namespace Nightbird::Glfw
+namespace Nightbird::WiiU
 {
 	class AudioProvider : public Audio::Provider
 	{
@@ -37,20 +35,20 @@ namespace Nightbird::Glfw
 		struct ActiveSound
 		{
 			Audio::Handle handle;
-			ma_audio_buffer audioBuffer;
-			ma_sound sound;
-			bool audioBufferInitialized = false;
-			bool soundInitialized = false;
+			std::vector<AXVoice*> voices;
+			std::vector<uint8_t*> buffers;
+			bool looping = false;
 			bool playOnce = false;
+			uint8_t channels = 0;
 		};
 
-		ma_engine m_AudioEngine;
 		Audio::Handle m_NextHandle = 1;
 		std::vector<std::unique_ptr<ActiveSound>> m_ActiveSounds;
 
 		bool m_Initialized = false;
 
 		Audio::Handle StartSound(const Core::AudioAsset& audio, bool loop, bool playOnce);
+		void SetupVoice(AXVoice* voice, void* data, uint32_t frames, uint32_t sampleRate, bool loop, uint8_t channel, uint8_t totalChannels);
 		ActiveSound* FindSound(Audio::Handle handle);
 		const ActiveSound* FindSound(Audio::Handle handle) const;
 		void DestroySound(ActiveSound& sound);

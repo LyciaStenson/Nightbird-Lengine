@@ -2,6 +2,8 @@
 
 #include "Core/Vertex.h"
 
+#include <cstring>
+
 namespace Nightbird::Load
 {
 	BinaryReader::BinaryReader(const std::string& path)
@@ -19,7 +21,9 @@ namespace Nightbird::Load
 	T BinaryReader::ReadValue()
 	{
 		T value;
-		m_File.read(reinterpret_cast<char*>(&value), sizeof(T));
+		uint8_t buffer[sizeof(T)];
+		m_File.read(reinterpret_cast<char*>(buffer), sizeof(T));
+		std::memcpy(&value, buffer, sizeof(T));
 		return value;
 	}
 

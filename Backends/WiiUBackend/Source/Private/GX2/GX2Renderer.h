@@ -3,7 +3,6 @@
 #include "Core/Renderer.h"
 
 #include "Core/Renderable.h"
-#include "Core/Texture.h"
 
 #include "GX2/GX2Geometry.h"
 #include "GX2/GX2Material.h"
@@ -20,6 +19,7 @@ namespace Nightbird::Core
 	class Scene;
 	class Camera;
 	class MeshPrimitive;
+	class Texture;
 	struct Material;
 }
 

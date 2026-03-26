@@ -35,7 +35,7 @@ namespace Nightbird::Editor
 			break;
 		case CookTarget::N3DS:
 			format = Core::TextureFormat::T3X;
-			data = Cook3DS(texture, uuid);
+			data = CookT3X(texture, uuid);
 			break;
 		default:
 			format = Core::TextureFormat::RGBA8;
@@ -82,7 +82,7 @@ namespace Nightbird::Editor
 		return std::vector<uint8_t>(data.begin(), data.end());
 	}
 
-	std::vector<uint8_t> TextureCooker::Cook3DS(const Core::Texture& texture, const uuids::uuid& uuid)
+	std::vector<uint8_t> TextureCooker::CookT3X(const Core::Texture& texture, const uuids::uuid& uuid)
 	{
 		std::filesystem::path tempDir = std::filesystem::temp_directory_path();
 

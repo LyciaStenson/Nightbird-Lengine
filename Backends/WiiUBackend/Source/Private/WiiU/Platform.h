@@ -2,7 +2,8 @@
 
 #include "Core/Platform.h"
 
-#include "InputProvider.h"
+#include "WiiU/InputProvider.h"
+#include "WiiU/AudioProvider.h"
 
 namespace Nightbird::WiiU
 {
@@ -20,8 +21,10 @@ namespace Nightbird::WiiU
 		virtual std::string GetCookedAssetsPath() const override;
 
 		Input::Provider& GetInputProvider() override;
+		Audio::Provider& GetAudioProvider() override;
 
 	private:
 		InputProvider m_InputProvider;
+		AudioProvider m_AudioProvider;
 	};
 }

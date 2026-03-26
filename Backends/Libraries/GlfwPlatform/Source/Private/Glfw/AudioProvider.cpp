@@ -137,6 +137,10 @@ namespace Nightbird::Glfw
 			return Audio::InvalidHandle;
 		}
 
+		auto activeSound = std::make_unique<ActiveSound>();
+		activeSound->handle = m_NextHandle++;
+		activeSound->playOnce = playOnce;
+
 		const auto& blob = audio.GetChannelData(0);
 		if (blob.empty())
 		{
@@ -144,13 +148,8 @@ namespace Nightbird::Glfw
 			return Audio::InvalidHandle;
 		}
 
-		const void* pcmData = blob.data();
-
-		ma_audio_buffer_config bufferConfig = ma_audio_buffer_config_init(ma_format_s16, audio.GetChannels(), audio.GetFrameCount(), pcmData, nullptr);
-
-		auto activeSound = std::make_unique<ActiveSound>();
-		activeSound->handle = m_NextHandle++;
-		activeSound->playOnce = playOnce;
+		ma_audio_buffer_config bufferConfig = ma_audio_buffer_config_init(ma_format_s16, audio.GetChannels(), audio.GetFrameCount(), blob.data(), nullptr);
+		bufferConfig.sampleRate = audio.GetSampleRate();
 
 		ma_result result = ma_audio_buffer_init(&bufferConfig, &activeSound->audioBuffer);
 		if (result != MA_SUCCESS)

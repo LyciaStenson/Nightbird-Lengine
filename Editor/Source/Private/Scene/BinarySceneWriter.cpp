@@ -167,7 +167,7 @@ namespace Nightbird::Editor
 			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(audioUUIDBytes.data()), 16);
 			writer.WriteUInt8(audioSource->GetLoop() ? 1 : 0);
 			writer.WriteUInt8(audioSource->GetPlayOnStart() ? 1 : 0);
-			writer.WriteUInt8(audioSource->GetVolume());
+			writer.WriteFloat(audioSource->GetVolume());
 		}
 		else if (auto* spatialObject = object->Cast<Core::SpatialObject>())
 		{

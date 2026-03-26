@@ -1,4 +1,4 @@
-#include "Platform.h"
+#include "WiiU/Platform.h"
 
 #include "Core/Log.h"
 
@@ -24,11 +24,13 @@ namespace Nightbird::WiiU
 
 	void Platform::Initialize()
 	{
-
+		m_AudioProvider.Initialize();
 	}
 
 	void Platform::Shutdown()
 	{
+		m_AudioProvider.Shutdown();
+
 		WHBUnmountSdCard();
 		WHBLogCafeDeinit();
 		WHBProcShutdown();
@@ -36,7 +38,7 @@ namespace Nightbird::WiiU
 
 	void Platform::Update()
 	{
-
+		m_AudioProvider.Update();
 	}
 
 	void Platform::WaitEvents()
@@ -63,5 +65,10 @@ namespace Nightbird::WiiU
 	Input::Provider& Platform::GetInputProvider()
 	{
 		return m_InputProvider;
+	}
+
+	Audio::Provider& Platform::GetAudioProvider()
+	{
+		return m_AudioProvider;
 	}
 }

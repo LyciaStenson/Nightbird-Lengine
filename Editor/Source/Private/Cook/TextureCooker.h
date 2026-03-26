@@ -22,6 +22,6 @@ namespace Nightbird::Editor
 
 	private:
 		std::vector<uint8_t> CookRGBA(const Core::Texture& texture);
-		std::vector<uint8_t> Cook3DS(const Core::Texture& texture, const uuids::uuid& uuid);
+		std::vector<uint8_t> CookT3X(const Core::Texture& texture, const uuids::uuid& uuid);
 	};
 }

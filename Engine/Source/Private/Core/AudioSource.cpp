@@ -88,6 +88,7 @@ namespace Nightbird::Core
 
 	bool AudioSource::IsPlaying() const
 	{
+		return false;
 		if (m_Handle == Audio::InvalidHandle)
 			return false;
 

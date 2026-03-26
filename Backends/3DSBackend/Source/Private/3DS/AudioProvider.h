@@ -21,15 +21,15 @@ namespace Nightbird::N3DS
 		void Shutdown() override;
 		void Update() override;
 
-		Audio::Handle Play(const Core::AudioAsset& audio, bool loop);
-		void PlayOnce(const Core::AudioAsset& audio);
-		void Stop(Audio::Handle handle);
-		void Pause(Audio::Handle handle);
-		void Resume(Audio::Handle handle);
+		Audio::Handle Play(const Core::AudioAsset& audio, bool loop) override;
+		void PlayOnce(const Core::AudioAsset& audio) override;
+		void Stop(Audio::Handle handle) override;
+		void Pause(Audio::Handle handle) override;
+		void Resume(Audio::Handle handle) override;
 
-		void SetVolume(Handle handle, float volume);
+		void SetVolume(Audio::Handle handle, float volume) override;
 
-		bool IsPlaying(Handle handle) const;
+		bool IsPlaying(Audio::Handle handle) const override;
 
 	private:
 		static constexpr int k_MaxChannels = 24;
