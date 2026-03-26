@@ -207,6 +207,7 @@ namespace Nightbird::WiiU
 		activeSound->playOnce = playOnce;
 		activeSound->channels = channels;
 
+		std::vector<uint8_t*> buffers(channels, nullptr);
 		for (uint8_t channel = 0; channel < channels; ++channel)
 		{
 			const auto& channelData = audio.GetChannelData(channel);
@@ -231,13 +232,23 @@ namespace Nightbird::WiiU
 
 			std::memcpy(buffer, channelData.data(), channelData.size());
 			DCFlushRange(buffer, channelData.size());
+			buffers[channel] = buffer;
 			activeSound->buffers.push_back(buffer);
+		}
 
-			AXVoice* voice = AXAcquireVoice(31, nullptr, nullptr);
-			if (!voice)
+		if (channels == 2)
+		{
+			AXVoice* voiceLeft = AXAcquireVoice(31, nullptr, nullptr);
+			AXVoice* voiceRight = AXAcquireVoice(31, nullptr, nullptr);
+
+			if (!voiceLeft || !voiceRight)
 			{
-				Core::Log::Error("AudioProvider: Failed to acquire voice for channel " + std::to_string(channel));
+				Core::Log::Error("AudioProvider: Failed to acquire stereo voices");
 
+				if (voiceLeft)
+					AXFreeVoice(voiceLeft);
+				if (voiceRight)
+					AXFreeVoice(voiceRight);
 				for (AXVoice* voice : activeSound->voices)
 					AXFreeVoice(voice);
 				for (auto* buffer : activeSound->buffers)
@@ -245,19 +256,11 @@ namespace Nightbird::WiiU
 
 				return Audio::InvalidHandle;
 			}
-			activeSound->voices.push_back(voice);
 
-			SetupVoice(voice, buffer, frames, audio.GetSampleRate(), loop, channel, channels);
+			activeSound->voices.push_back(voiceLeft);
+			activeSound->voices.push_back(voiceRight);
 
-			AXVoiceBegin(voice);
-			AXSetVoiceState(voice, AX_VOICE_STATE_PLAYING);
-			AXVoiceEnd(voice);
-		}
-
-		if (activeSound->voices.empty())
-		{
-			Core::Log::Error("AudioProvider: Failed to create voices");
-			return Audio::InvalidHandle;
+			SetupStereoVoices(voiceLeft, voiceRight, buffers[0], buffers[1], frames, audio.GetSampleRate(), loop);
 		}
 
 		Audio::Handle handle = activeSound->handle;
@@ -265,69 +268,62 @@ namespace Nightbird::WiiU
 		return handle;
 	}
 
-	void AudioProvider::SetupVoice(AXVoice* voice, void* data, uint32_t frames, uint32_t sampleRate, bool loop, uint8_t channel, uint8_t totalChannels)
+	void AudioProvider::SetupStereoVoices(AXVoice* voiceLeft, AXVoice* voiceRight, void* dataLeft, void* dataRight, uint32_t frames, uint32_t sampleRate, bool loop)
 	{
-		AXVoiceBegin(voice);
-		AXSetVoiceType(voice, AX_VOICE_TYPE_UNKNOWN);
+		AXVoiceBegin(voiceLeft);
+		AXVoiceBegin(voiceRight);
 
-		AXVoiceOffsets offsets{};
-		offsets.dataType = AX_VOICE_FORMAT_LPCM16;
-		offsets.loopingEnabled = loop ? AX_VOICE_LOOP_ENABLED : AX_VOICE_LOOP_DISABLED;
-		offsets.loopOffset = 0;
-		offsets.endOffset = frames - 1;
-		offsets.currentOffset = 0;
-		offsets.data = data;
-		AXSetVoiceOffsets(voice, &offsets);
+		AXSetVoiceType(voiceLeft,  AX_VOICE_TYPE_UNKNOWN);
+		AXSetVoiceType(voiceRight, AX_VOICE_TYPE_UNKNOWN);
 
-		AXSetVoiceSrcRatio(voice, static_cast<float>(sampleRate) / static_cast<float>(AXGetInputSamplesPerSec()));
-		AXSetVoiceSrcType(voice, AX_VOICE_SRC_TYPE_LINEAR);
+		AXVoiceOffsets offsetsLeft{};
+		offsetsLeft.dataType       = AX_VOICE_FORMAT_LPCM16;
+		offsetsLeft.loopingEnabled = loop ? AX_VOICE_LOOP_ENABLED : AX_VOICE_LOOP_DISABLED;
+		offsetsLeft.loopOffset     = 0;
+		offsetsLeft.endOffset      = frames - 1;
+		offsetsLeft.currentOffset  = 0;
+		offsetsLeft.data           = dataLeft;
+		AXSetVoiceOffsets(voiceLeft, &offsetsLeft);
+
+		AXVoiceOffsets offsetsRight = offsetsLeft;
+		offsetsRight.data = dataRight;
+		AXSetVoiceOffsets(voiceRight, &offsetsRight);
+
+		float ratio = static_cast<float>(sampleRate) / static_cast<float>(AXGetInputSamplesPerSec());
+		AXSetVoiceSrcRatio(voiceLeft,  ratio);
+		AXSetVoiceSrcRatio(voiceRight, ratio);
+		AXSetVoiceSrcType(voiceLeft,  AX_VOICE_SRC_TYPE_LINEAR);
+		AXSetVoiceSrcType(voiceRight, AX_VOICE_SRC_TYPE_LINEAR);
 
 		AXVoiceVeData veData{};
 		veData.volume = 0x8000;
-		veData.delta = 0;
-		AXSetVoiceVe(voice, &veData);
+		veData.delta  = 0;
+		AXSetVoiceVe(voiceLeft,  &veData);
+		AXSetVoiceVe(voiceRight, &veData);
 
-		AXVoiceDeviceMixData tvMix{};
-		AXVoiceDeviceMixData drcMix{};
+		// TV supports surround sound = 6
+		AXVoiceDeviceMixData tvMixLeft[6] = {};
+		AXVoiceDeviceMixData tvMixRight[6] = {};
+		tvMixLeft[0].bus[0].volume  = 0x8000; // Left
+		tvMixRight[1].bus[0].volume = 0x8000; // Right
 
-		if (totalChannels == 1)
-		{
-			// Mono: center
-			tvMix.bus[0].volume = 0x8000;
-			tvMix.bus[1].volume = 0x8000;
-			drcMix.bus[0].volume = 0x8000;
-			drcMix.bus[1].volume = 0x8000;
-		}
-		else if (totalChannels == 2)
-		{
-			if (channel == 0) // Left
-			{
-				tvMix.bus[0].volume = 0x8000;
-				tvMix.bus[1].volume = 0x0000;
-				drcMix.bus[0].volume = 0x8000;
-				drcMix.bus[1].volume = 0x0000;
-			}
-			else if (channel == 1) // Right
-			{
-				tvMix.bus[0].volume = 0x0000;
-				tvMix.bus[1].volume = 0x8000;
-				drcMix.bus[0].volume = 0x0000;
-				drcMix.bus[1].volume = 0x8000;
-			}
-		}
-		else
-		{
-			// More than 2 channels: naive center
-			tvMix.bus[0].volume = 0x8000;
-			tvMix.bus[1].volume = 0x8000;
-			drcMix.bus[0].volume = 0x8000;
-			drcMix.bus[1].volume = 0x8000;
-		}
+		AXSetVoiceDeviceMix(voiceLeft,  AX_DEVICE_TYPE_TV, 0, tvMixLeft);
+		AXSetVoiceDeviceMix(voiceRight, AX_DEVICE_TYPE_TV, 0, tvMixRight);
 
-		AXSetVoiceDeviceMix(voice, AX_DEVICE_TYPE_TV, 0, &tvMix);
-		AXSetVoiceDeviceMix(voice, AX_DEVICE_TYPE_DRC, 0, &drcMix);
+		// Gamepad (DRC) stereo = 2
+		AXVoiceDeviceMixData drcMixLeft[2] = {};
+		AXVoiceDeviceMixData drcMixRight[2] = {};
+		drcMixLeft[0].bus[0].volume  = 0x8000;
+		drcMixRight[1].bus[0].volume = 0x8000;
 
-		AXVoiceEnd(voice);
+		AXSetVoiceDeviceMix(voiceLeft,  AX_DEVICE_TYPE_DRC, 0, drcMixLeft);
+		AXSetVoiceDeviceMix(voiceRight, AX_DEVICE_TYPE_DRC, 0, drcMixRight);
+
+		AXSetVoiceState(voiceLeft,  AX_VOICE_STATE_PLAYING);
+		AXSetVoiceState(voiceRight, AX_VOICE_STATE_PLAYING);
+
+		AXVoiceEnd(voiceRight);
+		AXVoiceEnd(voiceLeft);
 	}
 
 	AudioProvider::ActiveSound* AudioProvider::FindSound(Audio::Handle handle)

@@ -48,7 +48,7 @@ namespace Nightbird::WiiU
 		bool m_Initialized = false;
 
 		Audio::Handle StartSound(const Core::AudioAsset& audio, bool loop, bool playOnce);
-		void SetupVoice(AXVoice* voice, void* data, uint32_t frames, uint32_t sampleRate, bool loop, uint8_t channel, uint8_t totalChannels);
+		void SetupStereoVoices(AXVoice* voiceLeft, AXVoice* voiceRight, void* dataLeft, void* dataRight, uint32_t frames, uint32_t sampleRate, bool loop);
 		ActiveSound* FindSound(Audio::Handle handle);
 		const ActiveSound* FindSound(Audio::Handle handle) const;
 		void DestroySound(ActiveSound& sound);
