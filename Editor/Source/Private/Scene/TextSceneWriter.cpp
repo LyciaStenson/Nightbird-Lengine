@@ -73,7 +73,7 @@ namespace Nightbird::Editor
 		else
 			node.insert("parent", std::string{});
 
-		if (auto* spatialObject = object->Cast<Core::SpatialObject>())
+		if (auto* spatialObject = Cast<Core::SpatialObject>(object))
 		{
 			toml::array position;
 			position.push_back(spatialObject->transform.position.x);
@@ -95,7 +95,7 @@ namespace Nightbird::Editor
 			node.insert("scale", scale);
 		}
 		
-		if (auto* directionalLight = object->Cast<Core::DirectionalLight>())
+		if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
 		{
 			node.insert("type", std::string("directional_light"));
 
@@ -106,7 +106,7 @@ namespace Nightbird::Editor
 			node.insert("color", color);
 			node.insert("intensity", directionalLight->intensity);
 		}
-		else if (auto* pointLight = object->Cast<Core::PointLight>())
+		else if (auto* pointLight = Cast<Core::PointLight>(object))
 		{
 			node.insert("type", std::string("point_light"));
 
@@ -118,12 +118,12 @@ namespace Nightbird::Editor
 			node.insert("intensity", pointLight->intensity);
 			node.insert("radius", pointLight->radius);
 		}
-		else if (auto* camera = object->Cast<Core::Camera>())
+		else if (auto* camera = Cast<Core::Camera>(object))
 		{
 			node.insert("type", std::string("camera"));
 			node.insert("fov", camera->fov);
 		}
-		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{
 			node.insert("type", std::string("audio_source"));
 			node.insert("audio_uuid", uuids::to_string(audioSource->GetAudioUUID()));
@@ -131,7 +131,7 @@ namespace Nightbird::Editor
 			node.insert("play_on_start", audioSource->GetPlayOnStart());
 			node.insert("volume", audioSource->GetVolume());
 		}
-		else if (object->Cast<Core::SceneObject>())
+		else if (Cast<Core::SpatialObject>(object))
 		{
 			node.insert("type", std::string("spatial_object"));
 		}

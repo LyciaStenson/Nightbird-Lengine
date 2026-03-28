@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Nightbird::Core
+namespace Nightbird
 {
 	struct TypeInfo
 	{
@@ -19,18 +19,40 @@ namespace Nightbird::Core
 			return false;
 		}
 	};
+
+	template<typename T, typename U>
+	T* Cast(U* obj)
+	{
+		if (obj && obj->GetTypeInfo()->IsA(&T::s_TypeInfo))
+			return static_cast<T*>(obj);
+		return nullptr;
+	}
+
+	template<typename T, typename U>
+	const T* Cast(const U* obj)
+	{
+		if (obj && obj->GetTypeInfo()->IsA(&T::s_TypeInfo))
+			return static_cast<const T*>(obj);
+		return nullptr;
+	}
+
+	template<typename T, typename U>
+	bool IsA(const U* obj)
+	{
+		return obj && obj->GetTypeInfo()->IsA(&T::s_TypeInfo);
+	}
 }
 
 #define NB_OBJECT(ClassName, ParentClass) \
-	static const ::Nightbird::Core::TypeInfo s_TypeInfo; \
-	const ::Nightbird::Core::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
+	static const ::Nightbird::TypeInfo s_TypeInfo; \
+	const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
 
 #define NB_OBJECT_BASE(ClassName) \
-	static const ::Nightbird::Core::TypeInfo s_TypeInfo; \
-	virtual const ::Nightbird::Core::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
+	static const ::Nightbird::TypeInfo s_TypeInfo; \
+	virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
 
 #define NB_OBJECT_IMPL(ClassName, ParentClass) \
-	const ::Nightbird::Core::TypeInfo ClassName::s_TypeInfo = { #ClassName, &ParentClass::s_TypeInfo };
+	const ::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, &ParentClass::s_TypeInfo };
 
 #define NB_OBJECT_BASE_IMPL(ClassName) \
-	const ::Nightbird::Core::TypeInfo ClassName::s_TypeInfo = { #ClassName, nullptr };
+	const ::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, nullptr };

@@ -94,7 +94,7 @@ namespace Nightbird::Editor
 			return;
 		}
 
-		if (auto* meshInstance = object->Cast<Core::MeshInstance>())
+		if (auto* meshInstance = Cast<Core::MeshInstance>(object))
 		{
 			Core::Log::Info("CookManager: Found MeshInstance: " + object->GetName());
 
@@ -124,7 +124,7 @@ namespace Nightbird::Editor
 				}
 			}
 		}
-		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{
 			Core::Log::Info("CookManager: Found AudioSouce: " + object->GetName());
 			uuids::uuid audioUUID = audioSource->GetAudioUUID();

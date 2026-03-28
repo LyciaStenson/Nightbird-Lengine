@@ -19,25 +19,6 @@ namespace Nightbird::Core
 	public:
 		NB_OBJECT_BASE(SceneObject)
 
-		template<typename T>
-		bool IsA() const { return GetTypeInfo()->IsA(&T::s_TypeInfo); }
-
-		template<typename T>
-		T* Cast()
-		{
-			if (IsA<T>())
-				return static_cast<T*>(this);
-			return nullptr;
-		}
-
-		template<typename T>
-		const T* Cast() const
-		{
-			if (IsA<T>())
-				return static_cast<const T*>(this);
-			return nullptr;
-		}
-
 		SceneObject(const std::string& name);
 		virtual ~SceneObject() = default;
 

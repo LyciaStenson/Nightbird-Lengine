@@ -52,7 +52,7 @@ int main()
 	importManager.Scan();
 
 	//auto result = importManager.LoadScene("Assets/Models/witch_treehouse.glb");
-	//if (auto* witchTreehouse = result.get()->Cast<Core::SpatialObject>())
+	//if (auto* witchTreehouse = Cast<Core::SpatialObject>(result.get()))
 	//{
 	//	witchTreehouse->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 	//	witchTreehouse->transform.scale = glm::vec3(0.001f);
@@ -65,7 +65,7 @@ int main()
 	//}
 
 	// auto result = importManager.LoadScene("Assets/Models/serena.glb");
-	// if (auto* serena = result.get()->Cast<Core::SpatialObject>())
+	// if (auto* serena = Cast<Core::SpatialObject>(result.get()))
 	// {
 	// 	serena->transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 	// 	serena->transform.scale = glm::vec3(0.03f);
@@ -78,7 +78,7 @@ int main()
 	// }
 
 	Editor::TextSceneReader sceneReader(importManager);
-	engine.SetScene(sceneReader.Read("Assets/Scenes/Serena2.ntscene").scene);
+	engine.SetScene(sceneReader.Read("Assets/Scenes/ClubPenguin.ntscene").scene);
 
 	//auto audioUUID = uuids::uuid::from_string("2322e33c-17db-45d1-94e4-846986d0079c");
 	//if (!audioUUID)
@@ -118,9 +118,9 @@ int main()
 	//sceneWriter.Write(engine.GetScene(), "Serena", GenerateUUID(), "Assets/Scenes/Serena2.ntscene");
 
 	Editor::CookManager cookManager("Cooked", importManager);
-	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::Desktop);
-	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::WiiU);
-	cookManager.Cook("Assets/Scenes/Serena2.ntscene", Editor::CookTarget::N3DS);
+	cookManager.Cook("Assets/Scenes/ClubPenguin.ntscene", Editor::CookTarget::Desktop);
+	cookManager.Cook("Assets/Scenes/ClubPenguin.ntscene", Editor::CookTarget::WiiU);
+	cookManager.Cook("Assets/Scenes/ClubPenguin.ntscene", Editor::CookTarget::N3DS);
 
 	engine.Initialize();
 	engine.RunLoop();

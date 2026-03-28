@@ -120,7 +120,7 @@ namespace Nightbird::Editor
 		}
 		
 		// Node type
-		if (auto* meshInstance = object->Cast<Core::MeshInstance>())
+		if (auto* meshInstance = Cast<Core::MeshInstance>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
 			WriteTransform(meshInstance->transform, writer);
@@ -135,7 +135,7 @@ namespace Nightbird::Editor
 				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
 			}
 		}
-		else if (auto* directionalLight = object->Cast<Core::DirectionalLight>())
+		else if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::DirectionalLight));
 			WriteTransform(directionalLight->transform, writer);
@@ -144,7 +144,7 @@ namespace Nightbird::Editor
 			writer.WriteFloat(directionalLight->color.b);
 			writer.WriteFloat(directionalLight->intensity);
 		}
-		else if (auto* pointLight = object->Cast<Core::PointLight>())
+		else if (auto* pointLight = Cast<Core::PointLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::PointLight));
 			WriteTransform(pointLight->transform, writer);
@@ -154,13 +154,13 @@ namespace Nightbird::Editor
 			writer.WriteFloat(pointLight->intensity);
 			writer.WriteFloat(pointLight->radius);
 		}
-		else if (auto* camera = object->Cast<Core::Camera>())
+		else if (auto* camera = Cast<Core::Camera>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
 			WriteTransform(camera->transform, writer);
 			writer.WriteFloat(camera->fov);
 		}
-		else if (auto* audioSource = object->Cast<Core::AudioSource>())
+		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::AudioSource));
 			auto audioUUIDBytes = audioSource->GetAudioUUID().as_bytes();
@@ -169,7 +169,7 @@ namespace Nightbird::Editor
 			writer.WriteUInt8(audioSource->GetPlayOnStart() ? 1 : 0);
 			writer.WriteFloat(audioSource->GetVolume());
 		}
-		else if (auto* spatialObject = object->Cast<Core::SpatialObject>())
+		else if (auto* spatialObject = Cast<Core::SpatialObject>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SpatialObject));
 			WriteTransform(spatialObject->transform, writer);

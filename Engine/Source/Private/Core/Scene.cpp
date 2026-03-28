@@ -80,7 +80,7 @@ namespace Nightbird::Core
 		if (!object)
 			return;
 		
-		if (auto* meshInstance = object->Cast<MeshInstance>())
+		if (auto* meshInstance = Cast<MeshInstance>(object))
 		{
 			const Mesh* mesh = meshInstance->GetMesh().get();
 			for (size_t i = 0; i < mesh->GetPrimitiveCount(); i++)
@@ -101,7 +101,7 @@ namespace Nightbird::Core
 		if (!object)
 			return;
 
-		if (auto* directionalLight = object->Cast<DirectionalLight>())
+		if (auto* directionalLight = Cast<DirectionalLight>(object))
 			directionalLights.push_back(directionalLight);
 
 		for (const auto& child : object->GetChildren())
@@ -113,7 +113,7 @@ namespace Nightbird::Core
 		if (!object)
 			return;
 
-		if (auto* pointLight = object->Cast<PointLight>())
+		if (auto* pointLight = Cast<PointLight>(object))
 			pointLights.push_back(pointLight);
 
 		for (const auto& child : object->GetChildren())

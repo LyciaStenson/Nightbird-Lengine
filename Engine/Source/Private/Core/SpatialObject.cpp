@@ -13,7 +13,7 @@ namespace Nightbird::Core
 	{
 		if (m_Parent)
 		{
-			if (auto* spatialParent = m_Parent->Cast<SpatialObject>())
+			if (auto* spatialParent = Cast<SpatialObject>(m_Parent))
 				return spatialParent->GetWorldMatrix() * GetLocalMatrix();
 		}
 

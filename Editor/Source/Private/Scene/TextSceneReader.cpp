@@ -252,7 +252,7 @@ namespace Nightbird::Editor
 		auto activeCameraUUID = uuids::uuid::from_string(activeCameraUUIDString);
 		if (activeCameraUUID && nodeMap.count(*activeCameraUUID))
 		{
-			auto* camera = nodeMap[*activeCameraUUID]->Cast<Core::Camera>();
+			auto* camera = Cast<Core::Camera>(nodeMap[*activeCameraUUID]);
 			if (camera)
 				sceneReadResult.scene->SetActiveCamera(camera);
 		}
