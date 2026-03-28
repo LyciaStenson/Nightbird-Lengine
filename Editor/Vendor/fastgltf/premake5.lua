@@ -3,10 +3,13 @@ project "fastgltf"
 	language "C++"
 	cppdialect "C++17"
 
+	pic "On"
+
+	removeconfigurations { "AppDebug", "AppRelease" }
+	removeplatforms { "WiiU", "3DS" }
+
 	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/fastgltf")
-
-	pic "On"
 
 	files
 	{

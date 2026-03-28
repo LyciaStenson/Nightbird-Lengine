@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CONFIG=${1:-editordebug}
+PLATFORM=${2:-desktop}
+
 echo "Building Linux project files."
 premake5 gmake
 if [ $? -ne 0 ]; then
@@ -7,8 +10,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-echo "Building..."
-make -j$(nproc) config=debug_desktop
+echo "Building ${CONFIG}_${PLATFORM}..."
+make -j$(nproc) config=${CONFIG}_${PLATFORM}
 if [ $? -ne 0 ]; then
 	echo "Build failed."
 	exit 1

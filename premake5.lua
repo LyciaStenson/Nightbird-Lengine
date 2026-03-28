@@ -1,6 +1,8 @@
 workspace "Nightbird"
-	configurations { "Debug", "Release" }
+	configurations { "EditorDebug", "EditorRelease", "AppDebug", "AppRelease" }
 	platforms { "Desktop", "WiiU", "3DS" }
+	defaultplatform "Desktop"
+
 	exceptionhandling "Off"
 	rtti "Off"
 
@@ -14,27 +16,31 @@ workspace "Nightbird"
 		architecture "x86_64"
 	filter { }
 
-	startproject "Editor"
-	defaultplatform "Desktop"
-
-	filter { "configurations:Debug"}
+	filter { "configurations:EditorDebug or AppDebug" }
 		defines { "DEBUG" }
 		symbols "On"
 		optimize "Off"
 		runtime "Debug"
+	filter { }
 
-	filter { "configurations:Release" }
+	filter { "configurations:EditorRelease or AppRelease" }
 		defines { "NDEBUG" }
 		optimize "On"
 		runtime "Release"
-
 	filter { }
 
-	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
+	filter { "configurations:EditorDebug or AppDebug" }
+		targetsuffix "-Debug"
+	filter { "configurations:EditorRelease or AppRelease" }
+		targetsuffix "-Release"
+	filter { }
+
+	outputdir = "%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
 	include "Backends/Libraries/GlfwPlatform/Vendor/glfw"
 	include "Editor/Vendor/fastgltf"
+	include "Editor/Vendor/rttr"
 group ""
 
 group "Nightbird"

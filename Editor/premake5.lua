@@ -3,14 +3,15 @@ project "Editor"
 	language "C++"
 	cppdialect "C++17"
 
+	removeconfigurations { "AppDebug", "AppRelease" }
+	removeplatforms { "WiiU", "3DS" }
+
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	debugdir (outBinDir)
-
-	defines { }
 
 	files {
 		"Source/Public/**.h",
@@ -24,14 +25,15 @@ project "Editor"
 		"Vendor/tomlplusplus",
 		"Vendor/fastgltf/include",
 		"Vendor/dr_libs",
+		"Vendor/rttr/src",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid"
 	}
 
-	defines { "EDITOR" }
+	defines { "EDITOR", "RTTR_DLL" }
 
-	filter { "platforms:Desktop" }
-		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "fastgltf", "Engine" }
+	filter { "configurations:EditorDebug or EditorRelease" }
+		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "fastgltf", "Engine", "rttr" }
 	filter { }

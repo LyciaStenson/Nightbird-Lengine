@@ -3,14 +3,14 @@ project "App"
 	language "C++"
 	cppdialect "C++17"
 
+	removeconfigurations { "EditorDebug", "EditorRelease" }
+
 	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
 
 	targetdir (outBinDir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	debugdir (outBinDir)
-
-	defines { }
 
 	files {
 		"Source/Public/**.h",
