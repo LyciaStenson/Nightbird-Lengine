@@ -163,10 +163,7 @@ namespace Nightbird::Vulkan
 	void Renderer::DrawScene(VkCommandBuffer commandBuffer)
 	{
 		if (!m_ActiveCamera)
-		{
-			Core::Log::Warning("No active camera");
 			return;
-		}
 
 		std::vector<DirectionalLightData> directionalLightData;
 		for (const auto* directionalLight : m_DirectionalLights)

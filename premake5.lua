@@ -31,6 +31,7 @@ workspace "Nightbird"
 
 	filter { "configurations:EditorDebug or AppDebug" }
 		targetsuffix "-Debug"
+	filter { }
 	filter { "configurations:EditorRelease or AppRelease" }
 		targetsuffix "-Release"
 	filter { }

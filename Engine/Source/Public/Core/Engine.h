@@ -16,6 +16,7 @@ namespace Nightbird::Core
 	{
 	public:
 		Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer);
+		~Engine();
 
 		void Initialize();
 		void RunLoop();

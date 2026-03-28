@@ -19,6 +19,8 @@ namespace Nightbird::Core
 		m_Scene = std::make_unique<Scene>();
 	}
 
+	Engine::~Engine() = default;
+
 	void Engine::Initialize()
 	{
 		m_Platform->Initialize();

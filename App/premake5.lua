@@ -1,16 +1,12 @@
 project "App"
-	kind "ConsoleApp"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 
 	removeconfigurations { "EditorDebug", "EditorRelease" }
 
-	local outBinDir = "%{wks.location}/Binaries/" .. outputdir
-
-	targetdir (outBinDir)
+	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
-
-	debugdir (outBinDir)
 
 	files {
 		"Source/Public/**.h",
@@ -26,11 +22,3 @@ project "App"
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid"
 	}
-
-	filter { "platforms:Desktop" }
-		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "Engine" }
-	filter { }
-
-	filter { "platforms:WiiU" }
-		links { "WiiUBackend", "Engine" }
-	filter { }
