@@ -46,6 +46,7 @@ group ""
 group "Nightbird/Backends"
 	include "Backends/GlfwVulkanBackend"
 	include "Backends/WiiUBackend"
+	include "Backends/3DSBackend"
 group ""
 
 group "Nightbird/Backends/Libraries"

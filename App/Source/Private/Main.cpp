@@ -38,7 +38,7 @@ int main()
 
 	engine.Initialize();
 
-	auto sceneUUID = uuids::uuid::from_string("664cd96f-2a3d-4eef-b0bd-3fc0b0efdab7");
+	auto sceneUUID = uuids::uuid::from_string("a857ebb3-e8a8-4ba2-a989-f9291a3e3b73");
 	if (!sceneUUID)
 	{
 		Core::Log::Error("Invalid scene UUID");

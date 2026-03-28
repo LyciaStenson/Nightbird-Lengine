@@ -16,6 +16,23 @@ namespace Nightbird::Editor
 		return result != 0;
 	}
 
+#ifdef _WIN32
+	static std::string ToMSys2Path(const std::string& path)
+	{
+		if (path.empty())
+			return "";
+
+		char driveLetter = path[0];
+		if (driveLetter < 'A' || driveLetter > 'Z')
+			return path;
+
+		std::string msysPath = path.substr(2);
+		std::replace(msysPath.begin(), msysPath.end(), '\\', '/');
+		msysPath = "/" + std::string(1, std::tolower(driveLetter)) + msysPath;
+		return msysPath;
+	}
+#endif
+
 	void TextureCooker::Cook(const Core::Texture& texture, const uuids::uuid& uuid, const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
 		std::filesystem::create_directories(outputDir);
@@ -84,10 +101,10 @@ namespace Nightbird::Editor
 
 	std::vector<uint8_t> TextureCooker::CookT3X(const Core::Texture& texture, const uuids::uuid& uuid)
 	{
-		std::filesystem::path tempDir = std::filesystem::temp_directory_path();
+		std::filesystem::path tempPath = std::filesystem::temp_directory_path();
 
-		std::filesystem::path inputPath = tempDir / (uuids::to_string(uuid) + ".png");
-		std::filesystem::path outputPath = tempDir / (uuids::to_string(uuid) + ".t3x");
+		std::filesystem::path inputPath = tempPath / (uuids::to_string(uuid) + ".png");
+		std::filesystem::path outputPath = tempPath / (uuids::to_string(uuid) + ".t3x");
 
 		const auto& srcPixels = texture.GetData();
 		std::vector<uint8_t> pixels = srcPixels;
@@ -97,17 +114,21 @@ namespace Nightbird::Editor
 			// Force opaque
 			pixels[i + 3] = 255;
 		}
-
-		Core::Log::Info("Cook3DS: " + std::to_string(texture.GetWidth()) + "x" + std::to_string(texture.GetHeight()));
-
+		
 		if (!WritePNG(inputPath, texture.GetWidth(), texture.GetHeight(), pixels))
 		{
 			Core::Log::Error("TextureCooker: Failed to write temporator PNG for tex3ds.");
 			return {};
 		}
 
+#ifdef _WIN32
+		std::string msys2InputPath = ToMSys2Path(inputPath.string());
+		std::string msys2OutputPath = ToMSys2Path(outputPath.string());
+		std::string command = "cmd /c \"\"C:\\devkitPro\\msys2\\usr\\bin\\bash.exe\" -l -c \"tex3ds '" + msys2InputPath + "' -f rgba5551 -z auto -o '" + msys2OutputPath + "'\"\"";
+#else
 		std::string command = "tex3ds \"" + inputPath.string() + "\" -f rgba5551 -z auto -o \"" + outputPath.string() + "\"";
-
+#endif
+		
 		int result = std::system(command.c_str());
 		if (result != 0)
 		{
@@ -121,9 +142,11 @@ namespace Nightbird::Editor
 			Core::Log::Error("TextureCooker: Failed to open tex3ds output.");
 			return {};
 		}
-
+		
 		std::vector<uint8_t> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
+		
+		file.close();
+		
 		std::filesystem::remove(inputPath);
 		std::filesystem::remove(outputPath);
 		return data;
