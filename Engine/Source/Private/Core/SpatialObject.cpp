@@ -6,7 +6,7 @@ namespace Nightbird::Core
 
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{
-		return transform.GetLocalMatrix();
+		return m_Transform.GetLocalMatrix();
 	}
 
 	glm::mat4 SpatialObject::GetWorldMatrix() const

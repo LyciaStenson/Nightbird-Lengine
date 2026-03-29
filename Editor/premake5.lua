@@ -32,7 +32,7 @@ project "Editor"
 		"%{wks.location}/Engine/Vendor/stduuid"
 	}
 
-	defines { "EDITOR", "RTTR_DLL" }
+	defines { "EDITOR_BUILD", "RTTR_DLL" }
 
 	filter { "configurations:EditorDebug or EditorRelease" }
 		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "fastgltf", "Engine", "rttr" }

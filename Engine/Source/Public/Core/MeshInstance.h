@@ -11,7 +11,10 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT(MeshInstance, SpatialObject)
+		NB_ENABLE(SpatialObject)
+		NB_REGISTRATION_FRIEND
 
+		MeshInstance(const std::string& name);
 		MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh);
 		~MeshInstance() override = default;
 

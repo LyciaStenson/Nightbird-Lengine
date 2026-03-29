@@ -16,6 +16,8 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT(AudioSource, SceneObject)
+		NB_ENABLE(SceneObject)
+		NB_REGISTRATION_FRIEND
 
 		using SceneObject::SceneObject;
 

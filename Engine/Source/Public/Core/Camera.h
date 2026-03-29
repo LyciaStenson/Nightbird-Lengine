@@ -10,10 +10,12 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT(Camera, SpatialObject)
+		NB_ENABLE(SpatialObject)
+		NB_REGISTRATION_FRIEND
 
 		using SpatialObject::SpatialObject;
 
-		float fov = 70.0f;
+		float m_Fov = 70.0f;
 
 		glm::mat4 GetViewMatrix() const;
 		glm::mat4 GetProjectionMatrix(float width, float height) const;

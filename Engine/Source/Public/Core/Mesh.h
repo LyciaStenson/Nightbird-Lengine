@@ -10,6 +10,7 @@ namespace Nightbird::Core
 	class Mesh
 	{
 	public:
+		Mesh() = default;
 		Mesh(std::vector<MeshPrimitive> primitives);
 
 		const std::vector<MeshPrimitive>& GetPrimitives() const;

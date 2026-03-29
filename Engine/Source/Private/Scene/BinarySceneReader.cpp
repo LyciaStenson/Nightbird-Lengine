@@ -128,14 +128,14 @@ namespace Nightbird::Load
 			case Core::SceneObjectType::SpatialObject:
 			{
 				auto spatialObject = std::make_unique<Core::SpatialObject>(nodeName);
-				ReadTransform(spatialObject->transform, reader);
+				ReadTransform(spatialObject->m_Transform, reader);
 				object = std::move(spatialObject);
 				break;
 			}
 			case Core::SceneObjectType::MeshInstance:
 			{
 				auto meshInstance = std::make_unique<Core::MeshInstance>(nodeName, nullptr);
-				ReadTransform(meshInstance->transform, reader);
+				ReadTransform(meshInstance->m_Transform, reader);
 
 				std::array<uint8_t, 16> meshUUIDBytes;
 				reader.ReadRawBytes(meshUUIDBytes.data(), 16);
@@ -154,12 +154,12 @@ namespace Nightbird::Load
 			case Core::SceneObjectType::DirectionalLight:
 			{
 				auto directionalLight = std::make_unique<Core::DirectionalLight>(nodeName);
-				ReadTransform(directionalLight->transform, reader);
+				ReadTransform(directionalLight->m_Transform, reader);
 
-				directionalLight->color.r = reader.ReadFloat();
-				directionalLight->color.g = reader.ReadFloat();
-				directionalLight->color.b = reader.ReadFloat();
-				directionalLight->intensity = reader.ReadFloat();
+				directionalLight->m_Color.r = reader.ReadFloat();
+				directionalLight->m_Color.g = reader.ReadFloat();
+				directionalLight->m_Color.b = reader.ReadFloat();
+				directionalLight->m_Intensity = reader.ReadFloat();
 
 				object = std::move(directionalLight);
 				break;
@@ -167,13 +167,13 @@ namespace Nightbird::Load
 			case Core::SceneObjectType::PointLight:
 			{
 				auto pointLight = std::make_unique<Core::PointLight>(nodeName);
-				ReadTransform(pointLight->transform, reader);
+				ReadTransform(pointLight->m_Transform, reader);
 
-				pointLight->color.r = reader.ReadFloat();
-				pointLight->color.g = reader.ReadFloat();
-				pointLight->color.b = reader.ReadFloat();
-				pointLight->intensity = reader.ReadFloat();
-				pointLight->radius = reader.ReadFloat();
+				pointLight->m_Color.r = reader.ReadFloat();
+				pointLight->m_Color.g = reader.ReadFloat();
+				pointLight->m_Color.b = reader.ReadFloat();
+				pointLight->m_Intensity = reader.ReadFloat();
+				pointLight->m_Radius = reader.ReadFloat();
 
 				object = std::move(pointLight);
 				break;
@@ -181,9 +181,9 @@ namespace Nightbird::Load
 			case Core::SceneObjectType::Camera:
 			{
 				auto camera = std::make_unique<Core::Camera>(nodeName);
-				ReadTransform(camera->transform, reader);
+				ReadTransform(camera->m_Transform, reader);
 
-				camera->fov = reader.ReadFloat();
+				camera->m_Fov = reader.ReadFloat();
 				if (nodeUUID == activeCameraUUID)
 					readNodesResult.activeCamera = camera.get();
 

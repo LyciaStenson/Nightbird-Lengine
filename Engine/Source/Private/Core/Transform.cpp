@@ -1,5 +1,8 @@
 #include "Core/Transform.h"
 
+#include "Core/Reflect.h"
+#include "Core/Log.h"
+
 namespace Nightbird::Core
 {
 	glm::mat4 Transform::GetLocalMatrix() const

@@ -112,57 +112,57 @@ namespace Nightbird::Editor
 			if (type == "spatial_object")
 			{
 				auto spatialObject = std::make_unique<Core::SpatialObject>(name);
-				spatialObject->transform.position = position;
-				spatialObject->transform.rotation = rotation;
-				spatialObject->transform.scale = scale;
+				spatialObject->m_Transform.position = position;
+				spatialObject->m_Transform.rotation = rotation;
+				spatialObject->m_Transform.scale = scale;
 				object = std::move(spatialObject);
 			}
 			else if (type == "mesh_instance")
 			{
 				auto meshInstance = std::make_unique<Core::MeshInstance>(name, nullptr);
-				meshInstance->transform.position = position;
-				meshInstance->transform.rotation = rotation;
-				meshInstance->transform.scale = scale;
+				meshInstance->m_Transform.position = position;
+				meshInstance->m_Transform.rotation = rotation;
+				meshInstance->m_Transform.scale = scale;
 				object = std::move(meshInstance);
 			}
 			else if (type == "directional_light")
 			{
 				auto directionalLight = std::make_unique<Core::DirectionalLight>(name);
-				directionalLight->transform.position = position;
-				directionalLight->transform.rotation = rotation;
-				directionalLight->transform.scale = scale;
+				directionalLight->m_Transform.position = position;
+				directionalLight->m_Transform.rotation = rotation;
+				directionalLight->m_Transform.scale = scale;
 				if (auto* color = (*nodeTable)["color"].as_array())
 				{
-					directionalLight->color.r = color->get(0)->value_or(1.0f);
-					directionalLight->color.g = color->get(1)->value_or(1.0f);
-					directionalLight->color.b = color->get(2)->value_or(1.0f);
+					directionalLight->m_Color.r = color->get(0)->value_or(1.0f);
+					directionalLight->m_Color.g = color->get(1)->value_or(1.0f);
+					directionalLight->m_Color.b = color->get(2)->value_or(1.0f);
 				}
-				directionalLight->intensity = (*nodeTable)["intensity"].value_or(1.0f);
+				directionalLight->m_Intensity = (*nodeTable)["intensity"].value_or(1.0f);
 				object = std::move(directionalLight);
 			}
 			else if (type == "point_light")
 			{
 				auto pointLight = std::make_unique<Core::PointLight>(name);
-				pointLight->transform.position = position;
-				pointLight->transform.rotation = rotation;
-				pointLight->transform.scale = scale;
+				pointLight->m_Transform.position = position;
+				pointLight->m_Transform.rotation = rotation;
+				pointLight->m_Transform.scale = scale;
 				if (auto* color = (*nodeTable)["color"].as_array())
 				{
-					pointLight->color.r = color->get(0)->value_or(1.0f);
-					pointLight->color.g = color->get(1)->value_or(1.0f);
-					pointLight->color.b = color->get(2)->value_or(1.0f);
+					pointLight->m_Color.r = color->get(0)->value_or(1.0f);
+					pointLight->m_Color.g = color->get(1)->value_or(1.0f);
+					pointLight->m_Color.b = color->get(2)->value_or(1.0f);
 				}
-				pointLight->intensity = (*nodeTable)["intensity"].value_or(1.0f);
-				pointLight->radius = (*nodeTable)["radius"].value_or(1.0f);
+				pointLight->m_Intensity = (*nodeTable)["intensity"].value_or(1.0f);
+				pointLight->m_Radius = (*nodeTable)["radius"].value_or(1.0f);
 				object = std::move(pointLight);
 			}
 			else if (type == "camera")
 			{
 				auto camera = std::make_unique<Core::Camera>(name);
-				camera->transform.position = position;
-				camera->transform.rotation = rotation;
-				camera->transform.scale = scale;
-				camera->fov = (*nodeTable)["fov"].value_or(70.0f);
+				camera->m_Transform.position = position;
+				camera->m_Transform.rotation = rotation;
+				camera->m_Transform.scale = scale;
+				camera->m_Fov = (*nodeTable)["fov"].value_or(70.0f);
 				object = std::move(camera);
 			}
 			else if (type == "audio_source")

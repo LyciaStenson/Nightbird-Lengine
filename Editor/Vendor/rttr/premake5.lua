@@ -5,6 +5,7 @@ project "rttr"
 
 	exceptionhandling "On"
 	rtti "On"
+	pic "On"
 
 	removeconfigurations { "AppDebug", "AppRelease" }
 	removeplatforms { "WiiU", "3DS" }
@@ -13,8 +14,6 @@ project "rttr"
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/rttr")
 
 	defines { "rttr_core_EXPORTS" }
-
-	pic "On"
 
 	files
 	{

@@ -2,5 +2,5 @@
 
 namespace Nightbird::Core
 {
-    NB_OBJECT_IMPL(PointLight, SpatialObject);
+	NB_OBJECT_IMPL(PointLight, SpatialObject);
 }

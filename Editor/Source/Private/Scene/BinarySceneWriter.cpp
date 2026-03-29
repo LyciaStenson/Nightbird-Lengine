@@ -123,7 +123,7 @@ namespace Nightbird::Editor
 		if (auto* meshInstance = Cast<Core::MeshInstance>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
-			WriteTransform(meshInstance->transform, writer);
+			WriteTransform(meshInstance->m_Transform, writer);
 			if (meshInstance->GetMesh() && m_MeshUUIDs->count(meshInstance->GetMesh().get()))
 			{
 				auto uuidBytes = m_MeshUUIDs->at(meshInstance->GetMesh().get()).as_bytes();
@@ -138,27 +138,27 @@ namespace Nightbird::Editor
 		else if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::DirectionalLight));
-			WriteTransform(directionalLight->transform, writer);
-			writer.WriteFloat(directionalLight->color.r);
-			writer.WriteFloat(directionalLight->color.g);
-			writer.WriteFloat(directionalLight->color.b);
-			writer.WriteFloat(directionalLight->intensity);
+			WriteTransform(directionalLight->m_Transform, writer);
+			writer.WriteFloat(directionalLight->m_Color.r);
+			writer.WriteFloat(directionalLight->m_Color.g);
+			writer.WriteFloat(directionalLight->m_Color.b);
+			writer.WriteFloat(directionalLight->m_Intensity);
 		}
 		else if (auto* pointLight = Cast<Core::PointLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::PointLight));
-			WriteTransform(pointLight->transform, writer);
-			writer.WriteFloat(pointLight->color.r);
-			writer.WriteFloat(pointLight->color.g);
-			writer.WriteFloat(pointLight->color.b);
-			writer.WriteFloat(pointLight->intensity);
-			writer.WriteFloat(pointLight->radius);
+			WriteTransform(pointLight->m_Transform, writer);
+			writer.WriteFloat(pointLight->m_Color.r);
+			writer.WriteFloat(pointLight->m_Color.g);
+			writer.WriteFloat(pointLight->m_Color.b);
+			writer.WriteFloat(pointLight->m_Intensity);
+			writer.WriteFloat(pointLight->m_Radius);
 		}
 		else if (auto* camera = Cast<Core::Camera>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
-			WriteTransform(camera->transform, writer);
-			writer.WriteFloat(camera->fov);
+			WriteTransform(camera->m_Transform, writer);
+			writer.WriteFloat(camera->m_Fov);
 		}
 		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{
@@ -172,7 +172,7 @@ namespace Nightbird::Editor
 		else if (auto* spatialObject = Cast<Core::SpatialObject>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SpatialObject));
-			WriteTransform(spatialObject->transform, writer);
+			WriteTransform(spatialObject->m_Transform, writer);
 		}
 		else
 		{

@@ -85,9 +85,9 @@ namespace Nightbird::Editor
 		
 		if (auto* trs = std::get_if<fastgltf::TRS>(&node.transform))
 		{
-			spatialNode->transform.position = glm::vec3(trs->translation.x(), trs->translation.y(), trs->translation.z());
-			spatialNode->transform.rotation = glm::quat(trs->rotation.w(), trs->rotation.x(), trs->rotation.y(), trs->rotation.z());
-			spatialNode->transform.scale = glm::vec3(trs->scale.x(), trs->scale.y(), trs->scale.z());
+			spatialNode->m_Transform.position = glm::vec3(trs->translation.x(), trs->translation.y(), trs->translation.z());
+			spatialNode->m_Transform.rotation = glm::quat(trs->rotation.w(), trs->rotation.x(), trs->rotation.y(), trs->rotation.z());
+			spatialNode->m_Transform.scale = glm::vec3(trs->scale.x(), trs->scale.y(), trs->scale.z());
 		}
 		
 		Core::SpatialObject* target = spatialNode.get();

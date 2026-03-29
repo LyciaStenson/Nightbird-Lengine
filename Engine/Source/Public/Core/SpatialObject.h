@@ -9,6 +9,8 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT(SpatialObject, SceneObject)
+		NB_ENABLE(SceneObject)
+		NB_REGISTRATION_FRIEND
 
 		using SceneObject::SceneObject;
 		~SpatialObject() override = default;
@@ -16,6 +18,6 @@ namespace Nightbird::Core
 		glm::mat4 GetLocalMatrix() const;
 		glm::mat4 GetWorldMatrix() const;
 
-		Transform transform;
+		Transform m_Transform;
 	};
 }

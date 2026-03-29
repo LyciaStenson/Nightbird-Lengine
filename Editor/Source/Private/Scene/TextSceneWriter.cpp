@@ -76,22 +76,22 @@ namespace Nightbird::Editor
 		if (auto* spatialObject = Cast<Core::SpatialObject>(object))
 		{
 			toml::array position;
-			position.push_back(spatialObject->transform.position.x);
-			position.push_back(spatialObject->transform.position.y);
-			position.push_back(spatialObject->transform.position.z);
+			position.push_back(spatialObject->m_Transform.position.x);
+			position.push_back(spatialObject->m_Transform.position.y);
+			position.push_back(spatialObject->m_Transform.position.z);
 			node.insert("position", position);
 
 			toml::array rotation;
-			rotation.push_back(spatialObject->transform.rotation.x);
-			rotation.push_back(spatialObject->transform.rotation.y);
-			rotation.push_back(spatialObject->transform.rotation.z);
-			rotation.push_back(spatialObject->transform.rotation.w);
+			rotation.push_back(spatialObject->m_Transform.rotation.x);
+			rotation.push_back(spatialObject->m_Transform.rotation.y);
+			rotation.push_back(spatialObject->m_Transform.rotation.z);
+			rotation.push_back(spatialObject->m_Transform.rotation.w);
 			node.insert("rotation", rotation);
 
 			toml::array scale;
-			scale.push_back(spatialObject->transform.scale.x);
-			scale.push_back(spatialObject->transform.scale.y);
-			scale.push_back(spatialObject->transform.scale.z);
+			scale.push_back(spatialObject->m_Transform.scale.x);
+			scale.push_back(spatialObject->m_Transform.scale.y);
+			scale.push_back(spatialObject->m_Transform.scale.z);
 			node.insert("scale", scale);
 		}
 		
@@ -100,28 +100,28 @@ namespace Nightbird::Editor
 			node.insert("type", std::string("directional_light"));
 
 			toml::array color;
-			color.push_back(directionalLight->color.r);
-			color.push_back(directionalLight->color.g);
-			color.push_back(directionalLight->color.b);
+			color.push_back(directionalLight->m_Color.r);
+			color.push_back(directionalLight->m_Color.g);
+			color.push_back(directionalLight->m_Color.b);
 			node.insert("color", color);
-			node.insert("intensity", directionalLight->intensity);
+			node.insert("intensity", directionalLight->m_Intensity);
 		}
 		else if (auto* pointLight = Cast<Core::PointLight>(object))
 		{
 			node.insert("type", std::string("point_light"));
 
 			toml::array color;
-			color.push_back(pointLight->color.r);
-			color.push_back(pointLight->color.g);
-			color.push_back(pointLight->color.b);
+			color.push_back(pointLight->m_Color.r);
+			color.push_back(pointLight->m_Color.g);
+			color.push_back(pointLight->m_Color.b);
 			node.insert("color", color);
-			node.insert("intensity", pointLight->intensity);
-			node.insert("radius", pointLight->radius);
+			node.insert("intensity", pointLight->m_Intensity);
+			node.insert("radius", pointLight->m_Radius);
 		}
 		else if (auto* camera = Cast<Core::Camera>(object))
 		{
 			node.insert("type", std::string("camera"));
-			node.insert("fov", camera->fov);
+			node.insert("fov", camera->m_Fov);
 		}
 		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{

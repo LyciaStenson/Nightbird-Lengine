@@ -8,11 +8,13 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT(PointLight, SpatialObject)
+		NB_ENABLE(SpatialObject)
+		NB_REGISTRATION_FRIEND
 
 		using SpatialObject::SpatialObject;
 
-		glm::vec3 color = glm::vec3(1.0f);
-		float intensity = 1.0f;
-		float radius = 10.0f;
+		glm::vec3 m_Color = glm::vec3(1.0f);
+		float m_Intensity = 1.0f;
+		float m_Radius = 10.0f;
 	};
 }

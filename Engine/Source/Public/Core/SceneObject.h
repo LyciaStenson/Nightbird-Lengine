@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeInfo.h"
+#include "Core/Reflect.h"
 
 #include <uuid.h>
 
@@ -18,6 +19,8 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_OBJECT_BASE(SceneObject)
+		NB_ENABLE()
+		NB_REGISTRATION_FRIEND
 
 		SceneObject(const std::string& name);
 		virtual ~SceneObject() = default;
@@ -29,7 +32,7 @@ namespace Nightbird::Core
 
 		void SetParent(SceneObject* parent);
 		SceneObject* GetParent() const;
-		
+
 		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;
 		std::vector<std::unique_ptr<SceneObject>>& GetChildren();
 		void AddChild(std::unique_ptr<SceneObject> child);

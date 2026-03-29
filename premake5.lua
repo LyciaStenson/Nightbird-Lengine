@@ -29,14 +29,7 @@ workspace "Nightbird"
 		runtime "Release"
 	filter { }
 
-	filter { "configurations:EditorDebug or AppDebug" }
-		targetsuffix "-Debug"
-	filter { }
-	filter { "configurations:EditorRelease or AppRelease" }
-		targetsuffix "-Release"
-	filter { }
-
-	outputdir = "%{cfg.system}-%{cfg.architecture}"
+	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "Dependencies"
 	include "Backends/Libraries/GlfwPlatform/Vendor/glfw"
