@@ -24,8 +24,6 @@ namespace Nightbird::Core
 		return platform;
 	}
 
-	using SurfaceCreator = VkSurfaceKHR(*)(VkInstance);
-
 	static VkSurfaceKHR CreateSurface(VkInstance instance)
 	{
 		VkSurfaceKHR surface;
