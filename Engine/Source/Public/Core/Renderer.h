@@ -3,6 +3,8 @@
 namespace Nightbird::Core
 {
 	class Scene;
+	class Camera;
+	class RenderSurface;
 
 	class Renderer
 	{
@@ -11,7 +13,10 @@ namespace Nightbird::Core
 
 		virtual void Initialize() = 0;
 		virtual void Shutdown() = 0;
-		virtual void SubmitScene(const Scene& scene) = 0;
-		virtual void DrawFrame() = 0;
+		virtual RenderSurface& GetDefaultSurface() = 0;
+		virtual void SubmitScene(const Scene& scene, const Camera& camera) = 0;
+		virtual void BeginFrame(RenderSurface& surface) = 0;
+		virtual void EndFrame(RenderSurface& surface) = 0;
+		virtual void DrawScene() = 0;
 	};
 }

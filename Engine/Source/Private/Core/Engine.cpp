@@ -17,12 +17,7 @@ namespace Nightbird::Core
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
 		m_Scene = std::make_unique<Scene>();
-	}
 
-	Engine::~Engine() = default;
-
-	void Engine::Initialize()
-	{
 		m_Platform->Initialize();
 		m_Renderer->Initialize();
 
@@ -30,40 +25,43 @@ namespace Nightbird::Core
 			m_Scene->SetEngine(this);
 	}
 
-	void Engine::RunLoop()
-	{
-		MainLoop();
-	}
-
-	void Engine::Shutdown()
+	Engine::~Engine()
 	{
 		m_Renderer->Shutdown();
 		m_Platform->Shutdown();
 	}
 
-	void Engine::MainLoop()
+	bool Engine::ShouldClose() const
 	{
-		auto lastTime = std::chrono::high_resolution_clock::now();
-		
-		while (!m_Platform->ShouldClose())
-		{
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
-			lastTime = currentTime;
+		return m_Platform->ShouldClose();
+	}
 
-			m_Platform->Update();
+	float Engine::Update()
+	{
+		static auto lastTime = std::chrono::high_resolution_clock::now();
 
-			m_InputSystem.Update(m_Platform->GetInputProvider());
-			
-			m_Scene->Update(deltaTime);
-			
-			if (m_InputSystem.WasButtonPressed(Input::Button::A))
-				Log::Info("A Pressed");
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+		lastTime = currentTime;
 
-			m_Renderer->SubmitScene(*m_Scene);
+		m_Platform->Update();
+		m_InputSystem.Update(m_Platform->GetInputProvider());
+		m_Scene->Update(deltaTime);
 
-			m_Renderer->DrawFrame();
-		}
+		if (m_InputSystem.WasButtonPressed(Input::Button::A))
+			Log::Info("A Pressed");
+
+		return deltaTime;
+	}
+
+	Platform& Engine::GetPlatform()
+	{
+		return *m_Platform;
+	}
+
+	Renderer& Engine::GetRenderer()
+	{
+		return *m_Renderer;
 	}
 
 	Input::System& Engine::GetInputSystem()

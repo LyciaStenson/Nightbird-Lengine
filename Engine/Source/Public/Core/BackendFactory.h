@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Core/Platform.h"
-#include "Core/Renderer.h"
-
 #include <memory>
 
 namespace Nightbird::Core
 {
-	std::unique_ptr<Renderer> CreateRenderer();
+	class Platform;
+	class Renderer;
+
 	std::unique_ptr<Platform> CreatePlatform();
+	std::unique_ptr<Renderer> CreateRenderer();
 }

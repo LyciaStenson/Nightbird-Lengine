@@ -13,6 +13,7 @@
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
 #include "Vulkan/SwapChain.h"
+#include "Vulkan/SwapChainSurface.h"
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/Sync.h"
 #include "Vulkan/DescriptorSetLayoutManager.h"
@@ -21,6 +22,7 @@
 #include "Vulkan/Geometry.h"
 #include "Vulkan/Material.h"
 #include "Vulkan/TransformPool.h"
+#include "Vulkan/FrameContext.h"
 
 #include <volk.h>
 
@@ -46,18 +48,23 @@ namespace Nightbird::Vulkan
 
 		void Initialize() override;
 		void Shutdown() override;
-		void SubmitScene(const Core::Scene& scene) override;
-		void DrawFrame() override;
+		Core::RenderSurface& GetDefaultSurface() override;
+		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
+		void BeginFrame(Core::RenderSurface& surface) override;
+		void EndFrame(Core::RenderSurface& surface) override;
+		void DrawScene();
+
+		VkCommandBuffer GetCurrentCommandBuffer() const;
 
 	private:
 		std::vector<const char*> m_Extensions;
 		SurfaceCreator m_SurfaceCreator;
-
 		VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
 
 		std::unique_ptr<Instance> m_Instance;
 		std::unique_ptr<Device> m_Device;
 		std::unique_ptr<SwapChain> m_SwapChain;
+		std::unique_ptr<SwapChainSurface> m_SwapChainSurface;
 		std::unique_ptr<RenderPass> m_RenderPass;
 		std::unique_ptr<Sync> m_Sync;
 
@@ -73,13 +80,13 @@ namespace Nightbird::Vulkan
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
 
-		Core::Camera* m_ActiveCamera = nullptr;
+		const Core::Camera* m_ActiveCamera = nullptr;
 
 		std::vector<Core::Renderable> m_Renderables;
 		std::vector<Core::DirectionalLight*> m_DirectionalLights;
 		std::vector<Core::PointLight*> m_PointLights;
 
-		uint32_t m_CurrentFrame = 0;
+		FrameContext m_CurrentFrame;
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
 

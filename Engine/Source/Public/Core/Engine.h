@@ -18,9 +18,11 @@ namespace Nightbird::Core
 		Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer);
 		~Engine();
 
-		void Initialize();
-		void RunLoop();
-		void Shutdown();
+		bool ShouldClose() const;
+		float Update();
+
+		Platform& GetPlatform();
+		Renderer& GetRenderer();
 
 		Input::System& GetInputSystem();
 		Audio::Provider& GetAudioProvider();
@@ -29,8 +31,6 @@ namespace Nightbird::Core
 		void SetScene(std::unique_ptr<Scene> scene);
 
 	private:
-		void MainLoop();
-
 		std::unique_ptr<Platform> m_Platform;
 		std::unique_ptr<Renderer> m_Renderer;
 

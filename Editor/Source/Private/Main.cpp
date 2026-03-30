@@ -1,4 +1,8 @@
 #include "Core/Engine.h"
+#include "Core/Scene.h"
+#include "Core/Camera.h"
+#include "Core/Platform.h"
+#include "Core/Renderer.h"
 #include "Core/BackendFactory.h"
 #include "Core/Log.h"
 
@@ -8,15 +12,22 @@
 
 int main(int argc, char** argv)
 {
-	auto runEngine = []()
+	auto runEditor = []()
 	{
 		auto platform = Nightbird::Core::CreatePlatform();
 		auto renderer = Nightbird::Core::CreateRenderer();
-
 		Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
-		engine.Initialize();
-		engine.RunLoop();
-		engine.Shutdown();
+
+		while (!engine.ShouldClose())
+		{
+			engine.Update();
+			auto& surface = engine.GetRenderer().GetDefaultSurface();
+			engine.GetRenderer().BeginFrame(surface);
+			if (engine.GetScene().GetActiveCamera())
+				engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
+			engine.GetRenderer().DrawScene();
+			engine.GetRenderer().EndFrame(surface);
+		}
 	};
 
 	if (argc > 1)
@@ -29,7 +40,7 @@ int main(int argc, char** argv)
 			for (auto& type : rttr::type::get_types())
 				Nightbird::Core::Log::Info("Registered type: " + type.get_name().to_string());
 
-			runEngine();
+			runEditor();
 		}
 		else
 		{
@@ -40,7 +51,7 @@ int main(int argc, char** argv)
 	else
 	{
 		Nightbird::Core::Log::Info("No project specified");
-		runEngine();
+		runEditor();
 	}
 
 	return 0;

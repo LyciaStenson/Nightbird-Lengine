@@ -35,9 +35,10 @@
 		RTTR_REGISTRATION_FRIEND
 
 #else
-	#define NB_REGISTRATION_BEGIN
+	#define NB_REGISTRATION
 	#define NB_REGISTRATION_END
 	#define NB_CLASS(Type)
+	#define NB_CLASS_END()
 	#define NB_PROPERTY(Name)
 	#define NB_CONSTRUCTOR(...)
 	#define NB_ENABLE(...)

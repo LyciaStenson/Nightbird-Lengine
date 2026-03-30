@@ -26,6 +26,7 @@ project "Editor"
 		"Vendor/fastgltf/include",
 		"Vendor/dr_libs",
 		"Vendor/rttr/src",
+		"Vendor/imgui",
 		"%{wks.location}/Engine/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
@@ -35,5 +36,5 @@ project "Editor"
 	defines { "EDITOR_BUILD", "RTTR_DLL" }
 
 	filter { "configurations:EditorDebug or EditorRelease" }
-		links { "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "fastgltf", "Engine", "rttr" }
+		links { "EditorGlfwVulkanBackend", "EditorGlfwPlatform", "EditorVulkanRenderer", "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "imgui", "fastgltf", "Engine", "rttr" }
 	filter { }

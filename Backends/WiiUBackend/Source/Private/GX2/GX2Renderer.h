@@ -30,7 +30,7 @@ namespace Nightbird::GX2
 	public:
 		void Initialize() override;
 		void Shutdown() override;
-		void SubmitScene(const Core::Scene& scene) override;
+		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
 		void DrawFrame() override;
 
 	private:
@@ -39,7 +39,7 @@ namespace Nightbird::GX2
 		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 		Material& GetOrCreateMaterial(const Core::Material* material);
 
-		Core::Camera* m_ActiveCamera = nullptr;
+		const Core::Camera* m_ActiveCamera = nullptr;
 		std::vector<Core::Renderable> m_Renderables;
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;

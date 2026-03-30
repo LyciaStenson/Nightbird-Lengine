@@ -68,9 +68,9 @@ namespace Nightbird::PICA
 		C3D_Fini();
 	}
 
-	void Renderer::SubmitScene(const Core::Scene& scene)
+	void Renderer::SubmitScene(const Core::Scene& scene, const Core::Camera& camera)
 	{
-		m_ActiveCamera = scene.GetActiveCamera();
+		m_ActiveCamera = &camera;
 		m_Renderables = scene.CollectRenderables();
 	}
 

@@ -29,7 +29,7 @@ namespace Nightbird::PICA
 	public:
 		void Initialize() override;
 		void Shutdown() override;
-		void SubmitScene(const Core::Scene& scene) override;
+		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
 		void DrawFrame() override;
 
 	private:
@@ -39,7 +39,7 @@ namespace Nightbird::PICA
 		Material& GetOrCreateMaterial(const Core::Material* material);
 		std::shared_ptr<Texture> GetOrCreateTexture(const Core::Texture* texture);
 
-		Core::Camera* m_ActiveCamera = nullptr;
+		const Core::Camera* m_ActiveCamera = nullptr;
 		std::vector<Core::Renderable> m_Renderables;
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
