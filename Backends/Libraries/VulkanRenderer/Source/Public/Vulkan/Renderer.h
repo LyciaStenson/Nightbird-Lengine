@@ -54,6 +54,11 @@ namespace Nightbird::Vulkan
 		void EndFrame(Core::RenderSurface& surface) override;
 		void DrawScene();
 
+		Instance& GetInstance();
+		Device& GetDevice();
+		SwapChain& GetSwapChain();
+		RenderPass& GetRenderPass();
+
 		VkCommandBuffer GetCurrentCommandBuffer() const;
 
 	private:

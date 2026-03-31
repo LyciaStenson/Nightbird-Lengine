@@ -11,6 +11,7 @@ project "EditorVulkanRenderer"
 
 	defines {
 		"VK_NO_PROTOTYPES",
+		"IMGUI_IMPL_VULKAN_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS"
 	}
 
@@ -19,6 +20,7 @@ project "EditorVulkanRenderer"
 		"Source/Private/**.h",
 		"Source/Private/**.cpp",
 		"Vendor/imgui/**.h",
+		"Vendor/imgui/**.cpp"
 	}
 
 	includedirs {
@@ -26,6 +28,7 @@ project "EditorVulkanRenderer"
 		"Source/Private",
 		"Vendor/imgui",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Editor/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",

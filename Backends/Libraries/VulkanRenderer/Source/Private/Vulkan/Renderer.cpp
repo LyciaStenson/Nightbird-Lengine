@@ -306,6 +306,26 @@ namespace Nightbird::Vulkan
 		return *m_SwapChainSurface;
 	}
 
+	Instance& Renderer::GetInstance()
+	{
+		return *m_Instance;
+	}
+
+	Device& Renderer::GetDevice()
+	{
+		return *m_Device;
+	}
+
+	SwapChain& Renderer::GetSwapChain()
+	{
+		return *m_SwapChain;
+	}
+
+	RenderPass& Renderer::GetRenderPass()
+	{
+		return *m_RenderPass;
+	}
+
 	VkCommandBuffer Renderer::GetCurrentCommandBuffer() const
 	{
 		return m_CurrentFrame.commandBuffer;

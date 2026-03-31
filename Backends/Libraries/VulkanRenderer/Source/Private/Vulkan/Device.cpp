@@ -195,6 +195,8 @@ namespace Nightbird::Vulkan
 			Core::Log::Error("Failed to create logical device");
 		}
 
+		volkLoadDevice(m_LogicalDevice);
+
 		m_GraphicsQueueFamily = indices.graphicsFamily.value();
 		m_PresentQueueFamily = indices.presentFamily.value();
 

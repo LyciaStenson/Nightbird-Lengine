@@ -11,6 +11,7 @@ project "EditorGlfwVulkanBackend"
 
 	defines {
 		"VK_NO_PROTOTYPES",
+		"IMGUI_IMPL_VULKAN_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
 		"GLFW_INCLUDE_VULKAN",
 		"EDITOR_BUILD",
@@ -27,6 +28,7 @@ project "EditorGlfwVulkanBackend"
 		"Source/Public",
 		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Editor/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",

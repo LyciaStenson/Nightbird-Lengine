@@ -17,7 +17,9 @@ project "EditorGlfwPlatform"
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
-		"Source/Private/**.cpp"
+		"Source/Private/**.cpp",
+		"Vendor/imgui/**.h",
+		"Vendor/imgui/**.cpp"
 	}
 
 	includedirs {
@@ -25,6 +27,7 @@ project "EditorGlfwPlatform"
 		"Source/Private",
 		"Vendor/imgui",
 		"%{wks.location}/Engine/Source/Public",
+		"%{wks.location}/Editor/Source/Public",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",
@@ -32,6 +35,7 @@ project "EditorGlfwPlatform"
 		"%{wks.location}/Editor/Vendor/imgui",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Source/Public",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/glfw/include",
+		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/miniaudio",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/vulkan-headers/include"
 	}
 

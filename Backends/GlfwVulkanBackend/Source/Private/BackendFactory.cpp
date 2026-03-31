@@ -4,6 +4,8 @@
 #include "Vulkan/Renderer.h"
 #include "Vulkan/Config.h"
 
+#include "Core/Log.h"
+
 #include <volk.h>
 #include <GLFW/glfw3.h>
 
@@ -16,6 +18,7 @@ namespace Nightbird::Core
 
 	std::unique_ptr<Core::Platform> CreatePlatform()
 	{
+		Log::Info("volkInitialize");
 		volkInitialize();
 		glfwInit();
 
