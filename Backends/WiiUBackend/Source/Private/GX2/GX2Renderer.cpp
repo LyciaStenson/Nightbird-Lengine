@@ -106,8 +106,6 @@ namespace Nightbird::GX2
 	void Renderer::BeginFrame(Core::RenderSurface& surface)
 	{
 		WHBGfxBeginRender();
-
-		m_CurrentSurface = &surface;
 	}
 
 	void Renderer::EndFrame(Core::RenderSurface& surface)
@@ -115,7 +113,7 @@ namespace Nightbird::GX2
 		WHBGfxFinishRender();
 	}
 
-	void Renderer::DrawScene()
+	void Renderer::DrawScene(Core::RenderSurface& surface)
 	{
 		if (!m_ActiveCamera)
 			return;
@@ -127,8 +125,8 @@ namespace Nightbird::GX2
 		GX2SetVertexShader(m_ShaderGroup.vertexShader);
 		GX2SetPixelShader(m_ShaderGroup.pixelShader);
 		
-		GX2SetViewport(0.0f, 0.0f, static_cast<float>(m_CurrentSurface->GetWidth()), static_cast<float>(m_CurrentSurface->GetWidth()), 0.0f, 1.0f);
-		GX2SetScissor(0, 0, m_CurrentSurface->GetWidth(), m_CurrentSurface->GetWidth());
+		GX2SetViewport(0.0f, 0.0f, static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetWidth()), 0.0f, 1.0f);
+		GX2SetScissor(0, 0, surface.GetWidth(), surface.GetWidth());
 
 		GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_FUNC_LESS);
 		GX2SetColorControl(GX2_LOGIC_OP_COPY, 0, GX2_DISABLE, GX2_ENABLE);
@@ -141,7 +139,7 @@ namespace Nightbird::GX2
 
 		glm::vec4 cameraPos = glm::vec4(glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]), 1.0f);
 		UploadMatrix(m_CameraData, m_ActiveCamera->GetViewMatrix());
-		UploadMatrix(m_CameraData + 16, m_ActiveCamera->GetProjectionMatrix(static_cast<float>(m_CurrentSurface->GetWidth()), static_cast<float>(m_CurrentSurface->GetWidth())));
+		UploadMatrix(m_CameraData + 16, m_ActiveCamera->GetProjectionMatrix(static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetWidth())));
 		UploadVec4(m_CameraData + 32, cameraPos);
 
 		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);

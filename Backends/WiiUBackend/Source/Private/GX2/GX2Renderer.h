@@ -39,7 +39,7 @@ namespace Nightbird::GX2
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
 		void BeginFrame(Core::RenderSurface& surface) override;
 		void EndFrame(Core::RenderSurface& surface) override;
-		void DrawScene() override;
+		void DrawScene(Core::RenderSurface& surface) override;
 
 	private:
 		const Core::Camera* m_ActiveCamera = nullptr;
@@ -51,8 +51,7 @@ namespace Nightbird::GX2
 
 		std::unique_ptr<RenderSurfaceTV> m_SurfaceTV;
 		std::unique_ptr<RenderSurfaceDRC> m_SurfaceDRC;
-		Core::RenderSurface* m_CurrentSurface;
-
+		
 		WHBGfxShaderGroup m_ShaderGroup = {};
 
 		uint32_t m_CameraBlockLocation = 0;

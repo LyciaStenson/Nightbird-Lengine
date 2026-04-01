@@ -162,7 +162,7 @@ namespace Nightbird::Vulkan
 		m_CurrentFrame.frameIndex = (m_CurrentFrame.frameIndex + 1) % Config::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Renderer::DrawScene()
+	void Renderer::DrawScene(Core::RenderSurface& surface)
 	{
 // 		if (!m_ActiveCamera)
 // 			return;

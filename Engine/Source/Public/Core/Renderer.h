@@ -17,6 +17,6 @@ namespace Nightbird::Core
 		virtual void SubmitScene(const Scene& scene, const Camera& camera) = 0;
 		virtual void BeginFrame(RenderSurface& surface) = 0;
 		virtual void EndFrame(RenderSurface& surface) = 0;
-		virtual void DrawScene() = 0;
+		virtual void DrawScene(RenderSurface& surface) = 0;
 	};
 }

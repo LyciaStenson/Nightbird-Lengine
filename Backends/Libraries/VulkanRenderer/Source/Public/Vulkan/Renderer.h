@@ -52,7 +52,7 @@ namespace Nightbird::Vulkan
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
 		void BeginFrame(Core::RenderSurface& surface) override;
 		void EndFrame(Core::RenderSurface& surface) override;
-		void DrawScene();
+		void DrawScene(Core::RenderSurface& surface) override;
 
 		Instance& GetInstance();
 		Device& GetDevice();

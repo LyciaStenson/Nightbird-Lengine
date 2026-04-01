@@ -7,6 +7,7 @@
 #include "PICA/PICAGeometry.h"
 #include "PICA/PICAMaterial.h"
 #include "PICA/PICATexture.h"
+#include "PICA/PICATopRenderSurface.h"
 
 #include <citro3d.h>
 
@@ -29,16 +30,13 @@ namespace Nightbird::PICA
 	public:
 		void Initialize() override;
 		void Shutdown() override;
+		Core::RenderSurface& GetDefaultSurface() override;
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
-		void DrawFrame() override;
-
+		void BeginFrame(Core::RenderSurface& surface) override;
+		void EndFrame(Core::RenderSurface& surface) override;
+		void DrawScene(Core::RenderSurface& surface) override;
+	
 	private:
-		void DrawScene();
-
-		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
-		Material& GetOrCreateMaterial(const Core::Material* material);
-		std::shared_ptr<Texture> GetOrCreateTexture(const Core::Texture* texture);
-
 		const Core::Camera* m_ActiveCamera = nullptr;
 		std::vector<Core::Renderable> m_Renderables;
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
@@ -46,12 +44,16 @@ namespace Nightbird::PICA
 		std::unordered_map<const Core::Texture*, std::shared_ptr<Texture>> m_TextureCache;
 
 		std::shared_ptr<Texture> m_DefaultTexture;
-
-		C3D_RenderTarget* m_TopTarget = nullptr;
-
+		
+		std::unique_ptr<TopRenderSurface> m_TopSurface;
+		
 		DVLB_s* m_ShaderDvlb = nullptr;
 		shaderProgram_s m_ShaderProgram = {};
 		int m_ULocProjection = -1;
 		int m_ULocModelView = -1;
+
+		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
+		Material& GetOrCreateMaterial(const Core::Material* material);
+		std::shared_ptr<Texture> GetOrCreateTexture(const Core::Texture* texture);
 	};
 }
