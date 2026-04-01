@@ -3,6 +3,9 @@ project "3DSBackend"
 	language "C++"
 	cppdialect "C++17"
 
+	removeconfigurations { "EditorDebug", "EditorRelease" }
+	removeplatforms { "Desktop", "WiiU" }
+
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 

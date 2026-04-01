@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 			engine.GetRenderer().BeginFrame(surface);
 			if (engine.GetScene().GetActiveCamera())
 				engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
-			engine.GetRenderer().DrawScene();
+			engine.GetRenderer().DrawScene(surface);
 
 			editorUI->BeginFrame();
 

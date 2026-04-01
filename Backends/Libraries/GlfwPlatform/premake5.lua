@@ -3,6 +3,8 @@ project "GlfwPlatform"
 	language "C++"
 	cppdialect "C++17"
 
+	removeplatforms { "WiiU", "3DS" }
+
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 

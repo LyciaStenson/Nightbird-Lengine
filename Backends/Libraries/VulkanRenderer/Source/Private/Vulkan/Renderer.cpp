@@ -123,8 +123,6 @@ namespace Nightbird::Vulkan
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(m_CurrentFrame.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		//DrawScene(commandBuffer);
 	}
 
 	void Renderer::EndFrame(Core::RenderSurface& coreSurface)
@@ -164,71 +162,71 @@ namespace Nightbird::Vulkan
 
 	void Renderer::DrawScene(Core::RenderSurface& surface)
 	{
-// 		if (!m_ActiveCamera)
-// 			return;
+ 		if (!m_ActiveCamera)
+ 			return;
 
-// 		std::vector<DirectionalLightData> directionalLightData;
-// 		for (const auto* directionalLight : m_DirectionalLights)
-// 		{
-// 			DirectionalLightData data{};
-// 			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
-// 			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
-// 			data.direction = glm::vec4(forward, 0.0f);
-// 			data.colorIntensity = glm::vec4(directionalLight->m_Color, directionalLight->m_Intensity);
-// 			directionalLightData.push_back(data);
-// 		}
-// 		m_GlobalDescriptorSetManager->UpdateDirectionalLights(m_CurrentFrame, directionalLightData);
+ 		std::vector<DirectionalLightData> directionalLightData;
+ 		for (const auto* directionalLight : m_DirectionalLights)
+ 		{
+ 			DirectionalLightData data{};
+ 			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
+ 			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
+ 			data.direction = glm::vec4(forward, 0.0f);
+ 			data.colorIntensity = glm::vec4(directionalLight->m_Color, directionalLight->m_Intensity);
+ 			directionalLightData.push_back(data);
+ 		}
+ 		m_GlobalDescriptorSetManager->UpdateDirectionalLights(m_CurrentFrame.frameIndex, directionalLightData);
 
-// 		std::vector<PointLightData> pointLightData;
-// 		for (const auto* pointLight : m_PointLights)
-// 		{
-// 			PointLightData data{};
-// 			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
-// 			data.positionRadius = glm::vec4(worldPos, pointLight->m_Radius);
-// 			data.colorIntensity = glm::vec4(pointLight->m_Color, pointLight->m_Intensity);
-// 			pointLightData.push_back(data);
-// 		}
-// 		m_GlobalDescriptorSetManager->UpdatePointLights(m_CurrentFrame, pointLightData);
+ 		std::vector<PointLightData> pointLightData;
+ 		for (const auto* pointLight : m_PointLights)
+ 		{
+ 			PointLightData data{};
+ 			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
+ 			data.positionRadius = glm::vec4(worldPos, pointLight->m_Radius);
+ 			data.colorIntensity = glm::vec4(pointLight->m_Color, pointLight->m_Intensity);
+ 			pointLightData.push_back(data);
+ 		}
+ 		m_GlobalDescriptorSetManager->UpdatePointLights(m_CurrentFrame.frameIndex, pointLightData);
 
-// 		m_TransformPool->Reset();
+ 		m_TransformPool->Reset();
 
-// 		CameraUBO cameraUBO{};
-// 		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
-// 		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(m_SwapChain->m_Extent.width), static_cast<float>(m_SwapChain->m_Extent.height));
-// 		proj[1][1] *= -1;
-// 		cameraUBO.projection = proj;
-// 		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
+ 		CameraUBO cameraUBO{};
+ 		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
+ 		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(m_SwapChain->m_Extent.width), static_cast<float>(m_SwapChain->m_Extent.height));
+ 		proj[1][1] *= -1;
+ 		cameraUBO.projection = proj;
+ 		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
 
-// 		m_GlobalDescriptorSetManager->UpdateCamera(m_CurrentFrame, cameraUBO);
+ 		m_GlobalDescriptorSetManager->UpdateCamera(m_CurrentFrame.frameIndex, cameraUBO);
 
-// 		std::vector<const Core::Renderable*> opaqueRenderables;
-// 		std::vector<const Core::Renderable*> transparentRenderables;
+ 		std::vector<const Core::Renderable*> opaqueRenderables;
+ 		std::vector<const Core::Renderable*> transparentRenderables;
 
-// 		for (const auto& renderable : m_Renderables)
-// 		{
-// 			if (renderable.primitive->GetMaterial()->transparencyEnabled)
-// 				transparentRenderables.push_back(&renderable);
-// 			else
-// 				opaqueRenderables.push_back(&renderable);
-// 		}
+ 		for (const auto& renderable : m_Renderables)
+ 		{
+ 			if (renderable.primitive->GetMaterial()->transparencyEnabled)
+ 				transparentRenderables.push_back(&renderable);
+ 			else
+ 				opaqueRenderables.push_back(&renderable);
+ 		}
 
-// 		glm::vec3 cameraPos = glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]);
-// 		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
-// 			[&](const Core::Renderable* a, const Core::Renderable* b)
-// 			{
-// 				float distA = glm::length(cameraPos - glm::vec3(a->transform[3]));
-// 				float distB = glm::length(cameraPos - glm::vec3(a->transform[3]));
-// 				return distA > distB;
-// 			}
-// 		);
+ 		glm::vec3 cameraPos = glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]);
+ 		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
+ 			[&](const Core::Renderable* a, const Core::Renderable* b)
+ 			{
+ 				float distA = glm::length(cameraPos - glm::vec3(a->transform[3]));
+ 				float distB = glm::length(cameraPos - glm::vec3(a->transform[3]));
+ 				return distA > distB;
+ 			}
+ 		);
 
-// 		m_OpaquePipeline->Bind(commandBuffer);
-// 		for (const auto* renderable : opaqueRenderables)
-// 			DrawRenderable(commandBuffer, *renderable, m_OpaquePipeline.get());
+ 		m_OpaquePipeline->Bind(m_CurrentFrame.commandBuffer);
+ 		for (const auto* renderable : opaqueRenderables)
+ 			DrawRenderable(m_CurrentFrame.commandBuffer, *renderable, m_OpaquePipeline.get());
 
-// 		m_TransparentPipeline->Bind(commandBuffer);
-// 		for (const auto* renderable : transparentRenderables)
-// 			DrawRenderable(commandBuffer, *renderable, m_TransparentPipeline.get());
+ 		m_TransparentPipeline->Bind(m_CurrentFrame.commandBuffer);
+ 		for (const auto* renderable : transparentRenderables)
+ 			DrawRenderable(m_CurrentFrame.commandBuffer, *renderable, m_TransparentPipeline.get());
 	}
 
 	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline)
