@@ -6,6 +6,8 @@
 
 #include "GX2/GX2Geometry.h"
 #include "GX2/GX2Material.h"
+#include "GX2/GX2RenderSurfaceTV.h"
+#include "GX2/GX2RenderSurfaceDRC.h"
 
 #include <gx2/shaders.h>
 #include <whb/gfx.h>
@@ -25,26 +27,31 @@ namespace Nightbird::Core
 
 namespace Nightbird::GX2
 {
+	class RenderSurfaceTV;
+	class RenderSurfaceDRC;
+
 	class Renderer : public Core::Renderer
 	{
 	public:
 		void Initialize() override;
 		void Shutdown() override;
+		Core::RenderSurface& GetDefaultSurface() override;
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
-		void DrawFrame() override;
+		void BeginFrame(Core::RenderSurface& surface) override;
+		void EndFrame(Core::RenderSurface& surface) override;
+		void DrawScene() override;
 
 	private:
-		void DrawScene(float width, float height);
-
-		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
-		Material& GetOrCreateMaterial(const Core::Material* material);
-
 		const Core::Camera* m_ActiveCamera = nullptr;
 		std::vector<Core::Renderable> m_Renderables;
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
+
+		std::unique_ptr<RenderSurfaceTV> m_SurfaceTV;
+		std::unique_ptr<RenderSurfaceDRC> m_SurfaceDRC;
+		Core::RenderSurface* m_CurrentSurface;
 
 		WHBGfxShaderGroup m_ShaderGroup = {};
 
@@ -53,5 +60,8 @@ namespace Nightbird::GX2
 
 		float* m_CameraData = nullptr;
 		float* m_ModelData = nullptr;
+
+		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
+		Material& GetOrCreateMaterial(const Core::Material* material);
 	};
 }
