@@ -2,15 +2,12 @@ workspace "Nightbird"
 	configurations { "EditorDebug", "EditorRelease", "AppDebug", "AppRelease" }
 	platforms { "Desktop", "WiiU", "3DS" }
 	defaultplatform "Desktop"
+	startproject "Editor"
 
 	exceptionhandling "Off"
 	rtti "Off"
 
 	defines { "TOML_COMPILER_HAS_EXCEPTIONS=0" }
-
-	filter { "action:vs*" }
-		buildoptions { "/EHs-c-" }
-	filter { }
 
 	filter { "platforms:Desktop" }
 		architecture "x86_64"
@@ -41,7 +38,6 @@ group ""
 group "Nightbird"
 	include "Engine"
 	include "App"
-	include "Editor"
 group ""
 
 group "Nightbird/Backends"
@@ -53,6 +49,10 @@ group ""
 group "Nightbird/Backends/Libraries"
 	include "Backends/Libraries/GlfwPlatform"
 	include "Backends/Libraries/VulkanRenderer"
+group ""
+
+group "Nightbird/Editor"
+	include "Editor"
 group ""
 
 group "Nightbird/Editor/Backends"

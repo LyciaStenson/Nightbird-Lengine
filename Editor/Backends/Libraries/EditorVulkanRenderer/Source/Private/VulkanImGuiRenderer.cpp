@@ -54,6 +54,8 @@ namespace Nightbird::Editor
 
 	void VulkanImGuiRenderer::Shutdown()
 	{
+		vkDeviceWaitIdle(m_Renderer.GetDevice().GetLogical());
+
 		ImGui_ImplVulkan_Shutdown();
 
 		vkDestroyDescriptorPool(m_Renderer.GetDevice().GetLogical(), m_DescriptorPool, nullptr);

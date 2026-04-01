@@ -26,8 +26,8 @@ namespace Nightbird::Editor
 
 	void EditorUIRenderer::Shutdown()
 	{
-		m_Platform->Shutdown();
 		m_Renderer->Shutdown();
+		m_Platform->Shutdown();
 
 		ImGui::DestroyContext();
 	}
