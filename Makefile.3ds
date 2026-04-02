@@ -34,32 +34,30 @@ include $(DEVKITARM)/3ds_rules
 
 NO_SMDH := 1
 
-TARGET		:=	App
+TARGET		:=	Engine
 BUILD		:=	Intermediate/3ds
 BUILD_DIR	:=	3ds
 SOURCES		:=	App/Source/Private \
-			Engine/Source/Private \
-			Engine/Source/Private/Core \
-			Engine/Source/Private/Input \
-			Engine/Source/Private/Audio \
-			Engine/Source/Private/Load \
-			Engine/Source/Private/Scene \
-			Backends/3DSBackend/Source/Private \
-			Backends/3DSBackend/Source/Private/3DS \
-			Backends/3DSBackend/Source/Private/PICA
+				Engine/Source/Private \
+				Engine/Source/Private/Core \
+				Engine/Source/Private/Input \
+				Engine/Source/Private/Audio \
+				Engine/Source/Private/Load \
+				Engine/Source/Private/Scene \
+				Backends/3DSBackend/Source/Private \
+				Backends/3DSBackend/Source/Private/3DS \
+				Backends/3DSBackend/Source/Private/PICA
 DATA		:=	data \
-			Intermediate/3ds/data
-INCLUDES	:=	App/Source/Public \
-			App/Source/Private \
-			Engine/Source/Public \
-			Engine/Source/Private \
-			Backends/3DSBackend/Source/Public \
-			Backends/3DSBackend/Source/Private \
-			Backends/3DSBackend/Source/Private/3DS \
-			Backends/3DSBackend/Source/Private/PICA \
-			Engine/Vendor/glm \
-			Engine/Vendor/stb \
-			Engine/Vendor/stduuid
+				Intermediate/3ds/data
+INCLUDES	:=	Engine/Source/Public \
+				Engine/Source/Private \
+				Backends/3DSBackend/Source/Public \
+				Backends/3DSBackend/Source/Private \
+				Backends/3DSBackend/Source/Private/3DS \
+				Backends/3DSBackend/Source/Private/PICA \
+				Engine/Vendor/glm \
+				Engine/Vendor/stb \
+				Engine/Vendor/stduuid
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -75,9 +73,6 @@ CFLAGS	+=	$(INCLUDE) -D__3DS__
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions -fno-rtti -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
-
-LIBS	:= -lcitro3d -lctru -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -93,7 +88,7 @@ LIBDIRS	:= $(CTRULIB)
 ifneq ($(BUILD_DIR),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/Binaries/3ds/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/Binaries/3ds/lib$(TARGET).a
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -107,20 +102,6 @@ CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
 
 export OFILES_SOURCES 	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
@@ -161,6 +142,8 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
+export AR_TARGET = $(TARGET)
+
 .PHONY: all clean
 
 #---------------------------------------------------------------------------------
@@ -179,7 +162,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) Binaries/3ds/$(TARGET).3dsx Binaries/3ds/$(TARGET).elf
+	@rm -fr $(BUILD) Binaries/3ds/lib$(TARGET).a
 
 #---------------------------------------------------------------------------------
 else
@@ -187,16 +170,21 @@ else
 
 DEPENDS := $(OFILES:.o=.d)
 
-all: $(OUTPUT).3dsx
+all: $(OUTPUT)
 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+#$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+
+$(OUTPUT): $(OFILES)
+	@echo building engine static library $@
+	@rm -f $@
+	@$(AR) rcs $@ $^
 
 $(OFILES_SOURCES) : $(HFILES)
 
-$(OUTPUT).elf	:	$(OFILES)
+#$(OUTPUT).elf	:	$(OFILES)
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data

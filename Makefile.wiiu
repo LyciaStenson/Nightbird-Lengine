@@ -32,8 +32,7 @@ SOURCES		:=	App/Source/Private \
 				Backends/WiiUBackend/Source/Private/GX2
 DATA		:=	data \
 				Intermediate/wiiu
-INCLUDES	:=	App/Source/Public \
-				Engine/Source/Public \
+INCLUDES	:=	Engine/Source/Public \
 				Engine/Source/Private \
 				Backends/WiiUBackend/Source/Public \
 				Backends/WiiUBackend/Source/Private \
@@ -54,9 +53,6 @@ CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions -fno-rtti -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
-#LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
-
-#LIBS	:= -lwut
 
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level
@@ -84,20 +80,6 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#-------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#-------------------------------------------------------------------------------
-#ifeq ($(strip $(CPPFILES)),)
-#-------------------------------------------------------------------------------
-#	export LD	:=	$(CC)
-#-------------------------------------------------------------------------------
-#else
-#-------------------------------------------------------------------------------
-#	export LD	:=	$(CXX)
-#-------------------------------------------------------------------------------
-#endif
-#-------------------------------------------------------------------------------
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
 export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
