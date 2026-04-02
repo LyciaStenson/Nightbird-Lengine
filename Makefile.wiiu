@@ -17,7 +17,7 @@ include $(DEVKITPRO)/wut/share/wut_rules
 # DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
 #-------------------------------------------------------------------------------
-TARGET		:=	App
+TARGET		:=	Engine
 BUILD		:=	Intermediate/wiiu
 BUILD_DIR	:=	wiiu
 SOURCES		:=	App/Source/Private \
@@ -31,9 +31,8 @@ SOURCES		:=	App/Source/Private \
 				Backends/WiiUBackend/Source/Private/WiiU \
 				Backends/WiiUBackend/Source/Private/GX2
 DATA		:=	data \
-			Intermediate/wiiu
+				Intermediate/wiiu
 INCLUDES	:=	App/Source/Public \
-				App/Source/Private \
 				Engine/Source/Public \
 				Engine/Source/Private \
 				Backends/WiiUBackend/Source/Public \
@@ -55,9 +54,9 @@ CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions -fno-rtti -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
+#LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lwut
+#LIBS	:= -lwut
 
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level
@@ -73,7 +72,7 @@ LIBDIRS	:= $(PORTLIBS) $(WUT_ROOT)
 ifneq ($(BUILD_DIR),$(notdir $(CURDIR)))
 #-------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/Binaries/wiiu/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/Binaries/wiiu/lib$(TARGET).a
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -89,15 +88,15 @@ BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 #-------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
 #-------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
+#ifeq ($(strip $(CPPFILES)),)
 #-------------------------------------------------------------------------------
-	export LD	:=	$(CC)
+#	export LD	:=	$(CC)
 #-------------------------------------------------------------------------------
-else
+#else
 #-------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
+#	export LD	:=	$(CXX)
 #-------------------------------------------------------------------------------
-endif
+#endif
 #-------------------------------------------------------------------------------
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
@@ -110,6 +109,8 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			-I$(CURDIR)/$(BUILD)
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+export AR_TARGET = $(TARGET)
 
 .PHONY: $(BUILD) clean all
 
@@ -124,7 +125,7 @@ $(BUILD):
 #-------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) Binaries/wiiu/$(TARGET).rpx Binaries/wiiu/$(TARGET).elf
+	@rm -fr $(BUILD) Binaries/wiiu/lib$(TARGET).a
 
 #-------------------------------------------------------------------------------
 else
@@ -133,14 +134,16 @@ else
 DEPENDS	:=	$(OFILES:.o=.d)
 
 #-------------------------------------------------------------------------------
-# main targets
+# build engine static library
 #-------------------------------------------------------------------------------
-all	:	$(OUTPUT).rpx
+all	:	$(OUTPUT)
 
-$(OUTPUT).rpx	:	$(OUTPUT).elf
-$(OUTPUT).elf	:	$(OFILES)
+$(OUTPUT): $(OFILES)
+	@echo building engine static library $@ ...
+	@rm -f $@
+	@$(AR) rcs $@ $^
 
-$(OFILES_SRC)	: $(HFILES_BIN)
+$(OFILES_SRC): $(HFILES_BIN)
 
 #-------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
