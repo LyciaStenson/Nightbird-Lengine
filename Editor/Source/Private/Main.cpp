@@ -9,7 +9,13 @@
 #include "EditorUIRenderer.h"
 #include "ImGuiPlatform.h"
 #include "ImGuiRenderer.h"
+#include "EditorContext.h"
 #include "EditorBackendFactory.h"
+
+#include "WindowManager.h"
+#include "Windows/SceneOutliner.h"
+
+#include "EditorUI.h"
 
 #include <rttr/library.h>
 #include <imgui.h>
@@ -24,8 +30,15 @@ int main(int argc, char** argv)
 		auto renderer = Nightbird::Core::CreateRenderer();
 		Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
 
-		auto editorUI = Nightbird::Editor::CreateEditorUIRenderer(engine.GetPlatform(), engine.GetRenderer());
-		editorUI->Initialize();
+		Nightbird::Editor::EditorContext context(engine);
+
+		Nightbird::Editor::WindowManager windowManager;
+		windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
+
+		Nightbird::Editor::EditorUI editorUI(windowManager);
+
+		auto editorUIRenderer = Nightbird::Editor::CreateEditorUIRenderer(engine.GetPlatform(), engine.GetRenderer());
+		editorUIRenderer->Initialize();
 
 		while (!engine.ShouldClose())
 		{
@@ -36,16 +49,17 @@ int main(int argc, char** argv)
 				engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
 			engine.GetRenderer().DrawScene(surface);
 
-			editorUI->BeginFrame();
+			editorUIRenderer->BeginFrame();
+			ImGui::DockSpaceOverViewport();
 
-			ImGui::ShowDemoWindow();
+			editorUI.Render();
 
-			editorUI->EndFrame();
+			editorUIRenderer->EndFrame();
 
 			engine.GetRenderer().EndFrame(surface);
 		}
 
-		editorUI->Shutdown();
+		editorUIRenderer->Shutdown();
 	};
 
 	if (argc > 1)
