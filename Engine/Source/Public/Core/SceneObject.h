@@ -30,7 +30,7 @@ namespace Nightbird::Core
 		Engine* GetEngine() const;
 		void SetScene(Scene* scene);
 
-		void SetParent(SceneObject* parent);
+		void SetParent(SceneObject* newParent);
 		SceneObject* GetParent() const;
 
 		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;

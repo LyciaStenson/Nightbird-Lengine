@@ -22,6 +22,8 @@ namespace Nightbird::Editor
 
 		m_Platform->Initialize();
 		m_Renderer->Initialize();
+
+		ImGui::StyleColorsDark();
 	}
 
 	void EditorUIRenderer::Shutdown()

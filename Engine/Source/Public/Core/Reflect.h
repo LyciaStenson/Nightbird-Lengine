@@ -16,7 +16,7 @@
 	#define NB_CLASS(Type) \
 		{ \
 			using _NB_CurrentType = Type; \
-			rttr::registration::class_<Type>(#Type) \
+			rttr::registration::class_<Type>(#Type)
 
 	#define NB_CLASS_END() \
 		;}
@@ -25,7 +25,7 @@
 		.property(#Name, &_NB_CurrentType::Name)
 
 	#define NB_CONSTRUCTOR(...) \
-		.constructor<__VA_ARGS__>()
+		.constructor<__VA_ARGS__>() (rttr::policy::ctor::as_raw_ptr)
 
 	#define NB_ENABLE(...) \
 		RTTR_ENABLE(__VA_ARGS__) \

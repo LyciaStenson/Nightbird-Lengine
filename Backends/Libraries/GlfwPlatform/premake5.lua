@@ -27,4 +27,4 @@ project "GlfwPlatform"
 		"Vendor/miniaudio"
 	}
 	
-	links { "Engine", "GLFW" }
+	links { "Engine", "glfw" }

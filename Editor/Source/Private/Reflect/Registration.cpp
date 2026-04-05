@@ -23,7 +23,7 @@ NB_REGISTRATION
 
 	NB_CLASS(Nightbird::Core::SpatialObject)
 		NB_CONSTRUCTOR(const std::string&)
-		NB_PROPERTY(m_Transform);
+		NB_PROPERTY(m_Transform)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::MeshInstance)

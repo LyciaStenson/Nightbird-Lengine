@@ -20,7 +20,8 @@ namespace Nightbird::Editor
 		void OnRender() override;
 
 	private:
-		void DrawSceneNode(Core::SceneObject* object);
+		void DrawAddObjectPopup();
+		void DrawSceneNode(Core::SceneObject* object, bool& dropHandled);
 
 		EditorContext& m_Context;
 	};

@@ -11,14 +11,12 @@
 #include "ImGuiRenderer.h"
 #include "EditorContext.h"
 #include "EditorBackendFactory.h"
+#include "EditorUI.h"
 
 #include "WindowManager.h"
 #include "Windows/SceneOutliner.h"
 
-#include "EditorUI.h"
-
 #include <rttr/library.h>
-#include <imgui.h>
 
 #include <string>
 
@@ -68,10 +66,6 @@ int main(int argc, char** argv)
 		if (project.load())
 		{
 			Nightbird::Core::Log::Info("Loaded project: " + std::string(argv[1]));
-
-			for (auto& type : rttr::type::get_types())
-				Nightbird::Core::Log::Info("Registered type: " + type.get_name().to_string());
-
 			runEditor();
 		}
 		else

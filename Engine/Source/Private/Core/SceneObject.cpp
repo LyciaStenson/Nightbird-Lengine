@@ -31,9 +31,19 @@ namespace Nightbird::Core
 			child->SetScene(scene);
 	}
 
-	void SceneObject::SetParent(SceneObject* parent)
+	void SceneObject::SetParent(SceneObject* newParent)
 	{
-		m_Parent = parent;
+		if (newParent == m_Parent || newParent == this)
+			return;
+
+		std::unique_ptr<SceneObject> detachedChild = nullptr;
+		if (m_Parent)
+			detachedChild = m_Parent->DetachChild(this);
+
+		m_Parent = newParent;
+
+		if (newParent && detachedChild)
+			newParent->AddChild(std::move(detachedChild));
 	}
 
 	SceneObject* SceneObject::GetParent() const
@@ -53,9 +63,13 @@ namespace Nightbird::Core
 
 	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
-		child->SetScene(m_Scene);
-		child->SetParent(this);
+		if (!child)
+			return;
+
 		m_Children.push_back(std::move(child));
+
+		m_Children.back()->SetScene(m_Scene);
+		m_Children.back()->SetParent(this);
 
 		if (m_Scene && m_Scene->GetEngine())
 			m_Children.back()->EnterSceneRecursive();
@@ -67,9 +81,9 @@ namespace Nightbird::Core
 		{
 			if (it->get() == child)
 			{
-				child->SetParent(nullptr);
 				auto detatched = std::move(*it);
 				m_Children.erase(it);
+				detatched->SetParent(nullptr);
 				return detatched;
 			}
 		}
