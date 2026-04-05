@@ -59,7 +59,15 @@ int main(int argc, char** argv)
 			return 1;
 		}
 
-		// LINUX + EDITORDEBUG ONLY
+		// EDITORDEBUG ONLY
+		std::string configStr = "EditorDebug";
+
+#ifdef _WIN32
+		platformStr = "windows-x86_64";
+#else
+		platformStr = "linux-x86_64";
+#endif
+
 		std::filesystem::path sharedLibPath = projectDir / "Binaries" / "linux-x86_64" / "EditorDebug" / ("lib" + projectConfig.name + ".so");
 
 		if (!std::filesystem::exists(sharedLibPath))
