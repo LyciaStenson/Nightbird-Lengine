@@ -62,6 +62,8 @@ int main(int argc, char** argv)
 		// EDITORDEBUG ONLY
 		std::string configStr = "EditorDebug";
 
+		std::string platformStr;
+
 #ifdef _WIN32
 		platformStr = "windows-x86_64";
 #else
