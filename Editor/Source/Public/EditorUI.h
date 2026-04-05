@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EditorTheme.h"
+
 namespace Nightbird::Editor
 {
 	class WindowManager;
@@ -9,10 +11,14 @@ namespace Nightbird::Editor
 	public:
 		EditorUI(WindowManager& windowManager);
 
+		void ApplyTheme(EditorTheme theme);
+
 		void Render();
 
 	private:
-		void RenderMainMenuBar();
+		void MainMenuBar();
+		void Toolbar();
+		void DockSpace();
 
 		WindowManager& m_WindowManager;
 	};

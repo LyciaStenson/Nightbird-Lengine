@@ -14,6 +14,8 @@ namespace Nightbird::Editor
 	class SceneOutliner : public ImGuiWindow
 	{
 	public:
+		NB_OBJECT(SceneOutliner, ImGuiWindow)
+
 		SceneOutliner(EditorContext& context, bool open = true);
 
 	protected:

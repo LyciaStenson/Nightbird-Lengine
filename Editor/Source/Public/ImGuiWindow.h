@@ -1,11 +1,13 @@
 #pragma once
 
-#include <imgui.h>
+#include "Core/TypeInfo.h"
 
 #include <optional>
 #include <string>
 
-namespace Nightbird
+#include <imgui.h>
+
+namespace Nightbird::Editor
 {
 	struct ImGuiWindowConfig
 	{
@@ -17,6 +19,8 @@ namespace Nightbird
 	class ImGuiWindow
 	{
 	public:
+		NB_OBJECT_BASE(ImGuiWindow)
+
 		ImGuiWindow(const std::string& title, bool open = true, const ImGuiWindowConfig& config = {});
 		virtual ~ImGuiWindow() = default;
 

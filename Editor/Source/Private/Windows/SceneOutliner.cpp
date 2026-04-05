@@ -9,6 +9,8 @@
 
 namespace Nightbird::Editor
 {
+	NB_OBJECT_IMPL(SceneOutliner, ImGuiWindow);
+
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
 		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)
 	{
@@ -95,7 +97,10 @@ namespace Nightbird::Editor
 						Core::SceneObject* rawObject = variant.get_value<Core::SceneObject*>();
 						std::unique_ptr<Core::SceneObject> object(rawObject);
 
-						m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
+						if (auto* selectObject = m_Context.GetSelectedObject())
+							selectObject->AddChild(std::move(object));
+						else
+							m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
 					}
 				}
 			}

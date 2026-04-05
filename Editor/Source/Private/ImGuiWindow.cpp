@@ -1,7 +1,9 @@
 #include "ImGuiWindow.h"
 
-namespace Nightbird
+namespace Nightbird::Editor
 {
+	NB_OBJECT_BASE_IMPL(ImGuiWindow)
+
 	ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowConfig& config)
 		: m_Title(std::move(title)), m_Open(open), m_Config(std::move(config))
 	{
@@ -28,7 +30,7 @@ namespace Nightbird
 		if (m_Config.padding)
 			ImGui::PopStyleVar();
 	}
-	
+
 	void ImGuiWindow::SetOpen(bool open)
 	{
 		m_Open = open;

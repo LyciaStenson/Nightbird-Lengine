@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/TypeInfo.h"
+
 #include "ImGuiWindow.h"
 
 #include <memory>
@@ -23,7 +25,7 @@ namespace Nightbird::Editor
 		T* GetWindow()
 		{
 			for (auto& window : m_Windows)
-				if (auto casted = dynamic_cast<T*>(window.get()))
+				if (auto casted = Cast<T>(window.get()))
 					return casted;
 			return nullptr;
 		}

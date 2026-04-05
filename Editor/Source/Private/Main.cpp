@@ -13,8 +13,15 @@
 #include "EditorBackendFactory.h"
 #include "EditorUI.h"
 
+#include "SettingsManager.h"
+
 #include "WindowManager.h"
 #include "Windows/SceneOutliner.h"
+#include "Windows/EditorSettingsWindow.h"
+#include "Windows/ProjectSettingsWindow.h"
+#include "Windows/AboutWindow.h"
+
+#include "EditorTheme.h"
 
 #include <rttr/library.h>
 
@@ -22,51 +29,20 @@
 
 int main(int argc, char** argv)
 {
-	auto runEditor = []()
-	{
-		auto platform = Nightbird::Core::CreatePlatform();
-		auto renderer = Nightbird::Core::CreateRenderer();
-		Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
+	auto platform = Nightbird::Core::CreatePlatform();
+	auto renderer = Nightbird::Core::CreateRenderer();
+	Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
 
-		Nightbird::Editor::EditorContext context(engine);
-
-		Nightbird::Editor::WindowManager windowManager;
-		windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
-
-		Nightbird::Editor::EditorUI editorUI(windowManager);
-
-		auto editorUIRenderer = Nightbird::Editor::CreateEditorUIRenderer(engine.GetPlatform(), engine.GetRenderer());
-		editorUIRenderer->Initialize();
-
-		while (!engine.ShouldClose())
-		{
-			engine.Update();
-			auto& surface = engine.GetRenderer().GetDefaultSurface();
-			engine.GetRenderer().BeginFrame(surface);
-			if (engine.GetScene().GetActiveCamera())
-				engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
-			engine.GetRenderer().DrawScene(surface);
-
-			editorUIRenderer->BeginFrame();
-			ImGui::DockSpaceOverViewport();
-
-			editorUI.Render();
-
-			editorUIRenderer->EndFrame();
-
-			engine.GetRenderer().EndFrame(surface);
-		}
-
-		editorUIRenderer->Shutdown();
-	};
-
+	bool projectLoaded = false;
+	std::string projectPath;
 	if (argc > 1)
 	{
 		rttr::library project(argv[1]);
-		if (project.load())
+		projectLoaded = project.load();
+		if (projectLoaded)
 		{
-			Nightbird::Core::Log::Info("Loaded project: " + std::string(argv[1]));
-			runEditor();
+			projectPath = std::string(argv[1]);
+			Nightbird::Core::Log::Info("Loaded project: " + projectPath);
 		}
 		else
 		{
@@ -77,8 +53,48 @@ int main(int argc, char** argv)
 	else
 	{
 		Nightbird::Core::Log::Info("No project specified");
-		runEditor();
 	}
+
+	Nightbird::Editor::EditorContext context(engine);
+
+	Nightbird::Editor::SettingsManager settingsManager;
+	Nightbird::Editor::EditorSettings editorSettings = settingsManager.LoadEditorSettings();
+	Nightbird::Editor::ProjectSettings projectSettings;
+	if (projectLoaded)
+		projectSettings = settingsManager.LoadProjectSettings(projectPath);
+
+	Nightbird::Editor::WindowManager windowManager;
+	windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
+	windowManager.AddWindow<Nightbird::Editor::EditorSettingsWindow>(editorSettings);
+	if (projectLoaded)
+		windowManager.AddWindow<Nightbird::Editor::ProjectSettingsWindow>(projectSettings);
+	windowManager.AddWindow<Nightbird::Editor::AboutWindow>();
+
+	auto editorUIRenderer = Nightbird::Editor::CreateEditorUIRenderer(engine.GetPlatform(), engine.GetRenderer());
+	editorUIRenderer->Initialize();
+
+	Nightbird::Editor::EditorUI editorUI(windowManager);
+	editorUI.ApplyTheme(Nightbird::Editor::EditorTheme::Dark);
+
+	while (!engine.ShouldClose())
+	{
+		engine.Update();
+		auto& surface = engine.GetRenderer().GetDefaultSurface();
+		engine.GetRenderer().BeginFrame(surface);
+		if (engine.GetScene().GetActiveCamera())
+			engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
+		engine.GetRenderer().DrawScene(surface);
+
+		editorUIRenderer->BeginFrame();
+
+		editorUI.Render();
+
+		editorUIRenderer->EndFrame();
+
+		engine.GetRenderer().EndFrame(surface);
+	}
+
+	editorUIRenderer->Shutdown();
 
 	return 0;
 }
