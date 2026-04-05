@@ -59,7 +59,7 @@ namespace Nightbird::Editor
 
 		table.insert("mainScene", settings.mainScene);
 
-		std::ofstream file(projectPath + "/ProjectSettings.toml");
+		std::ofstream file(projectPath + "ProjectSettings.toml");
 		file << table;
 	}
 }
