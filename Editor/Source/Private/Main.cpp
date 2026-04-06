@@ -58,6 +58,14 @@ int main(int argc, char** argv)
 			Nightbird::Core::Log::Error("Invalid project name in: " + projectPath.string());
 			return 1;
 		}
+		
+		std::filesystem::path premakePath = projectDir / "premake5.lua";
+		if (!std::filesystem::exists(premakePath))
+		{
+			Nightbird::Editor::GeneratePremake(projectConfig, installPath, projectDir);
+			Nightbird::Core::Log::Info("Generated premake5.lua for " + projectConfig.name + ", now build the project");
+			return 0;
+		}
 
 		// EDITORDEBUG ONLY
 		std::string configStr = "EditorDebug";
@@ -70,24 +78,7 @@ int main(int argc, char** argv)
 		platformStr = "linux-x86_64";
 #endif
 
-		std::filesystem::path sharedLibPath = projectDir / "Binaries" / "linux-x86_64" / "EditorDebug" / ("lib" + projectConfig.name + ".so");
-
-		if (!std::filesystem::exists(sharedLibPath))
-		{
-			std::filesystem::path premakePath = projectDir / "premake5.lua";
-			if (!std::filesystem::exists(premakePath))
-			{
-				Nightbird::Editor::GeneratePremake(projectConfig, installPath, projectDir);
-				Nightbird::Core::Log::Info("Generated premake5.lua for " + projectConfig.name + ", now build the project");
-				return 0;
-			}
-			else
-			{
-				Nightbird::Core::Log::Info("Project library not found, make sure to build the project");
-				return 0;
-			}
-		}
-
+		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / "EditorDebug" / projectConfig.name;
 		rttr::library projectLib(sharedLibPath.string());
 		projectLoaded = projectLib.load();
 		if (projectLoaded)
@@ -97,6 +88,7 @@ int main(int argc, char** argv)
 		else
 		{
 			Nightbird::Core::Log::Error("Failed to load project: " + sharedLibPath.string());
+			Nightbird::Core::Log::Info("Make sure to build the project");
 			Nightbird::Core::Log::Error(projectLib.get_error_string().to_string());
 		}
 	}
@@ -115,7 +107,7 @@ int main(int argc, char** argv)
 	Nightbird::Editor::EditorSettings editorSettings = settingsManager.LoadEditorSettings();
 	Nightbird::Editor::ProjectSettings projectSettings;
 	if (projectLoaded)
-		projectSettings = settingsManager.LoadProjectSettings(projectPath);
+		projectSettings = settingsManager.LoadProjectSettings(projectPath.string());
 
 	Nightbird::Editor::WindowManager windowManager;
 	windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);

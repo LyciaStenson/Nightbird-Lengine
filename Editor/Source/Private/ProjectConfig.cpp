@@ -59,7 +59,5 @@ namespace Nightbird::Editor
 
 		std::ofstream outFile(outputPath);
 		outFile << premakeContent;
-
-		Nightbird::Core::Log::Info("Generated premake5.lua for project: " + projectConfig.name);
 	}
 }

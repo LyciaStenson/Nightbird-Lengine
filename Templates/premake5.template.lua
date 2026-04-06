@@ -53,7 +53,7 @@ project "Editor"
 
 	debugdir (enginePath .. "Binaries/" .. outputdir)
 
-	debugargs { "%{wks.location}" }
+	debugargs { "%{wks.location}/%PROJECT_NAME%.nproject" }
 
 	dependson { "%PROJECT_NAME%" }
 
