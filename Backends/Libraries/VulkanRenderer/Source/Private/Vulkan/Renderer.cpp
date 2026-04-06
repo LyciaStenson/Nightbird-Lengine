@@ -14,8 +14,8 @@
 
 namespace Nightbird::Vulkan
 {
-	Renderer::Renderer(std::vector<const char*> extensions, SurfaceCreator surfaceCreator)
-		: m_Extensions(std::move(extensions)), m_SurfaceCreator(surfaceCreator)
+	Renderer::Renderer(Core::Platform* platform, std::vector<const char*> extensions, SurfaceCreator surfaceCreator)
+		: m_Platform(platform), m_Extensions(std::move(extensions)), m_SurfaceCreator(surfaceCreator)
 	{
 
 	}
@@ -28,23 +28,24 @@ namespace Nightbird::Vulkan
 		m_Surface = m_SurfaceCreator(m_Instance->Get());
 
 		m_Device = std::make_unique<Device>(m_Instance->Get(), m_Surface);
-
-		m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Surface);
-		m_RenderPass = std::make_unique<RenderPass>(m_Device.get(), m_SwapChain->GetColorFormat(), m_SwapChain->GetDepthFormat(), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		m_SwapChain->CreateFramebuffers(m_RenderPass->Get());
-
-		m_SwapChainSurface = std::make_unique<SwapChainSurface>(*m_Device, *m_SwapChain, *m_RenderPass);
-
 		m_Sync = std::make_unique<Sync>(m_Device->GetLogical());
 
+		int width = 0;
+		int height = 0;
+		m_Platform->GetFramebufferSize(&width, &height);
+
+		m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Sync.get(), m_Surface, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+		
+		m_SwapChainSurface = std::make_unique<SwapChainSurface>(m_Platform, *m_Device, *m_Sync, *m_SwapChain);
+		
 		CreateDescriptorPool();
 
 		m_DescriptorSetLayoutManager = std::make_unique<DescriptorSetLayoutManager>(m_Device.get());
 
 		m_GlobalDescriptorSetManager = std::make_unique<GlobalDescriptorSetManager>(m_Device.get(), m_DescriptorSetLayoutManager->GetGlobalDescriptorSetLayout(), m_DescriptorPool);
 
-		m_OpaquePipeline = std::make_unique<Pipeline>(m_Device.get(), m_RenderPass.get(), m_DescriptorSetLayoutManager.get(), PipelineType::Opaque, false);
-		m_TransparentPipeline = std::make_unique<Pipeline>(m_Device.get(), m_RenderPass.get(), m_DescriptorSetLayoutManager.get(), PipelineType::Transparent, false);
+		m_OpaquePipeline = std::make_unique<Pipeline>(m_Device.get(), &m_SwapChainSurface->GetRenderPass(), m_DescriptorSetLayoutManager.get(), PipelineType::Opaque, false);
+		m_TransparentPipeline = std::make_unique<Pipeline>(m_Device.get(), &m_SwapChainSurface->GetRenderPass(), m_DescriptorSetLayoutManager.get(), PipelineType::Transparent, false);
 
 		m_TransformPool = std::make_unique<TransformPool>(m_Device.get(), m_DescriptorPool, m_DescriptorSetLayoutManager.get(), 1000);
 
@@ -71,7 +72,6 @@ namespace Nightbird::Vulkan
 		m_Sync.reset();
 		m_SwapChainSurface.reset();
 		m_SwapChain.reset();
-		m_RenderPass.reset();
 		
 		vkDestroySurfaceKHR(m_Instance->Get(), m_Surface, nullptr);
 
@@ -87,30 +87,44 @@ namespace Nightbird::Vulkan
 		m_PointLights = scene.CollectPointLights();
 	}
 
-	void Renderer::BeginFrame(Core::RenderSurface& coreSurface)
+	bool Renderer::BeginFrame(Core::RenderSurface& coreSurface)
 	{
 		auto& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
+
+		if (surface.NeedsResize())
+		{
+			vkDeviceWaitIdle(m_Device->GetLogical());
+			
+			int width = 0;
+			int height = 0;
+			
+			m_Platform->GetFramebufferSize(&width, &height);
+			
+			surface.Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+			return false;
+		}
 
 		vkWaitForFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex], VK_TRUE, UINT64_MAX);
 
 		VkFramebuffer framebuffer = surface.AcquireFramebuffer(m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]);
 		if (framebuffer == VK_NULL_HANDLE)
-			return;
+			return false;
 
 		vkResetFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]);
 
 		m_CurrentFrame.commandBuffer = m_Device->GetCommandBuffer(m_CurrentFrame.frameIndex);
 		vkResetCommandBuffer(m_CurrentFrame.commandBuffer, 0);
 
-		m_RenderPass->BeginCommandBuffer(m_CurrentFrame.commandBuffer);
+		RenderPass& renderPass = surface.GetRenderPass();
+		
+		renderPass.BeginCommandBuffer(m_CurrentFrame.commandBuffer);
 		//m_RenderPass->Begin(commandBuffer, m_SwapChain->m_Framebuffers[imageIndex], m_SwapChain->m_Extent);
 
 		VkExtent2D extent = surface.GetExtent();
-		VkRenderPass compatibleRenderPass = surface.GetCompatibleRenderPass();
-
+		
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = compatibleRenderPass;
+		renderPassInfo.renderPass = renderPass.Get();
 		renderPassInfo.framebuffer = framebuffer;
 		renderPassInfo.renderArea.offset = {0, 0};
 		renderPassInfo.renderArea.extent = extent;
@@ -123,15 +137,19 @@ namespace Nightbird::Vulkan
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(m_CurrentFrame.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		return true;
 	}
 
 	void Renderer::EndFrame(Core::RenderSurface& coreSurface)
 	{
 		auto& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
 
+		RenderPass& renderPass = surface.GetRenderPass();
+
 		//m_RenderPass->End(commandBuffer);
 		vkCmdEndRenderPass(m_CurrentFrame.commandBuffer);
-		m_RenderPass->EndCommandBuffer(m_CurrentFrame.commandBuffer);
+		renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -304,6 +322,31 @@ namespace Nightbird::Vulkan
 		return *m_SwapChainSurface;
 	}
 
+	static VkFormat ToVkFormat(Core::PixelFormat format)
+	{
+		switch (format)
+		{
+		case Core::PixelFormat::RGBA8:
+			return VK_FORMAT_R8G8B8A8_UNORM;
+		case Core::PixelFormat::RGBA16F:
+			return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case Core::PixelFormat::Depth24Stencil8:
+			return VK_FORMAT_D24_UNORM_S8_UINT;
+		case Core::PixelFormat::Depth32F:
+			return VK_FORMAT_D32_SFLOAT;
+		}
+
+		return VK_FORMAT_R8G8B8A8_UNORM;
+	}
+
+	std::unique_ptr<Core::RenderSurface> Renderer::CreateSurface(uint32_t width, uint32_t height, Core::PixelFormat colorFormat, Core::PixelFormat depthFormat)
+	{
+		VkFormat colorVkFormat = ToVkFormat(colorFormat);
+		VkFormat depthVkFormat = ToVkFormat(depthFormat);
+
+		return std::make_unique<OffscreenSurface>(m_Device.get(), width, height, colorVkFormat, depthVkFormat);
+	}
+
 	Instance& Renderer::GetInstance()
 	{
 		return *m_Instance;
@@ -318,12 +361,7 @@ namespace Nightbird::Vulkan
 	{
 		return *m_SwapChain;
 	}
-
-	RenderPass& Renderer::GetRenderPass()
-	{
-		return *m_RenderPass;
-	}
-
+	
 	VkCommandBuffer Renderer::GetCurrentCommandBuffer() const
 	{
 		return m_CurrentFrame.commandBuffer;

@@ -2,6 +2,7 @@
 
 #include "Vulkan/Image.h"
 #include "Vulkan/Device.h"
+#include "Vulkan/Sync.h"
 #include "Vulkan/ImageUtils.h"
 #include "Vulkan/SwapChainUtils.h"
 
@@ -13,11 +14,11 @@
 
 namespace Nightbird::Vulkan
 {
-	SwapChain::SwapChain(Device* device, VkSurfaceKHR surface)
-		: m_Device(device), m_Surface(surface)
+	SwapChain::SwapChain(Device* device, Sync* sync, VkSurfaceKHR surface, uint32_t width, uint32_t height)
+		: m_Device(device), m_Sync(sync), m_Surface(surface)
 	{
-		CreateSwapChain();
-		CreateDepthResources();
+		CreateSwapChain(width, height);
+		CreateDepthResources(width, height);
 	}
 
 	SwapChain::~SwapChain()
@@ -40,6 +41,16 @@ namespace Nightbird::Vulkan
 		return m_MinImageCount;
 	}
 
+	const std::vector<std::unique_ptr<Image>>& SwapChain::GetImages() const
+	{
+		return m_Images;
+	}
+
+	const Image& SwapChain::GetDepthImage() const
+	{
+		return *m_DepthImage;
+	}
+
 	VkFormat SwapChain::GetColorFormat() const
 	{
 		return m_ColorFormat;
@@ -50,7 +61,7 @@ namespace Nightbird::Vulkan
 		return m_DepthFormat;
 	}
 
-	void SwapChain::CreateSwapChain()
+	void SwapChain::CreateSwapChain(uint32_t width, uint32_t height)
 	{
 		VkDevice logicalDevice = m_Device->GetLogical();
 		VkPhysicalDevice physicalDevice = m_Device->GetPhysical();
@@ -60,7 +71,7 @@ namespace Nightbird::Vulkan
 		m_SurfaceFormat = ChooseSwapSurfaceFormat(supportDetails.formats);
 		m_PresentMode = ChooseSwapPresentMode(supportDetails.presentModes);
 
-		m_Extent = ChooseSwapExtent(supportDetails.capabilities);
+		m_Extent = ChooseSwapExtent(supportDetails.capabilities, width, height);
 
 		m_MinImageCount = supportDetails.capabilities.minImageCount;
 		m_ImageCount = m_MinImageCount + 1;
@@ -122,49 +133,33 @@ namespace Nightbird::Vulkan
 		m_ColorFormat = m_SurfaceFormat.format;
 	}
 
-	void SwapChain::CleanupSwapChain()
-	{
-		VkDevice logicalDevice = m_Device->GetLogical();
-		
-		for (VkFramebuffer framebuffer : m_Framebuffers)
-			vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
-		
-		vkDestroySwapchainKHR(logicalDevice, m_SwapChain, nullptr);
-	}
-
-	void SwapChain::CreateDepthResources()
+	void SwapChain::CreateDepthResources(uint32_t width, uint32_t height)
 	{
 		m_DepthFormat = FindDepthFormat(m_Device->GetPhysical());
 		m_DepthImage = std::make_unique<Image>(m_Device, m_Extent.width, m_Extent.height, m_DepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
 		m_DepthImage->TransitionImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	}
 
-	void SwapChain::CreateFramebuffers(VkRenderPass renderPass)
+	void SwapChain::CleanupSwapChain()
 	{
-		m_Framebuffers.resize(m_Images.size());
+		vkDestroySwapchainKHR(m_Device->GetLogical(), m_SwapChain, nullptr);
+		m_SwapChain = VK_NULL_HANDLE;
 
-		for (size_t i = 0; i < m_Images.size(); i++)
-		{
-			std::array<VkImageView, 2> attachments =
-			{
-				m_Images[i]->GetImageView(),
-				m_DepthImage->GetImageView()
-			};
+		m_Images.clear();
+	}
+	
+	void SwapChain::Recreate(VkRenderPass renderPass, uint32_t width, uint32_t height)
+	{
+		if (width == m_Extent.width && height == m_Extent.height)
+			return;
+		
+		vkDeviceWaitIdle(m_Device->GetLogical());
 
-			VkFramebufferCreateInfo framebufferInfo{};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = renderPass;
-			framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = m_Extent.width;
-			framebufferInfo.height = m_Extent.height;
-			framebufferInfo.layers = 1;
+		CleanupSwapChain();
+		m_Sync->CleanupSyncObjects();
 
-			if (vkCreateFramebuffer(m_Device->GetLogical(), &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
-			{
-				std::cerr << "Failed to create framebuffers" << std::endl;
-			}
-		}
+		CreateSwapChain(width, height);
+		CreateDepthResources(width, height);
 	}
 
 	VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
@@ -191,16 +186,12 @@ namespace Nightbird::Vulkan
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, uint32_t width, uint32_t height)
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 			return capabilities.currentExtent;
-
-		int width, height;
-		width = 1280;
-		height = 720;
 		
-		VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+		VkExtent2D actualExtent = { width, height };
 
 		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);

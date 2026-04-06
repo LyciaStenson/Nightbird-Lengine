@@ -16,19 +16,20 @@ namespace Nightbird::Vulkan
 		OffscreenSurface(Device* device, uint32_t width, uint32_t height, VkFormat colorFormat, VkFormat depthFormat);
 		~OffscreenSurface();
 
-		uint32_t GetWidth() const override;
-		uint32_t GetHeight() const override;
+		Texture& GetColorTexture();
+		Texture& GetDepthTexture();
 
 		VkExtent2D GetExtent() const override;
 		VkFramebuffer AcquireFramebuffer(VkSemaphore imageAvailableSemaphore) override;
 		void Present(VkSemaphore renderFinishedSemaphore) override {};
-		VkRenderPass GetCompatibleRenderPass() const override;
+		RenderPass& GetRenderPass() const override;
+		bool NeedsResize() const override;
 		bool NeedsPresent() const override { return false; }
 
-		Texture& GetColorTexture();
-		Texture& GetDepthTexture();
+		uint32_t GetWidth() const override;
+		uint32_t GetHeight() const override;
 
-		void Resize(uint32_t width, uint32_t height);
+		void Resize(uint32_t width, uint32_t height) override;
 
 	private:
 		Device* m_Device;

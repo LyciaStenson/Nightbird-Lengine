@@ -16,13 +16,13 @@ namespace Nightbird::Glfw
 	class Platform : public Core::Platform
 	{
 	public:
-		virtual void Initialize() override;
-		virtual void Shutdown() override;
-		virtual void Update() override;
-		virtual void WaitEvents() override;
-		virtual bool ShouldClose() const override;
-		virtual void GetFramebufferSize(int* width, int* height) const override;
-
+		void Initialize() override;
+		void Shutdown() override;
+		void Update() override;
+		void WaitEvents() override;
+		bool ShouldClose() const override;
+		void GetFramebufferSize(int* width, int* height) const override;
+		
 		virtual std::string GetCookedAssetsPath() const override;
 
 		Input::Provider& GetInputProvider() override;

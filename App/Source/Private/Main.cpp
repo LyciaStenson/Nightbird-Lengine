@@ -15,7 +15,8 @@ int main()
 	{
 		engine.Update();
 		auto& surface = engine.GetRenderer().GetDefaultSurface();
-		engine.GetRenderer().BeginFrame(surface);
+		if (!engine.GetRenderer().BeginFrame(surface))
+			continue;
 		if (engine.GetScene().GetActiveCamera())
 			engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
 		engine.GetRenderer().DrawScene(surface);

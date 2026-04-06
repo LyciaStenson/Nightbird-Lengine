@@ -51,6 +51,8 @@ namespace Nightbird::Vulkan
 
 	void OffscreenSurface::Destroy()
 	{
+		vkDeviceWaitIdle(m_Device->GetLogical());
+
 		if (m_Framebuffer != VK_NULL_HANDLE)
 		{
 			vkDestroyFramebuffer(m_Device->GetLogical(), m_Framebuffer, nullptr);
@@ -62,16 +64,16 @@ namespace Nightbird::Vulkan
 		m_DepthTexture.reset();
 	}
 
-	uint32_t OffscreenSurface::GetWidth() const
+	Texture& OffscreenSurface::GetColorTexture()
 	{
-		return m_Width;
+		return *m_ColorTexture;
 	}
 
-	uint32_t OffscreenSurface::GetHeight() const
+	Texture& OffscreenSurface::GetDepthTexture()
 	{
-		return m_Height;
+		return *m_DepthTexture;
 	}
-
+	
 	VkExtent2D OffscreenSurface::GetExtent() const
 	{
 		return { m_Width, m_Height };
@@ -82,19 +84,24 @@ namespace Nightbird::Vulkan
 		return m_Framebuffer;
 	}
 
-	VkRenderPass OffscreenSurface::GetCompatibleRenderPass() const
+	RenderPass& OffscreenSurface::GetRenderPass() const
 	{
-		return m_RenderPass->Get();
+		return *m_RenderPass;
 	}
 
-	Texture& OffscreenSurface::GetColorTexture()
+	bool OffscreenSurface::NeedsResize() const
 	{
-		return *m_ColorTexture;
+		return false;
 	}
 
-	Texture& OffscreenSurface::GetDepthTexture()
+	uint32_t OffscreenSurface::GetWidth() const
 	{
-		return *m_DepthTexture;
+		return m_Width;
+	}
+
+	uint32_t OffscreenSurface::GetHeight() const
+	{
+		return m_Height;
 	}
 
 	void OffscreenSurface::Resize(uint32_t width, uint32_t height)

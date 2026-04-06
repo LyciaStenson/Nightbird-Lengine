@@ -41,6 +41,6 @@ namespace Nightbird::Core
 		if (Vulkan::Config::enableValidationLayers)
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		
-		return std::make_unique<Vulkan::Renderer>(extensions, CreateSurface);
+		return std::make_unique<Vulkan::Renderer>(s_Platform, extensions, CreateSurface);
 	}
 }

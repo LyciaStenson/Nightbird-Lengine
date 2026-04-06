@@ -22,7 +22,10 @@ namespace Nightbird::Editor
 
 		Vulkan::Device& device = m_Renderer.GetDevice();
 		Vulkan::SwapChain& swapChain = m_Renderer.GetSwapChain();
-		Vulkan::RenderPass& renderPass = m_Renderer.GetRenderPass();
+
+		Core::RenderSurface& coreSurface = m_Renderer.GetDefaultSurface();
+		auto& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
+		Vulkan::RenderPass& renderPass = surface.GetRenderPass();
 
 		VkInstance instance = m_Renderer.GetInstance().Get();
 

@@ -13,7 +13,6 @@
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
 #include "Vulkan/SwapChain.h"
-#include "Vulkan/SwapChainSurface.h"
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/Sync.h"
 #include "Vulkan/DescriptorSetLayoutManager.h"
@@ -23,6 +22,9 @@
 #include "Vulkan/Material.h"
 #include "Vulkan/TransformPool.h"
 #include "Vulkan/FrameContext.h"
+
+#include "Vulkan/SwapChainSurface.h"
+#include "Vulkan/OffscreenSurface.h"
 
 #include <volk.h>
 
@@ -40,28 +42,30 @@ namespace Nightbird::Core
 namespace Nightbird::Vulkan
 {
 	using SurfaceCreator = VkSurfaceKHR(*)(VkInstance);
-
+	
 	class Renderer : public Core::Renderer
 	{
 	public:
-		Renderer(std::vector<const char*> extensions, SurfaceCreator surfaceCreator);
+		Renderer(Core::Platform* platform, std::vector<const char*> extensions, SurfaceCreator surfaceCreator);
 
 		void Initialize() override;
 		void Shutdown() override;
 		Core::RenderSurface& GetDefaultSurface() override;
+		std::unique_ptr<Core::RenderSurface> CreateSurface(uint32_t width, uint32_t height, Core::PixelFormat colorFormat, Core::PixelFormat depthFormat) override;
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
-		void BeginFrame(Core::RenderSurface& surface) override;
+		bool BeginFrame(Core::RenderSurface& surface) override;
 		void EndFrame(Core::RenderSurface& surface) override;
 		void DrawScene(Core::RenderSurface& surface) override;
 
 		Instance& GetInstance();
 		Device& GetDevice();
 		SwapChain& GetSwapChain();
-		RenderPass& GetRenderPass();
-
+		
 		VkCommandBuffer GetCurrentCommandBuffer() const;
 
 	private:
+		Core::Platform* m_Platform = nullptr;
+
 		std::vector<const char*> m_Extensions;
 		SurfaceCreator m_SurfaceCreator;
 		VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
@@ -70,7 +74,6 @@ namespace Nightbird::Vulkan
 		std::unique_ptr<Device> m_Device;
 		std::unique_ptr<SwapChain> m_SwapChain;
 		std::unique_ptr<SwapChainSurface> m_SwapChainSurface;
-		std::unique_ptr<RenderPass> m_RenderPass;
 		std::unique_ptr<Sync> m_Sync;
 
 		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
