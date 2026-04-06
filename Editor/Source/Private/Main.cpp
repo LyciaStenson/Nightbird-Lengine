@@ -18,6 +18,7 @@
 #include "SettingsManager.h"
 
 #include "WindowManager.h"
+#include "Windows/SceneWindow.h"
 #include "Windows/SceneOutliner.h"
 #include "Windows/Inspector.h"
 #include "Windows/EditorSettingsWindow.h"
@@ -111,6 +112,7 @@ int main(int argc, char** argv)
 		projectSettings = settingsManager.LoadProjectSettings(projectPath.string());
 
 	Nightbird::Editor::WindowManager windowManager;
+	windowManager.AddWindow<Nightbird::Editor::SceneWindow>(context);
 	windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
 	windowManager.AddWindow<Nightbird::Editor::Inspector>(context);
 	windowManager.AddWindow<Nightbird::Editor::EditorSettingsWindow>(editorSettings);
