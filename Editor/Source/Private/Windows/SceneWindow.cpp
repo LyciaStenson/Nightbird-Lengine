@@ -81,13 +81,6 @@ namespace Nightbird::Editor
 			m_PendingHeight = newHeight;
 			m_NeedsResize = true;
 		}
-
-		//auto& renderer = m_Context.GetEngine().GetRenderer();
-		//if (renderer.BeginFrame(*m_Surface))
-		//{
-			//renderer.DrawScene(*m_Surface);
-			//renderer.EndFrame(*m_Surface);
-		//}
 		
 		ImGui::Image(m_TextureId, ImVec2(static_cast<float>(m_CurrentWidth), static_cast<float>(m_CurrentHeight)));
 	}

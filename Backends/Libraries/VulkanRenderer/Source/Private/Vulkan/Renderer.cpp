@@ -340,7 +340,7 @@ namespace Nightbird::Vulkan
 	
 	std::unique_ptr<Core::RenderSurface> Renderer::CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format)
 	{
-		VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
+		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 		if (format == Core::RenderSurfaceFormat::DepthOnly)
 			colorFormat = VK_FORMAT_UNDEFINED;
 

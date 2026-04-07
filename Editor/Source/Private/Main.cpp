@@ -4,6 +4,7 @@
 #include "Core/Platform.h"
 #include "Core/Renderer.h"
 #include "Core/BackendFactory.h"
+#include "Core/TypeInfo.h"
 #include "Core/Log.h"
 
 #include "ProjectConfig.h"
@@ -25,6 +26,10 @@
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
 
+#include "Import/ImportManager.h"
+#include "Scene/TextSceneReader.h"
+#include "Scene/TextSceneWriter.h"
+
 #include "EditorTheme.h"
 
 #include <rttr/library.h>
@@ -33,15 +38,30 @@
 #include <cstdlib>
 #include <filesystem>
 
+using namespace Nightbird;
+
 static std::filesystem::path GetInstallPath()
 {
 	const char* envPath = std::getenv("NIGHTBIRD_PATH");
 	if (!envPath)
 	{
-		Nightbird::Core::Log::Error("Failed to find NIGHTBIRD_PATH environment variable");
+		Core::Log::Error("Failed to find NIGHTBIRD_PATH environment variable");
 		return "";
 	}
 	return std::filesystem::path(envPath);
+}
+
+uuids::uuid GenerateUUID()
+{
+	std::random_device randomDevice;
+
+	auto seedData = std::array<int, std::mt19937::state_size>{};
+	std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+	std::seed_seq seq(std::begin(seedData), std::end(seedData));
+	std::mt19937 generator(seq);
+	uuids::uuid_random_generator gen{generator};
+
+	return gen();
 }
 
 int main(int argc, char** argv)
@@ -54,18 +74,18 @@ int main(int argc, char** argv)
 		std::filesystem::path projectDir = projectPath.parent_path();
 		std::filesystem::path installPath = GetInstallPath();
 
-		Nightbird::Editor::ProjectConfig projectConfig = Nightbird::Editor::LoadProjectConfig(projectPath);
+		Editor::ProjectConfig projectConfig = Editor::LoadProjectConfig(projectPath);
 		if (projectConfig.name.empty())
 		{
-			Nightbird::Core::Log::Error("Invalid project name in: " + projectPath.string());
+			Core::Log::Error("Invalid project name in: " + projectPath.string());
 			return 1;
 		}
 		
 		std::filesystem::path premakePath = projectDir / "premake5.lua";
 		if (!std::filesystem::exists(premakePath))
 		{
-			Nightbird::Editor::GeneratePremake(projectConfig, installPath, projectDir);
-			Nightbird::Core::Log::Info("Generated premake5.lua for " + projectConfig.name + ", now build the project");
+			Editor::GeneratePremake(projectConfig, installPath, projectDir);
+			Core::Log::Info("Generated premake5.lua for " + projectConfig.name + ", now build the project");
 			return 0;
 		}
 
@@ -80,54 +100,91 @@ int main(int argc, char** argv)
 		platformStr = "linux-x86_64";
 #endif
 
-		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / "EditorDebug" / projectConfig.name;
+		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / projectConfig.name;
 		rttr::library projectLib(sharedLibPath.string());
 		projectLoaded = projectLib.load();
 		if (projectLoaded)
 		{
-			Nightbird::Core::Log::Info("Loaded project: " + sharedLibPath.string());
+			Core::Log::Info("Loaded project: " + sharedLibPath.string());
 		}
 		else
 		{
-			Nightbird::Core::Log::Error("Failed to load project: " + sharedLibPath.string());
-			Nightbird::Core::Log::Info("Make sure to build the project");
-			Nightbird::Core::Log::Error(projectLib.get_error_string().to_string());
+			Core::Log::Error("Failed to load project: " + sharedLibPath.string());
+			Core::Log::Info("Make sure to build the project");
+			Core::Log::Error(projectLib.get_error_string().to_string());
 		}
 	}
 	else
 	{
-		Nightbird::Core::Log::Info("No project specified");
+		Core::Log::Info("No project specified");
 	}
 
-	auto platform = Nightbird::Core::CreatePlatform();
-	auto renderer = Nightbird::Core::CreateRenderer();
-	Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
+	auto platform = Core::CreatePlatform();
+	auto renderer = Core::CreateRenderer();
+	Core::Engine engine(std::move(platform), std::move(renderer));
 
-	auto editorUIBackend = Nightbird::Editor::CreateEditorUIBackend(engine.GetPlatform(), engine.GetRenderer());
+	auto editorUIBackend = Editor::CreateEditorUIBackend(engine.GetPlatform(), engine.GetRenderer());
 	editorUIBackend->Initialize();
 
-	Nightbird::Editor::EditorContext context(engine, *editorUIBackend);
+	Editor::EditorContext context(engine, *editorUIBackend);
 
-	Nightbird::Editor::SettingsManager settingsManager;
-	Nightbird::Editor::EditorSettings editorSettings = settingsManager.LoadEditorSettings();
-	Nightbird::Editor::ProjectSettings projectSettings;
+	Editor::SettingsManager settingsManager;
+	Editor::EditorSettings editorSettings = settingsManager.LoadEditorSettings();
+	Editor::ProjectSettings projectSettings;
 	if (projectLoaded)
 		projectSettings = settingsManager.LoadProjectSettings(projectPath.string());
 	
-	Nightbird::Editor::WindowManager windowManager;
-	Nightbird::Editor::SceneWindow& sceneWindow = windowManager.AddWindow<Nightbird::Editor::SceneWindow>(context);
-	windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
-	windowManager.AddWindow<Nightbird::Editor::Inspector>(context);
-	windowManager.AddWindow<Nightbird::Editor::EditorSettingsWindow>(editorSettings);
+	Editor::WindowManager windowManager;
+	Editor::SceneWindow& sceneWindow = windowManager.AddWindow<Editor::SceneWindow>(context);
+	windowManager.AddWindow<Editor::SceneOutliner>(context);
+	windowManager.AddWindow<Editor::Inspector>(context);
+	windowManager.AddWindow<Editor::EditorSettingsWindow>(editorSettings);
 	if (projectLoaded)
-		windowManager.AddWindow<Nightbird::Editor::ProjectSettingsWindow>(projectSettings);
-	windowManager.AddWindow<Nightbird::Editor::AboutWindow>();
+		windowManager.AddWindow<Editor::ProjectSettingsWindow>(projectSettings);
+	windowManager.AddWindow<Editor::AboutWindow>();
 
-	Nightbird::Editor::EditorUI editorUI(windowManager);
-	editorUI.ApplyTheme(Nightbird::Editor::EditorTheme::Dark);
+	Editor::EditorUI editorUI(windowManager);
+	editorUI.ApplyTheme(Editor::EditorTheme::Dark);
 
-	settingsManager.SaveEditorSettings(editorSettings);
-	settingsManager.SaveProjectSettings(projectSettings, "");
+	//settingsManager.SaveEditorSettings(editorSettings);
+	//settingsManager.SaveProjectSettings(projectSettings, "");
+
+	Editor::ImportManager importManager("Assets");
+	importManager.Scan();
+	
+	//auto sceneUUID = uuids::uuid::from_string("357fba9b-33ab-4aeb-8fa1-82dd9cd20765");
+	//if (sceneUUID.has_value())
+	//{
+	//	auto result = importManager.LoadScene(*sceneUUID);
+	//	if (auto* cadence = Cast<Core::SpatialObject>(result.get()))
+	//	{
+	//		cadence->m_Transform.position = glm::vec3(0.0f, 0.0f, 5.0f);
+	//		cadence->m_Transform.scale = glm::vec3(1.0f);
+
+	//		engine.GetScene().GetRoot()->AddChild(std::move(result));
+	//	}
+	//	else
+	//	{
+	//		Core::Log::Error("Failed to import model");
+	//	}
+	//}
+	//else
+	//{
+	//	Core::Log::Error("Failed to load scene UUID");
+	//}
+
+	//auto camera = std::make_unique<Core::Camera>("Camera");
+	//camera->m_Transform.position = glm::vec3(0.0f, 1.5f, 5.0f);
+	//Core::Camera* cameraPtr = camera.get();
+	
+	//engine.GetScene().GetRoot()->AddChild(std::move(camera));
+	//engine.GetScene().SetActiveCamera(cameraPtr);
+
+	//Editor::TextSceneWriter sceneWriter;
+	//sceneWriter.Write(engine.GetScene(), "ClubPenguin", GenerateUUID(), "Assets/Scenes/ClubPenguin.ntscene");
+
+	Editor::TextSceneReader sceneReader(importManager);
+	engine.SetScene(sceneReader.Read("Assets/Scenes/ClubPenguin.ntscene").scene);
 
 	while (!engine.ShouldClose())
 	{
@@ -150,9 +207,7 @@ int main(int argc, char** argv)
 		}
 		
 		editorUIBackend->BeginFrame();
-
 		editorUI.Render();
-
 		editorUIBackend->EndFrame();
 
 		engine.GetRenderer().EndFrame(surface);
