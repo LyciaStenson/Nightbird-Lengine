@@ -3,12 +3,14 @@
 #include "Core/Platform.h"
 #include "Core/Scene.h"
 #include "Core/Camera.h"
+#include "Core/RenderSurface.h"
+#include "Core/TypeInfo.h"
+#include "Core/Log.h"
 
+#include "Vulkan/Texture.h"
 #include "Vulkan/CameraUBO.h"
 #include "Vulkan/LightData.h"
 #include "Vulkan/Config.h"
-
-#include "Core/Log.h"
 
 #include <algorithm>
 
@@ -86,173 +88,187 @@ namespace Nightbird::Vulkan
 		m_DirectionalLights = scene.CollectDirectionalLights();
 		m_PointLights = scene.CollectPointLights();
 	}
-
-	bool Renderer::BeginFrame(Core::RenderSurface& coreSurface)
+	
+	bool Renderer::BeginFrame(Core::RenderSurface& surface)
 	{
-		auto& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
-
-		if (surface.NeedsResize())
+		if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
 		{
-			vkDeviceWaitIdle(m_Device->GetLogical());
-			
-			int width = 0;
-			int height = 0;
-			
-			m_Platform->GetFramebufferSize(&width, &height);
-			
-			surface.Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-			return false;
+			if (swapChainSurface->NeedsResize())
+			{
+				vkDeviceWaitIdle(m_Device->GetLogical());
+
+				int width = 0;
+				int height = 0;
+
+				m_Platform->GetFramebufferSize(&width, &height);
+
+				swapChainSurface->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+				return false;
+			}
+
+			vkWaitForFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex], VK_TRUE, UINT64_MAX);
+
+			VkFramebuffer framebuffer = swapChainSurface->AcquireFramebuffer(m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]);
+			if (framebuffer == VK_NULL_HANDLE)
+				return false;
+
+			vkResetFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]);
+
+			m_CurrentFrame.commandBuffer = m_Device->GetCommandBuffer(m_CurrentFrame.frameIndex);
+			vkResetCommandBuffer(m_CurrentFrame.commandBuffer, 0);
+
+			RenderPass& renderPass = swapChainSurface->GetRenderPass();
+			renderPass.BeginCommandBuffer(m_CurrentFrame.commandBuffer);
+			renderPass.Begin(m_CurrentFrame.commandBuffer, framebuffer, swapChainSurface->GetExtent());
+
+			return true;
+		}
+		else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
+		{
+			offscreenSurface->m_CommandBuffer = m_Device->BeginSingleTimeCommands();
+			offscreenSurface->GetColorTexture().TransitionToColor(offscreenSurface->m_CommandBuffer);
+
+			RenderPass& renderPass = offscreenSurface->GetRenderPass();
+			renderPass.Begin(offscreenSurface->m_CommandBuffer, offscreenSurface->GetFramebuffer(), offscreenSurface->GetExtent());
+
+			return true;
 		}
 
-		vkWaitForFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex], VK_TRUE, UINT64_MAX);
-
-		VkFramebuffer framebuffer = surface.AcquireFramebuffer(m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]);
-		if (framebuffer == VK_NULL_HANDLE)
-			return false;
-
-		vkResetFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]);
-
-		m_CurrentFrame.commandBuffer = m_Device->GetCommandBuffer(m_CurrentFrame.frameIndex);
-		vkResetCommandBuffer(m_CurrentFrame.commandBuffer, 0);
-
-		RenderPass& renderPass = surface.GetRenderPass();
-		
-		renderPass.BeginCommandBuffer(m_CurrentFrame.commandBuffer);
-		//m_RenderPass->Begin(commandBuffer, m_SwapChain->m_Framebuffers[imageIndex], m_SwapChain->m_Extent);
-
-		VkExtent2D extent = surface.GetExtent();
-		
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = renderPass.Get();
-		renderPassInfo.framebuffer = framebuffer;
-		renderPassInfo.renderArea.offset = {0, 0};
-		renderPassInfo.renderArea.extent = extent;
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		clearValues[1].depthStencil = {1.0f, 0};
-
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		vkCmdBeginRenderPass(m_CurrentFrame.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		return true;
+		return false;
 	}
 
-	void Renderer::EndFrame(Core::RenderSurface& coreSurface)
+	void Renderer::EndFrame(Core::RenderSurface& surface)
 	{
-		auto& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
-
-		RenderPass& renderPass = surface.GetRenderPass();
-
-		//m_RenderPass->End(commandBuffer);
-		vkCmdEndRenderPass(m_CurrentFrame.commandBuffer);
-		renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphores[] = { m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_CurrentFrame.commandBuffer;
-
-		VkSemaphore signalSemaphores[] = { m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex] };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]) != VK_SUCCESS)
+		if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
 		{
-			Core::Log::Error("Failed to submit draw command buffer");
-			return;
+			RenderPass& renderPass = swapChainSurface->GetRenderPass();
+
+			renderPass.End(m_CurrentFrame.commandBuffer);
+			renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
+			
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+			VkSemaphore waitSemaphores[] = {m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]};
+			VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = waitSemaphores;
+			submitInfo.pWaitDstStageMask = waitStages;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &m_CurrentFrame.commandBuffer;
+
+			VkSemaphore signalSemaphores[] = {m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]};
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = signalSemaphores;
+
+			if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]) != VK_SUCCESS)
+			{
+				Core::Log::Error("Failed to submit draw command buffer");
+				return;
+			}
+
+			swapChainSurface->Present(m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]);
+
+			m_CurrentFrame.frameIndex = (m_CurrentFrame.frameIndex + 1) % Config::MAX_FRAMES_IN_FLIGHT;
 		}
-
-		if (surface.NeedsPresent())
-			surface.Present(m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]);
-
-		m_CurrentFrame.frameIndex = (m_CurrentFrame.frameIndex + 1) % Config::MAX_FRAMES_IN_FLIGHT;
+		else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
+		{
+			RenderPass& renderPass = offscreenSurface->GetRenderPass();
+			renderPass.End(offscreenSurface->m_CommandBuffer);
+			offscreenSurface->GetColorTexture().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			
+			m_Device->EndSingleTimeCommands(offscreenSurface->m_CommandBuffer);
+			offscreenSurface->m_CommandBuffer = VK_NULL_HANDLE;
+		}
 	}
 
 	void Renderer::DrawScene(Core::RenderSurface& surface)
 	{
- 		if (!m_ActiveCamera)
- 			return;
-
- 		std::vector<DirectionalLightData> directionalLightData;
- 		for (const auto* directionalLight : m_DirectionalLights)
- 		{
- 			DirectionalLightData data{};
- 			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
- 			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
- 			data.direction = glm::vec4(forward, 0.0f);
- 			data.colorIntensity = glm::vec4(directionalLight->m_Color, directionalLight->m_Intensity);
- 			directionalLightData.push_back(data);
- 		}
- 		m_GlobalDescriptorSetManager->UpdateDirectionalLights(m_CurrentFrame.frameIndex, directionalLightData);
-
- 		std::vector<PointLightData> pointLightData;
- 		for (const auto* pointLight : m_PointLights)
- 		{
- 			PointLightData data{};
- 			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
- 			data.positionRadius = glm::vec4(worldPos, pointLight->m_Radius);
- 			data.colorIntensity = glm::vec4(pointLight->m_Color, pointLight->m_Intensity);
- 			pointLightData.push_back(data);
- 		}
- 		m_GlobalDescriptorSetManager->UpdatePointLights(m_CurrentFrame.frameIndex, pointLightData);
-
- 		m_TransformPool->Reset();
-
- 		CameraUBO cameraUBO{};
- 		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
- 		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(m_SwapChain->m_Extent.width), static_cast<float>(m_SwapChain->m_Extent.height));
- 		proj[1][1] *= -1;
- 		cameraUBO.projection = proj;
- 		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
-
- 		m_GlobalDescriptorSetManager->UpdateCamera(m_CurrentFrame.frameIndex, cameraUBO);
-
- 		std::vector<const Core::Renderable*> opaqueRenderables;
- 		std::vector<const Core::Renderable*> transparentRenderables;
-
- 		for (const auto& renderable : m_Renderables)
- 		{
- 			if (renderable.primitive->GetMaterial()->transparencyEnabled)
- 				transparentRenderables.push_back(&renderable);
- 			else
- 				opaqueRenderables.push_back(&renderable);
- 		}
-
- 		glm::vec3 cameraPos = glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]);
- 		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
- 			[&](const Core::Renderable* a, const Core::Renderable* b)
- 			{
- 				float distA = glm::length(cameraPos - glm::vec3(a->transform[3]));
- 				float distB = glm::length(cameraPos - glm::vec3(a->transform[3]));
- 				return distA > distB;
- 			}
- 		);
-
- 		m_OpaquePipeline->Bind(m_CurrentFrame.commandBuffer);
- 		for (const auto* renderable : opaqueRenderables)
- 			DrawRenderable(m_CurrentFrame.commandBuffer, *renderable, m_OpaquePipeline.get());
-
- 		m_TransparentPipeline->Bind(m_CurrentFrame.commandBuffer);
- 		for (const auto* renderable : transparentRenderables)
- 			DrawRenderable(m_CurrentFrame.commandBuffer, *renderable, m_TransparentPipeline.get());
+		if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
+		{
+			DrawScene(m_CurrentFrame.commandBuffer, swapChainSurface->GetExtent(), m_CurrentFrame.frameIndex);
+		}
+		else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
+		{
+			DrawScene(offscreenSurface->m_CommandBuffer, offscreenSurface->GetExtent(), 0);
+		}
 	}
 
-	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline)
+	void Renderer::DrawScene(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t frameIndex)
+	{
+		if (!m_ActiveCamera)
+			return;
+		
+		std::vector<DirectionalLightData> directionalLightData;
+		for (const auto* directionalLight : m_DirectionalLights)
+		{
+			DirectionalLightData data{};
+			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
+			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
+			data.direction = glm::vec4(forward, 0.0f);
+			data.colorIntensity = glm::vec4(directionalLight->m_Color, directionalLight->m_Intensity);
+			directionalLightData.push_back(data);
+		}
+		m_GlobalDescriptorSetManager->UpdateDirectionalLights(frameIndex, directionalLightData);
+
+		std::vector<PointLightData> pointLightData;
+		for (const auto* pointLight : m_PointLights)
+		{
+			PointLightData data{};
+			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
+			data.positionRadius = glm::vec4(worldPos, pointLight->m_Radius);
+			data.colorIntensity = glm::vec4(pointLight->m_Color, pointLight->m_Intensity);
+			pointLightData.push_back(data);
+		}
+		m_GlobalDescriptorSetManager->UpdatePointLights(frameIndex, pointLightData);
+
+		m_TransformPool->Reset();
+
+		CameraUBO cameraUBO{};
+		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
+		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(extent.width), static_cast<float>(extent.height));
+		proj[1][1] *= -1;
+		cameraUBO.projection = proj;
+		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
+
+		m_GlobalDescriptorSetManager->UpdateCamera(frameIndex, cameraUBO);
+
+		std::vector<const Core::Renderable*> opaqueRenderables;
+		std::vector<const Core::Renderable*> transparentRenderables;
+
+		for (const auto& renderable : m_Renderables)
+		{
+			if (renderable.primitive->GetMaterial()->transparencyEnabled)
+				transparentRenderables.push_back(&renderable);
+			else
+				opaqueRenderables.push_back(&renderable);
+		}
+
+		glm::vec3 cameraPos = glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]);
+		std::sort(transparentRenderables.begin(), transparentRenderables.end(),
+			[&](const Core::Renderable* a, const Core::Renderable* b)
+			{
+				float distA = glm::length(cameraPos - glm::vec3(a->transform[3]));
+				float distB = glm::length(cameraPos - glm::vec3(b->transform[3]));
+				return distA > distB;
+			}
+		);
+
+		m_OpaquePipeline->Bind(commandBuffer);
+		for (const auto* renderable : opaqueRenderables)
+			DrawRenderable(commandBuffer, *renderable, m_OpaquePipeline.get(), frameIndex);
+
+		m_TransparentPipeline->Bind(commandBuffer);
+		for (const auto* renderable : transparentRenderables)
+			DrawRenderable(commandBuffer, *renderable, m_TransparentPipeline.get(), frameIndex);
+	}
+	
+	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline, uint32_t frameIndex)
 	{
 		Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
 		Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
 
-		VkDescriptorSet transformDescriptorSet = m_TransformPool->Acquire(renderable.transform, m_CurrentFrame.frameIndex);
+		VkDescriptorSet transformDescriptorSet = m_TransformPool->Acquire(renderable.transform, frameIndex);
 		
 		VkBuffer vertexBuffers[] = { geometry.GetVertexBuffer() };
 		VkDeviceSize offsets[] = { 0 };
@@ -261,7 +277,7 @@ namespace Nightbird::Vulkan
 
 		std::array<VkDescriptorSet, 3> descriptorSets =
 		{
-			m_GlobalDescriptorSetManager->GetDescriptorSets()[m_CurrentFrame.frameIndex], transformDescriptorSet, material.GetDescriptorSets()[m_CurrentFrame.frameIndex]
+			m_GlobalDescriptorSetManager->GetDescriptorSets()[frameIndex], transformDescriptorSet, material.GetDescriptorSets()[frameIndex]
 		};
 
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
@@ -321,30 +337,16 @@ namespace Nightbird::Vulkan
 	{
 		return *m_SwapChainSurface;
 	}
-
-	static VkFormat ToVkFormat(Core::PixelFormat format)
+	
+	std::unique_ptr<Core::RenderSurface> Renderer::CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format)
 	{
-		switch (format)
-		{
-		case Core::PixelFormat::RGBA8:
-			return VK_FORMAT_R8G8B8A8_UNORM;
-		case Core::PixelFormat::RGBA16F:
-			return VK_FORMAT_R16G16B16A16_SFLOAT;
-		case Core::PixelFormat::Depth24Stencil8:
-			return VK_FORMAT_D24_UNORM_S8_UINT;
-		case Core::PixelFormat::Depth32F:
-			return VK_FORMAT_D32_SFLOAT;
-		}
+		VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
+		if (format == Core::RenderSurfaceFormat::DepthOnly)
+			colorFormat = VK_FORMAT_UNDEFINED;
 
-		return VK_FORMAT_R8G8B8A8_UNORM;
-	}
-
-	std::unique_ptr<Core::RenderSurface> Renderer::CreateSurface(uint32_t width, uint32_t height, Core::PixelFormat colorFormat, Core::PixelFormat depthFormat)
-	{
-		VkFormat colorVkFormat = ToVkFormat(colorFormat);
-		VkFormat depthVkFormat = ToVkFormat(depthFormat);
-
-		return std::make_unique<OffscreenSurface>(m_Device.get(), width, height, colorVkFormat, depthVkFormat);
+		VkFormat depthFormat = m_Device->FindSupportedDepthFormat();
+		
+		return std::make_unique<OffscreenSurface>(m_Device.get(), width, height, colorFormat, depthFormat);
 	}
 
 	Instance& Renderer::GetInstance()

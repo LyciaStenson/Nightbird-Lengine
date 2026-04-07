@@ -31,7 +31,9 @@ namespace Nightbird::Vulkan
 		uint32_t GetPresentQueueFamily() const;
 
 		VkCommandBuffer GetCommandBuffer(uint32_t currentFrame) const;
-	
+
+		VkFormat FindSupportedDepthFormat() const;
+
 	private:
 		VkDevice m_LogicalDevice;
 		VkPhysicalDevice m_PhysicalDevice;

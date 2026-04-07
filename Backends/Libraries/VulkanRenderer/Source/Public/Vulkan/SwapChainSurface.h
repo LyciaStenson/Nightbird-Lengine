@@ -22,16 +22,17 @@ namespace Nightbird::Vulkan
 	class SwapChainSurface : public RenderSurface
 	{
 	public:
+		NB_OBJECT(SwapChainSurface, RenderSurface)
 		SwapChainSurface(Core::Platform* platform, Device& device, Sync& sync, SwapChain& swapChain);
 		~SwapChainSurface();
 
 		VkExtent2D GetExtent() const override;
-		VkFramebuffer AcquireFramebuffer(VkSemaphore imageAvailableSemaphore) override;
-		void Present(VkSemaphore renderFinishedSemaphore) override;
 		RenderPass& GetRenderPass() const override;
 		bool NeedsResize() const override;
-		bool NeedsPresent() const override { return true; }
 
+		VkFramebuffer AcquireFramebuffer(VkSemaphore imageAvailableSemaphore);
+		void Present(VkSemaphore renderFinishedSemaphore);
+		
 		uint32_t GetWidth() const override;
 		uint32_t GetHeight() const override;
 

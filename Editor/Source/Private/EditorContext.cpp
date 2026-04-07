@@ -1,11 +1,13 @@
 #include "EditorContext.h"
 
+#include "EditorUIBackend.h"
+
 #include "Core/SceneObject.h"
 
 namespace Nightbird::Editor
 {
-	EditorContext::EditorContext(Core::Engine& engine)
-		: m_Engine(engine)
+	EditorContext::EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend)
+		: m_Engine(engine), m_EditorUIBackend(editorUIBackend)
 	{
 
 	}
@@ -28,5 +30,10 @@ namespace Nightbird::Editor
 	Core::Engine& EditorContext::GetEngine()
 	{
 		return m_Engine;
+	}
+
+	EditorUIBackend& EditorContext::GetEditorUIBackend() const
+	{
+		return m_EditorUIBackend;
 	}
 }

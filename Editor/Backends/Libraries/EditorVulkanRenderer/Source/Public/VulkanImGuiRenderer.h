@@ -22,6 +22,8 @@ namespace Nightbird::Editor
 		void Shutdown() override;
 		void NewFrame() override;
 		void RenderDrawData() override;
+		ImTextureID RegisterSurface(Core::RenderSurface& surface);
+		void UnregisterSurface(Core::RenderSurface& surface);
 
 	private:
 		Vulkan::Renderer& m_Renderer;

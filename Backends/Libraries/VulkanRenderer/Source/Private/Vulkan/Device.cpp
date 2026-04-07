@@ -342,4 +342,25 @@ namespace Nightbird::Vulkan
 	{
 		return m_CommandBuffers[currentFrame];
 	}
+
+	VkFormat Device::FindSupportedDepthFormat() const
+	{
+		std::vector<VkFormat> candidates = {
+			VK_FORMAT_D32_SFLOAT,
+			VK_FORMAT_D32_SFLOAT_S8_UINT,
+			VK_FORMAT_D24_UNORM_S8_UINT
+		};
+
+		for (VkFormat format : candidates)
+		{
+			VkFormatProperties properties;
+			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &properties);
+
+			if (properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+				return format;
+		}
+
+		Core::Log::Error("No supported depth format found");
+		return VK_FORMAT_UNDEFINED;
+	}
 }

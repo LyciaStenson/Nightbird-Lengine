@@ -30,6 +30,8 @@ namespace Nightbird::Vulkan
 		void TransitionToShaderRead(VkCommandBuffer commandBuffer);
 		void TransitionToColor(VkCommandBuffer commandBuffer);
 
+		void SetImageLayout(VkImageLayout layout);
+
 	private:
 		std::unique_ptr<Image> m_Image;
 

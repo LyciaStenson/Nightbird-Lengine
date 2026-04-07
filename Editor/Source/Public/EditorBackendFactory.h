@@ -10,7 +10,7 @@ namespace Nightbird::Core
 
 namespace Nightbird::Editor
 {
-	class EditorUIRenderer;
+	class EditorUIBackend;
 
-	std::unique_ptr<EditorUIRenderer> CreateEditorUIRenderer(Nightbird::Core::Platform& platform, Nightbird::Core::Renderer& renderer);
+	std::unique_ptr<EditorUIBackend> CreateEditorUIBackend(Nightbird::Core::Platform& platform, Nightbird::Core::Renderer& renderer);
 }

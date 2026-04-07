@@ -6,6 +6,8 @@
 
 namespace Nightbird::Vulkan
 {
+	NB_OBJECT_IMPL(OffscreenSurface, RenderSurface)
+
 	OffscreenSurface::OffscreenSurface(Device* device, uint32_t width, uint32_t height, VkFormat colorFormat, VkFormat depthFormat)
 		: m_Device(device), m_Width(width), m_Height(height), m_ColorFormat(colorFormat), m_DepthFormat(depthFormat)
 	{
@@ -23,11 +25,11 @@ namespace Nightbird::Vulkan
 			m_Device, m_Width, m_Height, m_ColorFormat,
 			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_IMAGE_ASPECT_COLOR_BIT);
-
+		
 		m_DepthTexture = std::make_unique<Texture>(
 			m_Device, m_Width, m_Height, m_DepthFormat,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT);
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_IMAGE_ASPECT_DEPTH_BIT);
 
 		m_RenderPass = std::make_unique<RenderPass>(
 			m_Device, m_ColorFormat, m_DepthFormat,
@@ -78,8 +80,8 @@ namespace Nightbird::Vulkan
 	{
 		return { m_Width, m_Height };
 	}
-
-	VkFramebuffer OffscreenSurface::AcquireFramebuffer(VkSemaphore)
+	
+	VkFramebuffer OffscreenSurface::GetFramebuffer() const
 	{
 		return m_Framebuffer;
 	}

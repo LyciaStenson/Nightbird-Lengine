@@ -309,4 +309,9 @@ namespace Nightbird::Vulkan
 			1, &memoryBarrier
 		);
 	}
+
+	void Image::SetLayout(VkImageLayout layout)
+	{
+		currentLayout = layout;
+	}
 }

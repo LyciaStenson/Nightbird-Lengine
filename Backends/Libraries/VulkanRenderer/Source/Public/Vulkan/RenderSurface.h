@@ -9,15 +9,13 @@
 namespace Nightbird::Vulkan
 {
 	class RenderPass;
-
+	
 	class RenderSurface : public Core::RenderSurface
 	{
 	public:
-		virtual VkFramebuffer AcquireFramebuffer(VkSemaphore imageAvailableSemaphore) = 0;
-		virtual void Present(VkSemaphore renderFinishedSemaphore) = 0;
+		NB_OBJECT(RenderSurface, Core::RenderSurface)
 		virtual VkExtent2D GetExtent() const = 0;
 		virtual RenderPass& GetRenderPass() const = 0;
 		virtual bool NeedsResize() const = 0;
-		virtual bool NeedsPresent() const = 0;
 	};
 }

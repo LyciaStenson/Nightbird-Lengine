@@ -1,4 +1,4 @@
-#include "EditorUIRenderer.h"
+#include "EditorUIBackend.h"
 
 #include "ImGuiPlatform.h"
 #include "ImGuiRenderer.h"
@@ -7,13 +7,13 @@
 
 namespace Nightbird::Editor
 {
-	EditorUIRenderer::EditorUIRenderer(std::unique_ptr<ImGuiPlatform> platform, std::unique_ptr<ImGuiRenderer> renderer)
+	EditorUIBackend::EditorUIBackend(std::unique_ptr<ImGuiPlatform> platform, std::unique_ptr<ImGuiRenderer> renderer)
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
 
 	}
 
-	void EditorUIRenderer::Initialize()
+	void EditorUIBackend::Initialize()
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -24,7 +24,7 @@ namespace Nightbird::Editor
 		m_Renderer->Initialize();
 	}
 
-	void EditorUIRenderer::Shutdown()
+	void EditorUIBackend::Shutdown()
 	{
 		m_Renderer->Shutdown();
 		m_Platform->Shutdown();
@@ -32,16 +32,26 @@ namespace Nightbird::Editor
 		ImGui::DestroyContext();
 	}
 
-	void EditorUIRenderer::BeginFrame()
+	void EditorUIBackend::BeginFrame()
 	{
 		m_Platform->NewFrame();
 		m_Renderer->NewFrame();
 		ImGui::NewFrame();
 	}
 
-	void EditorUIRenderer::EndFrame()
+	void EditorUIBackend::EndFrame()
 	{
 		ImGui::Render();
 		m_Renderer->RenderDrawData();
+	}
+
+	ImTextureID EditorUIBackend::RegisterSurface(Core::RenderSurface& surface)
+	{
+		return m_Renderer->RegisterSurface(surface);
+	}
+	
+	void EditorUIBackend::UnregisterSurface(Core::RenderSurface& surface)
+	{
+		m_Renderer->UnregisterSurface(surface);
 	}
 }

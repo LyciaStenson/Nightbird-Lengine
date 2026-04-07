@@ -8,7 +8,7 @@
 
 #include "ProjectConfig.h"
 
-#include "EditorUIRenderer.h"
+#include "EditorUIBackend.h"
 #include "ImGuiPlatform.h"
 #include "ImGuiRenderer.h"
 #include "EditorContext.h"
@@ -103,25 +103,25 @@ int main(int argc, char** argv)
 	auto renderer = Nightbird::Core::CreateRenderer();
 	Nightbird::Core::Engine engine(std::move(platform), std::move(renderer));
 
-	Nightbird::Editor::EditorContext context(engine);
+	auto editorUIBackend = Nightbird::Editor::CreateEditorUIBackend(engine.GetPlatform(), engine.GetRenderer());
+	editorUIBackend->Initialize();
+
+	Nightbird::Editor::EditorContext context(engine, *editorUIBackend);
 
 	Nightbird::Editor::SettingsManager settingsManager;
 	Nightbird::Editor::EditorSettings editorSettings = settingsManager.LoadEditorSettings();
 	Nightbird::Editor::ProjectSettings projectSettings;
 	if (projectLoaded)
 		projectSettings = settingsManager.LoadProjectSettings(projectPath.string());
-
+	
 	Nightbird::Editor::WindowManager windowManager;
-	windowManager.AddWindow<Nightbird::Editor::SceneWindow>(context);
+	Nightbird::Editor::SceneWindow& sceneWindow = windowManager.AddWindow<Nightbird::Editor::SceneWindow>(context);
 	windowManager.AddWindow<Nightbird::Editor::SceneOutliner>(context);
 	windowManager.AddWindow<Nightbird::Editor::Inspector>(context);
 	windowManager.AddWindow<Nightbird::Editor::EditorSettingsWindow>(editorSettings);
 	if (projectLoaded)
 		windowManager.AddWindow<Nightbird::Editor::ProjectSettingsWindow>(projectSettings);
 	windowManager.AddWindow<Nightbird::Editor::AboutWindow>();
-
-	auto editorUIRenderer = Nightbird::Editor::CreateEditorUIRenderer(engine.GetPlatform(), engine.GetRenderer());
-	editorUIRenderer->Initialize();
 
 	Nightbird::Editor::EditorUI editorUI(windowManager);
 	editorUI.ApplyTheme(Nightbird::Editor::EditorTheme::Dark);
@@ -132,23 +132,33 @@ int main(int argc, char** argv)
 	while (!engine.ShouldClose())
 	{
 		engine.Update();
+
 		auto& surface = engine.GetRenderer().GetDefaultSurface();
 		if (!engine.GetRenderer().BeginFrame(surface))
 			continue;
-		if (engine.GetScene().GetActiveCamera())
-			engine.GetRenderer().SubmitScene(engine.GetScene(), *engine.GetScene().GetActiveCamera());
-		engine.GetRenderer().DrawScene(surface);
+
+		if (sceneWindow.IsOpen())
+		{
+			if (sceneWindow.NeedsResize())
+				sceneWindow.Resize(sceneWindow.GetPendingWidth(), sceneWindow.GetPendingHeight());
+			
+			engine.GetRenderer().SubmitScene(engine.GetScene(), sceneWindow.GetCamera());
+
+			engine.GetRenderer().BeginFrame(sceneWindow.GetSurface());
+			engine.GetRenderer().DrawScene(sceneWindow.GetSurface());
+			engine.GetRenderer().EndFrame(sceneWindow.GetSurface());
+		}
 		
-		editorUIRenderer->BeginFrame();
+		editorUIBackend->BeginFrame();
 
 		editorUI.Render();
 
-		editorUIRenderer->EndFrame();
+		editorUIBackend->EndFrame();
 
 		engine.GetRenderer().EndFrame(surface);
 	}
 
-	editorUIRenderer->Shutdown();
+	editorUIBackend->Shutdown();
 
 	return 0;
 }

@@ -21,6 +21,8 @@ namespace Nightbird::Vulkan
 		void TransitionImageLayout(VkImageLayout newLayout);
 		void TransitionImageLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
 
+		void SetLayout(VkImageLayout layout);
+
 	private:
 		VkImage image;
 		VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;

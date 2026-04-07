@@ -8,10 +8,12 @@ namespace Nightbird::Core
 
 namespace Nightbird::Editor
 {
+	class EditorUIBackend;
+
 	class EditorContext
 	{
 	public:
-		EditorContext(Core::Engine& engine);
+		EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend);
 
 		void SelectObject(Core::SceneObject* object);
 		void ClearSelection();
@@ -20,8 +22,12 @@ namespace Nightbird::Editor
 
 		Core::Engine& GetEngine();
 
+		EditorUIBackend& GetEditorUIBackend() const;
+
 	private:
 		Core::Engine& m_Engine;
+		EditorUIBackend& m_EditorUIBackend;
+		
 		Core::SceneObject* m_SelectedObject = nullptr;
 	};
 }

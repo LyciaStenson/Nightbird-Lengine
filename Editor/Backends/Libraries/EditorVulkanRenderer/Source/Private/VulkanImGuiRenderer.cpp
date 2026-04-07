@@ -74,6 +74,17 @@ namespace Nightbird::Editor
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), m_Renderer.GetCurrentCommandBuffer());
 	}
 
+	ImTextureID VulkanImGuiRenderer::RegisterSurface(Core::RenderSurface& surface)
+	{
+		auto& vulkanSurface = static_cast<Vulkan::OffscreenSurface&>(surface);
+		return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(vulkanSurface.GetColorTexture().GetSampler(), vulkanSurface.GetColorTexture().GetImageView(), VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL));
+	}
+	
+	void VulkanImGuiRenderer::UnregisterSurface(Core::RenderSurface& surface)
+	{
+		//ImGui_ImplVulkan_RemoveTexture()
+	}
+
 	void VulkanImGuiRenderer::CreateDescriptorPool()
 	{
 		VkDescriptorPoolSize poolSizes[] =

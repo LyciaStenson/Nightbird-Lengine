@@ -1,6 +1,6 @@
 #include "EditorBackendFactory.h"
 
-#include "EditorUIRenderer.h"
+#include "EditorUIBackend.h"
 #include "GlfwImGuiPlatform.h"
 #include "VulkanImGuiRenderer.h"
 #include "Glfw/Platform.h"
@@ -11,13 +11,13 @@
 
 namespace Nightbird::Editor
 {
-	std::unique_ptr<EditorUIRenderer> CreateEditorUIRenderer(Core::Platform& platform, Core::Renderer& renderer)
+	std::unique_ptr<EditorUIBackend> CreateEditorUIBackend(Core::Platform& platform, Core::Renderer& renderer)
 	{
 		Core::Log::Info("CreateEditorUIRenderer");
 
 		auto imGuiPlatform = std::make_unique<GlfwImGuiPlatform>(static_cast<Glfw::Platform&>(platform));
 		auto imGuiRenderer = std::make_unique<VulkanImGuiRenderer>(static_cast<Vulkan::Renderer&>(renderer));
 
-		return std::make_unique<EditorUIRenderer>(std::move(imGuiPlatform), std::move(imGuiRenderer));
+		return std::make_unique<EditorUIBackend>(std::move(imGuiPlatform), std::move(imGuiRenderer));
 	}
 }

@@ -13,7 +13,6 @@
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
 #include "Vulkan/SwapChain.h"
-#include "Vulkan/RenderPass.h"
 #include "Vulkan/Sync.h"
 #include "Vulkan/DescriptorSetLayoutManager.h"
 #include "Vulkan/GlobalDescriptorSetManager.h"
@@ -51,12 +50,12 @@ namespace Nightbird::Vulkan
 		void Initialize() override;
 		void Shutdown() override;
 		Core::RenderSurface& GetDefaultSurface() override;
-		std::unique_ptr<Core::RenderSurface> CreateSurface(uint32_t width, uint32_t height, Core::PixelFormat colorFormat, Core::PixelFormat depthFormat) override;
+		std::unique_ptr<Core::RenderSurface> CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format) override;
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
 		bool BeginFrame(Core::RenderSurface& surface) override;
 		void EndFrame(Core::RenderSurface& surface) override;
 		void DrawScene(Core::RenderSurface& surface) override;
-
+		
 		Instance& GetInstance();
 		Device& GetDevice();
 		SwapChain& GetSwapChain();
@@ -98,8 +97,9 @@ namespace Nightbird::Vulkan
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
 
-		void DrawScene(VkCommandBuffer commandBuffer);
-		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&, Pipeline* currentPipeline);
+		void DrawScene(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t frameIndex);
+		
+		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&, Pipeline* currentPipeline, uint32_t frameIndex);
 
 		void CreateDescriptorPool();
 

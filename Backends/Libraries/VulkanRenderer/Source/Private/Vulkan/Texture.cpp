@@ -62,6 +62,11 @@ namespace Nightbird::Vulkan
 		m_Image->TransitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 
+	void Texture::SetImageLayout(VkImageLayout layout)
+	{
+		m_Image->SetLayout(layout);
+	}
+
 	void Texture::CreateFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, bool sRGB)
 	{
 		VkDeviceSize imageSize = width * height * 4;
