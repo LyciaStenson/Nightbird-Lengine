@@ -98,12 +98,14 @@ namespace Nightbird::Editor
 		if (m_ProjectLoaded)
 		{
 			Core::Log::Info("Loaded project: " + sharedLibPath.string());
+			return 0;
 		}
 		else
 		{
 			Core::Log::Error("Failed to load project: " + sharedLibPath.string());
 			Core::Log::Info("Make sure to build the project");
 			Core::Log::Error(projectLib.get_error_string().to_string());
+			return 1;
 		}
 	}
 
