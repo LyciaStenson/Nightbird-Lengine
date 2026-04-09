@@ -15,6 +15,7 @@
 #include "Windows/SceneWindow.h"
 #include "Windows/SceneOutliner.h"
 #include "Windows/Inspector.h"
+#include "Windows/AssetBrowser.h"
 #include "Windows/EditorSettingsWindow.h"
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
@@ -136,6 +137,7 @@ namespace Nightbird::Editor
 		m_WindowManager->AddWindow<SceneWindow>(*m_EditorContext);
 		m_WindowManager->AddWindow<SceneOutliner>(*m_EditorContext);
 		m_WindowManager->AddWindow<Inspector>(*m_EditorContext);
+		m_WindowManager->AddWindow<AssetBrowser>(*m_EditorContext);
 		m_WindowManager->AddWindow<Editor::EditorSettingsWindow>(m_EditorSettings);
 		if (m_ProjectLoaded)
 			m_WindowManager->AddWindow<Editor::ProjectSettingsWindow>(m_ProjectSettings);

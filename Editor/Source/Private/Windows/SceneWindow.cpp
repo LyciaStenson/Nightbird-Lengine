@@ -13,10 +13,10 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_IMPL(SceneWindow, ImGuiWindow);
+	NB_OBJECT_IMPL(SceneWindow, ImGuiWindow)
 
 	SceneWindow::SceneWindow(EditorContext& context, bool open)
-		: ImGuiWindow("Scene", open), m_Context(context)
+		: ImGuiWindow("Scene", open, { ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse }), m_Context(context)
 	{
 		m_Surface = context.GetEngine().GetRenderer().CreateOffscreenSurface(m_CurrentWidth, m_CurrentHeight, Core::RenderSurfaceFormat::Default);
 		

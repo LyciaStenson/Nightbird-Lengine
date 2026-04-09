@@ -36,8 +36,7 @@ namespace Nightbird::Editor
 	private:
 		void RenderCategory(const SettingsCategory& category);
 		void BuildCategories(rttr::instance settings, std::vector<SettingsCategory>& outCategories);
-
-	protected:
+		
 		void* m_Settings = nullptr;
 		rttr::type m_SettingsType = rttr::type::get<void>();
 		std::vector<SettingsCategory> m_Categories;

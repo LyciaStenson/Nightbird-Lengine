@@ -11,7 +11,7 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_IMPL(Inspector, ImGuiWindow);
+	NB_OBJECT_IMPL(Inspector, ImGuiWindow)
 
 	Inspector::Inspector(EditorContext& context, bool open)
 		: ImGuiWindow("Inspector", open), m_Context(context)
