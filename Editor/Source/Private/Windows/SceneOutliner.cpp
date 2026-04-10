@@ -9,8 +9,6 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_IMPL(SceneOutliner, ImGuiWindow)
-
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
 		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)
 	{

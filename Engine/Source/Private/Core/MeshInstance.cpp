@@ -2,8 +2,6 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(MeshInstance, SpatialObject);
-
 	MeshInstance::MeshInstance(const std::string& name)
 		: MeshInstance(name, nullptr)
 	{

@@ -2,8 +2,6 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_BASE_IMPL(ImGuiWindow)
-
 	ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowConfig& config)
 		: m_Title(std::move(title)), m_Open(open), m_Config(std::move(config))
 	{

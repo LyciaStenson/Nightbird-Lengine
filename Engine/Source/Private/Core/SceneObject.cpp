@@ -6,8 +6,6 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_BASE_IMPL(SceneObject)
-
 	SceneObject::SceneObject(const std::string& name)
 		: m_Name(name)
 	{

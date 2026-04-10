@@ -13,8 +13,6 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_IMPL(SceneWindow, ImGuiWindow)
-
 	SceneWindow::SceneWindow(EditorContext& context, bool open)
 		: ImGuiWindow("Scene", open, { ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse }), m_Context(context)
 	{

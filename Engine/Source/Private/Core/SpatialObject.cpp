@@ -2,8 +2,6 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(SpatialObject, SceneObject);
-
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{
 		return m_Transform.GetLocalMatrix();

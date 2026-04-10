@@ -6,8 +6,6 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_IMPL(AssetBrowser, ImGuiWindow)
-
 	AssetBrowser::AssetBrowser(EditorContext& context, bool open)
 		: ImGuiWindow("Asset Browser", open), m_Context(context)
 	{

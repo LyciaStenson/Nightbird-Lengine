@@ -44,15 +44,9 @@ namespace Nightbird
 }
 
 #define NB_OBJECT(ClassName, ParentClass) \
-	static const ::Nightbird::TypeInfo s_TypeInfo; \
+	inline static const ::Nightbird::TypeInfo s_TypeInfo = { #ClassName, &ParentClass::s_TypeInfo }; \
 	const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; }
 
 #define NB_OBJECT_BASE(ClassName) \
-	static const ::Nightbird::TypeInfo s_TypeInfo; \
+	inline static const ::Nightbird::TypeInfo s_TypeInfo = { #ClassName, nullptr }; \
 	virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
-
-#define NB_OBJECT_IMPL(ClassName, ParentClass) \
-	const ::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, &ParentClass::s_TypeInfo };
-
-#define NB_OBJECT_BASE_IMPL(ClassName) \
-	const ::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, nullptr };
