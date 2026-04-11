@@ -93,7 +93,14 @@ namespace Nightbird::Editor
 		platformStr = "linux-x86_64";
 #endif
 
-		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / projectConfig.name;
+		std::string libraryStr;
+#ifdef _WIN32
+		libraryStr = projectConfig.name + ".dll";
+#else
+		libraryStr = "lib" + projectConfig.name + ".so";
+#endif
+
+		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / libraryStr;
 		rttr::library projectLib(sharedLibPath.string());
 		m_ProjectLoaded = projectLib.load();
 		if (m_ProjectLoaded)
