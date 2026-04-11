@@ -7,6 +7,8 @@
 
 namespace Nightbird::Core
 {
+	NB_OBJECT_IMPL(AudioSource, SceneObject)
+
 	void AudioSource::EnterScene()
 	{
 		if (m_PlayOnStart && m_AudioAsset)

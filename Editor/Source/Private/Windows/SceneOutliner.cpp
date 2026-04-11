@@ -9,6 +9,8 @@
 
 namespace Nightbird::Editor
 {
+	NB_OBJECT_IMPL(SceneOutliner, ImGuiWindow)
+
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
 		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)
 	{
@@ -67,7 +69,7 @@ namespace Nightbird::Editor
 			{
 				if (type.is_derived_from(rttr::type::get<Core::SceneObject>()))
 				{
-					auto constructor = type.get_constructor({ rttr::type::get<std::string>() });
+					auto constructor = type.get_constructor(); // Missing name { rttr::type::get<std::string>() }
 					if (constructor.is_valid())
 					{
 						objectTypeNames.push_back(type.get_name().to_string());
@@ -90,10 +92,11 @@ namespace Nightbird::Editor
 			{
 				if (ImGui::MenuItem(objectTypeNames[i].c_str()))
 				{
-					rttr::variant variant = objectTypes[i].create({ objectTypeNames[i] });
+					rttr::variant variant = objectTypes[i].create();
 					if (variant.is_valid())
 					{
 						Core::SceneObject* rawObject = variant.get_value<Core::SceneObject*>();
+						rawObject->SetName(objectTypeNames[i]);
 						std::unique_ptr<Core::SceneObject> object(rawObject);
 
 						if (auto* selectObject = m_Context.GetSelectedObject())

@@ -83,17 +83,19 @@ namespace Nightbird::Editor
 			rttr::type type = rttr::type::get_by_name(typeName);
 			if (type.is_valid())
 			{
-				rttr::variant variant = type.create({ name });
+				rttr::variant variant = type.create(); // Missing name
 				if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
 				{
 					object.reset(variant.get_value<Core::SceneObject*>());
+					object->SetName(name);
 				}
 			}
 
 			if (!object)
 			{
 				Core::Log::Warning("TextSceneReader: Unknown type: " + typeName + ", defaulting to SceneObject");
-				object = std::make_unique<Core::SceneObject>(name);
+				object = std::make_unique<Core::SceneObject>(); // Missing name
+				object->SetName(name);
 			}
 
 			if (auto* propertiesTable = (*nodeTable)["properties"].as_table())

@@ -23,16 +23,16 @@ namespace Nightbird::Core
 		NB_REGISTRATION_FRIEND
 
 		SceneObject();
-		SceneObject(const std::string& name);
 		virtual ~SceneObject() = default;
 
 		const std::string& GetName() const;
+		void SetName(std::string name);
 
 		Engine* GetEngine() const;
 		void SetScene(Scene* scene);
 
-		void SetParent(SceneObject* newParent);
 		SceneObject* GetParent() const;
+		void SetParent(SceneObject* newParent);
 
 		const std::vector<std::unique_ptr<SceneObject>>& GetChildren() const;
 		std::vector<std::unique_ptr<SceneObject>>& GetChildren();

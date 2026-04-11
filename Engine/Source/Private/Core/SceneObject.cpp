@@ -6,14 +6,10 @@
 
 namespace Nightbird::Core
 {
+	NB_OBJECT_BASE_IMPL(SceneObject)
+
 	SceneObject::SceneObject()
 		: m_Name("SceneObject")
-	{
-
-	}
-
-	SceneObject::SceneObject(const std::string& name)
-		: m_Name(name)
 	{
 
 	}
@@ -21,6 +17,11 @@ namespace Nightbird::Core
 	const std::string& SceneObject::GetName() const
 	{
 		return m_Name;
+	}
+
+	void SceneObject::SetName(std::string name)
+	{
+		m_Name = std::move(name);
 	}
 
 	Engine* SceneObject::GetEngine() const
@@ -33,6 +34,11 @@ namespace Nightbird::Core
 		m_Scene = scene;
 		for (auto& child : m_Children)
 			child->SetScene(scene);
+	}
+
+	SceneObject* SceneObject::GetParent() const
+	{
+		return m_Parent;
 	}
 
 	void SceneObject::SetParent(SceneObject* newParent)
@@ -48,11 +54,6 @@ namespace Nightbird::Core
 
 		if (newParent && detachedChild)
 			newParent->AddChild(std::move(detachedChild));
-	}
-
-	SceneObject* SceneObject::GetParent() const
-	{
-		return m_Parent;
 	}
 
 	const std::vector<std::unique_ptr<SceneObject>>& SceneObject::GetChildren() const

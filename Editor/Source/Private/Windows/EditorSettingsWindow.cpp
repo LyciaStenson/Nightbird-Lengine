@@ -2,6 +2,8 @@
 
 namespace Nightbird::Editor
 {
+	NB_OBJECT_IMPL(EditorSettingsWindow, ImGuiWindow)
+
 	EditorSettingsWindow::EditorSettingsWindow(EditorSettings& settings)
 		: SettingsWindow("Editor Settings")
 	{

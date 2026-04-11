@@ -135,12 +135,18 @@ namespace Nightbird
 
 #define NB_OBJECT_BASE(ClassName) \
 	public: \
-	inline static ::Nightbird::TypeInfo s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), nullptr }; \
+	static ::Nightbird::TypeInfo s_TypeInfo; \
 	virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; } \
 	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
 
 #define NB_OBJECT(ClassName, ParentClass) \
 	public: \
-	inline static ::Nightbird::TypeInfo s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), &ParentClass::s_TypeInfo }; \
+	static ::Nightbird::TypeInfo s_TypeInfo; \
 	const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; } \
 	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
+
+#define NB_OBJECT_BASE_IMPL(ClassName) \
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), nullptr };
+
+#define NB_OBJECT_IMPL(ClassName, ParentClass) \
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), &ParentClass::s_TypeInfo };

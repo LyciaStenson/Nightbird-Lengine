@@ -47,7 +47,7 @@ namespace Nightbird::Editor
 		auto textures = LoadTextures(gltfAsset);
 		auto materials = LoadMaterials(gltfAsset, textures);
 
-		auto root = std::make_unique<Core::SpatialObject>("ImportedModel");
+		auto root = std::make_unique<Core::SpatialObject>();
 		root->SetSourceSceneUUID(assetInfo.uuid);
 
 		if (gltfAsset.defaultScene.has_value())
@@ -76,11 +76,13 @@ namespace Nightbird::Editor
 		if (node.meshIndex.has_value())
 		{
 			auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
-			spatialNode = std::make_unique<Core::MeshInstance>(std::string(node.name), mesh);
+			spatialNode = std::make_unique<Core::MeshInstance>(mesh); // Missing name
+			spatialNode->SetName(std::string(node.name));
 		}
 		else
 		{
-			spatialNode = std::make_unique<Core::SpatialObject>(std::string(node.name));
+			spatialNode = std::make_unique<Core::SpatialObject>(); // Missing name
+			spatialNode->SetName(std::string(node.name));
 		}
 		
 		if (auto* trs = std::get_if<fastgltf::TRS>(&node.transform))

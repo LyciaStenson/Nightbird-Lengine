@@ -2,6 +2,8 @@
 
 namespace Nightbird::Editor
 {
+	NB_OBJECT_IMPL(AboutWindow, ImGuiWindow)
+
 	AboutWindow::AboutWindow(bool open)
 	: ImGuiWindow("About Nightbird", open, { ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize, ImVec2(512, 448) })
 	{

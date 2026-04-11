@@ -122,19 +122,19 @@ namespace Nightbird::Load
 			{
 			case Core::SceneObjectType::SceneObject:
 			{
-				object = std::make_unique<Core::SceneObject>(nodeName);
+				object = std::make_unique<Core::SceneObject>(); // Missing name
 				break;
 			}
 			case Core::SceneObjectType::SpatialObject:
 			{
-				auto spatialObject = std::make_unique<Core::SpatialObject>(nodeName);
+				auto spatialObject = std::make_unique<Core::SpatialObject>(); // Missing name
 				ReadTransform(spatialObject->m_Transform, reader);
 				object = std::move(spatialObject);
 				break;
 			}
 			case Core::SceneObjectType::MeshInstance:
 			{
-				auto meshInstance = std::make_unique<Core::MeshInstance>(nodeName, nullptr);
+				auto meshInstance = std::make_unique<Core::MeshInstance>(); // Missing name
 				ReadTransform(meshInstance->m_Transform, reader);
 
 				std::array<uint8_t, 16> meshUUIDBytes;
@@ -153,7 +153,7 @@ namespace Nightbird::Load
 			}
 			case Core::SceneObjectType::DirectionalLight:
 			{
-				auto directionalLight = std::make_unique<Core::DirectionalLight>(nodeName);
+				auto directionalLight = std::make_unique<Core::DirectionalLight>(); // Missing name
 				ReadTransform(directionalLight->m_Transform, reader);
 
 				directionalLight->m_Color.r = reader.ReadFloat();
@@ -166,7 +166,7 @@ namespace Nightbird::Load
 			}
 			case Core::SceneObjectType::PointLight:
 			{
-				auto pointLight = std::make_unique<Core::PointLight>(nodeName);
+				auto pointLight = std::make_unique<Core::PointLight>(); // Missing name
 				ReadTransform(pointLight->m_Transform, reader);
 
 				pointLight->m_Color.r = reader.ReadFloat();
@@ -180,7 +180,7 @@ namespace Nightbird::Load
 			}
 			case Core::SceneObjectType::Camera:
 			{
-				auto camera = std::make_unique<Core::Camera>(nodeName);
+				auto camera = std::make_unique<Core::Camera>(); // Missing name
 				ReadTransform(camera->m_Transform, reader);
 
 				camera->m_Fov = reader.ReadFloat();
@@ -192,7 +192,7 @@ namespace Nightbird::Load
 			}
 			case Core::SceneObjectType::AudioSource:
 			{
-				auto audioSource = std::make_unique<Core::AudioSource>(nodeName);
+				auto audioSource = std::make_unique<Core::AudioSource>(); // Missing name
 				std::array<uint8_t, 16> audioUUIDBytes;
 				reader.ReadRawBytes(audioUUIDBytes.data(), 16);
 				uuids::uuid audioUUID(audioUUIDBytes);
@@ -217,7 +217,7 @@ namespace Nightbird::Load
 			default:
 			{
 				Core::Log::Warning("BinarySceneReader: Unknown object type: " + std::to_string(static_cast<int>(type)) + ", defaulting to SceneObject");
-				object = std::make_unique<Core::SceneObject>(nodeName);
+				object = std::make_unique<Core::SceneObject>(); // Missing name
 				break;
 			}
 			}
@@ -231,6 +231,8 @@ namespace Nightbird::Load
 			}
 
 			Core::SceneObject* objectPtr = object.get();
+			if (objectPtr)
+				objectPtr->SetName(nodeName);
 			nodeMap[nodeUUID] = objectPtr;
 			ownedNodeMap[nodeUUID] = std::move(object);
 			nodeUUIDs.push_back(nodeUUID);

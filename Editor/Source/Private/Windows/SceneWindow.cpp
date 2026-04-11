@@ -13,6 +13,8 @@
 
 namespace Nightbird::Editor
 {
+	NB_OBJECT_IMPL(SceneWindow, ImGuiWindow)
+
 	SceneWindow::SceneWindow(EditorContext& context, bool open)
 		: ImGuiWindow("Scene", open, { ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse }), m_Context(context)
 	{
@@ -20,7 +22,7 @@ namespace Nightbird::Editor
 		
 		m_TextureId = m_Context.GetEditorUIBackend().RegisterSurface(*m_Surface);
 
-		m_Camera = std::make_unique<Core::Camera>("EditorCamera");
+		m_Camera = std::make_unique<Core::Camera>();
 	}
 
 	SceneWindow::~SceneWindow()

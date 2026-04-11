@@ -9,7 +9,7 @@ namespace Nightbird::Core
 {
 	Scene::Scene()
 	{
-		m_Root = std::make_unique<SceneObject>("Root");
+		m_Root = std::make_unique<SceneObject>();
 	}
 	
 	void Scene::Update(float delta)

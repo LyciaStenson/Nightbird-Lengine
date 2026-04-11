@@ -18,39 +18,39 @@
 NB_REGISTRATION
 
 	NB_CLASS(Nightbird::Core::SceneObject)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 		NB_PROPERTY(m_Name)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::SpatialObject)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 		NB_PROPERTY(m_Transform)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::MeshInstance)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::Camera)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 		NB_PROPERTY(m_Fov)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::DirectionalLight)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 		NB_PROPERTY(m_Color)
 		NB_PROPERTY(m_Intensity)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::PointLight)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 		NB_PROPERTY(m_Color)
 		NB_PROPERTY(m_Intensity)
 		NB_PROPERTY(m_Radius)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::AudioSource)
-		NB_CONSTRUCTOR(const std::string&)
+		NB_CONSTRUCTOR()
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::Transform)

@@ -4,6 +4,8 @@
 
 namespace Nightbird::Core
 {
+	NB_OBJECT_IMPL(Camera, SpatialObject)
+
 	glm::mat4 Camera::GetViewMatrix() const
 	{
 		return glm::inverse(GetWorldMatrix());
