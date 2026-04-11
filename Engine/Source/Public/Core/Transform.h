@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Reflect.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -7,6 +9,8 @@ namespace Nightbird::Core
 {
 	struct Transform
 	{
+		NB_ENABLE()
+		
 		glm::mat4 GetLocalMatrix() const;
 
 		glm::vec3 position = glm::vec3(0.0f);

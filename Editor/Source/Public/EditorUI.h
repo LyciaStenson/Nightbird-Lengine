@@ -4,12 +4,13 @@
 
 namespace Nightbird::Editor
 {
+	class EditorContext;
 	class WindowManager;
 
 	class EditorUI
 	{
 	public:
-		EditorUI(WindowManager& windowManager);
+		EditorUI(EditorContext& context, WindowManager& windowManager);
 
 		void ApplyTheme(EditorTheme theme);
 
@@ -20,6 +21,7 @@ namespace Nightbird::Editor
 		void Toolbar();
 		void DockSpace();
 
+		EditorContext& m_Context;
 		WindowManager& m_WindowManager;
 	};
 }

@@ -2,6 +2,11 @@
 
 #include "EditorContext.h"
 
+#include "Scene/TextSceneReader.h"
+#include "Import/ImportManager.h"
+
+#include "Core/Engine.h"
+#include "Core/Scene.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Editor
@@ -50,7 +55,9 @@ namespace Nightbird::Editor
 				}
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					Core::Log::Info("AssetBrowser: Open file: " + path.string());
+					TextSceneReader sceneReader(m_Context.GetImportManager());
+					SceneReadResult result = sceneReader.Read(m_SelectedPath);
+					m_Context.GetEngine().SetScene(std::move(result.scene));
 				}
 			}
 		}

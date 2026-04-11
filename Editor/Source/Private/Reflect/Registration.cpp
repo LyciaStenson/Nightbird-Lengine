@@ -13,6 +13,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <uuid.h>
 
 NB_REGISTRATION
 
@@ -76,6 +77,10 @@ NB_REGISTRATION
 		NB_PROPERTY(y)
 		NB_PROPERTY(z)
 		NB_PROPERTY(w)
+	NB_CLASS_END()
+
+	NB_CLASS(uuids::uuid)
+		NB_CONSTRUCTOR()
 	NB_CLASS_END()
 
 NB_REGISTRATION_END

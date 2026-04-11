@@ -1,6 +1,8 @@
 #pragma once
 
 #include <uuid.h>
+#include <toml.hpp>
+#include <rttr/variant.h>
 
 #include <memory>
 #include <filesystem>
@@ -28,5 +30,8 @@ namespace Nightbird::Editor
 
 	private:
 		ImportManager& m_ImportManager;
+		
+		void DeserializeToml(const toml::table& table, rttr::instance instance);
+		rttr::variant TableToVariant(const toml::table& table);
 	};
 }

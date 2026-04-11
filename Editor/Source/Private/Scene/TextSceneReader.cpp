@@ -13,8 +13,6 @@
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
 
-#include <toml.hpp>
-
 namespace Nightbird::Editor
 {
 	TextSceneReader::TextSceneReader(ImportManager& importManager)
@@ -52,18 +50,17 @@ namespace Nightbird::Editor
 		}
 
 		sceneReadResult.scene = std::make_unique<Core::Scene>();
-		sceneReadResult.uuid = sceneUUID.value_or(uuids::uuid{});
+		sceneReadResult.uuid = *sceneUUID;
 
-		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
-		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> ownedNodesMap;
-		std::unordered_map<uuids::uuid, uuids::uuid> parentMap;
-
-		auto* nodesArray = document["nodes"].as_array();
+		toml::array* nodesArray = document["nodes"].as_array();
 		if (!nodesArray)
 		{
 			Core::Log::Warning("TextSceneReader: No nodes found in: " + path.string());
 			return sceneReadResult;
 		}
+
+		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
+		std::unordered_map<uuids::uuid, std::unique_ptr<Core::SceneObject>> ownedNodesMap;
 
 		for (auto& nodeValue : *nodesArray)
 		{
@@ -73,9 +70,8 @@ namespace Nightbird::Editor
 
 			std::string uuidString = (*nodeTable)["uuid"].value_or(std::string{});
 			std::string name = (*nodeTable)["name"].value_or(std::string{});
-			std::string type = (*nodeTable)["type"].value_or(std::string{});
-			std::string parentString = (*nodeTable)["parent"].value_or(std::string{});
-
+			std::string typeName = (*nodeTable)["type"].value_or(std::string{});
+			
 			auto uuid = uuids::uuid::from_string(uuidString);
 			if (!uuid)
 			{
@@ -83,110 +79,27 @@ namespace Nightbird::Editor
 				continue;
 			}
 
-			glm::vec3 position = glm::vec3(0.0f);
-			glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			glm::vec3 scale = glm::vec3(1.0f);
-
-			if (auto* nodePosition = (*nodeTable)["position"].as_array())
-			{
-				position.x = nodePosition->get(0)->value_or(0.0f);
-				position.y = nodePosition->get(1)->value_or(0.0f);
-				position.z = nodePosition->get(2)->value_or(0.0f);
-			}
-			if (auto* nodeRotation = (*nodeTable)["rotation"].as_array())
-			{
-				rotation.x = nodeRotation->get(0)->value_or(0.0f);
-				rotation.y = nodeRotation->get(1)->value_or(0.0f);
-				rotation.z = nodeRotation->get(2)->value_or(0.0f);
-				rotation.w = nodeRotation->get(3)->value_or(1.0f);
-			}
-			if (auto* nodeScale = (*nodeTable)["scale"].as_array())
-			{
-				scale.x = nodeScale->get(0)->value_or(1.0f);
-				scale.y = nodeScale->get(1)->value_or(1.0f);
-				scale.z = nodeScale->get(2)->value_or(1.0f);
-			}
-
 			std::unique_ptr<Core::SceneObject> object;
-			
-			if (type == "spatial_object")
+			rttr::type type = rttr::type::get_by_name(typeName);
+			if (type.is_valid())
 			{
-				auto spatialObject = std::make_unique<Core::SpatialObject>(name);
-				spatialObject->m_Transform.position = position;
-				spatialObject->m_Transform.rotation = rotation;
-				spatialObject->m_Transform.scale = scale;
-				object = std::move(spatialObject);
-			}
-			else if (type == "mesh_instance")
-			{
-				auto meshInstance = std::make_unique<Core::MeshInstance>(name, nullptr);
-				meshInstance->m_Transform.position = position;
-				meshInstance->m_Transform.rotation = rotation;
-				meshInstance->m_Transform.scale = scale;
-				object = std::move(meshInstance);
-			}
-			else if (type == "directional_light")
-			{
-				auto directionalLight = std::make_unique<Core::DirectionalLight>(name);
-				directionalLight->m_Transform.position = position;
-				directionalLight->m_Transform.rotation = rotation;
-				directionalLight->m_Transform.scale = scale;
-				if (auto* color = (*nodeTable)["color"].as_array())
+				rttr::variant variant = type.create({ name });
+				if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
 				{
-					directionalLight->m_Color.r = color->get(0)->value_or(1.0f);
-					directionalLight->m_Color.g = color->get(1)->value_or(1.0f);
-					directionalLight->m_Color.b = color->get(2)->value_or(1.0f);
+					object.reset(variant.get_value<Core::SceneObject*>());
 				}
-				directionalLight->m_Intensity = (*nodeTable)["intensity"].value_or(1.0f);
-				object = std::move(directionalLight);
 			}
-			else if (type == "point_light")
+
+			if (!object)
 			{
-				auto pointLight = std::make_unique<Core::PointLight>(name);
-				pointLight->m_Transform.position = position;
-				pointLight->m_Transform.rotation = rotation;
-				pointLight->m_Transform.scale = scale;
-				if (auto* color = (*nodeTable)["color"].as_array())
-				{
-					pointLight->m_Color.r = color->get(0)->value_or(1.0f);
-					pointLight->m_Color.g = color->get(1)->value_or(1.0f);
-					pointLight->m_Color.b = color->get(2)->value_or(1.0f);
-				}
-				pointLight->m_Intensity = (*nodeTable)["intensity"].value_or(1.0f);
-				pointLight->m_Radius = (*nodeTable)["radius"].value_or(1.0f);
-				object = std::move(pointLight);
-			}
-			else if (type == "camera")
-			{
-				auto camera = std::make_unique<Core::Camera>(name);
-				camera->m_Transform.position = position;
-				camera->m_Transform.rotation = rotation;
-				camera->m_Transform.scale = scale;
-				camera->m_Fov = (*nodeTable)["fov"].value_or(70.0f);
-				object = std::move(camera);
-			}
-			else if (type == "audio_source")
-			{
-				auto audioSource = std::make_unique<Core::AudioSource>(name);
-				std::string audioUUIDString = (*nodeTable)["audio_uuid"].value_or(std::string{});
-				auto audioUUID = uuids::uuid::from_string(audioUUIDString);
-				if (audioUUID)
-				{
-					audioSource->SetAudioUUID(*audioUUID);
-					auto audioAsset = m_ImportManager.LoadAudio(*audioUUID);
-					if (audioAsset)
-						audioSource->SetAudioAsset(audioAsset);
-					else
-						Core::Log::Error("TextSceneReader: Failed to load audio: " + audioUUIDString);
-				}
-				audioSource->SetLoop((*nodeTable)["loop"].value_or(false));
-				audioSource->SetPlayOnStart((*nodeTable)["play_on_start"].value_or(true));
-				audioSource->SetVolume(static_cast<float>((*nodeTable)["volume"].value_or(1.0f)));
-				object = std::move(audioSource);
-			}
-			else
-			{
+				Core::Log::Warning("TextSceneReader: Unknown type: " + typeName + ", defaulting to SceneObject");
 				object = std::make_unique<Core::SceneObject>(name);
+			}
+
+			if (auto* propertiesTable = (*nodeTable)["properties"].as_table())
+			{
+				rttr::instance objectInstance = *object;
+				DeserializeToml(*propertiesTable, objectInstance);
 			}
 
 			std::string sceneUUIDString = (*nodeTable)["scene_uuid"].value_or(std::string{});
@@ -208,17 +121,10 @@ namespace Nightbird::Editor
 					}
 				}
 			}
-			
+
 			Core::SceneObject* objectPtr = object.get();
 			nodeMap[*uuid] = objectPtr;
 			ownedNodesMap[*uuid] = std::move(object);
-
-			if (!parentString.empty())
-			{
-				auto parentUUID = uuids::uuid::from_string(parentString);
-				if (parentUUID)
-					parentMap[*uuid] = *parentUUID;
-			}
 		}
 
 		for (auto& nodeValue : *nodesArray)
@@ -259,5 +165,88 @@ namespace Nightbird::Editor
 
 		Core::Log::Info("TextSceneReader: Loaded scene: " + sceneName);
 		return sceneReadResult;
+	}
+
+	void TextSceneReader::DeserializeToml(const toml::table& table, rttr::instance instance)
+	{
+		rttr::type type = instance.get_derived_type();
+		if (!type.is_class())
+			return;
+		
+		for (auto& prop : type.get_properties())
+		{
+			if (!prop.is_valid() || prop.is_readonly())
+				continue;
+
+			std::string propName = prop.get_name().to_string();
+			const auto* propNode = table.get(propName);
+			if (!propNode)
+				continue;
+
+			const auto* propTable = propNode->as_table();
+			if (!propTable)
+				continue;
+
+			rttr::type propType = prop.get_type().get_raw_type();
+			rttr::variant variant;
+
+			Core::Log::Info("TextSceneReader: Property " + propName + " type: " + propType.get_name().to_string() + " is_class: " + std::to_string(propType.is_class()));
+
+			if (propType.is_class())
+			{
+				rttr::variant propVariant = prop.get_value(instance);
+				if (!propVariant.is_valid())
+					continue;
+
+				auto* valueTable = (*propTable)["value"].as_table();
+				if (!valueTable)
+					continue;
+
+				rttr::instance propInstance = propVariant;
+				if (!propInstance.is_valid())
+					continue;
+
+				DeserializeToml(*valueTable, propInstance);
+				variant = propVariant;
+			}
+			else
+			{
+				variant = TableToVariant(*propTable);
+			}
+
+			if (variant.is_valid())
+			{
+				bool success = prop.set_value(instance, variant);
+				if (!success)
+					Core::Log::Warning("TextSceneReader: Failed to set value for property " + propName);
+			}
+			else
+			{
+				Core::Log::Warning("TextSceneReader: Failed to deserialize property " + propName);
+			}
+		}
+	}
+
+	rttr::variant TextSceneReader::TableToVariant(const toml::table& table)
+	{
+		std::string typeName = table["type"].value_or(std::string{});
+
+		if (typeName == "int")
+			return table["value"].value_or(0);
+		else if (typeName == "float")
+			return table["value"].value_or(0.0f);
+		else if (typeName == "bool")
+			return table["value"].value_or(false);
+		else if (typeName == "string")
+			return table["value"].value_or(std::string{});
+		else if (typeName == "uuid")
+		{
+			std::string uuidString = table["value"].value_or(std::string{});
+			auto uuid = uuids::uuid::from_string(uuidString);
+			return uuid ? rttr::variant(*uuid) : rttr::variant{};
+		}
+
+		Core::Log::Warning("TextSceneReader: TableToVariant: Unknown type: " + typeName);
+		return {};
 	}
 }

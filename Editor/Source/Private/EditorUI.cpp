@@ -6,10 +6,16 @@
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
 
+#include "Scene/TextSceneWriter.h"
+
+#include "EditorContext.h"
+
+#include "Core/Engine.h"
+
 namespace Nightbird::Editor
 {
-	EditorUI::EditorUI(WindowManager& windowManager)
-		: m_WindowManager(windowManager)
+	EditorUI::EditorUI(EditorContext& context, WindowManager& windowManager)
+		: m_Context(context), m_WindowManager(windowManager)
 	{
 
 	}
@@ -41,12 +47,30 @@ namespace Nightbird::Editor
 		m_WindowManager.Render();
 	}
 
+	uuids::uuid GenerateUUID()
+	{
+		std::random_device randomDevice;
+
+		auto seedData = std::array<int, std::mt19937::state_size>{};
+		std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+		std::seed_seq seq(std::begin(seedData), std::end(seedData));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{generator};
+
+		return gen();
+	}
+
 	void EditorUI::MainMenuBar()
 	{
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Save Scene"))
+				{
+					TextSceneWriter sceneWriter;
+					sceneWriter.Write(m_Context.GetEngine().GetScene(), "TestScene", GenerateUUID(), "Assets/Scenes/TestScene.ntscene");
+				}
 				if (ImGui::MenuItem("Exit"))
 				{
 

@@ -67,79 +67,20 @@ namespace Nightbird::Editor
 
 		node.insert("uuid", uuids::to_string(m_NodeUUIDs[object]));
 		node.insert("name", object->GetName());
-
-		if (parent)
-			node.insert("parent", uuids::to_string(m_NodeUUIDs[parent]));
-		else
-			node.insert("parent", std::string{});
-
-		if (auto* spatialObject = Cast<Core::SpatialObject>(object))
-		{
-			toml::array position;
-			position.push_back(spatialObject->m_Transform.position.x);
-			position.push_back(spatialObject->m_Transform.position.y);
-			position.push_back(spatialObject->m_Transform.position.z);
-			node.insert("position", position);
-
-			toml::array rotation;
-			rotation.push_back(spatialObject->m_Transform.rotation.x);
-			rotation.push_back(spatialObject->m_Transform.rotation.y);
-			rotation.push_back(spatialObject->m_Transform.rotation.z);
-			rotation.push_back(spatialObject->m_Transform.rotation.w);
-			node.insert("rotation", rotation);
-
-			toml::array scale;
-			scale.push_back(spatialObject->m_Transform.scale.x);
-			scale.push_back(spatialObject->m_Transform.scale.y);
-			scale.push_back(spatialObject->m_Transform.scale.z);
-			node.insert("scale", scale);
-		}
+		node.insert("parent", parent ? uuids::to_string(m_NodeUUIDs[parent]) : std::string{});
 		
-		if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
-		{
-			node.insert("type", std::string("directional_light"));
+		rttr::type type = rttr::type::get(*object);
+		node.insert("type", type.get_name().to_string());
 
-			toml::array color;
-			color.push_back(directionalLight->m_Color.r);
-			color.push_back(directionalLight->m_Color.g);
-			color.push_back(directionalLight->m_Color.b);
-			node.insert("color", color);
-			node.insert("intensity", directionalLight->m_Intensity);
-		}
-		else if (auto* pointLight = Cast<Core::PointLight>(object))
+		toml::table properties;
+		for (auto& property : type.get_properties())
 		{
-			node.insert("type", std::string("point_light"));
-
-			toml::array color;
-			color.push_back(pointLight->m_Color.r);
-			color.push_back(pointLight->m_Color.g);
-			color.push_back(pointLight->m_Color.b);
-			node.insert("color", color);
-			node.insert("intensity", pointLight->m_Intensity);
-			node.insert("radius", pointLight->m_Radius);
+			rttr::variant value = property.get_value(*object);
+			toml::table tomlValue = VariantToToml(value);
+			properties.insert(property.get_name().to_string(), tomlValue);
 		}
-		else if (auto* camera = Cast<Core::Camera>(object))
-		{
-			node.insert("type", std::string("camera"));
-			node.insert("fov", camera->m_Fov);
-		}
-		else if (auto* audioSource = Cast<Core::AudioSource>(object))
-		{
-			node.insert("type", std::string("audio_source"));
-			node.insert("audio_uuid", uuids::to_string(audioSource->GetAudioUUID()));
-			node.insert("loop", audioSource->GetLoop());
-			node.insert("play_on_start", audioSource->GetPlayOnStart());
-			node.insert("volume", audioSource->GetVolume());
-		}
-		else if (Cast<Core::SpatialObject>(object))
-		{
-			node.insert("type", std::string("spatial_object"));
-		}
-		else
-		{
-			node.insert("type", std::string("scene_object"));
-		}
-
+		node.insert("properties", properties);
+		
 		if (object->HasSourceScene())
 		{
 			node.insert("scene_uuid", uuids::to_string(object->GetSourceSceneUUID().value()));
@@ -151,6 +92,41 @@ namespace Nightbird::Editor
 
 		for (const auto& child : object->GetChildren())
 			WriteNode(child.get(), object, nodesArray);
+	}
+
+	toml::table TextSceneWriter::VariantToToml(const rttr::variant& variant)
+	{
+		toml::table result;
+
+		rttr::type type = variant.get_type();
+		result.insert("type", type.get_name().to_string());
+
+		if (type == rttr::type::get<int>())
+			result.insert("value", variant.get_value<int>());
+		else if (variant.is_type<float>())
+			result.insert("value", variant.get_value<float>());
+		else if (variant.is_type<bool>())
+			result.insert("value", variant.get_value<bool>());
+		else if (variant.is_type<std::string>())
+			result.insert("value", variant.get_value<std::string>());
+		else if (variant.is_type<uuids::uuid>())
+			result.insert("value", uuids::to_string(variant.get_value<uuids::uuid>()));
+		else if (type.is_class())
+		{
+			toml::table nested;
+			for (auto& prop : type.get_properties())
+			{
+				rttr::variant propVariant = prop.get_value(variant);
+				nested.insert(prop.get_name().to_string(), VariantToToml(propVariant));
+			}
+			result.insert("value", nested);
+		}
+		else
+		{
+			Core::Log::Warning("TextSceneWriter: Unsupported type: " + type.get_name().to_string());
+		}
+		
+		return result;
 	}
 
 	uuids::uuid TextSceneWriter::GenerateUUID() const

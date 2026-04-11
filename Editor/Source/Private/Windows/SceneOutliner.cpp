@@ -34,7 +34,8 @@ namespace Nightbird::Editor
 
 		bool dropHandled = false;
 
-		DrawSceneNode(m_Context.GetEngine().GetScene().GetRoot(), dropHandled);
+		for (const auto& child : m_Context.GetEngine().GetScene().GetRoot()->GetChildren())
+			DrawSceneNode(child.get(), dropHandled);
 
 		ImVec2 space = ImGui::GetContentRegionAvail();
 		ImGui::Dummy(ImVec2(space.x, std::max(24.0f, space.y)));

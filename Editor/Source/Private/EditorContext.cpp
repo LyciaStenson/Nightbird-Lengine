@@ -2,16 +2,18 @@
 
 #include "EditorUIBackend.h"
 
+#include "Import/ImportManager.h"
+
 #include "Core/SceneObject.h"
 
 namespace Nightbird::Editor
 {
-	EditorContext::EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend)
-		: m_Engine(engine), m_EditorUIBackend(editorUIBackend)
+	EditorContext::EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend, ImportManager& importManager)
+		: m_Engine(engine), m_EditorUIBackend(editorUIBackend), m_ImportManager(importManager)
 	{
 
 	}
-
+	
 	void EditorContext::SelectObject(Core::SceneObject* object)
 	{
 		m_SelectedObject = object;
@@ -35,5 +37,10 @@ namespace Nightbird::Editor
 	EditorUIBackend& EditorContext::GetEditorUIBackend() const
 	{
 		return m_EditorUIBackend;
+	}
+
+	ImportManager& EditorContext::GetImportManager() const
+	{
+		return m_ImportManager;
 	}
 }

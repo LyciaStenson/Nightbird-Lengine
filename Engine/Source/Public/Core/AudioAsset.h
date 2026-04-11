@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Asset.h"
+
 #include <vector>
 #include <cstdint>
 
@@ -11,9 +13,10 @@ namespace Nightbird::Core
 		DSP_ADPCM = 1
 	};
 
-	class AudioAsset
+	class AudioAsset : Asset
 	{
 	public:
+		NB_OBJECT(AudioAsset, Asset)
 		AudioAsset(uint32_t sampleRate, uint32_t frameCount, uint8_t channels, AudioEncoding encoding, std::vector<std::vector<uint8_t>> channelData);
 
 		uint32_t GetSampleRate() const;

@@ -115,11 +115,12 @@ namespace Nightbird::Editor
 		m_EditorUIBackend = CreateEditorUIBackend(m_Engine->GetPlatform(), m_Engine->GetRenderer());
 		m_EditorUIBackend->Initialize();
 
-		m_EditorContext = std::make_unique<EditorContext>(*m_Engine, *m_EditorUIBackend);
+		InitializeImportManager();
+
+		m_EditorContext = std::make_unique<EditorContext>(*m_Engine, *m_EditorUIBackend, *m_ImportManager);
 
 		InitializeSettings();
 		InitializeWindows();
-		InitializeImportManager();
 		InitializeEditorUI();
 	}
 
@@ -146,7 +147,7 @@ namespace Nightbird::Editor
 
 	void EditorApplication::InitializeEditorUI()
 	{
-		m_EditorUI = std::make_unique<EditorUI>(*m_WindowManager);
+		m_EditorUI = std::make_unique<EditorUI>(*m_EditorContext, *m_WindowManager);
 		m_EditorUI->ApplyTheme(EditorTheme::Dark);
 	}
 
@@ -158,9 +159,6 @@ namespace Nightbird::Editor
 
 	void EditorApplication::RunEditorLoop()
 	{
-		TextSceneReader sceneReader(*m_ImportManager);
-		m_Engine->SetScene(sceneReader.Read("Assets/Scenes/ClubPenguin.ntscene").scene);
-
 		while (!m_Engine->ShouldClose())
 		{
 			Update();
