@@ -189,9 +189,7 @@ namespace Nightbird::Editor
 
 			rttr::type propType = prop.get_type().get_raw_type();
 			rttr::variant variant;
-
-			Core::Log::Info("TextSceneReader: Property " + propName + " type: " + propType.get_name().to_string() + " is_class: " + std::to_string(propType.is_class()));
-
+			
 			if (propType.is_class())
 			{
 				rttr::variant propVariant = prop.get_value(instance);

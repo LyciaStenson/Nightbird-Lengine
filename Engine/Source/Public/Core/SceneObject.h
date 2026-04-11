@@ -22,6 +22,7 @@ namespace Nightbird::Core
 		NB_ENABLE()
 		NB_REGISTRATION_FRIEND
 
+		SceneObject();
 		SceneObject(const std::string& name);
 		virtual ~SceneObject() = default;
 
