@@ -5,8 +5,6 @@
 	#include <rttr/registration>
 	#include <rttr/registration_friend>
 
-	#include "Core/Log.h"
-
 	#define NB_REGISTRATION \
 		RTTR_REGISTRATION {
 
@@ -20,6 +18,12 @@
 
 	#define NB_CLASS_END() \
 		;}
+
+	#define NB_CLASS_EDITOR_ONLY(Type) \
+		NB_CLASS(Type)
+
+	#define NB_CLASS_EDITOR_ONLY_END() \
+		NB_CLASS_END()
 
 	#define NB_PROPERTY(Name) \
 		.property(#Name, &_NB_CurrentType::Name)
@@ -43,10 +47,11 @@
 		NB_CONCAT_INNER(a, b)
 
 	#define NB_REGISTRATION \
-		namespace { static bool NB_CONCAT(_nb_reg_, __COUNTER__) = ([]() -> bool {
+		namespace Nightbird { struct Registration { static void Run() {
 
 	#define NB_REGISTRATION_END \
-		return true; }(), true); }
+		}}; static bool NB_CONCAT(_nb_reg_, __COUNTER__) = \
+			(Registration::Run(), true); }
 
 	#define NB_CLASS(Type) \
 		{ \
@@ -65,6 +70,9 @@
 		}; \
 		}
 
+	#define NB_CLASS_EDITOR_ONLY(Type)
+	#define NB_CLASS_EDITOR_ONLY_END()
+
 	#define NB_PROPERTY(Name) \
 		{ \
 			#Name, \
@@ -78,5 +86,6 @@
 	#define NB_ENABLE(...) \
 		public:
 
-	#define NB_REGISTRATION_FRIEND
+	#define NB_REGISTRATION_FRIEND \
+		friend struct ::Nightbird::Registration;
 #endif

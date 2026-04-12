@@ -2,6 +2,8 @@
 
 namespace Nightbird::Core
 {
+	NB_OBJECT_BASE_IMPL(Mesh)
+
 	Mesh::Mesh(std::vector<MeshPrimitive> primitives)
 		: m_Primitives(std::move(primitives))
 	{

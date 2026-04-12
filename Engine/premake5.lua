@@ -13,7 +13,10 @@ project "Engine"
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
-		"Source/Private/**.cpp"
+		"Source/Private/**.cpp",
+	}
+	excludes {
+		"Source/Private/Reflect/Registration.cpp"
 	}
 
 	includedirs {

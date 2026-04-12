@@ -5,6 +5,8 @@
 
 namespace Nightbird::Core
 {
+	NB_OBJECT_BASE_IMPL(Transform)
+
 	glm::mat4 Transform::GetLocalMatrix() const
 	{
 		glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(position));

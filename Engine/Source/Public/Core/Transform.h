@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/TypeInfo.h"
 #include "Core/Reflect.h"
 
 #include "Core/Math/Vector3.h"
@@ -9,6 +10,7 @@ namespace Nightbird::Core
 {
 	struct Transform
 	{
+		NB_OBJECT_BASE(Transform)
 		NB_ENABLE()
 		
 		glm::mat4 GetLocalMatrix() const;

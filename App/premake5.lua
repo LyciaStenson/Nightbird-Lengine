@@ -11,7 +11,8 @@ project "App"
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
-		"Source/Private/**.cpp"
+		"Source/Private/**.cpp",
+		"%{wks.location}/Engine/Source/Private/Reflect/Registration.cpp"
 	}
 
 	includedirs {

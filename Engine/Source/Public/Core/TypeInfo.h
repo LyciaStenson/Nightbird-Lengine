@@ -80,7 +80,9 @@ namespace Nightbird
 			return p;
 		}
 	};
-	
+
+	struct Registration;
+
 	struct TypeInfo
 	{
 		const char* name;
