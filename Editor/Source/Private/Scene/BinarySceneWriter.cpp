@@ -11,8 +11,6 @@
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
 
-#include "Core/SceneObjectType.h"
-
 #include "Cook/BinaryWriter.h"
 
 namespace Nightbird::Editor
@@ -49,8 +47,8 @@ namespace Nightbird::Editor
 		// Active camera UUID
 		if (activeCamera && m_NodeUUIDs.count(activeCamera))
 		{
-			auto cameraUUIDBytes = m_NodeUUIDs[activeCamera].as_bytes();
-			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(cameraUUIDBytes.data()), 16);
+			auto bytes = m_NodeUUIDs[activeCamera].as_bytes();
+			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
 		}
 		else
 		{
@@ -119,107 +117,120 @@ namespace Nightbird::Editor
 		writer.WriteUInt16(static_cast<uint16_t>(typeName.size()));
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName.data()), typeName.size());
 
-		// Properties
-		rttr::instance instance(*object);
-		auto properties = type.get_properties();
+		// Collect leaf properties
+		std::vector<LeafProperty> leaves;
+		CollectLeaves(rttr::instance(*object), type, leaves);
 
-		writer.WriteUInt16(static_cast<uint16_t>(properties.size()));
+		// Leaves size
+		writer.WriteUInt16(static_cast<uint16_t>(leaves.size()));
 
-		for (auto& prop : properties)
-		{
-			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
-		}
+		for (const auto& leaf : leaves)
+			WriteLeaf(leaf, writer);
 
-		// Node type
-		if (auto* meshInstance = Cast<Core::MeshInstance>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
-			//WriteTransform(meshInstance->m_Transform, writer);
-			//if (meshInstance->GetMesh() && m_MeshUUIDs->count(meshInstance->GetMesh().get()))
-			//{
-				//auto uuidBytes = m_MeshUUIDs->at(meshInstance->GetMesh().get()).as_bytes();
-				//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(uuidBytes.data()), 16);
-			//}
-			//else
-			//{
-				//auto nullBytes = uuids::uuid{}.as_bytes();
-				//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
-			//}
-		}
-		else if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::DirectionalLight));
-			//WriteTransform(directionalLight->m_Transform, writer);
-			writer.WriteFloat(directionalLight->m_Color.r);
-			writer.WriteFloat(directionalLight->m_Color.g);
-			writer.WriteFloat(directionalLight->m_Color.b);
-			writer.WriteFloat(directionalLight->m_Intensity);
-		}
-		else if (auto* pointLight = Cast<Core::PointLight>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::PointLight));
-			//WriteTransform(pointLight->m_Transform, writer);
-			writer.WriteFloat(pointLight->m_Color.r);
-			writer.WriteFloat(pointLight->m_Color.g);
-			writer.WriteFloat(pointLight->m_Color.b);
-			writer.WriteFloat(pointLight->m_Intensity);
-			writer.WriteFloat(pointLight->m_Radius);
-		}
-		else if (auto* camera = Cast<Core::Camera>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
-			//WriteTransform(camera->m_Transform, writer);
-			writer.WriteFloat(camera->m_Fov);
-		}
-		else if (auto* audioSource = Cast<Core::AudioSource>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::AudioSource));
-			auto audioUUIDBytes = audioSource->GetAudioUUID().as_bytes();
-			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(audioUUIDBytes.data()), 16);
-			writer.WriteUInt8(audioSource->GetLoop() ? 1 : 0);
-			writer.WriteUInt8(audioSource->GetPlayOnStart() ? 1 : 0);
-			writer.WriteFloat(audioSource->GetVolume());
-		}
-		else if (auto* spatialObject = Cast<Core::SpatialObject>(object))
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SpatialObject));
-			//WriteTransform(spatialObject->m_Transform, writer);
-		}
-		else
-		{
-			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SceneObject));
-		}
-
+		// Do not serialize children of scene instance
 		if (object->HasSourceScene())
-			return; // Do not serialize children of scene instance
+			return;
 
 		for (const auto& child : object->GetChildren())
 			WriteNode(child.get(), m_NodeUUIDs[object], writer);
 	}
 
-	void BinarySceneWriter::WriteProperties(const rttr::instance& instance, BinaryWriter& writer)
+	void BinarySceneWriter::CollectLeaves(const rttr::instance& instance, const rttr::type& type, std::vector<LeafProperty>& leaves)
 	{
+		for (auto& prop : type.get_properties())
+		{
+			rttr::variant variant = prop.get_value(instance);
+			rttr::type propType = variant.get_type();
+			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
 
+			if (propType == rttr::type::get<int>() ||
+				propType == rttr::type::get<float>() ||
+				propType == rttr::type::get<bool>() ||
+				propType == rttr::type::get<std::string>() ||
+				propType == rttr::type::get<uuids::uuid>())
+			{
+				leaves.push_back({ nameHash, variant });
+			}
+			else if (propType.is_class() && !propType.get_properties().empty())
+			{
+				leaves.push_back({ nameHash, variant });
+				CollectLeavesRecursive(variant, propType, leaves);
+			}
+			else
+			{
+				Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
+			}
+		}
 	}
 
-	void BinarySceneWriter::WriteVariant(const rttr::variant& variant, BinaryWriter& writer)
+	void BinarySceneWriter::CollectLeavesRecursive(const rttr::variant& variant, const rttr::type& type, std::vector<LeafProperty>& leaves)
 	{
+		for (auto& prop : type.get_properties())
+		{
+			rttr::variant variant = prop.get_value(variant);
+			rttr::type propType = variant.get_type();
+			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
 
+			if (propType == rttr::type::get<int>() ||
+				propType == rttr::type::get<float>() ||
+				propType == rttr::type::get<bool>() ||
+				propType == rttr::type::get<std::string>() ||
+				propType == rttr::type::get<uuids::uuid>())
+			{
+				leaves.push_back({ nameHash, variant });
+			}
+			else if (propType.is_class() && !propType.get_properties().empty())
+			{
+				leaves.push_back({ nameHash, variant });
+				CollectLeavesRecursive(variant, propType, leaves);
+			}
+			else
+			{
+				Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
+			}
+		}
 	}
 
-	// void BinarySceneWriter::WriteTransform(const Core::Transform& transform, BinaryWriter& writer)
-	// {
-	//	writer.WriteFloat(transform.position.x);
-	//	writer.WriteFloat(transform.position.y);
-	//	writer.WriteFloat(transform.position.z);
-	//	writer.WriteFloat(transform.rotation.x);
-	//	writer.WriteFloat(transform.rotation.y);
-	//	writer.WriteFloat(transform.rotation.z);
-	//	writer.WriteFloat(transform.rotation.w);
-	//	writer.WriteFloat(transform.scale.x);
-	//	writer.WriteFloat(transform.scale.y);
-	//	writer.WriteFloat(transform.scale.z);
-	// }
+	void BinarySceneWriter::WriteLeaf(const LeafProperty& leaf, BinaryWriter& writer)
+	{
+		rttr::type type = leaf.variant.get_type();
+
+		writer.WriteUInt32(leaf.nameHash);
+
+		if (type == rttr::type::get<int>())
+		{
+			writer.WriteUInt16(sizeof(int32_t));
+			writer.WriteInt32(leaf.variant.get_value<int>());
+		}
+		else if (type == rttr::type::get<float>())
+		{
+			writer.WriteUInt16(sizeof(float));
+			writer.WriteFloat(leaf.variant.get_value<float>());
+		}
+		else if (type == rttr::type::get<bool>())
+		{
+			writer.WriteUInt16(sizeof(uint8_t));
+			writer.WriteUInt8(leaf.variant.get_value<bool>() ? 1 : 0);
+		}
+		else if (type == rttr::type::get<std::string>())
+		{
+			const auto& value = leaf.variant.get_value<std::string>();
+			writer.WriteUInt16(static_cast<uint16_t>(sizeof(uint32_t) + value.size()));
+			writer.WriteUInt32(static_cast<uint32_t>(value.size()));
+			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(value.data()), value.size());
+		}
+		else if (type == rttr::type::get<uuids::uuid>())
+		{
+			writer.WriteUInt16(16);
+			auto bytes = leaf.variant.get_value<uuids::uuid>().as_bytes();
+			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
+		}
+		else if (type.is_class())
+		{
+			// Struct
+			writer.WriteUInt16(0);
+		}
+	}
 
 	uuids::uuid BinarySceneWriter::GenerateUUID() const
 	{

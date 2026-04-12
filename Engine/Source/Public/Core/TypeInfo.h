@@ -14,12 +14,15 @@ namespace Nightbird
 		return h;
 	}
 
+	struct TypeInfo;
+
 	struct PropDesc
 	{
 		const char* name;
 		uint32_t nameHash;
 		uint32_t offset;
 		uint32_t size;
+		const TypeInfo* nestedType = nullptr;
 	};
 
 	struct OwnedObject
@@ -111,6 +114,24 @@ namespace Nightbird
 		static const TypeInfo* Find(std::string_view name) noexcept;
 		static const TypeInfo* Find(uint32_t nameHash) noexcept;
 	};
+
+	namespace Detail
+	{
+		template<typename T, typename = void>
+		struct HasTypeInfo : std::false_type {};
+
+		template<typename T>
+		struct HasTypeInfo<T, std::void_t<decltype(T::s_TypeInfo)>> : std::true_type {};
+
+		template<typename T>
+		const TypeInfo* GetNestedTypeInfo()
+		{
+			if constexpr (HasTypeInfo<T>::value)
+				return &T::s_TypeInfo;
+			else
+				return nullptr;
+		}
+	}
 	
 	template<typename T, typename U>
 	T* Cast(U* obj)

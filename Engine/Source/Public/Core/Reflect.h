@@ -78,7 +78,8 @@
 			#Name, \
 			::Nightbird::FNVHash(#Name), \
 			static_cast<uint32_t>(offsetof(_NB_CurrentType, Name)), \
-			static_cast<uint32_t>(sizeof(_NB_CurrentType::Name)) \
+			static_cast<uint32_t>(sizeof(_NB_CurrentType::Name)), \
+			::Nightbird::Detail::GetNestedTypeInfo<decltype(_NB_CurrentType::Name)>() \
 		},
 
 	#define NB_CONSTRUCTOR(...)

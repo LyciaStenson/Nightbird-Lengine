@@ -1,7 +1,5 @@
 #include "Core/BinarySceneReader.h"
 
-#include "Core/SceneObjectType.h"
-
 #include "Core/AssetLoader.h"
 #include "Core/BinaryReader.h"
 
@@ -14,6 +12,8 @@
 #include "Core/Camera.h"
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
+
+#include <vector>
 
 namespace Nightbird::Core
 {
@@ -36,7 +36,7 @@ namespace Nightbird::Core
 
 	BinarySceneReader::ReadNodesResult BinarySceneReader::ReadNodes(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		ReadNodesResult readNodesResult;
+		ReadNodesResult result;
 
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbscene";
 
@@ -44,16 +44,16 @@ namespace Nightbird::Core
 		if (!reader.IsValid())
 		{
 			Core::Log::Error("BinarySceneReader: Failed to open: " + path);
-			return readNodesResult;
+			return result;
 		}
 
-		// Validate type		
+		// Validate type
 		uint8_t type[4] = {};
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'S' || type[1] != 'C' || type[2] != 'N' || type[3] != 'E')
 		{
 			Core::Log::Error("BinarySceneReader: Invalid type signature in: " + path);
-			return readNodesResult;
+			return result;
 		}
 
 		// Check Version
@@ -61,18 +61,19 @@ namespace Nightbird::Core
 		if (version != 1)
 		{
 			Core::Log::Error("BinarySceneReader: Unsupported version: " + std::to_string(version));
-			return readNodesResult;
+			return result;
 		}
 
 		// Scene name
 		uint32_t nameLength = reader.ReadUInt32();
 		std::string sceneName(nameLength, '\0');
 		reader.ReadRawBytes(reinterpret_cast<uint8_t*>(sceneName.data()), nameLength);
+		result.sceneName = sceneName;
 
 		// Scene UUID
 		std::array<uint8_t, 16> sceneUUIDBytes;
 		reader.ReadRawBytes(sceneUUIDBytes.data(), 16);
-		uuids::uuid sceneUUID(sceneUUIDBytes);
+		result.sceneUUID = uuids::uuid(sceneUUIDBytes);
 
 		// Active camera UUID
 		std::array<uint8_t, 16> activeCameraUUIDBytes;
@@ -99,11 +100,7 @@ namespace Nightbird::Core
 			reader.ReadRawBytes(parentUUIDBytes.data(), 16);
 			uuids::uuid parentUUID(parentUUIDBytes);
 
-			// Name
-			uint32_t nodeNameLength = reader.ReadUInt32();
-			std::string nodeName(nodeNameLength, '\0');
-			reader.ReadRawBytes(reinterpret_cast<uint8_t*>(nodeName.data()), nodeNameLength);
-
+			// Source scene UUID
 			uint8_t hasSceneUUID = reader.ReadUInt8();
 			uuids::uuid sourceSceneUUID;
 			if (hasSceneUUID)
@@ -113,113 +110,44 @@ namespace Nightbird::Core
 				sourceSceneUUID = uuids::uuid(sceneUUIDBytes);
 			}
 
-			// Type
-			Core::SceneObjectType type = static_cast<Core::SceneObjectType>(reader.ReadUInt8());
+			// Type Name
+			uint32_t typeNameLength = reader.ReadUInt16();
+			std::string typeName(typeNameLength, '\0');
+			reader.ReadRawBytes(reinterpret_cast<uint8_t*>(typeName.data()), typeNameLength);
 
+			// Property count
+			uint16_t propCount = reader.ReadUInt16();
+
+			// Construct object via TypeInfo factory
+			const TypeInfo* typeInfo = TypeInfo::Find(typeName);
 			std::unique_ptr<Core::SceneObject> object;
 
-			switch (type)
+			if (typeInfo && typeInfo->factory)
 			{
-			case Core::SceneObjectType::SceneObject:
-			{
-				object = std::make_unique<Core::SceneObject>();
-				break;
+				OwnedObject owned = typeInfo->factory();
+				if (owned.IsValid())
+					object.reset(static_cast<SceneObject*>(owned.Release()));
 			}
-			case Core::SceneObjectType::SpatialObject:
-			{
-				auto spatialObject = std::make_unique<Core::SpatialObject>();
-				ReadTransform(spatialObject->m_Transform, reader);
-				object = std::move(spatialObject);
-				break;
-			}
-			case Core::SceneObjectType::MeshInstance:
-			{
-				auto meshInstance = std::make_unique<Core::MeshInstance>();
-				ReadTransform(meshInstance->m_Transform, reader);
 
-				std::array<uint8_t, 16> meshUUIDBytes;
-				reader.ReadRawBytes(meshUUIDBytes.data(), 16);
-				uuids::uuid meshUUID(meshUUIDBytes);
-
-				if (!meshUUID.is_nil())
+			if (!object)
+			{
+				Log::Warning("BinarySceneReader: Unknown type " + typeName + ", defaulting to SceneObject");
+				object = std::make_unique<SceneObject>();
+				// Skip all properties
+				for (uint16_t i = 0; i < propCount; ++i)
 				{
-					auto mesh = m_AssetLoader.LoadMesh(meshUUID);
-					if (mesh)
-						meshInstance->SetMesh(mesh);
+					reader.ReadUInt32(); // Hash
+					uint16_t size = reader.ReadUInt16();
+					if (size > 0)
+					{
+						std::vector<uint8_t> discard(size);
+						reader.ReadRawBytes(discard.data(), size);
+					}
 				}
-
-				object = std::move(meshInstance);
-				break;
 			}
-			case Core::SceneObjectType::DirectionalLight:
+			else
 			{
-				auto directionalLight = std::make_unique<Core::DirectionalLight>();
-				ReadTransform(directionalLight->m_Transform, reader);
-
-				directionalLight->m_Color.r = reader.ReadFloat();
-				directionalLight->m_Color.g = reader.ReadFloat();
-				directionalLight->m_Color.b = reader.ReadFloat();
-				directionalLight->m_Intensity = reader.ReadFloat();
-
-				object = std::move(directionalLight);
-				break;
-			}
-			case Core::SceneObjectType::PointLight:
-			{
-				auto pointLight = std::make_unique<Core::PointLight>();
-				ReadTransform(pointLight->m_Transform, reader);
-
-				pointLight->m_Color.r = reader.ReadFloat();
-				pointLight->m_Color.g = reader.ReadFloat();
-				pointLight->m_Color.b = reader.ReadFloat();
-				pointLight->m_Intensity = reader.ReadFloat();
-				pointLight->m_Radius = reader.ReadFloat();
-
-				object = std::move(pointLight);
-				break;
-			}
-			case Core::SceneObjectType::Camera:
-			{
-				auto camera = std::make_unique<Core::Camera>();
-				ReadTransform(camera->m_Transform, reader);
-
-				camera->m_Fov = reader.ReadFloat();
-				if (nodeUUID == activeCameraUUID)
-					readNodesResult.activeCamera = camera.get();
-
-				object = std::move(camera);
-				break;
-			}
-			case Core::SceneObjectType::AudioSource:
-			{
-				auto audioSource = std::make_unique<Core::AudioSource>();
-				std::array<uint8_t, 16> audioUUIDBytes;
-				reader.ReadRawBytes(audioUUIDBytes.data(), 16);
-				uuids::uuid audioUUID(audioUUIDBytes);
-				bool loop = reader.ReadUInt8() != 0;
-				bool playOnStart = reader.ReadUInt8() != 0;
-				float volume = reader.ReadFloat();
-				audioSource->SetLoop(loop);
-				audioSource->SetPlayOnStart(playOnStart);
-				audioSource->SetVolume(volume);
-				audioSource->SetAudioUUID(audioUUID);
-				if (!audioUUID.is_nil())
-				{
-					auto audio = m_AssetLoader.LoadAudio(audioUUID);
-					if (audio)
-						audioSource->SetAudioAsset(audio);
-					else
-						Core::Log::Warning("BinarySceneReader: Failed to load audio: " + uuids::to_string(audioUUID));
-				}
-				object = std::move(audioSource);
-				break;
-			}
-			default:
-			{
-				Core::Log::Warning("BinarySceneReader: Unknown object type: " + std::to_string(static_cast<int>(type)) + ", defaulting to SceneObject");
-				object = std::make_unique<Core::SceneObject>();
-				break;
-			}
+				ReadProperties(object.get(), typeInfo, propCount, reader);
 			}
 
 			if (hasSceneUUID)
@@ -230,9 +158,10 @@ namespace Nightbird::Core
 					object->AddChild(std::move(child));
 			}
 
-			Core::SceneObject* objectPtr = object.get();
-			if (objectPtr)
-				objectPtr->SetName(nodeName);
+			if (nodeUUID == activeCameraUUID)
+				result.activeCamera = Cast<Camera>(object.get());
+
+			SceneObject* objectPtr = object.get();
 			nodeMap[nodeUUID] = objectPtr;
 			ownedNodeMap[nodeUUID] = std::move(object);
 			nodeUUIDs.push_back(nodeUUID);
@@ -241,6 +170,7 @@ namespace Nightbird::Core
 				parentMap[nodeUUID] = parentUUID;
 		}
 
+		// Build scene hierarchy
 		for (const auto& nodeUUID : nodeUUIDs)
 		{
 			if (!ownedNodeMap.count(nodeUUID))
@@ -250,24 +180,89 @@ namespace Nightbird::Core
 			if (parentIt != parentMap.end() && nodeMap.count(parentIt->second))
 				nodeMap[parentIt->second]->AddChild(std::move(ownedNodeMap[nodeUUID]));
 			else
-				readNodesResult.rootChildren.push_back(std::move(ownedNodeMap[nodeUUID]));
+				result.rootChildren.push_back(std::move(ownedNodeMap[nodeUUID]));
 		}
-		
+
+		for (const auto& nodeUUID : nodeUUIDs)
+		{
+			if (nodeMap.count(nodeUUID))
+				nodeMap[nodeUUID]->LoadAssets(m_AssetLoader);
+		}
+
 		Core::Log::Info("BinarySceneReader: Loaded scene: " + path);
-		return readNodesResult;
+		return result;
 	}
-	
-	void BinarySceneReader::ReadTransform(Core::Transform& transform, BinaryReader& reader)
+
+	void BinarySceneReader::ReadProperties(SceneObject* object, const TypeInfo* typeInfo, uint16_t propCount, BinaryReader& reader)
 	{
-		transform.position.x = reader.ReadFloat();
-		transform.position.y = reader.ReadFloat();
-		transform.position.z = reader.ReadFloat();
-		transform.rotation.x = reader.ReadFloat();
-		transform.rotation.y = reader.ReadFloat();
-		transform.rotation.z = reader.ReadFloat();
-		transform.rotation.w = reader.ReadFloat();
-		transform.scale.x = reader.ReadFloat();
-		transform.scale.y = reader.ReadFloat();
-		transform.scale.z = reader.ReadFloat();
+		uint8_t* objectBase = reinterpret_cast<uint8_t*>(object);
+
+		for (uint16_t i = 0; i < propCount; ++i)
+		{
+			uint32_t hash = reader.ReadUInt32();
+			uint16_t size = reader.ReadUInt16();
+			ReadIntoDesc(objectBase, typeInfo, hash, size, reader);
+		}
+	}
+
+	void BinarySceneReader::ReadIntoDesc(uint8_t* objectBase, const TypeInfo* typeInfo, uint32_t incomingHash, uint16_t incomingSize, BinaryReader& reader)
+	{
+		for (const TypeInfo* t = typeInfo; t!= nullptr; t = t->parent)
+		{
+			for (uint16_t i = 0; i < t->propCount; ++i)
+			{
+				const PropDesc& desc = t->props[i];
+				if (desc.nameHash != incomingHash)
+					continue;
+
+				if (incomingSize == 0)
+				{
+					// Size of 0 means nested type
+					if (desc.nestedType)
+					{
+						uint8_t* nestedBase = objectBase + desc.offset;
+						uint16_t nestedPropCount = desc.nestedType->propCount;
+
+						for (uint16_t np = 0; np < nestedPropCount; ++np)
+						{
+							uint32_t nestedHash = reader.ReadUInt32();
+							uint16_t nestedSize = reader.ReadUInt16();
+							ReadIntoDesc(nestedBase, desc.nestedType, nestedHash, nestedSize, reader);
+						}
+					}
+					else
+					{
+						Log::Warning("BinarySceneReader: Nested type marker with no nestedType for hash " + std::to_string(incomingHash));
+					}
+				}
+				else
+				{
+					if (incomingSize == desc.size)
+					{
+						reader.ReadRawBytes(objectBase + desc.offset, incomingSize);
+					}
+					else
+					{
+						Log::Warning("BinarySceneReader: Size mismatch for property " + std::to_string(incomingHash) + ": Expected " + std::to_string(desc.size) + " but got " + std::to_string(incomingSize));
+						std::vector<uint8_t> discard(incomingSize);
+						reader.ReadRawBytes(discard.data(), incomingSize);
+					}
+				}
+
+				return;
+			}
+		}
+
+		// Mo matching PropDesc found
+		if (incomingSize > 0)
+		{
+			Log::Warning("BinarySceneReader: No matching PropDesc found for property " + std::to_string(incomingHash));
+			std::vector<uint8_t> discard(incomingSize);
+			reader.ReadRawBytes(discard.data(), incomingSize);
+		}
+		else
+		{
+			Log::Warning("BinarySceneReader: Unknown nested type with hash " + std::to_string(incomingHash));
+		}
 	}
 }

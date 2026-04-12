@@ -42,6 +42,21 @@ namespace Nightbird::Editor
 		WriteValue(value);
 	}
 
+	void BinaryWriter::WriteInt8(int8_t value)
+	{
+		m_File.write(reinterpret_cast<const char*>(&value), 1);
+	}
+
+	void BinaryWriter::WriteInt16(int16_t value)
+	{
+		WriteValue(value);
+	}
+
+	void BinaryWriter::WriteInt32(int32_t value)
+	{
+		WriteValue(value);
+	}
+
 	void BinaryWriter::WriteFloat(float value)
 	{
 		WriteValue(value);

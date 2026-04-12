@@ -18,7 +18,11 @@ namespace Nightbird::Core
 		uint8_t ReadUInt8();
 		uint16_t ReadUInt16();
 		uint32_t ReadUInt32();
+		int8_t ReadInt8();
+		int16_t ReadInt16();
+		int32_t ReadInt32();
 		float ReadFloat();
+
 		Vertex ReadVertex();
 		std::vector<Vertex> ReadVertices(uint32_t count);
 		std::vector<uint16_t> ReadIndices(uint32_t count);

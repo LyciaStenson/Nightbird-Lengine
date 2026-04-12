@@ -20,9 +20,9 @@ namespace Nightbird::Core
 	template<typename T>
 	T BinaryReader::ReadValue()
 	{
-		T value;
 		uint8_t buffer[sizeof(T)];
 		m_File.read(reinterpret_cast<char*>(buffer), sizeof(T));
+		T value;
 		std::memcpy(&value, buffer, sizeof(T));
 		return value;
 	}
@@ -42,6 +42,23 @@ namespace Nightbird::Core
 	uint32_t BinaryReader::ReadUInt32()
 	{
 		return ReadValue<uint32_t>();
+	}
+
+	int8_t BinaryReader::ReadInt8()
+	{
+		int8_t value;
+		m_File.read(reinterpret_cast<char*>(&value), 1);
+		return value;
+	}
+
+	int16_t BinaryReader::ReadInt16()
+	{
+		return ReadValue<int16_t>();
+	}
+
+	int32_t BinaryReader::ReadInt32()
+	{
+		return ReadValue<int32_t>();
 	}
 
 	float BinaryReader::ReadFloat()
