@@ -21,6 +21,7 @@ namespace Nightbird::Core
 
 		using SceneObject::SceneObject;
 
+		void LoadAssets(AssetLoader& assetLoader) override;
 		void EnterScene() override;
 		void Tick(float delta) override;
 

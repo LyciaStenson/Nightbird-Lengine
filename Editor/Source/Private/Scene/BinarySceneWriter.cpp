@@ -18,12 +18,10 @@
 namespace Nightbird::Editor
 {
 	void BinarySceneWriter::Write(Core::SceneObject* root, const uuids::uuid& sceneUUID,
-		const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs,
 		const std::filesystem::path& outputPath, Endianness endianness,
 		Core::Camera* activeCamera)
 	{
 		m_NodeUUIDs.clear();
-		m_MeshUUIDs = &meshUUIDs;
 
 		AssignNodeUUIDs(root, true);
 
@@ -38,7 +36,7 @@ namespace Nightbird::Editor
 
 		// Version
 		writer.WriteUInt32(1);
-		
+
 		// Scene name
 		std::string name = root->GetName();
 		writer.WriteUInt32(static_cast<uint32_t>(name.size()));
@@ -59,17 +57,12 @@ namespace Nightbird::Editor
 			auto nullBytes = uuids::uuid{}.as_bytes();
 			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
 		}
-		
-		// Node count
+
+		// Node count (minus root)
 		writer.WriteUInt32(static_cast<uint32_t>(m_NodeUUIDs.size() - 1));
 
 		for (const auto& child : root->GetChildren())
-		{
-			Core::Log::Info("BinarySceneWriter: Root name: " + std::string(root->GetName()));
-			Core::Log::Info("BinarySceneWriter: Node count before -1: " + std::to_string(m_NodeUUIDs.size()));
-			Core::Log::Info("BinarySceneWriter: Children count: " + std::to_string(root->GetChildren().size()));
 			WriteNode(child.get(), uuids::uuid{}, writer);
-		}
 
 		Core::Log::Info("BinarySceneWriter: Written binary scene: " + outputPath.string());
 	}
@@ -83,7 +76,7 @@ namespace Nightbird::Editor
 
 		if (!isRoot && object->HasSourceScene())
 			return;
-		
+
 		for (const auto& child : object->GetChildren())
 			AssignNodeUUIDs(child.get());
 	}
@@ -102,10 +95,10 @@ namespace Nightbird::Editor
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(parentUUIDBytes.data()), 16);
 
 		// Name
-		std::string name = object->GetName();
-		writer.WriteUInt32(static_cast<uint32_t>(name.size()));
-		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(name.data()), name.size());
-		
+		//std::string name = object->GetName();
+		//writer.WriteUInt32(static_cast<uint32_t>(name.size()));
+		//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(name.data()), name.size());
+
 		if (object->HasSourceScene())
 		{
 			// Has Scene UUID (true)
@@ -119,27 +112,44 @@ namespace Nightbird::Editor
 			// Has Scene UUID (false)
 			writer.WriteUInt8(0);
 		}
-		
+
+		// Type name
+		rttr::type type = rttr::type::get(*object);
+		std::string typeName = type.get_name().to_string();
+		writer.WriteUInt16(static_cast<uint16_t>(typeName.size()));
+		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName.data()), typeName.size());
+
+		// Properties
+		rttr::instance instance(*object);
+		auto properties = type.get_properties();
+
+		writer.WriteUInt16(static_cast<uint16_t>(properties.size()));
+
+		for (auto& prop : properties)
+		{
+			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
+		}
+
 		// Node type
 		if (auto* meshInstance = Cast<Core::MeshInstance>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::MeshInstance));
-			WriteTransform(meshInstance->m_Transform, writer);
-			if (meshInstance->GetMesh() && m_MeshUUIDs->count(meshInstance->GetMesh().get()))
-			{
-				auto uuidBytes = m_MeshUUIDs->at(meshInstance->GetMesh().get()).as_bytes();
-				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(uuidBytes.data()), 16);
-			}
-			else
-			{
-				auto nullBytes = uuids::uuid{}.as_bytes();
-				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
-			}
+			//WriteTransform(meshInstance->m_Transform, writer);
+			//if (meshInstance->GetMesh() && m_MeshUUIDs->count(meshInstance->GetMesh().get()))
+			//{
+				//auto uuidBytes = m_MeshUUIDs->at(meshInstance->GetMesh().get()).as_bytes();
+				//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(uuidBytes.data()), 16);
+			//}
+			//else
+			//{
+				//auto nullBytes = uuids::uuid{}.as_bytes();
+				//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(nullBytes.data()), 16);
+			//}
 		}
 		else if (auto* directionalLight = Cast<Core::DirectionalLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::DirectionalLight));
-			WriteTransform(directionalLight->m_Transform, writer);
+			//WriteTransform(directionalLight->m_Transform, writer);
 			writer.WriteFloat(directionalLight->m_Color.r);
 			writer.WriteFloat(directionalLight->m_Color.g);
 			writer.WriteFloat(directionalLight->m_Color.b);
@@ -148,7 +158,7 @@ namespace Nightbird::Editor
 		else if (auto* pointLight = Cast<Core::PointLight>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::PointLight));
-			WriteTransform(pointLight->m_Transform, writer);
+			//WriteTransform(pointLight->m_Transform, writer);
 			writer.WriteFloat(pointLight->m_Color.r);
 			writer.WriteFloat(pointLight->m_Color.g);
 			writer.WriteFloat(pointLight->m_Color.b);
@@ -158,7 +168,7 @@ namespace Nightbird::Editor
 		else if (auto* camera = Cast<Core::Camera>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::Camera));
-			WriteTransform(camera->m_Transform, writer);
+			//WriteTransform(camera->m_Transform, writer);
 			writer.WriteFloat(camera->m_Fov);
 		}
 		else if (auto* audioSource = Cast<Core::AudioSource>(object))
@@ -173,7 +183,7 @@ namespace Nightbird::Editor
 		else if (auto* spatialObject = Cast<Core::SpatialObject>(object))
 		{
 			writer.WriteUInt8(static_cast<uint8_t>(Core::SceneObjectType::SpatialObject));
-			WriteTransform(spatialObject->m_Transform, writer);
+			//WriteTransform(spatialObject->m_Transform, writer);
 		}
 		else
 		{
@@ -182,24 +192,34 @@ namespace Nightbird::Editor
 
 		if (object->HasSourceScene())
 			return; // Do not serialize children of scene instance
-		
+
 		for (const auto& child : object->GetChildren())
 			WriteNode(child.get(), m_NodeUUIDs[object], writer);
 	}
 
-	void BinarySceneWriter::WriteTransform(const Core::Transform& transform, BinaryWriter& writer)
+	void BinarySceneWriter::WriteProperties(const rttr::instance& instance, BinaryWriter& writer)
 	{
-		writer.WriteFloat(transform.position.x);
-		writer.WriteFloat(transform.position.y);
-		writer.WriteFloat(transform.position.z);
-		writer.WriteFloat(transform.rotation.x);
-		writer.WriteFloat(transform.rotation.y);
-		writer.WriteFloat(transform.rotation.z);
-		writer.WriteFloat(transform.rotation.w);
-		writer.WriteFloat(transform.scale.x);
-		writer.WriteFloat(transform.scale.y);
-		writer.WriteFloat(transform.scale.z);
+
 	}
+
+	void BinarySceneWriter::WriteVariant(const rttr::variant& variant, BinaryWriter& writer)
+	{
+
+	}
+
+	// void BinarySceneWriter::WriteTransform(const Core::Transform& transform, BinaryWriter& writer)
+	// {
+	//	writer.WriteFloat(transform.position.x);
+	//	writer.WriteFloat(transform.position.y);
+	//	writer.WriteFloat(transform.position.z);
+	//	writer.WriteFloat(transform.rotation.x);
+	//	writer.WriteFloat(transform.rotation.y);
+	//	writer.WriteFloat(transform.rotation.z);
+	//	writer.WriteFloat(transform.rotation.w);
+	//	writer.WriteFloat(transform.scale.x);
+	//	writer.WriteFloat(transform.scale.y);
+	//	writer.WriteFloat(transform.scale.z);
+	// }
 
 	uuids::uuid BinarySceneWriter::GenerateUUID() const
 	{

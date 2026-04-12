@@ -8,11 +8,13 @@
 #include "Core/PointLight.h"
 #include "Core/AudioSource.h"
 
-#include "Core/Transform.h"
 #include "Core/Mesh.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Core/Transform.h"
+
+#include "Core/Math/Vector3.h"
+#include "Core/Math/Quat.h"
+
 #include <uuid.h>
 
 NB_REGISTRATION
@@ -29,6 +31,7 @@ NB_REGISTRATION
 
 	NB_CLASS(Nightbird::Core::MeshInstance)
 		NB_CONSTRUCTOR()
+		NB_PROPERTY(m_MeshUUID)
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::Camera)
@@ -51,6 +54,11 @@ NB_REGISTRATION
 
 	NB_CLASS(Nightbird::Core::AudioSource)
 		NB_CONSTRUCTOR()
+		NB_PROPERTY(m_AudioUUID)
+	NB_CLASS_END()
+
+	NB_CLASS(Nightbird::Core::Mesh)
+		NB_CONSTRUCTOR()
 	NB_CLASS_END()
 
 	NB_CLASS(Nightbird::Core::Transform)
@@ -60,24 +68,35 @@ NB_REGISTRATION
 		NB_PROPERTY(scale)
 	NB_CLASS_END()
 
-	NB_CLASS(Nightbird::Core::Mesh)
-		NB_CONSTRUCTOR()
-	NB_CLASS_END()
-
-	NB_CLASS(glm::vec3)
+	NB_CLASS(Nightbird::Core::Vector3)
 		NB_CONSTRUCTOR()
 		NB_PROPERTY(x)
 		NB_PROPERTY(y)
 		NB_PROPERTY(z)
 	NB_CLASS_END()
 
-	NB_CLASS(glm::quat)
+	NB_CLASS(Nightbird::Core::Quat)
 		NB_CONSTRUCTOR()
 		NB_PROPERTY(x)
 		NB_PROPERTY(y)
 		NB_PROPERTY(z)
 		NB_PROPERTY(w)
 	NB_CLASS_END()
+
+	//NB_CLASS(glm::vec3)
+	//	NB_CONSTRUCTOR()
+	//	NB_PROPERTY(x)
+	//	NB_PROPERTY(y)
+	//	NB_PROPERTY(z)
+	//NB_CLASS_END()
+
+	//NB_CLASS(glm::quat)
+	//	NB_CONSTRUCTOR()
+	//	NB_PROPERTY(x)
+	//	NB_PROPERTY(y)
+	//	NB_PROPERTY(z)
+	//	NB_PROPERTY(w)
+	//NB_CLASS_END()
 
 	NB_CLASS(uuids::uuid)
 		NB_CONSTRUCTOR()

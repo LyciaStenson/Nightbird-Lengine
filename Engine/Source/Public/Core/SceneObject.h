@@ -2,6 +2,7 @@
 
 #include "Core/TypeInfo.h"
 #include "Core/Reflect.h"
+#include "Core/AssetLoader.h"
 
 #include <uuid.h>
 
@@ -38,13 +39,14 @@ namespace Nightbird::Core
 		std::vector<std::unique_ptr<SceneObject>>& GetChildren();
 		void AddChild(std::unique_ptr<SceneObject> child);
 		std::unique_ptr<SceneObject> DetachChild(SceneObject* child);
-		
+
 		bool HasSourceScene() const;
 		const std::optional<uuids::uuid>& GetSourceSceneUUID() const;
 		void SetSourceSceneUUID(const uuids::uuid& uuid);
 
 		void EnterSceneRecursive();
 
+		virtual void LoadAssets(AssetLoader& assetLoader) {}
 		virtual void EnterScene();
 		virtual void Tick(float delta);
 

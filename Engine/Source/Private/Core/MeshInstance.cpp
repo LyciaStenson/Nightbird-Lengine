@@ -16,6 +16,11 @@ namespace Nightbird::Core
 
 	}
 
+	void MeshInstance::LoadAssets(AssetLoader& assetLoader)
+	{
+		m_Mesh = assetLoader.LoadMesh(m_MeshUUID);
+	}
+
 	std::shared_ptr<const Mesh> MeshInstance::GetMesh() const
 	{
 		return m_Mesh;

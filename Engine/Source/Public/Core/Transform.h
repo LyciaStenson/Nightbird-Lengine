@@ -2,8 +2,8 @@
 
 #include "Core/Reflect.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Core/Math/Vector3.h"
+#include "Core/Math/Quat.h"
 
 namespace Nightbird::Core
 {
@@ -13,8 +13,8 @@ namespace Nightbird::Core
 		
 		glm::mat4 GetLocalMatrix() const;
 
-		glm::vec3 position = glm::vec3(0.0f);
-		glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		glm::vec3 scale = glm::vec3(1.0f);
+		Vector3 position = Vector3(0.0f);
+		Quat rotation = Quat(1.0f, 0.0f, 0.0f, 0.0f);
+		Vector3 scale = Vector3(1.0f);
 	};
 }

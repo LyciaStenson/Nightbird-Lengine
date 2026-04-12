@@ -61,7 +61,8 @@ namespace Nightbird::Editor
 	{
 		BinarySceneWriter sceneWriter;
 		auto outputPath = outputDir / (uuids::to_string(sceneUUID) + ".nbscene");
-		sceneWriter.Write(root, sceneUUID, m_MeshUUIDs, outputPath, endianness, activeCamera);
+		//sceneWriter.Write(root, sceneUUID, m_MeshUUIDs, outputPath, endianness, activeCamera);
+		sceneWriter.Write(root, sceneUUID, outputPath, endianness, activeCamera);
 		Core::Log::Info("CookManager: Written binary scene: " + outputPath.string());
 	}
 

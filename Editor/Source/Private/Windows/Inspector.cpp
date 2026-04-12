@@ -5,10 +5,6 @@
 #include "Core/SceneObject.h"
 #include "Core/Transform.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/quaternion.hpp>
-
 namespace Nightbird::Editor
 {
 	NB_OBJECT_IMPL(Inspector, ImGuiWindow)
@@ -69,10 +65,10 @@ namespace Nightbird::Editor
 				if (ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
 					property.set_value(instance, std::string(buffer));
 			}
-			else if (propertyType == rttr::type::get<glm::vec3>())
+			else if (propertyType == rttr::type::get<Core::Vector3>())
 			{
-				glm::vec3 value = variant.get_value<glm::vec3>();
-				if (ImGui::DragFloat3(label.c_str(), glm::value_ptr(value), 0.01f))
+				Core::Vector3 value = variant.get_value<Core::Vector3>();
+				if (ImGui::DragFloat3(label.c_str(), &value.x, 0.01f))
 					property.set_value(instance, value);
 			}
 			else if (propertyType == rttr::type::get<Core::Transform>())
@@ -82,11 +78,11 @@ namespace Nightbird::Editor
 				ImGui::Text("%s", label.c_str());
 				ImGui::PushID((label + "_Transform").c_str());
 
-				if (ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 0.01f))
+				if (ImGui::DragFloat3("Position", &transform.position.x, 0.01f))
 					property.set_value(instance, transform);
-				if (ImGui::DragFloat4("Rotation", glm::value_ptr(transform.rotation)))
+				if (ImGui::DragFloat4("Rotation", &transform.rotation.x))
 					property.set_value(instance, transform);
-				if (ImGui::DragFloat3("Scale", glm::value_ptr(transform.scale), 0.01f))
+				if (ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f))
 					property.set_value(instance, transform);
 
 				ImGui::PopID();

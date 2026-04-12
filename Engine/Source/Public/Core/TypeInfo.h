@@ -70,7 +70,7 @@ namespace Nightbird
 		template<typename T>
 		T* As() noexcept
 		{
-			return static_cast<const T*>(ptr);
+			return static_cast<T*>(ptr);
 		}
 
 		void* Release() noexcept
@@ -87,8 +87,8 @@ namespace Nightbird
 		uint32_t nameHash;
 		const TypeInfo* parent;
 
-		using FactorFn = OwnedObject(*)();
-		FactorFn factory = nullptr;
+		using FactoryFn = OwnedObject(*)();
+		FactoryFn factory = nullptr;
 
 		const PropDesc* props = nullptr;
 		uint16_t propCount = 0;

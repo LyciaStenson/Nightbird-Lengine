@@ -122,19 +122,19 @@ namespace Nightbird::Core
 			{
 			case Core::SceneObjectType::SceneObject:
 			{
-				object = std::make_unique<Core::SceneObject>(); // Missing name
+				object = std::make_unique<Core::SceneObject>();
 				break;
 			}
 			case Core::SceneObjectType::SpatialObject:
 			{
-				auto spatialObject = std::make_unique<Core::SpatialObject>(); // Missing name
+				auto spatialObject = std::make_unique<Core::SpatialObject>();
 				ReadTransform(spatialObject->m_Transform, reader);
 				object = std::move(spatialObject);
 				break;
 			}
 			case Core::SceneObjectType::MeshInstance:
 			{
-				auto meshInstance = std::make_unique<Core::MeshInstance>(); // Missing name
+				auto meshInstance = std::make_unique<Core::MeshInstance>();
 				ReadTransform(meshInstance->m_Transform, reader);
 
 				std::array<uint8_t, 16> meshUUIDBytes;
@@ -153,7 +153,7 @@ namespace Nightbird::Core
 			}
 			case Core::SceneObjectType::DirectionalLight:
 			{
-				auto directionalLight = std::make_unique<Core::DirectionalLight>(); // Missing name
+				auto directionalLight = std::make_unique<Core::DirectionalLight>();
 				ReadTransform(directionalLight->m_Transform, reader);
 
 				directionalLight->m_Color.r = reader.ReadFloat();
@@ -166,7 +166,7 @@ namespace Nightbird::Core
 			}
 			case Core::SceneObjectType::PointLight:
 			{
-				auto pointLight = std::make_unique<Core::PointLight>(); // Missing name
+				auto pointLight = std::make_unique<Core::PointLight>();
 				ReadTransform(pointLight->m_Transform, reader);
 
 				pointLight->m_Color.r = reader.ReadFloat();
@@ -180,7 +180,7 @@ namespace Nightbird::Core
 			}
 			case Core::SceneObjectType::Camera:
 			{
-				auto camera = std::make_unique<Core::Camera>(); // Missing name
+				auto camera = std::make_unique<Core::Camera>();
 				ReadTransform(camera->m_Transform, reader);
 
 				camera->m_Fov = reader.ReadFloat();
@@ -192,7 +192,7 @@ namespace Nightbird::Core
 			}
 			case Core::SceneObjectType::AudioSource:
 			{
-				auto audioSource = std::make_unique<Core::AudioSource>(); // Missing name
+				auto audioSource = std::make_unique<Core::AudioSource>();
 				std::array<uint8_t, 16> audioUUIDBytes;
 				reader.ReadRawBytes(audioUUIDBytes.data(), 16);
 				uuids::uuid audioUUID(audioUUIDBytes);
@@ -217,7 +217,7 @@ namespace Nightbird::Core
 			default:
 			{
 				Core::Log::Warning("BinarySceneReader: Unknown object type: " + std::to_string(static_cast<int>(type)) + ", defaulting to SceneObject");
-				object = std::make_unique<Core::SceneObject>(); // Missing name
+				object = std::make_unique<Core::SceneObject>();
 				break;
 			}
 			}

@@ -9,6 +9,11 @@ namespace Nightbird::Core
 {
 	NB_OBJECT_IMPL(AudioSource, SceneObject)
 
+	void AudioSource::LoadAssets(AssetLoader& assetLoader)
+	{
+		m_AudioAsset = assetLoader.LoadAudio(m_AudioUUID);
+	}
+
 	void AudioSource::EnterScene()
 	{
 		if (m_PlayOnStart && m_AudioAsset)
