@@ -11,10 +11,7 @@ namespace Nightbird::Core
 	class Scene;
 	class Mesh;
 	class AudioAsset;
-}
 
-namespace Nightbird::Load
-{
 	class BinarySceneReader;
 	class TextureLoader;
 	class MaterialLoader;

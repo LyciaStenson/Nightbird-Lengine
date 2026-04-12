@@ -1,18 +1,18 @@
-#include "Load/AssetLoader.h"
+#include "Core/AssetLoader.h"
 
-#include "Scene/BinarySceneReader.h"
+#include "Core/BinarySceneReader.h"
 
-#include "Load/TextureLoader.h"
-#include "Load/MaterialLoader.h"
-#include "Load/MeshLoader.h"
-#include "Load/AudioLoader.h"
+#include "Core/TextureLoader.h"
+#include "Core/MaterialLoader.h"
+#include "Core/MeshLoader.h"
+#include "Core/AudioLoader.h"
 
 #include "Core/Scene.h"
 #include "Core/Mesh.h"
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
-namespace Nightbird::Load
+namespace Nightbird::Core
 {
 	AssetLoader::AssetLoader(const std::string& cookedDir)
 		: m_CookedDir(cookedDir)
@@ -24,12 +24,12 @@ namespace Nightbird::Load
 		m_AudioLoader = std::make_unique<AudioLoader>();
 	}
 
-	std::unique_ptr<Core::Scene> AssetLoader::LoadScene(const uuids::uuid& uuid)
+	std::unique_ptr<Scene> AssetLoader::LoadScene(const uuids::uuid& uuid)
 	{
 		return m_SceneReader->ReadScene(m_CookedDir, uuid);
 	}
 
-	std::shared_ptr<Core::Mesh> AssetLoader::LoadMesh(const uuids::uuid& uuid)
+	std::shared_ptr<Mesh> AssetLoader::LoadMesh(const uuids::uuid& uuid)
 	{
 		auto it = m_MeshCache.find(uuid);
 		if (it != m_MeshCache.end())
@@ -38,7 +38,7 @@ namespace Nightbird::Load
 		auto mesh = m_MeshLoader->Load(m_CookedDir, uuid);
 		if (!mesh)
 		{
-			Core::Log::Error("AssetLoader: Failed to load mesh: " + uuids::to_string(uuid));
+			Log::Error("AssetLoader: Failed to load mesh: " + uuids::to_string(uuid));
 			return nullptr;
 		}
 
@@ -46,7 +46,7 @@ namespace Nightbird::Load
 		return mesh;
 	}
 
-	std::shared_ptr<Core::AudioAsset> AssetLoader::LoadAudio(const uuids::uuid& uuid)
+	std::shared_ptr<AudioAsset> AssetLoader::LoadAudio(const uuids::uuid& uuid)
 	{
 		auto it = m_AudioCache.find(uuid);
 		if (it != m_AudioCache.end())
@@ -55,7 +55,7 @@ namespace Nightbird::Load
 		auto audio = m_AudioLoader->Load(m_CookedDir, uuid);
 		if (!audio)
 		{
-			Core::Log::Error("AssetLoader: Failed to load audio: " + uuids::to_string(uuid));
+			Log::Error("AssetLoader: Failed to load audio: " + uuids::to_string(uuid));
 			return nullptr;
 		}
 

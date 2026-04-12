@@ -8,10 +8,7 @@
 namespace Nightbird::Core
 {
 	struct Vertex;
-}
 
-namespace Nightbird::Load
-{
 	class BinaryReader
 	{
 	public:
@@ -22,8 +19,8 @@ namespace Nightbird::Load
 		uint16_t ReadUInt16();
 		uint32_t ReadUInt32();
 		float ReadFloat();
-		Core::Vertex ReadVertex();
-		std::vector<Core::Vertex> ReadVertices(uint32_t count);
+		Vertex ReadVertex();
+		std::vector<Vertex> ReadVertices(uint32_t count);
 		std::vector<uint16_t> ReadIndices(uint32_t count);
 		void ReadRawBytes(uint8_t* destination, size_t size);
 

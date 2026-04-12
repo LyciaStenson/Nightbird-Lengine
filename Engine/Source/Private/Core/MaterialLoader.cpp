@@ -1,7 +1,7 @@
-#include "Load/MaterialLoader.h"
+#include "Core/MaterialLoader.h"
 
-#include "Load/BinaryReader.h"
-#include "Load/TextureLoader.h"
+#include "Core/BinaryReader.h"
+#include "Core/TextureLoader.h"
 
 #include "Core/Material.h"
 #include "Core/Texture.h"
@@ -10,7 +10,7 @@
 #include <array>
 #include <cstdint>
 
-namespace Nightbird::Load
+namespace Nightbird::Core
 {
 	MaterialLoader::MaterialLoader(TextureLoader& textureLoader)
 		: m_TextureLoader(textureLoader)
@@ -18,14 +18,14 @@ namespace Nightbird::Load
 
 	}
 
-	std::shared_ptr<Core::Material> MaterialLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Material> MaterialLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		std::string path = cookedDir  + "/" + uuids::to_string(uuid) + ".nbmaterial";
 
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("MaterialLoader: Failed to open: " + path);
+			Log::Error("MaterialLoader: Failed to open: " + path);
 			return nullptr;
 		}
 
@@ -34,7 +34,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'M' || type[1] != 'A' || type[2] != 'T' || type[3] != 'L')
 		{
-			Core::Log::Error("MaterialLoader: Invalid type signature in: " + path);
+			Log::Error("MaterialLoader: Invalid type signature in: " + path);
 			return nullptr;
 		}
 
@@ -42,11 +42,11 @@ namespace Nightbird::Load
 		uint32_t version = reader.ReadUInt32();
 		if (version != 1)
 		{
-			Core::Log::Error("MaterialLoader: Unsupported version: " + std::to_string(version));
+			Log::Error("MaterialLoader: Unsupported version: " + std::to_string(version));
 			return nullptr;
 		}
 
-		auto material = std::make_shared<Core::Material>();
+		auto material = std::make_shared<Material>();
 
 		material->baseColorFactor.r = reader.ReadFloat();
 		material->baseColorFactor.g= reader.ReadFloat();
@@ -87,7 +87,7 @@ namespace Nightbird::Load
 		return material;
 	}
 
-	std::shared_ptr<Core::Texture> MaterialLoader::LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Texture> MaterialLoader::LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		auto it = m_TextureCache.find(uuid);
 		if (it != m_TextureCache.end())

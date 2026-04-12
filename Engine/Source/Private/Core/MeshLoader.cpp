@@ -1,7 +1,7 @@
-#include "Load/MeshLoader.h"
+#include "Core/MeshLoader.h"
 
-#include "Load/BinaryReader.h"
-#include "Load/MaterialLoader.h"
+#include "Core/BinaryReader.h"
+#include "Core/MaterialLoader.h"
 
 #include "Core/Mesh.h"
 #include "Core/MeshPrimitive.h"
@@ -10,7 +10,7 @@
 #include <array>
 #include <cstdint>
 
-namespace Nightbird::Load
+namespace Nightbird::Core
 {
 	MeshLoader::MeshLoader(MaterialLoader& materialLoader)
 		: m_MaterialLoader(materialLoader)
@@ -18,14 +18,14 @@ namespace Nightbird::Load
 
 	}
 
-	std::shared_ptr<Core::Mesh> MeshLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Mesh> MeshLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbmesh";
 		
 		BinaryReader reader(path);
 		if (!reader.IsValid())
 		{
-			Core::Log::Error("MeshLoader: Failed to open: " + path);
+			Log::Error("MeshLoader: Failed to open: " + path);
 			return nullptr;
 		}
 
@@ -34,7 +34,7 @@ namespace Nightbird::Load
 		reader.ReadRawBytes(type, 4);
 		if (type[0] != 'M' || type[1] != 'E' || type[2] != 'S' || type[3] != 'H')
 		{
-			Core::Log::Error("MeshLoader: Invalid type signature in: " + path);
+			Log::Error("MeshLoader: Invalid type signature in: " + path);
 			return nullptr;
 		}
 
@@ -42,13 +42,13 @@ namespace Nightbird::Load
 		uint32_t version = reader.ReadUInt32();
 		if (version != 1)
 		{
-			Core::Log::Error("MeshLoader: Unsupported version: " + std::to_string(version));
+			Log::Error("MeshLoader: Unsupported version: " + std::to_string(version));
 			return nullptr;
 		}
 
 		uint32_t primitiveCount = reader.ReadUInt32();
 
-		std::vector<Core::MeshPrimitive> primitives;
+		std::vector<MeshPrimitive> primitives;
 		primitives.reserve(primitiveCount);
 
 		for (uint32_t i = 0; i < primitiveCount; i++)
@@ -60,7 +60,7 @@ namespace Nightbird::Load
 			auto indices = reader.ReadIndices(indexCount);
 
 			uint8_t hasMaterial = reader.ReadUInt8();
-			std::shared_ptr<Core::Material> material;
+			std::shared_ptr<Material> material;
 			if (hasMaterial)
 			{
 				std::array<uint8_t, 16> uuidBytes;
@@ -72,10 +72,10 @@ namespace Nightbird::Load
 			primitives.emplace_back(std::move(vertices), std::move(indices), material);
 		}
 
-		return std::make_shared<Core::Mesh>(std::move(primitives));
+		return std::make_shared<Mesh>(std::move(primitives));
 	}
 
-	std::shared_ptr<Core::Material> MeshLoader::LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Material> MeshLoader::LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		auto it = m_MaterialCache.find(uuid);
 		if (it != m_MaterialCache.end())

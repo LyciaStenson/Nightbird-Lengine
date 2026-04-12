@@ -11,10 +11,7 @@ namespace Nightbird::Core
 {
 	class Camera;
 	struct Transform;
-}
 
-namespace Nightbird::Load
-{
 	class AssetLoader;
 	class BinaryReader;
 

@@ -8,13 +8,10 @@
 namespace Nightbird::Core
 {
 	class Texture;
-}
 
-namespace Nightbird::Load
-{
 	class TextureLoader
 	{
 	public:
-		std::shared_ptr<Core::Texture> Load(const std::string& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Texture> Load(const std::string& cookedDir, const uuids::uuid& uuid);
 	};
 }

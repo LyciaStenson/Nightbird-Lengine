@@ -1,10 +1,10 @@
-#include "Load/BinaryReader.h"
+#include "Core/BinaryReader.h"
 
 #include "Core/Vertex.h"
 
 #include <cstring>
 
-namespace Nightbird::Load
+namespace Nightbird::Core
 {
 	BinaryReader::BinaryReader(const std::string& path)
 		: m_File(path, std::ios::binary | std::ios::in)
@@ -49,9 +49,9 @@ namespace Nightbird::Load
 		return ReadValue<float>();
 	}
 
-	Core::Vertex BinaryReader::ReadVertex()
+	Vertex BinaryReader::ReadVertex()
 	{
-		Core::Vertex vertex;
+		Vertex vertex;
 		vertex.position.x = ReadFloat();
 		vertex.position.y = ReadFloat();
 		vertex.position.z = ReadFloat();
@@ -67,9 +67,9 @@ namespace Nightbird::Load
 		return vertex;
 	}
 	
-	std::vector<Core::Vertex> BinaryReader::ReadVertices(uint32_t count)
+	std::vector<Vertex> BinaryReader::ReadVertices(uint32_t count)
 	{
-		std::vector<Core::Vertex> vertices(count);
+		std::vector<Vertex> vertices(count);
 		for (auto& vertex : vertices)
 			vertex = ReadVertex();
 		return vertices;

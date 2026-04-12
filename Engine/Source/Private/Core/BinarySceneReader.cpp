@@ -1,9 +1,9 @@
-#include "Scene/BinarySceneReader.h"
+#include "Core/BinarySceneReader.h"
 
-#include "Load/AssetLoader.h"
-#include "Load/BinaryReader.h"
+#include "Core/SceneObjectType.h"
 
-#include "Scene/SceneObjectType.h"
+#include "Core/AssetLoader.h"
+#include "Core/BinaryReader.h"
 
 #include "Core/Transform.h"
 #include "Core/SceneObject.h"
@@ -15,7 +15,7 @@
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
 
-namespace Nightbird::Load
+namespace Nightbird::Core
 {
 	BinarySceneReader::BinarySceneReader(AssetLoader& assetLoader)
 		: m_AssetLoader(assetLoader)

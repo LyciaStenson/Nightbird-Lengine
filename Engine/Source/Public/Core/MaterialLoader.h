@@ -10,10 +10,7 @@ namespace Nightbird::Core
 {
 	struct Material;
 	class Texture;
-}
 
-namespace Nightbird::Load
-{
 	class TextureLoader;
 
 	class MaterialLoader
@@ -21,12 +18,12 @@ namespace Nightbird::Load
 	public:
 		MaterialLoader(TextureLoader& textureLoader);
 
-		std::shared_ptr<Core::Material> Load(const std::string& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Material> Load(const std::string& cookedDir, const uuids::uuid& uuid);
 
 	private:
 		TextureLoader& m_TextureLoader;
-		std::unordered_map<uuids::uuid, std::shared_ptr<Core::Texture>> m_TextureCache;
+		std::unordered_map<uuids::uuid, std::shared_ptr<Texture>> m_TextureCache;
 
-		std::shared_ptr<Core::Texture> LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Texture> LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid);
 	};
 }

@@ -11,8 +11,9 @@
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
 
+#include "Core/SceneObjectType.h"
+
 #include "Cook/BinaryWriter.h"
-#include "Scene/SceneObjectType.h"
 
 namespace Nightbird::Editor
 {
