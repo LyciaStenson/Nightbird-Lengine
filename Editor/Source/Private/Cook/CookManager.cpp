@@ -22,7 +22,32 @@ namespace Nightbird::Editor
 
 	}
 
-	void CookManager::Cook(const std::filesystem::path& textScenePath, CookTarget target)
+	void CookManager::Cook(const uuids::uuid& sceneUUID, CookTarget target)
+	{
+		const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(sceneUUID);
+		if (!assetInfo)
+		{
+			Core::Log::Error("CookManager: No asset info found for scene UUID: " + uuids::to_string(sceneUUID));
+			return;
+		}
+
+		TextSceneReader sceneReader(m_ImportManager);
+		SceneReadResult result = sceneReader.Read(assetInfo->sourcePath);
+		if (!result.scene)
+		{
+			Core::Log::Error("CookManager: Failed to read text scene: " + assetInfo->sourcePath.string());
+			return;
+		}
+
+		CookScene(*result.scene, sceneUUID, target);
+	}
+
+	void CookManager::Cook(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target)
+	{
+		CookScene(scene, sceneUUID, target);
+	}
+
+	void CookManager::CookScene(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target)
 	{
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
@@ -31,19 +56,11 @@ namespace Nightbird::Editor
 		m_ImportedSceneRoots.clear();
 		m_CookedSceneUUIDs.clear();
 
-		TextSceneReader sceneReader(m_ImportManager);
-		SceneReadResult sceneReadResult = sceneReader.Read(textScenePath);
-		if (!sceneReadResult.scene)
-		{
-			Core::Log::Error("CookManager: Failed to read text scene: " + textScenePath.string());
-			return;
-		}
-
 		m_Endianness = GetEndianness(target);
 		m_CookOutputDir = GetOutputDir(target);
 		std::filesystem::create_directories(m_CookOutputDir);
 		
-		CollectAssets(sceneReadResult.scene->GetRoot());
+		CollectAssets(scene.GetRoot());
 		
 		CookTextures(m_CookOutputDir, target, m_Endianness);
 		CookMaterials(m_CookOutputDir, m_Endianness);
@@ -53,9 +70,9 @@ namespace Nightbird::Editor
 		for (auto& [uuid, importedRoot] : m_ImportedSceneRoots)
 			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
 
-		WriteBinaryScene(sceneReadResult.scene->GetRoot(), sceneReadResult.uuid, m_CookOutputDir, m_Endianness, sceneReadResult.scene->GetActiveCamera());
+		WriteBinaryScene(scene.GetRoot(), sceneUUID, m_CookOutputDir, m_Endianness, scene.GetActiveCamera());
 
-		m_ProjectCooker.Cook(sceneReadResult.uuid, m_CookOutputDir, m_Endianness);
+		m_ProjectCooker.Cook(sceneUUID, m_CookOutputDir, m_Endianness);
 	}
 
 	void CookManager::WriteBinaryScene(Core::SceneObject* root, const uuids::uuid& sceneUUID,
@@ -63,7 +80,6 @@ namespace Nightbird::Editor
 	{
 		BinarySceneWriter sceneWriter;
 		auto outputPath = outputDir / (uuids::to_string(sceneUUID) + ".nbscene");
-		//sceneWriter.Write(root, sceneUUID, m_MeshUUIDs, outputPath, endianness, activeCamera);
 		sceneWriter.Write(root, sceneUUID, outputPath, endianness, activeCamera);
 		Core::Log::Info("CookManager: Written binary scene: " + outputPath.string());
 	}

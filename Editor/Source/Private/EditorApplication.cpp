@@ -4,6 +4,7 @@
 #include "Core/Renderer.h"
 #include "Core/Scene.h"
 #include "Core/BackendFactory.h"
+#include "Core/SceneObject.h"
 #include "Core/Log.h"
 
 #include "ProjectConfig.h"
@@ -123,8 +124,9 @@ namespace Nightbird::Editor
 		m_EditorUIBackend->Initialize();
 
 		InitializeImportManager();
+		InitializeCookManager();
 
-		m_EditorContext = std::make_unique<EditorContext>(*m_Engine, *m_EditorUIBackend, *m_ImportManager);
+		m_EditorContext = std::make_unique<EditorContext>(*m_Engine, *m_EditorUIBackend, *m_ImportManager, *m_CookManager);
 
 		InitializeSettings();
 		InitializeWindows();
@@ -162,6 +164,11 @@ namespace Nightbird::Editor
 	{
 		m_ImportManager = std::make_unique<ImportManager>("Assets");
 		m_ImportManager->Scan();
+	}
+
+	void EditorApplication::InitializeCookManager()
+	{
+		m_CookManager = std::make_unique<CookManager>("Cooked", *m_ImportManager);
 	}
 
 	void EditorApplication::RunEditorLoop()

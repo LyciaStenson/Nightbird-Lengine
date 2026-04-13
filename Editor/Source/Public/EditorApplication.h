@@ -13,6 +13,7 @@
 #include "EditorContext.h"
 #include "WindowManager.h"
 #include "Import/ImportManager.h"
+#include "Cook/CookManager.h"
 
 #include <memory>
 #include <filesystem>
@@ -35,6 +36,7 @@ namespace Nightbird::Editor
 		void InitializeWindows();
 		void InitializeEditorUI();
 		void InitializeImportManager();
+		void InitializeCookManager();
 		void RunEditorLoop();
 		void Update();
 		void Render();
@@ -46,7 +48,8 @@ namespace Nightbird::Editor
 		std::unique_ptr<EditorContext> m_EditorContext;
 		std::unique_ptr<WindowManager> m_WindowManager;
 		std::unique_ptr<ImportManager> m_ImportManager;
-		
+		std::unique_ptr<CookManager> m_CookManager;
+
 		SettingsManager m_SettingsManager;
 		EditorSettings m_EditorSettings;
 		ProjectSettings m_ProjectSettings;

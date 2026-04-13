@@ -34,7 +34,8 @@ namespace Nightbird::Editor
 	public:
 		CookManager(const std::filesystem::path& outputDir, ImportManager& importManager);
 
-		void Cook(const std::filesystem::path& textScenePath, CookTarget target);
+		void Cook(const uuids::uuid& sceneUUID, CookTarget target);
+		void Cook(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target);
 
 	private:
 		std::filesystem::path m_RootOutputDir;
@@ -65,6 +66,7 @@ namespace Nightbird::Editor
 		
 		void CollectAssets(Core::SceneObject* object);
 
+		void CookScene(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target);
 		void CookTextures(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness);
 		void CookMaterials(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMeshes(const std::filesystem::path& outputDir, Endianness endianness);

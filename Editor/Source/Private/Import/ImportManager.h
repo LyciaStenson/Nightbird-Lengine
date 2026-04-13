@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Import/AssetType.h"
 #include "Import/AssetInfo.h"
 #include "Import/Importer.h"
 
@@ -26,7 +25,6 @@ namespace Nightbird::Editor
 
 		void Scan();
 
-		AssetType GetAssetType(const uuids::uuid& uuid) const;
 		const AssetInfo* GetAssetInfo(const uuids::uuid& uuid) const;
 
 		std::unique_ptr<Core::SceneObject> LoadScene(const uuids::uuid& uuid);

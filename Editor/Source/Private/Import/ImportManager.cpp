@@ -1,7 +1,6 @@
 #include "Import/ImportManager.h"
 
 #include "Import/AssetInfo.h"
-#include "Import/AssetType.h"
 #include "Import/GltfSceneImporter.h"
 #include "Import/DrLibsAudioImporter.h"
 
@@ -36,6 +35,12 @@ namespace Nightbird::Editor
 			if (entry.path().extension() == ".assetinfo")
 				continue;
 
+			for (const auto& importer : m_Importers)
+			{
+				if (!importer->SupportsExtension(entry.path().extension().string()))
+					continue;
+			}
+
 			std::filesystem::path assetInfoPath = entry.path().string() + ".assetinfo";
 
 			if (!std::filesystem::exists(assetInfoPath))
@@ -43,20 +48,6 @@ namespace Nightbird::Editor
 			else
 				ReadAssetInfoFile(assetInfoPath);
 		}
-	}
-
-	AssetType ImportManager::GetAssetType(const uuids::uuid& uuid) const
-	{
-		const AssetInfo* assetInfo = GetAssetInfo(uuid);
-		if (!assetInfo)
-			return AssetType::Unknown;
-
-		for (const auto& importer : m_Importers)
-		{
-			if (importer->GetName() == assetInfo->importer)
-				return importer->GetAssetType();
-		}
-		return AssetType::Unknown;
 	}
 
 	const AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid) const
@@ -80,8 +71,8 @@ namespace Nightbird::Editor
 		{
 			if (importer->GetName() == assetInfo->importer)
 			{
-				if (importer->GetAssetType() == AssetType::Scene)
-					return static_cast<SceneImporter*>(importer.get())->Load(*assetInfo);
+				if (auto* sceneImporter = importer->AsSceneImporter())
+					return sceneImporter->Load(*assetInfo);
 			}
 		}
 
@@ -102,8 +93,8 @@ namespace Nightbird::Editor
 		{
 			if (importer->GetName() == assetInfo->importer)
 			{
-				if (importer->GetAssetType() == AssetType::Audio)
-					return static_cast<AudioImporter*>(importer.get())->Load(*assetInfo);
+				if (auto* audioImporter = importer->AsAudioImporter())
+					return audioImporter->Load(*assetInfo);
 			}
 		}
 

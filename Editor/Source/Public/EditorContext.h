@@ -10,11 +10,12 @@ namespace Nightbird::Editor
 {
 	class EditorUIBackend;
 	class ImportManager;
+	class CookManager;
 
 	class EditorContext
 	{
 	public:
-		EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend, ImportManager& importManager);
+		EditorContext(Core::Engine& engine, EditorUIBackend& editorUIBackend, ImportManager& importManager, CookManager& cookManager);
 
 		void SelectObject(Core::SceneObject* object);
 		void ClearSelection();
@@ -26,11 +27,13 @@ namespace Nightbird::Editor
 		EditorUIBackend& GetEditorUIBackend() const;
 
 		ImportManager& GetImportManager() const;
+		CookManager& GetCookManager() const;
 
 	private:
 		Core::Engine& m_Engine;
 		EditorUIBackend& m_EditorUIBackend;
 		ImportManager& m_ImportManager;
+		CookManager& m_CookManager;
 		
 		Core::SceneObject* m_SelectedObject = nullptr;
 	};

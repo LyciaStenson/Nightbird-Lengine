@@ -23,7 +23,7 @@ namespace Nightbird::Editor
 	{
 		return extension == ".glb" || extension == ".gltf";
 	}
-	
+
 	std::unique_ptr<Core::SceneObject> GltfSceneImporter::Load(const AssetInfo& assetInfo)
 	{
 		fastgltf::Parser parser;

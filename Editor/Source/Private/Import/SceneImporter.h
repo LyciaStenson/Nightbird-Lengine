@@ -16,7 +16,7 @@ namespace Nightbird::Editor
 	class SceneImporter : public Importer
 	{
 	public:
-		AssetType GetAssetType() const override { return AssetType::Scene; }
+		SceneImporter* AsSceneImporter() override { return this; }
 		virtual std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) = 0;
 	};
 }

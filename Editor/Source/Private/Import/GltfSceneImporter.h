@@ -25,7 +25,7 @@ namespace Nightbird::Editor
 	{
 	public:
 		std::string GetName() const override { return "gltf"; }
-		bool SupportsExtension(const std::string& extensions) const override;
+		bool SupportsExtension(const std::string& extension) const override;
 		std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) override;
 
 	private:
