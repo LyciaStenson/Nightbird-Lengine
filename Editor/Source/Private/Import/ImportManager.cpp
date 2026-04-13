@@ -1,6 +1,7 @@
 #include "Import/ImportManager.h"
 
 #include "Import/AssetInfo.h"
+#include "Import/TextSceneImporter.h"
 #include "Import/GltfSceneImporter.h"
 #include "Import/DrLibsAudioImporter.h"
 
@@ -15,6 +16,7 @@ namespace Nightbird::Editor
 	ImportManager::ImportManager(const std::filesystem::path& assetsDir)
 		: m_AssetsDir(assetsDir)
 	{
+		m_Importers.push_back(std::make_unique<TextSceneImporter>());
 		m_Importers.push_back(std::make_unique<GltfSceneImporter>());
 		m_Importers.push_back(std::make_unique<DrLibsAudioImporter>());
 	}
@@ -35,23 +37,26 @@ namespace Nightbird::Editor
 			if (entry.path().extension() == ".assetinfo")
 				continue;
 
-			bool supported = false;
 			for (const auto& importer : m_Importers)
 			{
-				if (importer->SupportsExtension(entry.path().extension().string()))
+				if (!importer->SupportsExtension(entry.path().extension().string()))
+					continue;
+
+				if (importer->HasEmbeddedAssetInfo())
 				{
-					supported = true;
-					break;
+					auto assetInfo = importer->ReadEmbeddedAssetInfo(entry.path());
+					if (assetInfo)
+						m_AssetInfos[assetInfo->uuid] = std::move(*assetInfo);
+				}
+				else
+				{
+					std::filesystem::path assetInfoPath = entry.path().string() + ".assetinfo";
+					if (!std::filesystem::exists(assetInfoPath))
+						GenerateAssetInfoFile(entry.path());
+					else
+						ReadAssetInfoFile(assetInfoPath);
 				}
 			}
-			if (!supported)
-				continue;
-
-			std::filesystem::path assetInfoPath = entry.path().string() + ".assetinfo";
-			if (!std::filesystem::exists(assetInfoPath))
-				GenerateAssetInfoFile(entry.path());
-			else
-				ReadAssetInfoFile(assetInfoPath);
 		}
 	}
 

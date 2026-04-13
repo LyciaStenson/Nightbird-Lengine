@@ -15,6 +15,8 @@ namespace Nightbird::Editor
 
 	std::optional<AssetInfo> TextSceneImporter::ReadEmbeddedAssetInfo(const std::filesystem::path& path) const
 	{
+		Core::Log::Info("ReadEmbeddedAssetInfo");
+
 		if (!std::filesystem::exists(path))
 		{
 			Core::Log::Error("TextSceneImporter: File not found: " + path.string());

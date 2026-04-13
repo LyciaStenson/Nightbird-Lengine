@@ -66,6 +66,7 @@ namespace Nightbird::Editor
 							auto scene = std::make_unique<Core::Scene>();
 							scene->SetActiveCamera(result.activeCamera);
 
+							Core::Log::Info(result.root ? "result.root valid" : "result.root invalid");
 							for (auto& child : result.root->GetChildren())
 								scene->GetRoot()->AddChild(std::move(child));
 
