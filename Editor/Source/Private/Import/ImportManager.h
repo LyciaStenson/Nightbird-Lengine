@@ -26,8 +26,12 @@ namespace Nightbird::Editor
 
 		void Scan();
 
+		const std::unordered_map<uuids::uuid, AssetInfo>& GetAssetInfos() const;
+
 		const AssetInfo* GetAssetInfo(const uuids::uuid& uuid) const;
 		const AssetInfo* GetAssetInfo(const std::filesystem::path& path) const;
+
+		Importer* FindImporter(const std::filesystem::path& path) const;
 
 		Core::SceneReadResult LoadScene(const uuids::uuid& uuid);
 		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);

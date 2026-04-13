@@ -60,6 +60,11 @@ namespace Nightbird::Editor
 		}
 	}
 
+	const std::unordered_map<uuids::uuid, AssetInfo>& ImportManager::GetAssetInfos() const
+	{
+		return m_AssetInfos;
+	}
+
 	const AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid) const
 	{
 		auto it = m_AssetInfos.find(uuid);
@@ -74,6 +79,16 @@ namespace Nightbird::Editor
 		{
 			if (assetInfo.sourcePath == path)
 				return &assetInfo;
+		}
+		return nullptr;
+	}
+
+	Importer* ImportManager::FindImporter(const std::filesystem::path& path) const
+	{
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->SupportsExtension(path.extension().string()))
+				return importer.get();
 		}
 		return nullptr;
 	}

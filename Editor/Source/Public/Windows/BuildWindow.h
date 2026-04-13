@@ -2,6 +2,8 @@
 
 #include "ImGuiWindow.h"
 
+#include <uuid.h>
+
 namespace Nightbird::Editor
 {
 	class EditorContext;
@@ -18,5 +20,9 @@ namespace Nightbird::Editor
 
 	private:
 		EditorContext& m_Context;
+
+		int m_SelectedPlatform = 0;
+		uuids::uuid m_SelectedSceneUUID;
+		std::string m_SelectedSceneName;
 	};
 }
