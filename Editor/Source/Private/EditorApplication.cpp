@@ -13,6 +13,7 @@
 
 #include "Scene/TextSceneReader.h"
 
+#include "Windows/BuildWindow.h"
 #include "Windows/SceneWindow.h"
 #include "Windows/SceneOutliner.h"
 #include "Windows/Inspector.h"
@@ -143,7 +144,8 @@ namespace Nightbird::Editor
 	void EditorApplication::InitializeWindows()
 	{
 		m_WindowManager = std::make_unique<WindowManager>();
-		
+
+		m_WindowManager->AddWindow<BuildWindow>(*m_EditorContext);
 		m_WindowManager->AddWindow<SceneWindow>(*m_EditorContext);
 		m_WindowManager->AddWindow<SceneOutliner>(*m_EditorContext);
 		m_WindowManager->AddWindow<Inspector>(*m_EditorContext);

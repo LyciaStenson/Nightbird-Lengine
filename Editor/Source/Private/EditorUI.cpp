@@ -2,6 +2,7 @@
 
 #include "WindowManager.h"
 
+#include "Windows/BuildWindow.h"
 #include "Windows/EditorSettingsWindow.h"
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
@@ -70,6 +71,11 @@ namespace Nightbird::Editor
 				{
 					TextSceneWriter sceneWriter;
 					sceneWriter.Write(m_Context.GetEngine().GetScene(), "TestScene", GenerateUUID(), "Assets/Scenes/TestScene.ntscene");
+				}
+				if (ImGui::MenuItem("Build"))
+				{
+					if (auto* window = m_WindowManager.GetWindow<BuildWindow>())
+						window->SetOpen(true);
 				}
 				if (ImGui::MenuItem("Exit"))
 				{
