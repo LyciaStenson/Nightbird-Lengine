@@ -1,9 +1,7 @@
 #include "Scene/TextSceneReader.h"
 
-#include "Import/ImportManager.h"
 #include "Import/AssetInfo.h"
 
-#include "Core/Scene.h"
 #include "Core/SceneObject.h"
 #include "Core/SpatialObject.h"
 #include "Core/MeshInstance.h"
@@ -15,30 +13,24 @@
 
 namespace Nightbird::Editor
 {
-	TextSceneReader::TextSceneReader(ImportManager& importManager)
-		: m_ImportManager(importManager)
+	Core::SceneReadResult TextSceneReader::Read(const std::filesystem::path& path)
 	{
-
-	}
-
-	SceneReadResult TextSceneReader::Read(const std::filesystem::path& path)
-	{
-		SceneReadResult sceneReadResult;
+		Core::SceneReadResult result;
 
 		if (!std::filesystem::exists(path))
 		{
 			Core::Log::Error("TextSceneReader: File not found: " + path.string());
-			return sceneReadResult;
+			return result;
 		}
 
-		toml::parse_result tomlParseResult = toml::parse_file(path.string());
-		if (!tomlParseResult)
+		toml::parse_result tomlResult = toml::parse_file(path.string());
+		if (!tomlResult)
 		{
 			Core::Log::Error("TextSceneReader: Failed to parse: " + path.string());
-			return sceneReadResult;
+			return result;
 		}
 
-		toml::table& document = tomlParseResult.table();
+		toml::table& document = tomlResult.table();
 
 		std::string sceneName = document["scene"]["name"].value_or(std::string{});
 		std::string sceneUUIDString = document["scene"]["uuid"].value_or(std::string{});
@@ -46,17 +38,17 @@ namespace Nightbird::Editor
 		if (!sceneUUID)
 		{
 			Core::Log::Error("TextSceneReader: Invalid scene UUID in: " + path.string());
-			return sceneReadResult;
+			return result;
 		}
 
-		sceneReadResult.scene = std::make_unique<Core::Scene>();
-		sceneReadResult.uuid = *sceneUUID;
+		result.root = std::make_unique<Core::SceneObject>();
+		result.uuid = *sceneUUID;
 
 		toml::array* nodesArray = document["nodes"].as_array();
 		if (!nodesArray)
 		{
 			Core::Log::Warning("TextSceneReader: No nodes found in: " + path.string());
-			return sceneReadResult;
+			return result;
 		}
 
 		std::unordered_map<uuids::uuid, Core::SceneObject*> nodeMap;
@@ -83,7 +75,7 @@ namespace Nightbird::Editor
 			rttr::type type = rttr::type::get_by_name(typeName);
 			if (type.is_valid())
 			{
-				rttr::variant variant = type.create(); // Missing name
+				rttr::variant variant = type.create();
 				if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
 				{
 					object.reset(variant.get_value<Core::SceneObject*>());
@@ -94,7 +86,7 @@ namespace Nightbird::Editor
 			if (!object)
 			{
 				Core::Log::Warning("TextSceneReader: Unknown type: " + typeName + ", defaulting to SceneObject");
-				object = std::make_unique<Core::SceneObject>(); // Missing name
+				object = std::make_unique<Core::SceneObject>();
 				object->SetName(name);
 			}
 
@@ -109,19 +101,7 @@ namespace Nightbird::Editor
 			{
 				auto sceneUUID = uuids::uuid::from_string(sceneUUIDString);
 				if (sceneUUID)
-				{
 					object->SetSourceSceneUUID(*sceneUUID);
-					auto importedRoot = m_ImportManager.LoadScene(*sceneUUID);
-					if (importedRoot)
-					{
-						for (auto& child : importedRoot->GetChildren())
-							object->AddChild(std::move(child));
-					}
-					else
-					{
-						Core::Log::Warning("TextSceneReader: Assetinfo not found for scene UUID: " + sceneUUIDString);
-					}
-				}
 			}
 
 			Core::SceneObject* objectPtr = object.get();
@@ -148,11 +128,11 @@ namespace Nightbird::Editor
 				if (parentUUID && nodeMap.count(*parentUUID))
 					nodeMap[*parentUUID]->AddChild(std::move(ownedNodesMap[*uuid]));
 				else
-					sceneReadResult.scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
+					result.root->AddChild(std::move(ownedNodesMap[*uuid]));
 			}
 			else
 			{
-				sceneReadResult.scene->GetRoot()->AddChild(std::move(ownedNodesMap[*uuid]));
+				result.root->AddChild(std::move(ownedNodesMap[*uuid]));
 			}
 		}
 
@@ -160,13 +140,11 @@ namespace Nightbird::Editor
 		auto activeCameraUUID = uuids::uuid::from_string(activeCameraUUIDString);
 		if (activeCameraUUID && nodeMap.count(*activeCameraUUID))
 		{
-			auto* camera = Cast<Core::Camera>(nodeMap[*activeCameraUUID]);
-			if (camera)
-				sceneReadResult.scene->SetActiveCamera(camera);
+			result.activeCamera = Cast<Core::Camera>(nodeMap[*activeCameraUUID]);
 		}
 
 		Core::Log::Info("TextSceneReader: Loaded scene: " + sceneName);
-		return sceneReadResult;
+		return result;
 	}
 
 	void TextSceneReader::DeserializeToml(const toml::table& table, rttr::instance instance)

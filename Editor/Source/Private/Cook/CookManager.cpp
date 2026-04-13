@@ -1,6 +1,5 @@
 #include "Cook/CookManager.h"
 
-#include "Core/Scene.h"
 #include "Core/SceneObject.h"
 #include "Core/AudioSource.h"
 #include "Core/MeshInstance.h"
@@ -22,32 +21,30 @@ namespace Nightbird::Editor
 
 	}
 
-	void CookManager::Cook(const uuids::uuid& sceneUUID, CookTarget target)
+	void CookManager::CookScene(const uuids::uuid& sceneUUID, CookTarget target)
 	{
-		const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(sceneUUID);
-		if (!assetInfo)
+		Core::SceneReadResult result = m_ImportManager.LoadScene(sceneUUID);
+		if (!result.root)
 		{
-			Core::Log::Error("CookManager: No asset info found for scene UUID: " + uuids::to_string(sceneUUID));
+			Core::Log::Error("CookManager: Failed to load scene: " + uuids::to_string(sceneUUID));
 			return;
 		}
 
-		TextSceneReader sceneReader(m_ImportManager);
-		SceneReadResult result = sceneReader.Read(assetInfo->sourcePath);
-		if (!result.scene)
+		CookSceneInternal(result, target);
+	}
+
+	void CookManager::CookScene(Core::SceneReadResult result, CookTarget target)
+	{
+		if (!result.root)
 		{
-			Core::Log::Error("CookManager: Failed to read text scene: " + assetInfo->sourcePath.string());
+			Core::Log::Error("CookManager: SceneReadResult missing root");
 			return;
 		}
 
-		CookScene(*result.scene, sceneUUID, target);
+		CookSceneInternal(result, target);
 	}
 
-	void CookManager::Cook(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target)
-	{
-		CookScene(scene, sceneUUID, target);
-	}
-
-	void CookManager::CookScene(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target)
+	void CookManager::CookSceneInternal(Core::SceneReadResult& result, CookTarget target)
 	{
 		m_TextureUUIDs.clear();
 		m_MaterialUUIDs.clear();
@@ -59,8 +56,8 @@ namespace Nightbird::Editor
 		m_Endianness = GetEndianness(target);
 		m_CookOutputDir = GetOutputDir(target);
 		std::filesystem::create_directories(m_CookOutputDir);
-		
-		CollectAssets(scene.GetRoot());
+
+		CollectAssets(result.root.get());
 		
 		CookTextures(m_CookOutputDir, target, m_Endianness);
 		CookMaterials(m_CookOutputDir, m_Endianness);
@@ -70,9 +67,9 @@ namespace Nightbird::Editor
 		for (auto& [uuid, importedRoot] : m_ImportedSceneRoots)
 			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
 
-		WriteBinaryScene(scene.GetRoot(), sceneUUID, m_CookOutputDir, m_Endianness, scene.GetActiveCamera());
+		WriteBinaryScene(result.root.get(), result.uuid, m_CookOutputDir, m_Endianness, result.activeCamera);
 
-		m_ProjectCooker.Cook(sceneUUID, m_CookOutputDir, m_Endianness);
+		m_ProjectCooker.Cook(result.uuid, m_CookOutputDir, m_Endianness);
 	}
 
 	void CookManager::WriteBinaryScene(Core::SceneObject* root, const uuids::uuid& sceneUUID,
@@ -90,7 +87,7 @@ namespace Nightbird::Editor
 			return;
 
 		Core::Log::Info("CookManager: CollectAssets visiting: " + object->GetName());
-		
+
 		if (object->HasSourceScene())
 		{
 			if (m_CookedSceneUUIDs.count(object->GetSourceSceneUUID().value()))
@@ -104,12 +101,17 @@ namespace Nightbird::Editor
 				return;
 			}
 
-			auto importedRoot = m_ImportManager.LoadScene(assetInfo->uuid);
+			Core::SceneReadResult nestedResult = m_ImportManager.LoadScene(assetInfo->uuid);
+			if (!nestedResult.root)
+			{
+				Core::Log::Warning("CookManager: Failed to load nested scene: " + object->GetName());
+				return;
+			}
 
-			for (const auto& child : importedRoot->GetChildren())
+			for (const auto& child : nestedResult.root->GetChildren())
 				CollectAssets(child.get());
 
-			m_ImportedSceneRoots[object->GetSourceSceneUUID().value()] = std::move(importedRoot);
+			m_ImportedSceneRoots[object->GetSourceSceneUUID().value()] = std::move(nestedResult.root);
 			return;
 		}
 
@@ -186,7 +188,7 @@ namespace Nightbird::Editor
 		for (const auto& [uuid, sourcePath] : m_AudioPathUUIDs)
 			m_AudioCooker.Cook(sourcePath, uuid, outputDir, target, endianness);
 	}
-	
+
 	uuids::uuid CookManager::GenerateUUID() const
 	{
 		std::random_device randomDevice;

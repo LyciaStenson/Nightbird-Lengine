@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Core/Scene.h"
+#include "Core/SceneReadResult.h"
+#include "Core/TypeInfo.h"
 
 #include <uuid.h>
 
@@ -19,21 +20,12 @@ namespace Nightbird::Core
 	{
 	public:
 		BinarySceneReader(AssetLoader& assetLoader);
-		
-		std::unique_ptr<Core::Scene> ReadScene(const std::string& cookedDir, const uuids::uuid& uuid);
+
+		SceneReadResult Read(const std::string& cookedDir, const uuids::uuid& uuid);
 
 	private:
 		AssetLoader& m_AssetLoader;
 
-		struct ReadNodesResult
-		{
-			std::string sceneName;
-			uuids::uuid sceneUUID;
-			Core::Camera* activeCamera = nullptr;
-			std::vector<std::unique_ptr<Core::SceneObject>> rootChildren;
-		};
-
-		ReadNodesResult ReadNodes(const std::string& cookedDir, const uuids::uuid& uuid);
 		void ReadProperties(SceneObject* object, const TypeInfo* typeInfo, uint16_t propCount, BinaryReader& reader);
 		void ReadIntoDesc(uint8_t* objectBase, const TypeInfo* typeInfo, uint32_t incomingHash, uint16_t incomingSize, BinaryReader& reader);
 	};

@@ -14,11 +14,6 @@ namespace fastgltf
 	struct Image;
 }
 
-namespace Nightbird::Core
-{
-	class SpatialObject;
-}
-
 namespace Nightbird::Editor
 {
 	class GltfSceneImporter : public SceneImporter
@@ -26,10 +21,10 @@ namespace Nightbird::Editor
 	public:
 		std::string GetName() const override { return "gltf"; }
 		bool SupportsExtension(const std::string& extension) const override;
-		std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) override;
+		Core::SceneReadResult Load(const AssetInfo& assetInfo) override;
 
 	private:
-		void ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SpatialObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials);
+		void ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SceneObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials);
 
 		std::vector<std::shared_ptr<Core::Texture>> LoadTextures(const fastgltf::Asset& gltfAsset);
 		std::vector<std::shared_ptr<Core::Material>> LoadMaterials(const fastgltf::Asset& gltfAsset, const std::vector<std::shared_ptr<Core::Texture>>& textures);

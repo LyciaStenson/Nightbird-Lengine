@@ -11,6 +11,9 @@ namespace Nightbird::Editor
 	public:
 		std::string GetName() const override { return "TextScene"; }
 		bool SupportsExtension(const std::string& extension) const override;
-		std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) override;
+		bool HasEmbeddedAssetInfo() const override { return true; }
+		std::optional<AssetInfo> ReadEmbeddedAssetInfo(const std::filesystem::path& path) const override;
+
+		Core::SceneReadResult Load(const AssetInfo& assetInfo) override;
 	};
 }

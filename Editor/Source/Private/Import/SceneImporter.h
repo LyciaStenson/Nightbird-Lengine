@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/SceneReadResult.h"
 #include "Import/Importer.h"
 
 #include <memory>
@@ -17,6 +18,6 @@ namespace Nightbird::Editor
 	{
 	public:
 		SceneImporter* AsSceneImporter() override { return this; }
-		virtual std::unique_ptr<Core::SceneObject> Load(const AssetInfo& assetInfo) = 0;
+		virtual Core::SceneReadResult Load(const AssetInfo& assetInfo) = 0;
 	};
 }

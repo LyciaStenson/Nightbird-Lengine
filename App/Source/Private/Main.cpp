@@ -28,13 +28,23 @@ int main()
 	AssetLoader assetLoader(cookedPath);
 
 	ProjectInfo project = assetLoader.LoadProject();
-	auto mainScene = assetLoader.LoadScene(project.mainSceneUUID);
-	if (!mainScene)
+
+	SceneReadResult result = assetLoader.LoadScene(project.mainSceneUUID);
+	if (result.root)
+	{
+		auto scene = std::make_unique<Scene>();
+		scene->SetActiveCamera(result.activeCamera);
+
+		for (auto& child : result.root->GetChildren())
+			scene->GetRoot()->AddChild(std::move(child));
+
+		engine.SetScene(std::move(scene));
+	}
+	else
 	{
 		Log::Error("Failed to load main scene");
-		return -1;
+		//return -1;
 	}
-	engine.SetScene(std::move(mainScene));
 
 	while (!engine.ShouldClose())
 	{

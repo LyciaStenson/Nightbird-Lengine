@@ -1,8 +1,6 @@
 #include "Import/DrLibsAudioImporter.h"
 
-#include "Import/AssetInfo.h"
 #include "Core/AudioAsset.h"
-
 #include "Core/Log.h"
 
 #define DR_WAV_IMPLEMENTATION

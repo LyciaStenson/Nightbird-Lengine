@@ -22,21 +22,11 @@ namespace Nightbird::Core
 	{
 
 	}
-	
-	std::unique_ptr<Core::Scene> BinarySceneReader::ReadScene(const std::string& cookedDir, const uuids::uuid& uuid)
-	{
-		auto nodesRead = ReadNodes(cookedDir, uuid);
-		auto scene = std::make_unique<Core::Scene>();
-		for (auto& child : nodesRead.rootChildren)
-			scene->GetRoot()->AddChild(std::move(child));
-		if (nodesRead.activeCamera)
-			scene->SetActiveCamera(nodesRead.activeCamera);
-		return scene;
-	}
 
-	BinarySceneReader::ReadNodesResult BinarySceneReader::ReadNodes(const std::string& cookedDir, const uuids::uuid& uuid)
+	SceneReadResult BinarySceneReader::Read(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		ReadNodesResult result;
+		SceneReadResult result;
+		result.root = std::make_unique<SceneObject>();
 
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbscene";
 
@@ -68,12 +58,12 @@ namespace Nightbird::Core
 		uint32_t nameLength = reader.ReadUInt32();
 		std::string sceneName(nameLength, '\0');
 		reader.ReadRawBytes(reinterpret_cast<uint8_t*>(sceneName.data()), nameLength);
-		result.sceneName = sceneName;
+		result.root->SetName(sceneName);
 
 		// Scene UUID
 		std::array<uint8_t, 16> sceneUUIDBytes;
 		reader.ReadRawBytes(sceneUUIDBytes.data(), 16);
-		result.sceneUUID = uuids::uuid(sceneUUIDBytes);
+		result.uuid = uuids::uuid(sceneUUIDBytes);
 
 		// Active camera UUID
 		std::array<uint8_t, 16> activeCameraUUIDBytes;
@@ -151,12 +141,7 @@ namespace Nightbird::Core
 			}
 
 			if (hasSceneUUID)
-			{
 				object->SetSourceSceneUUID(sourceSceneUUID);
-				auto instancedNodesResult = ReadNodes(cookedDir, sourceSceneUUID);
-				for (auto& child : instancedNodesResult.rootChildren)
-					object->AddChild(std::move(child));
-			}
 
 			if (nodeUUID == activeCameraUUID)
 				result.activeCamera = Cast<Camera>(object.get());
@@ -180,13 +165,7 @@ namespace Nightbird::Core
 			if (parentIt != parentMap.end() && nodeMap.count(parentIt->second))
 				nodeMap[parentIt->second]->AddChild(std::move(ownedNodeMap[nodeUUID]));
 			else
-				result.rootChildren.push_back(std::move(ownedNodeMap[nodeUUID]));
-		}
-
-		for (const auto& nodeUUID : nodeUUIDs)
-		{
-			if (nodeMap.count(nodeUUID))
-				nodeMap[nodeUUID]->LoadAssets(m_AssetLoader);
+				result.root->AddChild(std::move(ownedNodeMap[nodeUUID]));
 		}
 
 		Core::Log::Info("BinarySceneReader: Loaded scene: " + path);

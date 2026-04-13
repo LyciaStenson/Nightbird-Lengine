@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/SceneReadResult.h"
+
 #include "Cook/Target.h"
 #include "Cook/ProjectCooker.h"
 #include "Cook/TextureCooker.h"
@@ -34,8 +36,8 @@ namespace Nightbird::Editor
 	public:
 		CookManager(const std::filesystem::path& outputDir, ImportManager& importManager);
 
-		void Cook(const uuids::uuid& sceneUUID, CookTarget target);
-		void Cook(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target);
+		void CookScene(const uuids::uuid& sceneUUID, CookTarget target);
+		void CookScene(Core::SceneReadResult, CookTarget target);
 
 	private:
 		std::filesystem::path m_RootOutputDir;
@@ -63,10 +65,10 @@ namespace Nightbird::Editor
 
 		void WriteBinaryScene(Core::SceneObject* scene, const uuids::uuid& sceneUUID,
 			const std::filesystem::path& outputDir, Endianness endianness, Core::Camera* activeCamera = nullptr);
-		
+
 		void CollectAssets(Core::SceneObject* object);
 
-		void CookScene(Core::Scene& scene, const uuids::uuid& sceneUUID, CookTarget target);
+		void CookSceneInternal(Core::SceneReadResult&, CookTarget target);
 		void CookTextures(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness);
 		void CookMaterials(const std::filesystem::path& outputDir, Endianness endianness);
 		void CookMeshes(const std::filesystem::path& outputDir, Endianness endianness);

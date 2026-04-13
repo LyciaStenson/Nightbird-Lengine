@@ -57,9 +57,21 @@ namespace Nightbird::Editor
 				}
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					TextSceneReader sceneReader(m_Context.GetImportManager());
-					SceneReadResult result = sceneReader.Read(m_SelectedPath);
-					m_Context.GetEngine().SetScene(std::move(result.scene));
+					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
+					if (assetInfo)
+					{
+						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid);
+						if (result.root)
+						{
+							auto scene = std::make_unique<Core::Scene>();
+							scene->SetActiveCamera(result.activeCamera);
+
+							for (auto& child : result.root->GetChildren())
+								scene->GetRoot()->AddChild(std::move(child));
+
+							m_Context.GetEngine().SetScene(std::move(scene));
+						}
+					}
 				}
 			}
 		}

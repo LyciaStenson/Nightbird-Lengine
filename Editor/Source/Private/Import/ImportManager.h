@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/SceneReadResult.h"
 #include "Import/AssetInfo.h"
 #include "Import/Importer.h"
 
@@ -26,8 +27,9 @@ namespace Nightbird::Editor
 		void Scan();
 
 		const AssetInfo* GetAssetInfo(const uuids::uuid& uuid) const;
+		const AssetInfo* GetAssetInfo(const std::filesystem::path& path) const;
 
-		std::unique_ptr<Core::SceneObject> LoadScene(const uuids::uuid& uuid);
+		Core::SceneReadResult LoadScene(const uuids::uuid& uuid);
 		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);
 
 	private:

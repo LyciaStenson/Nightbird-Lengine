@@ -35,14 +35,19 @@ namespace Nightbird::Editor
 			if (entry.path().extension() == ".assetinfo")
 				continue;
 
+			bool supported = false;
 			for (const auto& importer : m_Importers)
 			{
-				if (!importer->SupportsExtension(entry.path().extension().string()))
-					continue;
+				if (importer->SupportsExtension(entry.path().extension().string()))
+				{
+					supported = true;
+					break;
+				}
 			}
+			if (!supported)
+				continue;
 
 			std::filesystem::path assetInfoPath = entry.path().string() + ".assetinfo";
-
 			if (!std::filesystem::exists(assetInfoPath))
 				GenerateAssetInfoFile(entry.path());
 			else
@@ -58,13 +63,25 @@ namespace Nightbird::Editor
 		return nullptr;
 	}
 
-	std::unique_ptr<Core::SceneObject> ImportManager::LoadScene(const uuids::uuid& uuid)
+	const AssetInfo* ImportManager::GetAssetInfo(const std::filesystem::path& path) const
 	{
+		for (const auto& [uuid, assetInfo] : m_AssetInfos)
+		{
+			if (assetInfo.sourcePath == path)
+				return &assetInfo;
+		}
+		return nullptr;
+	}
+
+	Core::SceneReadResult ImportManager::LoadScene(const uuids::uuid& uuid)
+	{
+		Core::SceneReadResult result;
+
 		const AssetInfo* assetInfo = GetAssetInfo(uuid);
 		if (!assetInfo)
 		{
 			Core::Log::Warning("ImportManager: AssetInfo not found for scene UUID: " + uuids::to_string(uuid));
-			return nullptr;
+			return result;
 		}
 
 		for (const auto& importer : m_Importers)
@@ -72,12 +89,37 @@ namespace Nightbird::Editor
 			if (importer->GetName() == assetInfo->importer)
 			{
 				if (auto* sceneImporter = importer->AsSceneImporter())
-					return sceneImporter->Load(*assetInfo);
+				{
+					result = sceneImporter->Load(*assetInfo);
+					break;
+				}
 			}
 		}
 
-		Core::Log::Warning("ImportManager: No scene importer found for: " + assetInfo->importer);
-		return nullptr;
+		if (!result.root)
+		{
+			Core::Log::Warning("ImportManager: No scene importer found for: " + assetInfo->importer);
+			return result;
+		}
+
+		for (auto& object : result.root->GetChildren())
+		{
+			if (const auto& sceneUUID = object->GetSourceSceneUUID())
+			{
+				Core::SceneReadResult nestedResult = LoadScene(*sceneUUID);
+				if (nestedResult.root)
+				{
+					for (auto& nestedChild : nestedResult.root->GetChildren())
+						object->AddChild(std::move(nestedChild));
+				}
+				else
+				{
+					Core::Log::Warning("ImportManager: Failed to load nested scene with UUID: " + uuids::to_string(*sceneUUID));
+				}
+			}
+		}
+
+		return result;
 	}
 
 	std::shared_ptr<Core::AudioAsset> ImportManager::LoadAudio(const uuids::uuid& uuid)

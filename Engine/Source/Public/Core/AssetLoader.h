@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/SceneReadResult.h"
+
 #include <uuid.h>
 
 #include <string>
@@ -8,7 +10,7 @@
 
 namespace Nightbird::Core
 {
-	class Scene;
+	class SceneObject;
 	class Mesh;
 	class AudioAsset;
 
@@ -27,7 +29,7 @@ namespace Nightbird::Core
 
 		ProjectInfo LoadProject();
 
-		std::unique_ptr<Core::Scene> LoadScene(const uuids::uuid& uuid);
+		SceneReadResult LoadScene(const uuids::uuid& uuid);
 
 		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
 		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);
@@ -44,5 +46,8 @@ namespace Nightbird::Core
 
 		std::unordered_map<uuids::uuid, std::shared_ptr<Core::Mesh>> m_MeshCache;
 		std::unordered_map<uuids::uuid, std::shared_ptr<Core::AudioAsset>> m_AudioCache;
+
+		void LoadNestedScenes(SceneObject* object);
+		void LoadAssetsRecursive(SceneObject* object);
 	};
 }
