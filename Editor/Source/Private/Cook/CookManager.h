@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cook/Target.h"
+#include "Cook/ProjectCooker.h"
 #include "Cook/TextureCooker.h"
 #include "Cook/MaterialCooker.h"
 #include "Cook/MeshCooker.h"
@@ -43,6 +44,7 @@ namespace Nightbird::Editor
 
 		ImportManager& m_ImportManager;
 		
+		ProjectCooker m_ProjectCooker;
 		TextureCooker m_TextureCooker;
 		MaterialCooker m_MaterialCooker;
 		MeshCooker m_MeshCooker;

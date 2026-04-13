@@ -1,7 +1,7 @@
 #include "Core/AssetLoader.h"
 
 #include "Core/BinarySceneReader.h"
-
+#include "Core/ProjectLoader.h"
 #include "Core/TextureLoader.h"
 #include "Core/MaterialLoader.h"
 #include "Core/MeshLoader.h"
@@ -18,10 +18,16 @@ namespace Nightbird::Core
 		: m_CookedDir(cookedDir)
 	{
 		m_SceneReader = std::make_unique<BinarySceneReader>(*this);
+		m_ProjectLoader = std::make_unique<ProjectLoader>();
 		m_TextureLoader = std::make_unique<TextureLoader>();
 		m_MaterialLoader = std::make_unique<MaterialLoader>(*m_TextureLoader);
 		m_MeshLoader = std::make_unique<MeshLoader>(*m_MaterialLoader);
 		m_AudioLoader = std::make_unique<AudioLoader>();
+	}
+
+	ProjectInfo AssetLoader::LoadProject()
+	{
+		return m_ProjectLoader->Load(m_CookedDir);
 	}
 
 	std::unique_ptr<Scene> AssetLoader::LoadScene(const uuids::uuid& uuid)

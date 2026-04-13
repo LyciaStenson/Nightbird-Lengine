@@ -13,6 +13,8 @@ namespace Nightbird::Core
 	class AudioAsset;
 
 	class BinarySceneReader;
+	class ProjectLoader;
+	struct ProjectInfo;
 	class TextureLoader;
 	class MaterialLoader;
 	class MeshLoader;
@@ -22,7 +24,9 @@ namespace Nightbird::Core
 	{
 	public:
 		AssetLoader(const std::string& cookedDir);
-		
+
+		ProjectInfo LoadProject();
+
 		std::unique_ptr<Core::Scene> LoadScene(const uuids::uuid& uuid);
 
 		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
@@ -32,6 +36,7 @@ namespace Nightbird::Core
 		std::string m_CookedDir;
 
 		std::unique_ptr<BinarySceneReader> m_SceneReader;
+		std::unique_ptr<ProjectLoader> m_ProjectLoader;
 		std::unique_ptr<TextureLoader> m_TextureLoader;
 		std::unique_ptr<MaterialLoader> m_MaterialLoader;
 		std::unique_ptr<MeshLoader> m_MeshLoader;

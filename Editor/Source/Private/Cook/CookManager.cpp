@@ -30,7 +30,7 @@ namespace Nightbird::Editor
 		m_AudioPathUUIDs.clear();
 		m_ImportedSceneRoots.clear();
 		m_CookedSceneUUIDs.clear();
-		
+
 		TextSceneReader sceneReader(m_ImportManager);
 		SceneReadResult sceneReadResult = sceneReader.Read(textScenePath);
 		if (!sceneReadResult.scene)
@@ -54,6 +54,8 @@ namespace Nightbird::Editor
 			WriteBinaryScene(importedRoot.get(), uuid, m_CookOutputDir, m_Endianness);
 
 		WriteBinaryScene(sceneReadResult.scene->GetRoot(), sceneReadResult.uuid, m_CookOutputDir, m_Endianness, sceneReadResult.scene->GetActiveCamera());
+
+		m_ProjectCooker.Cook(sceneReadResult.uuid, m_CookOutputDir, m_Endianness);
 	}
 
 	void CookManager::WriteBinaryScene(Core::SceneObject* root, const uuids::uuid& sceneUUID,
