@@ -4,7 +4,7 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(Camera, SpatialObject)
+	NB_OBJECT_IMPL(Nightbird::Core::Camera, Nightbird::Core::SpatialObject)
 
 	glm::mat4 Camera::GetViewMatrix() const
 	{

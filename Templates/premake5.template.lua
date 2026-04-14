@@ -82,7 +82,8 @@ project "%PROJECT_NAME%"
 
 	files {
 		"Source/**.h",
-		"Source/**.cpp"
+		"Source/**.cpp",
+		enginePath .. "Engine/Source/Private/Reflect/Registration.cpp"
 	}
 
 	includedirs {

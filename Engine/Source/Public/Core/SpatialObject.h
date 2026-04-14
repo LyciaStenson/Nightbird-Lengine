@@ -8,7 +8,7 @@ namespace Nightbird::Core
 	class SpatialObject : public SceneObject
 	{
 	public:
-		NB_OBJECT(SpatialObject, SceneObject)
+		NB_OBJECT()
 		NB_ENABLE(SceneObject)
 		NB_REGISTRATION_FRIEND
 

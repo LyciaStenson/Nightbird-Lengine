@@ -8,7 +8,7 @@ namespace Nightbird::Core
 {
 	struct Quat
 	{
-		NB_OBJECT_BASE(Quat)
+		NB_OBJECT_BASE()
 
 		float x = 0.0f;
 		float y = 0.0f;

@@ -7,7 +7,7 @@ namespace Nightbird::Core
 	class DirectionalLight : public SpatialObject
 	{
 	public:
-		NB_OBJECT(DirectionalLight, SpatialObject)
+		NB_OBJECT()
 		NB_ENABLE(SpatialObject)
 		NB_REGISTRATION_FRIEND
 

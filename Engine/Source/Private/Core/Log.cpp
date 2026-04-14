@@ -4,37 +4,51 @@
 
 namespace Nightbird::Core
 {
-	Log::LogFunc Log::s_InfoFunc = [](const std::string& message) { std::cout << "[Info] " << message << std::endl; };
-	Log::LogFunc Log::s_WarningFunc = [](const std::string& message) { std::cout << "[Warning] " << message << std::endl; };
-	Log::LogFunc Log::s_ErrorFunc = [](const std::string& message) { std::cerr << "[Error] " << message << std::endl; };
+	static Log::LogFunc& GetInfoFunc()
+	{
+		static Log::LogFunc func = [](const std::string& message) { std::cout << "[Info] " << message << std::endl; };
+		return func;
+	}
+
+	static Log::LogFunc& GetWarningFunc()
+	{
+		static Log::LogFunc func = [](const std::string& message) { std::cout << "[Warning] " << message << std::endl; };
+		return func;
+	}
+
+	static Log::LogFunc& GetErrorFunc()
+	{
+		static Log::LogFunc func = [](const std::string& message) { std::cerr << "[Error] " << message << std::endl; };
+		return func;
+	}
 
 	void Log::Info(const std::string& message)
 	{
-		s_InfoFunc(message);
+		GetInfoFunc()(message);
 	}
 
 	void Log::Warning(const std::string& message)
 	{
-		s_WarningFunc(message);
+		GetWarningFunc()(message);
 	}
 
 	void Log::Error(const std::string& message)
 	{
-		s_ErrorFunc(message);
+		GetErrorFunc()(message);
 	}
 
 	void Log::SetInfoFunc(LogFunc func)
 	{
-		s_InfoFunc = func;
+		GetInfoFunc() = func;
 	}
 
 	void Log::SetWarningFunc(LogFunc func)
 	{
-		s_WarningFunc = func;
+		GetWarningFunc() = func;
 	}
 
 	void Log::SetErrorFunc(LogFunc func)
 	{
-		s_ErrorFunc = func;
+		GetErrorFunc() = func;
 	}
 }

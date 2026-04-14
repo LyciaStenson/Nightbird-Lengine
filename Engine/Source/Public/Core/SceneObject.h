@@ -19,7 +19,7 @@ namespace Nightbird::Core
 	class SceneObject
 	{
 	public:
-		NB_OBJECT_BASE(SceneObject)
+		NB_OBJECT_BASE()
 		NB_ENABLE()
 		NB_REGISTRATION_FRIEND
 

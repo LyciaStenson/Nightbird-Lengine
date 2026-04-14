@@ -13,7 +13,7 @@ namespace Nightbird::Vulkan
 	class RenderSurface : public Core::RenderSurface
 	{
 	public:
-		NB_OBJECT(Vulkan::RenderSurface, Core::RenderSurface)
+		NB_OBJECT()
 		virtual VkExtent2D GetExtent() const = 0;
 		virtual RenderPass& GetRenderPass() const = 0;
 		virtual bool NeedsResize() const = 0;

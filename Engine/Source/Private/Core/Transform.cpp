@@ -5,7 +5,7 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_BASE_IMPL(Transform)
+	NB_OBJECT_BASE_IMPL(Nightbird::Core::Transform)
 
 	glm::mat4 Transform::GetLocalMatrix() const
 	{

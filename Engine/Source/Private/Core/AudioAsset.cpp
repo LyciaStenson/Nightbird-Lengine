@@ -4,7 +4,7 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(AudioAsset, Asset)
+	NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Core::AudioAsset, Nightbird::Core::Asset)
 
 	AudioAsset::AudioAsset(uint32_t sampleRate, uint32_t frameCount, uint8_t channels, AudioEncoding encoding, std::vector<std::vector<uint8_t>> channelData)
 		: m_SampleRate(sampleRate), m_FrameCount(frameCount), m_Channels(channels), m_Encoding(encoding), m_ChannelData(std::move(channelData))

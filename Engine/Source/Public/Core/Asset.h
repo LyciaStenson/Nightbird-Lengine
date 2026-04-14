@@ -7,7 +7,7 @@ namespace Nightbird::Core
 	class Asset
 	{
 	public:
-		NB_OBJECT_BASE(Asset)
+		NB_OBJECT_BASE()
 		virtual ~Asset() = default;
 	};
 }

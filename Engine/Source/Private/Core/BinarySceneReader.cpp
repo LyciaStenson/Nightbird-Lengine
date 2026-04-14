@@ -101,7 +101,7 @@ namespace Nightbird::Core
 			}
 
 			// Type Name
-			uint32_t typeNameLength = reader.ReadUInt16();
+			uint16_t typeNameLength = reader.ReadUInt16();
 			std::string typeName(typeNameLength, '\0');
 			reader.ReadRawBytes(reinterpret_cast<uint8_t*>(typeName.data()), typeNameLength);
 

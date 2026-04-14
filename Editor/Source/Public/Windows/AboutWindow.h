@@ -7,7 +7,7 @@ namespace Nightbird::Editor
 	class AboutWindow : public ImGuiWindow
 	{
 	public:
-		NB_OBJECT(AboutWindow, ImGuiWindow)
+		NB_OBJECT()
 
 		AboutWindow(bool open = false);
 

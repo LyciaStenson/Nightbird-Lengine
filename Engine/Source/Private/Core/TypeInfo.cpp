@@ -29,7 +29,9 @@ namespace Nightbird
 
 	const TypeInfo* TypeInfo::Find(std::string_view name) noexcept
 	{
-		return Find(FNVHash(name));
+		uint32_t hash = FNVHash(name);
+		Core::Log::Info("TypeInfo::Find: looking for " + std::string(name) + " using hash " + std::to_string(hash));
+		return Find(hash);
 	}
 
 	const TypeInfo* TypeInfo::Find(uint32_t hash) noexcept

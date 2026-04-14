@@ -10,7 +10,7 @@ namespace Nightbird::Core
 	class MeshInstance : public SpatialObject
 	{
 	public:
-		NB_OBJECT(MeshInstance, SpatialObject)
+		NB_OBJECT()
 		NB_ENABLE(SpatialObject)
 		NB_REGISTRATION_FRIEND
 

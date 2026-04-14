@@ -9,7 +9,7 @@ namespace Nightbird::Editor
 	class EditorSettingsWindow : public SettingsWindow
 	{
 	public:
-		NB_OBJECT(EditorSettingsWindow, SettingsWindow)
+		NB_OBJECT()
 
 		EditorSettingsWindow(EditorSettings& settings);
 	};

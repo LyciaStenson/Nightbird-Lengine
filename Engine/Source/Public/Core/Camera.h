@@ -9,7 +9,7 @@ namespace Nightbird::Core
 	class Camera : public SpatialObject
 	{
 	public:
-		NB_OBJECT(Camera, SpatialObject)
+		NB_OBJECT()
 		NB_ENABLE(SpatialObject)
 		NB_REGISTRATION_FRIEND
 

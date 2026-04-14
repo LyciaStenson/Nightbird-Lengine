@@ -13,7 +13,7 @@
 
 namespace Nightbird::Vulkan
 {
-	NB_OBJECT_IMPL(Vulkan::SwapChainSurface, Vulkan::RenderSurface)
+	NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Vulkan::SwapChainSurface, Nightbird::Vulkan::RenderSurface)
 
 	SwapChainSurface::SwapChainSurface(Core::Platform* platform, Device& device, Sync& sync, SwapChain& swapChain)
 		: m_Platform(platform), m_Device(device), m_Sync(sync), m_SwapChain(swapChain)

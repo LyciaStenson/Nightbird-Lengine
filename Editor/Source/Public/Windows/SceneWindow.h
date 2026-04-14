@@ -17,7 +17,7 @@ namespace Nightbird::Editor
 	class SceneWindow : public ImGuiWindow
 	{
 	public:
-		NB_OBJECT(SceneWindow, ImGuiWindow)
+		NB_OBJECT()
 		SceneWindow(EditorContext& context, bool open = true);
 		~SceneWindow();
 

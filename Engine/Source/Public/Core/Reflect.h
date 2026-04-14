@@ -63,11 +63,12 @@
 		_NB_CurrentType::s_TypeInfo.props = _nb_props; \
 		_NB_CurrentType::s_TypeInfo.propCount = \
 			static_cast<uint16_t>(sizeof(_nb_props) / sizeof(_nb_props[0])); \
-		_NB_CurrentType::s_TypeInfo.factory = []() -> ::Nightbird::OwnedObject { \
-			_NB_CurrentType* p = new _NB_CurrentType(); \
-			return { p, [](void* ptr) { \
-				delete static_cast<_NB_CurrentType*>(ptr); } }; \
-		}; \
+		Core::Log::Info(std::string("Registration: ") + _NB_CurrentType::s_TypeInfo.name \
+		+ " -> " + std::to_string(_NB_CurrentType::s_TypeInfo.propCount) + " props:"); \
+		for (uint16_t _nb_i = 0; _nb_i < _NB_CurrentType::s_TypeInfo.propCount; ++_nb_i) \
+			Core::Log::Info(std::string("  [") + std::to_string(_nb_i) + "] " \
+			+ _nb_props[_nb_i].name + " hash=" + std::to_string(_nb_props[_nb_i].nameHash) \
+			+ " nestedType=" + (_nb_props[_nb_i].nestedType ? _nb_props[_nb_i].nestedType->name : "null")); \
 		}
 
 	#define NB_CLASS_EDITOR_ONLY(Type)

@@ -2,7 +2,7 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(MeshInstance, SpatialObject)
+	NB_OBJECT_IMPL(Nightbird::Core::MeshInstance, Nightbird::Core::SpatialObject)
 
 	MeshInstance::MeshInstance()
 		: SpatialObject(), m_Mesh(std::make_shared<Mesh>())

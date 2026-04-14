@@ -22,7 +22,7 @@ namespace Nightbird::Vulkan
 	class SwapChainSurface : public RenderSurface
 	{
 	public:
-		NB_OBJECT(Vulkan::SwapChainSurface, Vulkan::RenderSurface)
+		NB_OBJECT()
 		SwapChainSurface(Core::Platform* platform, Device& device, Sync& sync, SwapChain& swapChain);
 		~SwapChainSurface();
 

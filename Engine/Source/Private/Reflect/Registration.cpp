@@ -15,6 +15,8 @@
 #include "Core/Math/Vector3.h"
 #include "Core/Math/Quat.h"
 
+#include "Core/Log.h"
+
 #include <uuid.h>
 
 NB_REGISTRATION
@@ -88,3 +90,10 @@ NB_REGISTRATION
 	NB_CLASS_EDITOR_ONLY_END()
 
 NB_REGISTRATION_END
+
+#ifndef EDITOR_BUILD
+namespace Nightbird
+{
+	void ForceRegistrationLink() {}
+}
+#endif

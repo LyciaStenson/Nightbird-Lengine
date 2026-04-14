@@ -2,5 +2,5 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_BASE_IMPL(Quat)
+	NB_OBJECT_BASE_IMPL(Nightbird::Core::Quat)
 }

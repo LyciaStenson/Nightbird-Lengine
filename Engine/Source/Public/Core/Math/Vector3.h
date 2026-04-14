@@ -8,7 +8,7 @@ namespace Nightbird::Core
 {
 	struct Vector3
 	{
-		NB_OBJECT_BASE(Vector3)
+		NB_OBJECT_BASE()
 
 		float x = 0.0f;
 		float y = 0.0f;

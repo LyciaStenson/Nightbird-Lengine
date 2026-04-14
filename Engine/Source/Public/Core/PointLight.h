@@ -7,7 +7,7 @@ namespace Nightbird::Core
 	class PointLight : public SpatialObject
 	{
 	public:
-		NB_OBJECT(PointLight, SpatialObject)
+		NB_OBJECT()
 		NB_ENABLE(SpatialObject)
 		NB_REGISTRATION_FRIEND
 

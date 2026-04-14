@@ -2,5 +2,5 @@
 
 namespace Nightbird::Vulkan
 {
-	NB_OBJECT_IMPL(Vulkan::RenderSurface, Core::RenderSurface)
+	NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Vulkan::RenderSurface, Nightbird::Core::RenderSurface)
 }

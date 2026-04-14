@@ -94,6 +94,7 @@ namespace Nightbird
 
 		using FactoryFn = OwnedObject(*)();
 		FactoryFn factory = nullptr;
+		bool hasFactory = false;
 
 		const PropDesc* props = nullptr;
 		uint16_t propCount = 0;
@@ -156,20 +157,63 @@ namespace Nightbird
 	}
 }
 
-#define NB_OBJECT_BASE(ClassName) \
+#define NB_OBJECT_BASE() \
 	public: \
 	static ::Nightbird::TypeInfo s_TypeInfo; \
 	virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; } \
 	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
 
-#define NB_OBJECT(ClassName, ParentClass) \
+#define NB_OBJECT() \
 	public: \
 	static ::Nightbird::TypeInfo s_TypeInfo; \
 	const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; } \
 	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
 
 #define NB_OBJECT_BASE_IMPL(ClassName) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), nullptr };
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
+		#ClassName, \
+		::Nightbird::FNVHash(#ClassName), \
+		nullptr, \
+		[]() -> ::Nightbird::OwnedObject { \
+			ClassName* p = new ClassName(); \
+			return { p, [](void* ptr) { delete static_cast<ClassName*>(ptr); } }; \
+		}, \
+		true, \
+		nullptr, \
+		0 \
+	};
 
 #define NB_OBJECT_IMPL(ClassName, ParentClass) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { #ClassName, ::Nightbird::FNVHash(#ClassName), &ParentClass::s_TypeInfo };
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
+		#ClassName, \
+		::Nightbird::FNVHash(#ClassName), \
+		&ParentClass::s_TypeInfo, \
+		[]() -> ::Nightbird::OwnedObject { \
+			ClassName* p = new ClassName(); \
+			return { p, [](void* ptr) { delete static_cast<ClassName*>(ptr); } }; \
+		}, \
+		true, \
+		nullptr, \
+		0 \
+	};
+
+#define NB_OBJECT_BASE_NO_FACTORY_IMPL(ClassName) \
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
+		#ClassName, \
+		::Nightbird::FNVHash(#ClassName), \
+		nullptr, \
+		false, \
+		nullptr, \
+		0 \
+	};
+
+#define NB_OBJECT_NO_FACTORY_IMPL(ClassName, ParentClass) \
+	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
+		#ClassName, \
+		::Nightbird::FNVHash(#ClassName), \
+		&ParentClass::s_TypeInfo, \
+		nullptr, \
+		false, \
+		nullptr, \
+		0 \
+	};

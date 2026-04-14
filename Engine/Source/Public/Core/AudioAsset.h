@@ -16,7 +16,7 @@ namespace Nightbird::Core
 	class AudioAsset : Asset
 	{
 	public:
-		NB_OBJECT(AudioAsset, Asset)
+		NB_OBJECT()
 		AudioAsset(uint32_t sampleRate, uint32_t frameCount, uint8_t channels, AudioEncoding encoding, std::vector<std::vector<uint8_t>> channelData);
 
 		uint32_t GetSampleRate() const;
