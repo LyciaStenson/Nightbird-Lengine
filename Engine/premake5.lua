@@ -28,6 +28,5 @@ project "Engine"
 	}
 
 	filter { "configurations:EditorDebug or EditorRelease" }
-		includedirs { "%{wks.location}/Editor/Vendor/rttr/src" }
-		defines { "EDITOR_BUILD", "RTTR_DLL" }
+		defines { "EDITOR_BUILD" }
 	filter { }

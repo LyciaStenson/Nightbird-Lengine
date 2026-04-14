@@ -14,8 +14,7 @@ project "EditorGlfwVulkanBackend"
 		"IMGUI_IMPL_VULKAN_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
 		"GLFW_INCLUDE_VULKAN",
-		"EDITOR_BUILD",
-		"RTTR_DLL"
+		"EDITOR_BUILD"
 	}
 
 	files {
@@ -32,7 +31,6 @@ project "EditorGlfwVulkanBackend"
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",
-		"%{wks.location}/Editor/Vendor/rttr/src",
 		"%{wks.location}/Editor/Vendor/imgui",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Source/Public",
 		"%{wks.location}/Backends/Libraries/GlfwPlatform/Vendor/glfw/include",

@@ -32,7 +32,6 @@ project "EditorVulkanRenderer"
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
 		"%{wks.location}/Engine/Vendor/stduuid",
-		"%{wks.location}/Editor/Vendor/rttr/src",
 		"%{wks.location}/Editor/Vendor/imgui",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Source/Public",
 		"%{wks.location}/Backends/Libraries/VulkanRenderer/Vendor/vulkan-headers/include",

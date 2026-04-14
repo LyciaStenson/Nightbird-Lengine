@@ -31,7 +31,6 @@ workspace "Nightbird"
 group "Dependencies"
 	include "Backends/Libraries/GlfwPlatform/Vendor/glfw"
 	include "Editor/Vendor/fastgltf"
-	include "Editor/Vendor/rttr"
 	include "Editor/Vendor/imgui"
 group ""
 
