@@ -206,7 +206,8 @@ namespace Nightbird::Vulkan
 			glm::mat4 worldMatrix = directionalLight->GetWorldMatrix();
 			glm::vec3 forward = glm::normalize(glm::vec3(worldMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
 			data.direction = glm::vec4(forward, 0.0f);
-			data.colorIntensity = glm::vec4(directionalLight->m_Color, directionalLight->m_Intensity);
+			glm::vec3 color = directionalLight->m_Color;
+			data.colorIntensity = glm::vec4(color, directionalLight->m_Intensity);
 			directionalLightData.push_back(data);
 		}
 		m_GlobalDescriptorSetManager->UpdateDirectionalLights(frameIndex, directionalLightData);
@@ -217,7 +218,8 @@ namespace Nightbird::Vulkan
 			PointLightData data{};
 			glm::vec3 worldPos = glm::vec3(pointLight->GetWorldMatrix()[3]);
 			data.positionRadius = glm::vec4(worldPos, pointLight->m_Radius);
-			data.colorIntensity = glm::vec4(pointLight->m_Color, pointLight->m_Intensity);
+			glm::vec3 color = pointLight->m_Color;
+			data.colorIntensity = glm::vec4(color, pointLight->m_Intensity);
 			pointLightData.push_back(data);
 		}
 		m_GlobalDescriptorSetManager->UpdatePointLights(frameIndex, pointLightData);

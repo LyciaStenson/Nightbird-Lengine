@@ -57,9 +57,9 @@ NB_REGISTRATION
 		NB_PROPERTY(m_AudioUUID)
 	NB_CLASS_END()
 
-	NB_CLASS(Nightbird::Core::Mesh)
+	NB_CLASS_EDITOR_ONLY(Nightbird::Core::Mesh)
 		NB_CONSTRUCTOR()
-	NB_CLASS_END()
+	NB_CLASS_EDITOR_ONLY_END()
 
 	NB_CLASS(Nightbird::Core::Transform)
 		NB_CONSTRUCTOR()

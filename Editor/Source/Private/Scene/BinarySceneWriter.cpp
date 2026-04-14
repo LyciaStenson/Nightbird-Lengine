@@ -167,8 +167,8 @@ namespace Nightbird::Editor
 	{
 		for (auto& prop : type.get_properties())
 		{
-			rttr::variant variant = prop.get_value(variant);
-			rttr::type propType = variant.get_type();
+			rttr::variant propVariant = prop.get_value(variant);
+			rttr::type propType = propVariant.get_type();
 			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
 
 			if (propType == rttr::type::get<int>() ||
@@ -177,12 +177,12 @@ namespace Nightbird::Editor
 				propType == rttr::type::get<std::string>() ||
 				propType == rttr::type::get<uuids::uuid>())
 			{
-				leaves.push_back({ nameHash, variant });
+				leaves.push_back({ nameHash, propVariant});
 			}
 			else if (propType.is_class() && !propType.get_properties().empty())
 			{
-				leaves.push_back({ nameHash, variant });
-				CollectLeavesRecursive(variant, propType, leaves);
+				leaves.push_back({ nameHash, propVariant});
+				CollectLeavesRecursive(propVariant, propType, leaves);
 			}
 			else
 			{
