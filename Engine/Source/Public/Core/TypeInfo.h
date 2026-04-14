@@ -5,6 +5,9 @@
 
 namespace Nightbird
 {
+	struct TypeInfo;
+	struct FieldInfo;
+
 	// FNV-1a hash
 	constexpr uint32_t FNVHash(std::string_view s) noexcept
 	{
@@ -13,91 +16,19 @@ namespace Nightbird
 			h = (h ^ static_cast<uint8_t>(c)) * 16777619u;
 		return h;
 	}
-
-	struct TypeInfo;
-
-	struct PropDesc
-	{
-		const char* name;
-		uint32_t nameHash;
-		uint32_t offset;
-		uint32_t size;
-		const TypeInfo* nestedType = nullptr;
-	};
-
-	struct OwnedObject
-	{
-		void* ptr = nullptr;
-		void (*deleter)(void*) = nullptr;
-
-		OwnedObject() = default;
-		OwnedObject(void* p, void(*d)(void*)) noexcept : ptr(p), deleter(d) {}
-
-		OwnedObject(const OwnedObject&) = delete;
-		OwnedObject& operator=(const OwnedObject&) = delete;
-
-		OwnedObject(OwnedObject&& other) noexcept
-			: ptr(other.ptr), deleter(other.deleter)
-		{
-			other.ptr = nullptr;
-		}
-
-		OwnedObject& operator=(OwnedObject&& other) noexcept
-		{
-			if (ptr && deleter)
-				deleter(ptr);
-
-			ptr = other.ptr;
-			deleter = other.deleter;
-			other.ptr = nullptr;
-			return *this;
-		}
-
-		~OwnedObject()
-		{
-			if (ptr && deleter)
-				deleter(ptr);
-		}
-
-		bool IsValid() const noexcept
-		{
-			return ptr != nullptr;
-		}
-
-		template<typename T>
-		const T* As() const noexcept
-		{
-			return static_cast<const T*>(ptr);
-		}
-
-		template<typename T>
-		T* As() noexcept
-		{
-			return static_cast<T*>(ptr);
-		}
-
-		void* Release() noexcept
-		{
-			void* p = ptr;
-			ptr = nullptr;
-			return p;
-		}
-	};
-
-	struct Registration;
-
+	
 	struct TypeInfo
 	{
-		const char* name;
-		uint32_t nameHash;
-		const TypeInfo* parent;
+		const char* name = nullptr;
+		uint32_t nameHash = 0;
 
-		using FactoryFn = OwnedObject(*)();
+		const TypeInfo* parent = nullptr;
+
+		using FactoryFn = void* (*)();
 		FactoryFn factory = nullptr;
-		bool hasFactory = false;
 
-		const PropDesc* props = nullptr;
-		uint16_t propCount = 0;
+		const FieldInfo* fields = nullptr;
+		uint16_t fieldCount = 0;
 
 		bool IsA(const TypeInfo* other) const noexcept
 		{
@@ -111,28 +42,42 @@ namespace Nightbird
 			return false;
 		}
 
-		static void Register(TypeInfo* info) noexcept;
-		static const TypeInfo* Find(std::string_view name) noexcept;
-		static const TypeInfo* Find(uint32_t nameHash) noexcept;
+		bool HasFactory() const noexcept
+		{
+			return factory != nullptr;
+		}
+
+		void* Create() const noexcept
+		{
+			return factory ? factory() : nullptr;
+		}
 	};
 
-	namespace Detail
+	enum class FieldKind : uint8_t
 	{
-		template<typename T, typename = void>
-		struct HasTypeInfo : std::false_type {};
+		Object, // Has TypeInfo
+		Bool, Int32, UInt32, Float, Double, String,
+		Vec2, Vec3, Vec4,
+		Unknown
+	};
 
-		template<typename T>
-		struct HasTypeInfo<T, std::void_t<decltype(T::s_TypeInfo)>> : std::true_type {};
+	struct FieldInfo
+	{
+		const char* name = nullptr;
+		uint32_t nameHash = 0;
 
-		template<typename T>
-		const TypeInfo* GetNestedTypeInfo()
-		{
-			if constexpr (HasTypeInfo<T>::value)
-				return &T::s_TypeInfo;
-			else
-				return nullptr;
-		}
-	}
+		const TypeInfo* type = nullptr;
+		FieldKind kind = FieldKind::Unknown;
+		
+		using GetFn = void* (*)(void* instance);
+		using SetFn = void (*)(void* instance, const void* value);
+
+		GetFn Get = nullptr;
+		SetFn Set = nullptr;
+	};
+	
+	const TypeInfo* Find(std::string_view name) noexcept;
+	const TypeInfo* Find(uint32_t hash) noexcept;
 	
 	template<typename T, typename U>
 	T* Cast(U* obj)
@@ -156,64 +101,3 @@ namespace Nightbird
 		return obj && obj->GetTypeInfo()->IsA(&T::s_TypeInfo);
 	}
 }
-
-#define NB_OBJECT_BASE() \
-	public: \
-	static ::Nightbird::TypeInfo s_TypeInfo; \
-	virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; } \
-	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
-
-#define NB_OBJECT() \
-	public: \
-	static ::Nightbird::TypeInfo s_TypeInfo; \
-	const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; } \
-	static inline bool _nb_registered = (::Nightbird::TypeInfo::Register(&s_TypeInfo), true);
-
-#define NB_OBJECT_BASE_IMPL(ClassName) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
-		#ClassName, \
-		::Nightbird::FNVHash(#ClassName), \
-		nullptr, \
-		[]() -> ::Nightbird::OwnedObject { \
-			ClassName* p = new ClassName(); \
-			return { p, [](void* ptr) { delete static_cast<ClassName*>(ptr); } }; \
-		}, \
-		true, \
-		nullptr, \
-		0 \
-	};
-
-#define NB_OBJECT_IMPL(ClassName, ParentClass) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
-		#ClassName, \
-		::Nightbird::FNVHash(#ClassName), \
-		&ParentClass::s_TypeInfo, \
-		[]() -> ::Nightbird::OwnedObject { \
-			ClassName* p = new ClassName(); \
-			return { p, [](void* ptr) { delete static_cast<ClassName*>(ptr); } }; \
-		}, \
-		true, \
-		nullptr, \
-		0 \
-	};
-
-#define NB_OBJECT_BASE_NO_FACTORY_IMPL(ClassName) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
-		#ClassName, \
-		::Nightbird::FNVHash(#ClassName), \
-		nullptr, \
-		false, \
-		nullptr, \
-		0 \
-	};
-
-#define NB_OBJECT_NO_FACTORY_IMPL(ClassName, ParentClass) \
-	::Nightbird::TypeInfo ClassName::s_TypeInfo = { \
-		#ClassName, \
-		::Nightbird::FNVHash(#ClassName), \
-		&ParentClass::s_TypeInfo, \
-		nullptr, \
-		false, \
-		nullptr, \
-		0 \
-	};
