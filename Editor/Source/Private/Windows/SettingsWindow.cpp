@@ -4,7 +4,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::SettingsWindow, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(SettingsWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	SettingsWindow::SettingsWindow(const std::string& title, bool open)
 		: ImGuiWindow(title, open, { ImGuiWindowFlags_NoDocking })

@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 	class ImGuiWindow
 	{
 	public:
-		//NB_TYPE_BASE()
+		NB_TYPE_BASE()
 
 		ImGuiWindow(const std::string& title, bool open = true, const ImGuiWindowConfig& config = {});
 		virtual ~ImGuiWindow() = default;

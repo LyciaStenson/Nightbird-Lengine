@@ -11,7 +11,7 @@ namespace Nightbird::Editor
 	class AssetBrowser : public ImGuiWindow
 	{
 	public:
-		//NB_OBJECT()
+		NB_TYPE()
 		
 		AssetBrowser(EditorContext& context, bool open = true);
 

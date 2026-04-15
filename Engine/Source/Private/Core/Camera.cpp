@@ -4,7 +4,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(Camera, NB_PARENT(SpatialObject), NB_FACTORY(Camera),
+	NB_REFLECT(Camera, NB_PARENT(SpatialObject), NB_FACTORY(Camera),
 		NB_FIELD(m_Fov, Float)
 	)
 		

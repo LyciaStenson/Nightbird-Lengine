@@ -2,7 +2,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(MeshInstance, NB_PARENT(SpatialObject), NB_FACTORY(MeshInstance),
+	NB_REFLECT(MeshInstance, NB_PARENT(SpatialObject), NB_FACTORY(MeshInstance),
 		NB_FIELD(m_MeshUUID, UUID)
 	)
 

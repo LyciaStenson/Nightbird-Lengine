@@ -7,7 +7,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(AudioSource, NB_PARENT(SceneObject), NB_FACTORY(AudioSource),
+	NB_REFLECT(AudioSource, NB_PARENT(SceneObject), NB_FACTORY(AudioSource),
 		NB_FIELD(m_AudioUUID, UUID)
 	)
 

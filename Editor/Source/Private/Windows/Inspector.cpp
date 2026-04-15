@@ -7,7 +7,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::Inspector, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(Inspector, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	Inspector::Inspector(EditorContext& context, bool open)
 		: ImGuiWindow("Inspector", open), m_Context(context)

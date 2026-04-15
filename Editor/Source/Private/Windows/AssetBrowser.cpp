@@ -11,7 +11,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::AssetBrowser, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(AssetBrowser, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	AssetBrowser::AssetBrowser(EditorContext& context, bool open)
 		: ImGuiWindow("Asset Browser", open), m_Context(context)

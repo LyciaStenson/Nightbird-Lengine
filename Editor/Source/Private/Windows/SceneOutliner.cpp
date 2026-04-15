@@ -9,7 +9,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::SceneOutliner, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(SceneOutliner, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
 		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)

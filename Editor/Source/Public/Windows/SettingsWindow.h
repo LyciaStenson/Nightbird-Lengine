@@ -18,7 +18,7 @@ namespace Nightbird::Editor
 	class SettingsWindow : public ImGuiWindow
 	{
 	public:
-		//NB_OBJECT()
+		NB_TYPE()
 
 		SettingsWindow(const std::string& title, bool open = false);
 

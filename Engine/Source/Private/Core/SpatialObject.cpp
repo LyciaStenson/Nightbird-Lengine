@@ -2,7 +2,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(SpatialObject, NB_PARENT(SceneObject), NB_FACTORY(SpatialObject),
+	NB_REFLECT(SpatialObject, NB_PARENT(SceneObject), NB_FACTORY(SpatialObject),
 		NB_FIELD(m_Transform, Object)
 	)
 	

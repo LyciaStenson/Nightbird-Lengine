@@ -2,7 +2,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::AboutWindow, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(AboutWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	AboutWindow::AboutWindow(bool open)
 	: ImGuiWindow("About Nightbird", open, { ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize, ImVec2(512, 448) })

@@ -2,7 +2,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::ProjectSettingsWindow, Nightbird::Editor::ImGuiWindow)
+	NB_REFLECT_NO_FIELDS(ProjectSettingsWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
 
 	ProjectSettingsWindow::ProjectSettingsWindow(ProjectSettings& settings)
 		: SettingsWindow("Project Settings")

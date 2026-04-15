@@ -4,7 +4,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(Transform, NB_NO_PARENT, NB_FACTORY(Transform),
+	NB_REFLECT(Transform, NB_NO_PARENT, NB_FACTORY(Transform),
 		NB_FIELD(position, Vector3),
 		NB_FIELD(rotation, Quat),
 		NB_FIELD(scale, Vector3)

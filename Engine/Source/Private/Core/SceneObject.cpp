@@ -6,7 +6,7 @@
 
 namespace Nightbird::Core
 {
-	NB_REFLECT_TYPE(SceneObject, NB_NO_PARENT, NB_FACTORY(SceneObject),
+	NB_REFLECT(SceneObject, NB_NO_PARENT, NB_FACTORY(SceneObject),
 		NB_FIELD(m_Name, String)
 	)
 
