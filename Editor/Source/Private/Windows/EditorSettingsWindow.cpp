@@ -7,6 +7,6 @@ namespace Nightbird::Editor
 	EditorSettingsWindow::EditorSettingsWindow(EditorSettings& settings)
 		: SettingsWindow("Editor Settings")
 	{
-		SetSettings(settings);
+		//SetSettings(settings);
 	}
 }

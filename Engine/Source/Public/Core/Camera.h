@@ -10,7 +10,6 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_TYPE()
-		NB_REFLECTION_FRIEND
 
 		using SpatialObject::SpatialObject;
 

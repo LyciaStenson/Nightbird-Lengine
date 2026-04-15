@@ -16,8 +16,6 @@ namespace Nightbird
 			h = (h ^ static_cast<uint8_t>(c)) * 16777619u;
 		return h;
 	}
-
-	struct ReflectionAccessor {};
 	
 	struct TypeInfo
 	{
@@ -30,18 +28,27 @@ namespace Nightbird
 		FactoryFn factory = nullptr;
 
 		const FieldInfo* fields = nullptr;
-		uint16_t fieldCount = 0;
+		uint32_t fieldCount = 0;
 
 		bool IsA(const TypeInfo* other) const noexcept
 		{
-			const TypeInfo* current = this;
-			while (current)
+			for (auto* current = this; current; current = current->parent)
 			{
 				if (current == other)
 					return true;
-				current = current->parent;
 			}
 			return false;
+		}
+
+		void* Create() const noexcept
+		{
+			return factory ? factory() : nullptr;
+		}
+
+		template<typename T>
+		T* CreateAs() const noexcept
+		{
+			return static_cast<T*>(Create());
 		}
 
 		bool HasFactory() const noexcept
@@ -49,10 +56,13 @@ namespace Nightbird
 			return factory != nullptr;
 		}
 
-		void* Create() const noexcept
+		bool HasFields() const noexcept
 		{
-			return factory ? factory() : nullptr;
+			return fields != nullptr && fieldCount > 0;
 		}
+
+		const FieldInfo* Begin() const noexcept;
+		const FieldInfo* End() const noexcept;
 	};
 
 	enum class FieldKind : uint8_t
@@ -71,16 +81,7 @@ namespace Nightbird
 
 		const TypeInfo* type = nullptr;
 		FieldKind kind = FieldKind::Unknown;
-		
-		using GetFn = void* (*)(void* instance);
-		using SetFn = void (*)(void* instance, const void* value);
-
-		GetFn Get = nullptr;
-		SetFn Set = nullptr;
 	};
-	
-	const TypeInfo* Find(std::string_view name) noexcept;
-	const TypeInfo* Find(uint32_t hash) noexcept;
 	
 	template<typename T, typename U>
 	T* Cast(U* obj)

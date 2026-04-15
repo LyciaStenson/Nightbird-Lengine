@@ -11,7 +11,6 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_TYPE()
-		NB_REFLECTION_FRIEND
 
 		MeshInstance();
 		MeshInstance(std::shared_ptr<Mesh> mesh);
@@ -22,8 +21,9 @@ namespace Nightbird::Core
 		std::shared_ptr<const Mesh> GetMesh() const;
 		void SetMesh(std::shared_ptr<Mesh> mesh);
 
-	private:
 		uuids::uuid m_MeshUUID;
+
+	private:
 		std::shared_ptr<Mesh> m_Mesh;
 	};
 }

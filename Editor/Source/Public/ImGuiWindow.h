@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/TypeInfo.h"
+#include "Core/Reflection.h"
 
 #include <optional>
 #include <string>
@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 	class ImGuiWindow
 	{
 	public:
-		//NB_OBJECT_BASE()
+		//NB_TYPE_BASE()
 
 		ImGuiWindow(const std::string& title, bool open = true, const ImGuiWindowConfig& config = {});
 		virtual ~ImGuiWindow() = default;

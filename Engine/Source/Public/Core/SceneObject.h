@@ -21,7 +21,6 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_TYPE_BASE()
-		NB_REFLECTION_FRIEND
 
 		SceneObject();
 		virtual ~SceneObject() = default;
@@ -50,8 +49,10 @@ namespace Nightbird::Core
 		virtual void EnterScene();
 		virtual void Tick(float delta);
 
-	protected:
+		// Public for reflection
 		std::string m_Name;
+
+	protected:
 		Scene* m_Scene = nullptr;
 		SceneObject* m_Parent = nullptr;
 		std::vector<std::unique_ptr<SceneObject>> m_Children;

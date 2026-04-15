@@ -57,29 +57,29 @@ namespace Nightbird::Editor
 	void SceneOutliner::DrawAddObjectPopup()
 	{
 		static std::vector<std::string> objectTypeNames;
-		static std::vector<rttr::type> objectTypes;
+		//static std::vector<rttr::type> objectTypes;
 		static bool objectTypesDirty = true;
 
-		if (objectTypesDirty)
-		{
-			objectTypeNames.clear();
-			objectTypes.clear();
+		//if (objectTypesDirty)
+		//{
+		//	objectTypeNames.clear();
+		//	objectTypes.clear();
 
-			for (auto& type : rttr::type::get_types())
-			{
-				if (type.is_derived_from(rttr::type::get<Core::SceneObject>()))
-				{
-					auto constructor = type.get_constructor(); // Missing name { rttr::type::get<std::string>() }
-					if (constructor.is_valid())
-					{
-						objectTypeNames.push_back(type.get_name().to_string());
-						objectTypes.push_back(type);
-					}
-				}
-			}
+		//	for (auto& type : rttr::type::get_types())
+		//	{
+		//		if (type.is_derived_from(rttr::type::get<Core::SceneObject>()))
+		//		{
+		//			auto constructor = type.get_constructor(); // Missing name { rttr::type::get<std::string>() }
+		//			if (constructor.is_valid())
+		//			{
+		//				objectTypeNames.push_back(type.get_name().to_string());
+		//				objectTypes.push_back(type);
+		//			}
+		//		}
+		//	}
 
-			objectTypesDirty = false;
-		}
+		//	objectTypesDirty = false;
+		//}
 
 		if (ImGui::Button("Add"))
 		{
@@ -88,24 +88,24 @@ namespace Nightbird::Editor
 
 		if (ImGui::BeginPopup("AddObject"))
 		{
-			for (size_t i = 0; i < objectTypeNames.size() && i < objectTypes.size(); ++i)
-			{
-				if (ImGui::MenuItem(objectTypeNames[i].c_str()))
-				{
-					rttr::variant variant = objectTypes[i].create();
-					if (variant.is_valid())
-					{
-						Core::SceneObject* rawObject = variant.get_value<Core::SceneObject*>();
-						rawObject->SetName(objectTypeNames[i]);
-						std::unique_ptr<Core::SceneObject> object(rawObject);
+			//for (size_t i = 0; i < objectTypeNames.size() && i < objectTypes.size(); ++i)
+			//{
+				//if (ImGui::MenuItem(objectTypeNames[i].c_str()))
+				//{
+					//rttr::variant variant = objectTypes[i].create();
+					//if (variant.is_valid())
+					//{
+					//	Core::SceneObject* rawObject = variant.get_value<Core::SceneObject*>();
+					//	rawObject->SetName(objectTypeNames[i]);
+					//	std::unique_ptr<Core::SceneObject> object(rawObject);
 
-						if (auto* selectObject = m_Context.GetSelectedObject())
-							selectObject->AddChild(std::move(object));
-						else
-							m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
-					}
-				}
-			}
+					//	if (auto* selectObject = m_Context.GetSelectedObject())
+					//		selectObject->AddChild(std::move(object));
+					//	else
+					//		m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
+					//}
+				//}
+			//}
 			ImGui::EndPopup();
 		}
 	}

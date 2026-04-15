@@ -22,8 +22,6 @@
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
 
-#include <rttr/library.h>
-
 #include <cstdlib>
 
 namespace Nightbird::Editor
@@ -103,20 +101,22 @@ namespace Nightbird::Editor
 #endif
 
 		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / libraryStr;
-		rttr::library projectLib(sharedLibPath.string());
-		m_ProjectLoaded = projectLib.load();
-		if (m_ProjectLoaded)
-		{
-			Core::Log::Info("Loaded project: " + sharedLibPath.string());
-			return 0;
-		}
-		else
-		{
-			Core::Log::Error("Failed to load project: " + sharedLibPath.string());
-			Core::Log::Info("Make sure to build the project");
-			Core::Log::Error(projectLib.get_error_string().to_string());
-			return 1;
-		}
+		//rttr::library projectLib(sharedLibPath.string());
+		//m_ProjectLoaded = projectLib.load();
+		//if (m_ProjectLoaded)
+		//{
+			//Core::Log::Info("Loaded project: " + sharedLibPath.string());
+			//return 0;
+		//}
+		//else
+		//{
+			//Core::Log::Error("Failed to load project: " + sharedLibPath.string());
+			//Core::Log::Info("Make sure to build the project");
+			//Core::Log::Error(projectLib.get_error_string().to_string());
+			//return 1;
+		//}
+
+		return 0;
 	}
 
 	void EditorApplication::InitializeEditor()

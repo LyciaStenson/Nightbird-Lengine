@@ -6,9 +6,9 @@
 
 namespace Nightbird::Core
 {
-	NB_TYPE_BASE_IMPL(SceneObject)
+	NB_REFLECT_TYPE(SceneObject, NB_NO_PARENT, NB_FACTORY(SceneObject),
 		NB_FIELD(m_Name, String)
-	NB_TYPE_IMPL_END()
+	)
 
 	SceneObject::SceneObject()
 		: m_Name("SceneObject")

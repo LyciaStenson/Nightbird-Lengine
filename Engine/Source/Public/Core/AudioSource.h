@@ -16,7 +16,6 @@ namespace Nightbird::Core
 	{
 	public:
 		NB_TYPE()
-		NB_REFLECTION_FRIEND
 
 		using SceneObject::SceneObject;
 
@@ -46,8 +45,10 @@ namespace Nightbird::Core
 		const uuids::uuid& GetAudioUUID() const;
 		void SetAudioUUID(const uuids::uuid& uuid);
 
-	private:
+		// Public for reflection
 		uuids::uuid m_AudioUUID;
+
+	private:
 		std::shared_ptr<AudioAsset> m_AudioAsset;
 		Audio::Handle m_Handle = Audio::InvalidHandle;
 		bool m_Loop = false;

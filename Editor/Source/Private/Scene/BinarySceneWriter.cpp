@@ -112,20 +112,20 @@ namespace Nightbird::Editor
 		}
 
 		// Type name
-		rttr::type type = rttr::type::get(*object);
-		std::string typeName = type.get_name().to_string();
-		writer.WriteUInt16(static_cast<uint16_t>(typeName.size()));
-		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName.data()), typeName.size());
+		//rttr::type type = rttr::type::get(*object);
+		//std::string typeName = type.get_name().to_string();
+		//writer.WriteUInt16(static_cast<uint16_t>(typeName.size()));
+		//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName.data()), typeName.size());
 
 		// Collect leaf properties
-		std::vector<LeafProperty> leaves;
-		CollectLeaves(rttr::instance(*object), type, leaves);
+		//std::vector<LeafProperty> leaves;
+		//CollectLeaves(rttr::instance(*object), type, leaves);
 
 		// Leaves size
-		writer.WriteUInt16(static_cast<uint16_t>(leaves.size()));
+		//writer.WriteUInt16(static_cast<uint16_t>(leaves.size()));
 
-		for (const auto& leaf : leaves)
-			WriteLeaf(leaf, writer);
+		//for (const auto& leaf : leaves)
+			//WriteLeaf(leaf, writer);
 
 		// Do not serialize children of scene instance
 		if (object->HasSourceScene())
@@ -135,102 +135,102 @@ namespace Nightbird::Editor
 			WriteNode(child.get(), m_NodeUUIDs[object], writer);
 	}
 
-	void BinarySceneWriter::CollectLeaves(const rttr::instance& instance, const rttr::type& type, std::vector<LeafProperty>& leaves)
-	{
-		for (auto& prop : type.get_properties())
-		{
-			rttr::variant variant = prop.get_value(instance);
-			rttr::type propType = variant.get_type();
-			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
+	//void BinarySceneWriter::CollectLeaves(const rttr::instance& instance, const rttr::type& type, std::vector<LeafProperty>& leaves)
+	//{
+	//	for (auto& prop : type.get_properties())
+	//	{
+	//		rttr::variant variant = prop.get_value(instance);
+	//		rttr::type propType = variant.get_type();
+	//		uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
 
-			if (propType == rttr::type::get<int>() ||
-				propType == rttr::type::get<float>() ||
-				propType == rttr::type::get<bool>() ||
-				propType == rttr::type::get<std::string>() ||
-				propType == rttr::type::get<uuids::uuid>())
-			{
-				leaves.push_back({ nameHash, variant });
-			}
-			else if (propType.is_class() && !propType.get_properties().empty())
-			{
-				leaves.push_back({ nameHash, variant });
-				CollectLeavesRecursive(variant, propType, leaves);
-			}
-			else
-			{
-				Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
-			}
-		}
-	}
+	//		if (propType == rttr::type::get<int>() ||
+	//			propType == rttr::type::get<float>() ||
+	//			propType == rttr::type::get<bool>() ||
+	//			propType == rttr::type::get<std::string>() ||
+	//			propType == rttr::type::get<uuids::uuid>())
+	//		{
+	//			leaves.push_back({ nameHash, variant });
+	//		}
+	//		else if (propType.is_class() && !propType.get_properties().empty())
+	//		{
+	//			leaves.push_back({ nameHash, variant });
+	//			CollectLeavesRecursive(variant, propType, leaves);
+	//		}
+	//		else
+	//		{
+	//			Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
+	//		}
+	//	}
+	//}
 
-	void BinarySceneWriter::CollectLeavesRecursive(const rttr::variant& variant, const rttr::type& type, std::vector<LeafProperty>& leaves)
-	{
-		for (auto& prop : type.get_properties())
-		{
-			rttr::variant propVariant = prop.get_value(variant);
-			rttr::type propType = propVariant.get_type();
-			uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
+	//void BinarySceneWriter::CollectLeavesRecursive(const rttr::variant& variant, const rttr::type& type, std::vector<LeafProperty>& leaves)
+	//{
+	//	for (auto& prop : type.get_properties())
+	//	{
+	//		rttr::variant propVariant = prop.get_value(variant);
+	//		rttr::type propType = propVariant.get_type();
+	//		uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
 
-			if (propType == rttr::type::get<int>() ||
-				propType == rttr::type::get<float>() ||
-				propType == rttr::type::get<bool>() ||
-				propType == rttr::type::get<std::string>() ||
-				propType == rttr::type::get<uuids::uuid>())
-			{
-				leaves.push_back({ nameHash, propVariant});
-			}
-			else if (propType.is_class() && !propType.get_properties().empty())
-			{
-				leaves.push_back({ nameHash, propVariant});
-				CollectLeavesRecursive(propVariant, propType, leaves);
-			}
-			else
-			{
-				Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
-			}
-		}
-	}
+	//		if (propType == rttr::type::get<int>() ||
+	//			propType == rttr::type::get<float>() ||
+	//			propType == rttr::type::get<bool>() ||
+	//			propType == rttr::type::get<std::string>() ||
+	//			propType == rttr::type::get<uuids::uuid>())
+	//		{
+	//			leaves.push_back({ nameHash, propVariant});
+	//		}
+	//		else if (propType.is_class() && !propType.get_properties().empty())
+	//		{
+	//			leaves.push_back({ nameHash, propVariant});
+	//			CollectLeavesRecursive(propVariant, propType, leaves);
+	//		}
+	//		else
+	//		{
+	//			Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
+	//		}
+	//	}
+	//}
 
-	void BinarySceneWriter::WriteLeaf(const LeafProperty& leaf, BinaryWriter& writer)
-	{
-		rttr::type type = leaf.variant.get_type();
+	//void BinarySceneWriter::WriteLeaf(const LeafProperty& leaf, BinaryWriter& writer)
+	//{
+	//	rttr::type type = leaf.variant.get_type();
 
-		writer.WriteUInt32(leaf.nameHash);
+	//	writer.WriteUInt32(leaf.nameHash);
 
-		if (type == rttr::type::get<int>())
-		{
-			writer.WriteUInt16(sizeof(int32_t));
-			writer.WriteInt32(leaf.variant.get_value<int>());
-		}
-		else if (type == rttr::type::get<float>())
-		{
-			writer.WriteUInt16(sizeof(float));
-			writer.WriteFloat(leaf.variant.get_value<float>());
-		}
-		else if (type == rttr::type::get<bool>())
-		{
-			writer.WriteUInt16(sizeof(uint8_t));
-			writer.WriteUInt8(leaf.variant.get_value<bool>() ? 1 : 0);
-		}
-		else if (type == rttr::type::get<std::string>())
-		{
-			const auto& value = leaf.variant.get_value<std::string>();
-			writer.WriteUInt16(static_cast<uint16_t>(sizeof(uint32_t) + value.size()));
-			writer.WriteUInt32(static_cast<uint32_t>(value.size()));
-			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(value.data()), value.size());
-		}
-		else if (type == rttr::type::get<uuids::uuid>())
-		{
-			writer.WriteUInt16(16);
-			auto bytes = leaf.variant.get_value<uuids::uuid>().as_bytes();
-			writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
-		}
-		else if (type.is_class())
-		{
-			// Struct
-			writer.WriteUInt16(0);
-		}
-	}
+	//	if (type == rttr::type::get<int>())
+	//	{
+	//		writer.WriteUInt16(sizeof(int32_t));
+	//		writer.WriteInt32(leaf.variant.get_value<int>());
+	//	}
+	//	else if (type == rttr::type::get<float>())
+	//	{
+	//		writer.WriteUInt16(sizeof(float));
+	//		writer.WriteFloat(leaf.variant.get_value<float>());
+	//	}
+	//	else if (type == rttr::type::get<bool>())
+	//	{
+	//		writer.WriteUInt16(sizeof(uint8_t));
+	//		writer.WriteUInt8(leaf.variant.get_value<bool>() ? 1 : 0);
+	//	}
+	//	else if (type == rttr::type::get<std::string>())
+	//	{
+	//		const auto& value = leaf.variant.get_value<std::string>();
+	//		writer.WriteUInt16(static_cast<uint16_t>(sizeof(uint32_t) + value.size()));
+	//		writer.WriteUInt32(static_cast<uint32_t>(value.size()));
+	//		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(value.data()), value.size());
+	//	}
+	//	else if (type == rttr::type::get<uuids::uuid>())
+	//	{
+	//		writer.WriteUInt16(16);
+	//		auto bytes = leaf.variant.get_value<uuids::uuid>().as_bytes();
+	//		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
+	//	}
+	//	else if (type.is_class())
+	//	{
+	//		// Struct
+	//		writer.WriteUInt16(0);
+	//	}
+	//}
 
 	uuids::uuid BinarySceneWriter::GenerateUUID() const
 	{

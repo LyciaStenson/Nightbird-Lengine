@@ -2,7 +2,7 @@
 
 namespace Nightbird::Editor
 {
-	//NB_OBJECT_BASE_NO_FACTORY_IMPL(Nightbird::Editor::ImGuiWindow)
+	//NB_REFLECT_TYPE(ImGuiWindow, NB_NO_PARENT, NB_NO_FACTORY)
 
 	ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowConfig& config)
 		: m_Title(std::move(title)), m_Open(open), m_Config(std::move(config))

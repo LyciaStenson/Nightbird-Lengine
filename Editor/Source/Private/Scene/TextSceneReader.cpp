@@ -72,16 +72,16 @@ namespace Nightbird::Editor
 			}
 
 			std::unique_ptr<Core::SceneObject> object;
-			rttr::type type = rttr::type::get_by_name(typeName);
-			if (type.is_valid())
-			{
-				rttr::variant variant = type.create();
-				if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
-				{
-					object.reset(variant.get_value<Core::SceneObject*>());
-					object->SetName(name);
-				}
-			}
+			//rttr::type type = rttr::type::get_by_name(typeName);
+			//if (type.is_valid())
+			//{
+			//	rttr::variant variant = type.create();
+			//	if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
+			//	{
+			//		object.reset(variant.get_value<Core::SceneObject*>());
+			//		object->SetName(name);
+			//	}
+			//}
 
 			if (!object)
 			{
@@ -90,11 +90,11 @@ namespace Nightbird::Editor
 				object->SetName(name);
 			}
 
-			if (auto* propertiesTable = (*nodeTable)["properties"].as_table())
-			{
-				rttr::instance objectInstance = *object;
-				DeserializeToml(*propertiesTable, objectInstance);
-			}
+			//if (auto* propertiesTable = (*nodeTable)["properties"].as_table())
+			//{
+			//	rttr::instance objectInstance = *object;
+			//	DeserializeToml(*propertiesTable, objectInstance);
+			//}
 
 			std::string sceneUUIDString = (*nodeTable)["scene_uuid"].value_or(std::string{});
 			if (!sceneUUIDString.empty())
@@ -147,84 +147,84 @@ namespace Nightbird::Editor
 		return result;
 	}
 
-	void TextSceneReader::DeserializeToml(const toml::table& table, rttr::instance instance)
-	{
-		rttr::type type = instance.get_derived_type();
-		if (!type.is_class())
-			return;
-		
-		for (auto& prop : type.get_properties())
-		{
-			if (!prop.is_valid() || prop.is_readonly())
-				continue;
+	//void TextSceneReader::DeserializeToml(const toml::table& table, rttr::instance instance)
+	//{
+	//	rttr::type type = instance.get_derived_type();
+	//	if (!type.is_class())
+	//		return;
+	//	
+	//	for (auto& prop : type.get_properties())
+	//	{
+	//		if (!prop.is_valid() || prop.is_readonly())
+	//			continue;
 
-			std::string propName = prop.get_name().to_string();
-			const auto* propNode = table.get(propName);
-			if (!propNode)
-				continue;
+	//		std::string propName = prop.get_name().to_string();
+	//		const auto* propNode = table.get(propName);
+	//		if (!propNode)
+	//			continue;
 
-			const auto* propTable = propNode->as_table();
-			if (!propTable)
-				continue;
+	//		const auto* propTable = propNode->as_table();
+	//		if (!propTable)
+	//			continue;
 
-			rttr::type propType = prop.get_type().get_raw_type();
-			rttr::variant variant;
-			
-			if (propType.is_class())
-			{
-				rttr::variant propVariant = prop.get_value(instance);
-				if (!propVariant.is_valid())
-					continue;
+	//		rttr::type propType = prop.get_type().get_raw_type();
+	//		rttr::variant variant;
+	//		
+	//		if (propType.is_class())
+	//		{
+	//			rttr::variant propVariant = prop.get_value(instance);
+	//			if (!propVariant.is_valid())
+	//				continue;
 
-				auto* valueTable = (*propTable)["value"].as_table();
-				if (!valueTable)
-					continue;
+	//			auto* valueTable = (*propTable)["value"].as_table();
+	//			if (!valueTable)
+	//				continue;
 
-				rttr::instance propInstance = propVariant;
-				if (!propInstance.is_valid())
-					continue;
+	//			rttr::instance propInstance = propVariant;
+	//			if (!propInstance.is_valid())
+	//				continue;
 
-				DeserializeToml(*valueTable, propInstance);
-				variant = propVariant;
-			}
-			else
-			{
-				variant = TableToVariant(*propTable);
-			}
+	//			DeserializeToml(*valueTable, propInstance);
+	//			variant = propVariant;
+	//		}
+	//		else
+	//		{
+	//			variant = TableToVariant(*propTable);
+	//		}
 
-			if (variant.is_valid())
-			{
-				bool success = prop.set_value(instance, variant);
-				if (!success)
-					Core::Log::Warning("TextSceneReader: Failed to set value for property " + propName);
-			}
-			else
-			{
-				Core::Log::Warning("TextSceneReader: Failed to deserialize property " + propName);
-			}
-		}
-	}
+	//		if (variant.is_valid())
+	//		{
+	//			bool success = prop.set_value(instance, variant);
+	//			if (!success)
+	//				Core::Log::Warning("TextSceneReader: Failed to set value for property " + propName);
+	//		}
+	//		else
+	//		{
+	//			Core::Log::Warning("TextSceneReader: Failed to deserialize property " + propName);
+	//		}
+	//	}
+	//}
 
-	rttr::variant TextSceneReader::TableToVariant(const toml::table& table)
-	{
-		std::string typeName = table["type"].value_or(std::string{});
+	//rttr::variant TextSceneReader::TableToVariant(const toml::table& table)
+	//{
+	//	std::string typeName = table["type"].value_or(std::string{});
 
-		if (typeName == "int")
-			return table["value"].value_or(0);
-		else if (typeName == "float")
-			return table["value"].value_or(0.0f);
-		else if (typeName == "bool")
-			return table["value"].value_or(false);
-		else if (typeName == "string")
-			return table["value"].value_or(std::string{});
-		else if (typeName == "uuid")
-		{
-			std::string uuidString = table["value"].value_or(std::string{});
-			auto uuid = uuids::uuid::from_string(uuidString);
-			return uuid ? rttr::variant(*uuid) : rttr::variant{};
-		}
+	//	if (typeName == "int")
+	//		return table["value"].value_or(0);
+	//	else if (typeName == "float")
+	//		return table["value"].value_or(0.0f);
+	//	else if (typeName == "bool")
+	//		return table["value"].value_or(false);
+	//	else if (typeName == "string")
+	//		return table["value"].value_or(std::string{});
+	//	else if (typeName == "uuid")
+	//	{
+	//		std::string uuidString = table["value"].value_or(std::string{});
+	//		auto uuid = uuids::uuid::from_string(uuidString);
+	//		return uuid ? rttr::variant(*uuid) : rttr::variant{};
+	//	}
 
-		Core::Log::Warning("TextSceneReader: TableToVariant: Unknown type: " + typeName);
-		return {};
-	}
+	//	Core::Log::Warning("TextSceneReader: TableToVariant: Unknown type: " + typeName);
+	//	return {};
+	//}
 }

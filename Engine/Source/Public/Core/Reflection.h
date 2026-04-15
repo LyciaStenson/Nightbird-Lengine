@@ -4,8 +4,7 @@
 #include "Core/TypeRegistry.h"
 #include "Core/ReflectionInternal.h"
 
-#define NB_CONCAT_INNER(a, b) a##b
-#define NB_CONCAT(a, b) NB_CONCAT_INNER(a, b)
+#include <iterator>
 
 #define NB_TYPE_BASE() \
 	public: \
@@ -19,12 +18,17 @@
 		const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; } \
 		static void _nb_RegisterType();
 
-#define NB_TYPE_BASE_IMPL(Type) \
+#define NB_PARENT(T) &T::s_TypeInfo
+#define NB_NO_PARENT nullptr
+#define NB_FACTORY(T) []() -> void* { return new T(); }
+#define NB_NO_FACTORY nullptr
+
+#define NB_REFLECT_TYPE(Type, Parent, Factory, ...) \
 	::Nightbird::TypeInfo Type::s_TypeInfo = { \
 		#Type, \
 		::Nightbird::FNVHash(#Type), \
-		nullptr, \
-		[]() -> void* { return new Type(); }, \
+		Parent, \
+		Factory, \
 		nullptr, \
 		0 \
 	}; \
@@ -35,32 +39,11 @@
 	namespace NB_Reflection_##Type \
 	{ \
 		using _NB_CurrentType = Type; \
-		static const ::Nightbird::FieldInfo _nb_fields[] = {
-
-#define NB_TYPE_IMPL(Type, Parent) \
-	::Nightbird::TypeInfo Type::s_TypeInfo = { \
-		#Type, \
-		::Nightbird::FNVHash(#Type), \
-		&Parent::s_TypeInfo, \
-		[]() -> void* { return new Type(); }, \
-		nullptr, \
-		0 \
-	}; \
-	void Type::_nb_RegisterType() \
-	{ \
-		::Nightbird::TypeRegistry::Register(&Type::s_TypeInfo); \
-	} \
-	namespace NB_Reflection_##Type \
-	{ \
-		using _NB_CurrentType = Type; \
-		static const ::Nightbird::FieldInfo _nb_fields[] = {
-
-#define NB_TYPE_IMPL_END() \
-		}; \
-		static bool NB_CONCAT(_nb_reg_, __COUNTER__) = ([]() { \
+		static const ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
+		static const bool _nb_reg_ = ([]() { \
 			_NB_CurrentType::s_TypeInfo.fields = _nb_fields; \
 			_NB_CurrentType::s_TypeInfo.fieldCount = \
-				static_cast<uint16_t>(sizeof(_nb_fields) / sizeof(_nb_fields[0])); \
+				static_cast<uint16_t>(std::size(_nb_fields)); \
 			_NB_CurrentType::_nb_RegisterType(); \
 			return true; \
 		}()); \
@@ -71,15 +54,5 @@
 		#Name, \
 		::Nightbird::FNVHash(#Name), \
 		::Nightbird::Detail::GetFieldTypeInfo<std::decay_t<decltype(_NB_CurrentType::Name)>>(), \
-		::Nightbird::FieldKind::Kind, \
-		[](void* instance) -> void* { \
-			return &static_cast<_NB_CurrentType*>(instance)->Name; \
-		}, \
-		[](void* instance, const void* value) { \
-			auto* obj = static_cast<_NB_CurrentType*>(instance); \
-			obj->Name = *static_cast<const std::decay_t<decltype(obj->Name)>*>(value); \
-		} \
-	},
-
-#define NB_REFLECTION_FRIEND \
-	friend struct ::Nightbird::ReflectionAccessor;
+		::Nightbird::FieldKind::Kind \
+	}

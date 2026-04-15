@@ -2,7 +2,6 @@
 
 #include <uuid.h>
 #include <toml.hpp>
-#include <rttr/variant.h>
 
 #include <string>
 #include <filesystem>
@@ -30,7 +29,7 @@ namespace Nightbird::Editor
 
 		void WriteNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray);
 
-		toml::table VariantToToml(const rttr::variant& variant);
+		//toml::table VariantToToml(const rttr::variant& variant);
 
 		uuids::uuid GenerateUUID() const;
 	};

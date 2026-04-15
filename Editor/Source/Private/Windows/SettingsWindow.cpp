@@ -14,21 +14,21 @@ namespace Nightbird::Editor
 
 	void SettingsWindow::OnRender()
 	{
-		ImGui::BeginChild("LeftPanel", ImVec2(200, 0), true);
+		//ImGui::BeginChild("LeftPanel", ImVec2(200, 0), true);
 		//for (int i = 0; i < m_Categories.size(); ++i)
 		//{
 			//bool selected = (i == m_SelectedCategory);
 			//if (ImGui::Selectable(m_Categories[i].name.c_str(), selected))
 				//m_SelectedCategory = i;
 		//}
-		ImGui::EndChild();
+		//ImGui::EndChild();
 
-		ImGui::SameLine();
+		//ImGui::SameLine();
 
-		ImGui::BeginChild("RightPanel", ImVec2(0, 0), false);
+		//ImGui::BeginChild("RightPanel", ImVec2(0, 0), false);
 		//if (m_SelectedCategory >= 0 && m_SelectedCategory < m_Categories.size())
 			//RenderCategory(m_Categories[m_SelectedCategory]);
-		ImGui::EndChild();
+		//ImGui::EndChild();
 	}
 
 	//void SettingsWindow::RenderCategory(const SettingsCategory& category)

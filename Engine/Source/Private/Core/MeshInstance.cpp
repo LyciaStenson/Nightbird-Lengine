@@ -2,9 +2,9 @@
 
 namespace Nightbird::Core
 {
-	NB_TYPE_IMPL(MeshInstance, SpatialObject)
+	NB_REFLECT_TYPE(MeshInstance, NB_PARENT(SpatialObject), NB_FACTORY(MeshInstance),
 		NB_FIELD(m_MeshUUID, UUID)
-	NB_TYPE_IMPL_END()
+	)
 
 	MeshInstance::MeshInstance()
 		: SpatialObject(), m_Mesh(std::make_shared<Mesh>())
