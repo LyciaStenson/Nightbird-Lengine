@@ -5,20 +5,20 @@
 #include <string>
 #include <vector>
 
-#include <rttr/type.h>
+//#include <rttr/type.h>
 
 namespace Nightbird::Editor
 {
-	struct SettingsCategory
-	{
-		std::string name;
-		std::vector<rttr::property> properties;
-	};
+	//struct SettingsCategory
+	//{
+		//std::string name;
+		//std::vector<rttr::property> properties;
+	//};
 
 	class SettingsWindow : public ImGuiWindow
 	{
 	public:
-		NB_OBJECT()
+		//NB_OBJECT()
 
 		SettingsWindow(const std::string& title, bool open = false);
 
@@ -34,12 +34,12 @@ namespace Nightbird::Editor
 		void OnRender() override;
 
 	private:
-		void RenderCategory(const SettingsCategory& category);
-		void BuildCategories(rttr::instance settings, std::vector<SettingsCategory>& outCategories);
+		//void RenderCategory(const SettingsCategory& category);
+		//void BuildCategories(rttr::instance settings, std::vector<SettingsCategory>& outCategories);
 		
 		void* m_Settings = nullptr;
-		rttr::type m_SettingsType = rttr::type::get<void>();
-		std::vector<SettingsCategory> m_Categories;
+		//rttr::type m_SettingsType = rttr::type::get<void>();
+		//std::vector<SettingsCategory> m_Categories;
 		int m_SelectedCategory = 0;
 	};
 }

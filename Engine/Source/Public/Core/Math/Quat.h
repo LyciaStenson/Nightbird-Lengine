@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/TypeInfo.h"
+#include "Core/Reflection.h"
 
 #include <glm/gtc/quaternion.hpp>
 
@@ -8,7 +8,7 @@ namespace Nightbird::Core
 {
 	struct Quat
 	{
-		NB_OBJECT_BASE()
+		NB_TYPE_BASE()
 
 		float x = 0.0f;
 		float y = 0.0f;

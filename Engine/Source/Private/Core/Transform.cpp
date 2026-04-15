@@ -1,11 +1,14 @@
 #include "Core/Transform.h"
 
-#include "Core/Reflect.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_BASE_IMPL(Nightbird::Core::Transform)
+	NB_TYPE_BASE_IMPL(Transform)
+		NB_FIELD(position, Vector3)
+		NB_FIELD(rotation, Quat)
+		NB_FIELD(scale, Vector3)
+	NB_TYPE_IMPL_END()
 
 	glm::mat4 Transform::GetLocalMatrix() const
 	{

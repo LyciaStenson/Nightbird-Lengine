@@ -16,6 +16,8 @@ namespace Nightbird
 			h = (h ^ static_cast<uint8_t>(c)) * 16777619u;
 		return h;
 	}
+
+	struct ReflectionAccessor {};
 	
 	struct TypeInfo
 	{
@@ -57,7 +59,8 @@ namespace Nightbird
 	{
 		Object, // Has TypeInfo
 		Bool, Int32, UInt32, Float, Double, String,
-		Vec2, Vec3, Vec4,
+		Vector2, Vector3, Vector4, Quat,
+		UUID,
 		Unknown
 	};
 

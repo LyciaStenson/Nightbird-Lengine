@@ -6,7 +6,7 @@
 
 namespace Nightbird::Vulkan
 {
-	NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Vulkan::OffscreenSurface, Nightbird::Vulkan::RenderSurface)
+	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Vulkan::OffscreenSurface, Nightbird::Vulkan::RenderSurface)
 
 	OffscreenSurface::OffscreenSurface(Device* device, uint32_t width, uint32_t height, VkFormat colorFormat, VkFormat depthFormat)
 		: m_Device(device), m_Width(width), m_Height(height), m_ColorFormat(colorFormat), m_DepthFormat(depthFormat)

@@ -13,7 +13,7 @@ namespace Nightbird::Vulkan
 	class OffscreenSurface : public RenderSurface
 	{
 	public:
-		NB_OBJECT()
+		//NB_OBJECT()
 		OffscreenSurface(Device* device, uint32_t width, uint32_t height, VkFormat colorFormat, VkFormat depthFormat);
 		~OffscreenSurface();
 

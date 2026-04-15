@@ -7,7 +7,9 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(Nightbird::Core::AudioSource, Nightbird::Core::SceneObject)
+	NB_TYPE_IMPL(AudioSource, SceneObject)
+		NB_FIELD(m_AudioUUID, UUID)
+	NB_TYPE_IMPL_END()
 
 	void AudioSource::LoadAssets(AssetLoader& assetLoader)
 	{

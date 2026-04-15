@@ -2,7 +2,7 @@
 
 #include "ImGuiWindow.h"
 
-#include <rttr/type.h>
+//#include <rttr/type.h>
 
 namespace Nightbird::Editor
 {
@@ -11,7 +11,7 @@ namespace Nightbird::Editor
 	class Inspector : public ImGuiWindow
 	{
 	public:
-		NB_OBJECT()
+		//NB_OBJECT()
 
 		Inspector(EditorContext& context, bool open = true);
 
@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 		void OnRender() override;
 
 	private:
-		void DrawProperties(rttr::instance instance);
+		//void DrawProperties(rttr::instance instance);
 
 		EditorContext& m_Context;
 	};

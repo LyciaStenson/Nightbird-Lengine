@@ -10,9 +10,8 @@ namespace Nightbird::Core
 	class MeshInstance : public SpatialObject
 	{
 	public:
-		NB_OBJECT()
-		NB_ENABLE(SpatialObject)
-		NB_REGISTRATION_FRIEND
+		NB_TYPE()
+		NB_REFLECTION_FRIEND
 
 		MeshInstance();
 		MeshInstance(std::shared_ptr<Mesh> mesh);

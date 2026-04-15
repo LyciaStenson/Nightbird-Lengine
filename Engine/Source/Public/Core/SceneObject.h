@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Core/TypeInfo.h"
-#include "Core/Reflect.h"
+#include "Core/Reflection.h"
+
 #include "Core/AssetLoader.h"
 
 #include <uuid.h>
@@ -19,9 +20,8 @@ namespace Nightbird::Core
 	class SceneObject
 	{
 	public:
-		NB_OBJECT_BASE()
-		NB_ENABLE()
-		NB_REGISTRATION_FRIEND
+		NB_TYPE_BASE()
+		NB_REFLECTION_FRIEND
 
 		SceneObject();
 		virtual ~SceneObject() = default;

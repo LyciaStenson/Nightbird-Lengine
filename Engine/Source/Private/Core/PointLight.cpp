@@ -2,5 +2,9 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(Nightbird::Core::PointLight, Nightbird::Core::SceneObject)
+	NB_TYPE_IMPL(PointLight, SceneObject)
+		NB_FIELD(m_Color, Vector3)
+		NB_FIELD(m_Intensity, Float)
+		NB_FIELD(m_Radius, Float)
+	NB_TYPE_IMPL_END()
 }

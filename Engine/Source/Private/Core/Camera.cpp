@@ -4,7 +4,9 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(Nightbird::Core::Camera, Nightbird::Core::SpatialObject)
+	NB_TYPE_IMPL(Camera, SpatialObject)
+		NB_FIELD(m_Fov, Float)
+	NB_TYPE_IMPL_END()
 
 	glm::mat4 Camera::GetViewMatrix() const
 	{

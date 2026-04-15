@@ -12,7 +12,7 @@ namespace Nightbird::Core
 	class Mesh
 	{
 	public:
-		NB_OBJECT_BASE()
+		//NB_OBJECT_BASE()
 
 		Mesh() = default;
 		Mesh(std::vector<MeshPrimitive> primitives);

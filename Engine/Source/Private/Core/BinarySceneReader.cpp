@@ -109,15 +109,15 @@ namespace Nightbird::Core
 			uint16_t propCount = reader.ReadUInt16();
 
 			// Construct object via TypeInfo factory
-			const TypeInfo* typeInfo = TypeInfo::Find(typeName);
+			//const TypeInfo* typeInfo = TypeInfo::Find(typeName);
 			std::unique_ptr<Core::SceneObject> object;
 
-			if (typeInfo && typeInfo->factory)
-			{
-				OwnedObject owned = typeInfo->factory();
-				if (owned.IsValid())
-					object.reset(static_cast<SceneObject*>(owned.Release()));
-			}
+			//if (typeInfo && typeInfo->factory)
+			//{
+				//OwnedObject owned = typeInfo->factory();
+				//if (owned.IsValid())
+					//object.reset(static_cast<SceneObject*>(owned.Release()));
+			//}
 
 			if (!object)
 			{
@@ -137,7 +137,7 @@ namespace Nightbird::Core
 			}
 			else
 			{
-				ReadProperties(object.get(), typeInfo, propCount, reader);
+				//ReadProperties(object.get(), typeInfo, propCount, reader);
 			}
 
 			if (hasSceneUUID)
@@ -188,45 +188,45 @@ namespace Nightbird::Core
 	{
 		for (const TypeInfo* t = typeInfo; t!= nullptr; t = t->parent)
 		{
-			for (uint16_t i = 0; i < t->propCount; ++i)
+			for (uint16_t i = 0; i < t->fieldCount; ++i)
 			{
-				const PropDesc& desc = t->props[i];
-				if (desc.nameHash != incomingHash)
+				const FieldInfo& field = t->fields[i];
+				if (field.nameHash != incomingHash)
 					continue;
 
-				if (incomingSize == 0)
-				{
+				//if (incomingSize == 0)
+				//{
 					// Size of 0 means nested type
-					if (desc.nestedType)
-					{
-						uint8_t* nestedBase = objectBase + desc.offset;
-						uint16_t nestedPropCount = desc.nestedType->propCount;
+					//if (field.type)
+					//{
+						//uint8_t* nestedBase = objectBase + field.offset;
+						//uint16_t nestedFieldCount = field.type->fieldCount;
 
-						for (uint16_t np = 0; np < nestedPropCount; ++np)
-						{
-							uint32_t nestedHash = reader.ReadUInt32();
-							uint16_t nestedSize = reader.ReadUInt16();
-							ReadIntoDesc(nestedBase, desc.nestedType, nestedHash, nestedSize, reader);
-						}
-					}
-					else
-					{
-						Log::Warning("BinarySceneReader: Nested type marker with no nestedType for hash " + std::to_string(incomingHash));
-					}
-				}
-				else
-				{
-					if (incomingSize == desc.size)
-					{
-						reader.ReadRawBytes(objectBase + desc.offset, incomingSize);
-					}
-					else
-					{
-						Log::Warning("BinarySceneReader: Size mismatch for property " + std::to_string(incomingHash) + ": Expected " + std::to_string(desc.size) + " but got " + std::to_string(incomingSize));
-						std::vector<uint8_t> discard(incomingSize);
-						reader.ReadRawBytes(discard.data(), incomingSize);
-					}
-				}
+						//for (uint16_t nf = 0; nf < nestedFieldCount; ++nf)
+						//{
+							//uint32_t nestedHash = reader.ReadUInt32();
+							//uint16_t nestedSize = reader.ReadUInt16();
+							//ReadIntoDesc(nestedBase, field.type, nestedHash, nestedSize, reader);
+						//}
+					//}
+					//else
+					//{
+						//Log::Warning("BinarySceneReader: Nested type marker with no nestedType for hash " + std::to_string(incomingHash));
+					//}
+				//}
+				//else
+				//{
+					//if (incomingSize == field.size)
+					//{
+						//reader.ReadRawBytes(objectBase + field.offset, incomingSize);
+					//}
+					//else
+					//{
+						//Log::Warning("BinarySceneReader: Size mismatch for property " + std::to_string(incomingHash) + ": Expected " + std::to_string(field.size) + " but got " + std::to_string(incomingSize));
+						//std::vector<uint8_t> discard(incomingSize);
+						//reader.ReadRawBytes(discard.data(), incomingSize);
+					//}
+				//}
 
 				return;
 			}

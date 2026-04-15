@@ -7,10 +7,9 @@ namespace Nightbird::Core
 	class PointLight : public SpatialObject
 	{
 	public:
-		NB_OBJECT()
-		NB_ENABLE(SpatialObject)
-		NB_REGISTRATION_FRIEND
-
+		NB_TYPE()
+		NB_REFLECTION_FRIEND
+			
 		using SpatialObject::SpatialObject;
 
 		Vector3 m_Color = Vector3(1.0f);

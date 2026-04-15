@@ -8,7 +8,7 @@
 
 namespace Nightbird::Editor
 {
-	NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::BuildWindow, Nightbird::Editor::ImGuiWindow)
+	//NB_OBJECT_NO_FACTORY_IMPL(Nightbird::Editor::BuildWindow, Nightbird::Editor::ImGuiWindow)
 
 	BuildWindow::BuildWindow(EditorContext& context, bool open)
 	: ImGuiWindow("Build Window", open, { ImGuiWindowFlags_NoDocking }), m_Context(context)

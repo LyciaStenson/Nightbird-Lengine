@@ -2,7 +2,9 @@
 
 namespace Nightbird::Core
 {
-	NB_OBJECT_IMPL(Nightbird::Core::SpatialObject, Nightbird::Core::SceneObject)
+	NB_TYPE_IMPL(SpatialObject, SceneObject)
+		NB_FIELD(m_Transform, Object)
+	NB_TYPE_IMPL_END()
 
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{

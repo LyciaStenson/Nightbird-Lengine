@@ -11,7 +11,7 @@ namespace Nightbird::Editor
 	class BuildWindow : public ImGuiWindow
 	{
 	public:
-		NB_OBJECT()
+		//NB_OBJECT()
 
 		BuildWindow(EditorContext& context, bool open = false);
 
