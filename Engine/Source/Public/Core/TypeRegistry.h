@@ -7,9 +7,14 @@
 
 namespace Nightbird
 {
+	using ReflectionApplyFn = void(*)();
+	void RegisterReflectionApply(ReflectionApplyFn fn) noexcept;
+
 	class TypeRegistry
 	{
 	public:
+		static void InitReflection() noexcept;
+
 		static void Register(TypeInfo* type) noexcept;
 
 		static const TypeInfo* Find(std::string_view name) noexcept;

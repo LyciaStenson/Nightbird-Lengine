@@ -9,14 +9,12 @@
 #define NB_TYPE_BASE() \
 	public: \
 		static ::Nightbird::TypeInfo s_TypeInfo; \
-		virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; } \
-		static void _nb_RegisterType();
+		virtual const ::Nightbird::TypeInfo* GetTypeInfo() const { return &s_TypeInfo; }
 
 #define NB_TYPE() \
 	public: \
 		static ::Nightbird::TypeInfo s_TypeInfo; \
 		const ::Nightbird::TypeInfo* GetTypeInfo() const override { return &s_TypeInfo; } \
-		static void _nb_RegisterType();
 
 #define NB_PARENT(T) &T::s_TypeInfo
 #define NB_NO_PARENT nullptr
@@ -33,19 +31,19 @@
 		nullptr, \
 		0 \
 	}; \
-	void Type::_nb_RegisterType() \
-	{ \
-		::Nightbird::TypeRegistry::Register(&Type::s_TypeInfo); \
-	} \
 	namespace NB_Reflection_##Type \
 	{ \
 		using _NB_CurrentType = Type; \
 		static const ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
-		static const bool _nb_reg_##Type = ([]() { \
-			_NB_CurrentType::s_TypeInfo.fields = _nb_fields; \
-			_NB_CurrentType::s_TypeInfo.fieldCount = \
+		inline void _nb_ApplyReflection() \
+		{ \
+			Type::s_TypeInfo.fields = _nb_fields; \
+			Type::s_TypeInfo.fieldCount = \
 				static_cast<uint32_t>(std::size(_nb_fields)); \
-			_NB_CurrentType::_nb_RegisterType(); \
+			::Nightbird::TypeRegistry::Register(&Type::s_TypeInfo); \
+		} \
+		static const bool _nb_registration_apply = ([]() { \
+			::Nightbird::RegisterReflectionApply(&_nb_ApplyReflection); \
 			return true; \
 		}()); \
 	}
@@ -59,14 +57,14 @@
 		nullptr, \
 		0 \
 	}; \
-	void Type::_nb_RegisterType() \
-	{ \
-		::Nightbird::TypeRegistry::Register(&Type::s_TypeInfo); \
-	} \
 	namespace NB_Reflection_##Type \
 	{ \
-		static const bool _nb_reg_##Type = ([]() { \
-			Type::_nb_RegisterType(); \
+		inline void _nb_ApplyReflection() \
+		{ \
+			::Nightbird::TypeRegistry::Register(&Type::s_TypeInfo); \
+		} \
+		static const bool _nb_registration_apply = ([]() { \
+			::Nightbird::RegisterReflectionApply(&_nb_ApplyReflection); \
 			return true; \
 		}()); \
 	}

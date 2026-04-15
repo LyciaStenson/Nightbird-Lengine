@@ -20,6 +20,8 @@ using namespace Nightbird::Core;
 
 int main()
 {
+	Nightbird::TypeRegistry::InitReflection();
+
 	auto platform = CreatePlatform();
 	auto renderer = CreateRenderer();
 	Engine engine(std::move(platform), std::move(renderer));
