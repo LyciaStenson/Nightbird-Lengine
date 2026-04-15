@@ -24,9 +24,9 @@ namespace Nightbird::Editor
 		template<typename T>
 		T* GetWindow()
 		{
-			//for (auto& window : m_Windows)
-				//if (auto casted = Cast<T>(window.get()))
-					//return casted;
+			for (auto& window : m_Windows)
+				if (auto casted = Cast<T>(window.get()))
+					return casted;
 			return nullptr;
 		}
 
