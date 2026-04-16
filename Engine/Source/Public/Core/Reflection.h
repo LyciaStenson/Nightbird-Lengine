@@ -4,8 +4,6 @@
 #include "Core/TypeRegistry.h"
 #include "Core/ReflectionInternal.h"
 
-#include <iterator>
-
 #define NB_TYPE_BASE() \
 	public: \
 		static ::Nightbird::TypeInfo s_TypeInfo; \
@@ -19,7 +17,7 @@
 #define NB_PARENT(T) &T::s_TypeInfo
 #define NB_NO_PARENT nullptr
 
-#define NB_FACTORY(T) []() -> void* { return new T(); }
+#define NB_FACTORY(T) ([]() -> void* { return new T(); })
 #define NB_NO_FACTORY nullptr
 
 #define NB_REFLECT(Type, Parent, Factory, ...) \
@@ -69,10 +67,10 @@
 		}()); \
 	}
 
-#define NB_FIELD(Name, Kind) \
+#define NB_FIELD(Name) \
 	{ \
 		#Name, \
 		::Nightbird::FNVHash(#Name), \
 		::Nightbird::Detail::GetFieldTypeInfo<std::decay_t<decltype(_NB_CurrentType::Name)>>(), \
-		::Nightbird::FieldKind::Kind \
+		::Nightbird::Detail::DeduceFieldKind<std::decay_t<decltype(_NB_CurrentType::Name)>>() \
 	}

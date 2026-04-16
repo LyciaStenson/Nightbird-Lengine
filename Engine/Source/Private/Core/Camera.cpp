@@ -5,7 +5,7 @@
 namespace Nightbird::Core
 {
 	NB_REFLECT(Camera, NB_PARENT(SpatialObject), NB_FACTORY(Camera),
-		NB_FIELD(m_Fov, Float)
+		NB_FIELD(m_Fov)
 	)
 		
 	glm::mat4 Camera::GetViewMatrix() const

@@ -1,7 +1,7 @@
 project "Engine"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	pic "On"
 
@@ -15,10 +15,7 @@ project "Engine"
 		"Source/Private/**.h",
 		"Source/Private/**.cpp",
 	}
-	excludes {
-		"Source/Private/Reflect/Registration.cpp"
-	}
-
+	
 	includedirs {
 		"Source/Public",
 		"Source/Private",

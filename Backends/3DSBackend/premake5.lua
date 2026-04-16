@@ -1,7 +1,7 @@
 project "3DSBackend"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	removeconfigurations { "EditorDebug", "EditorRelease" }
 	removeplatforms { "Desktop", "WiiU" }

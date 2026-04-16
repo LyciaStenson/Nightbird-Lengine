@@ -3,8 +3,8 @@
 namespace Nightbird::Core
 {
 	NB_REFLECT(PointLight, NB_PARENT(SceneObject), NB_FACTORY(PointLight),
-		NB_FIELD(m_Color, Vector3),
-		NB_FIELD(m_Intensity, Float),
-		NB_FIELD(m_Radius, Float)
+		NB_FIELD(m_Color),
+		NB_FIELD(m_Intensity),
+		NB_FIELD(m_Radius)
 	)
 }

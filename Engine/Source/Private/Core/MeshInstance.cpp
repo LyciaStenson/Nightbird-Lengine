@@ -3,7 +3,7 @@
 namespace Nightbird::Core
 {
 	NB_REFLECT(MeshInstance, NB_PARENT(SpatialObject), NB_FACTORY(MeshInstance),
-		NB_FIELD(m_MeshUUID, UUID)
+		NB_FIELD(m_MeshUUID)
 	)
 
 	MeshInstance::MeshInstance()

@@ -1,7 +1,7 @@
 project "Editor"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	removeconfigurations { "AppDebug", "AppRelease" }
 	removeplatforms { "WiiU", "3DS" }
@@ -16,8 +16,7 @@ project "Editor"
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
-		"Source/Private/**.cpp",
-		"%{wks.location}/Engine/Source/Private/Reflect/Registration.cpp"
+		"Source/Private/**.cpp"
 	}
 
 	includedirs {

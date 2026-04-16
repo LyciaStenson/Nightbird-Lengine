@@ -1,7 +1,7 @@
 project "EditorVulkanRenderer"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	removeconfigurations { "AppDebug", "AppRelease" }
 	removeplatforms { "WiiU", "3DS" }

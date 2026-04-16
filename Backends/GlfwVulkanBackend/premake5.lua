@@ -4,7 +4,7 @@ local outDir = "%{wks.location}/Binaries/" .. outputdir .. "/"
 project "GlfwVulkanBackend"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	removeplatforms { "WiiU", "3DS" }
 

@@ -11,7 +11,7 @@ namespace Nightbird::Core
 
 		using SpatialObject::SpatialObject;
 
-		Vector3 m_Color = Vector3(1.0f);
+		glm::vec3 m_Color = glm::vec3(1.0f);
 		float m_Intensity = 1.0f;
 	};
 }

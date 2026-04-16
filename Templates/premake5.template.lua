@@ -59,7 +59,7 @@ project "Editor"
 
 project "%PROJECT_NAME%"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	pic "On"
 
@@ -82,8 +82,7 @@ project "%PROJECT_NAME%"
 
 	files {
 		"Source/**.h",
-		"Source/**.cpp",
-		enginePath .. "Engine/Source/Private/Reflect/Registration.cpp"
+		"Source/**.cpp"
 	}
 
 	includedirs {

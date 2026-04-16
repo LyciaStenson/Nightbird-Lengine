@@ -21,8 +21,5 @@ namespace Nightbird
 		static const TypeInfo* Find(uint32_t hash) noexcept;
 
 		static const std::vector<TypeInfo*>& GetAll() noexcept;
-
-	private:
-		static std::vector<TypeInfo*> s_Types;
 	};
 }
