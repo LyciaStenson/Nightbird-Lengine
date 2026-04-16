@@ -17,7 +17,7 @@ namespace Nightbird::Editor
 		void OnRender() override;
 
 	private:
-		void DrawFields(TypeInfo* type);
+		void DrawFields(void* object, const TypeInfo* type);
 
 		EditorContext& m_Context;
 	};

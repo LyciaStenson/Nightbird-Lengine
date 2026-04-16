@@ -20,71 +20,131 @@ namespace Nightbird::Editor
 
 	void Inspector::OnRender()
 	{
-		Core::SceneObject* selectedObject = m_Context.GetSelectedObject();
-		if (selectedObject)
+		Core::SceneObject* selected = m_Context.GetSelectedObject();
+		if (!selected)
 		{
-			DrawFields(&selectedObject->s_TypeInfo);
+			ImGui::TextDisabled("Select an object to edit");
+			return;
 		}
+
+		const TypeInfo* type = selected->GetTypeInfo();
+		ImGui::Text("%s", type->name);
+		ImGui::Separator();
+
+		DrawFields(selected, type);
 	}
 
-	void Inspector::DrawFields(TypeInfo* type)
+	void Inspector::DrawFields(void* object, const TypeInfo* type)
 	{
-		if (type->HasFields())
+		if (!object || !type)
+			return;
+
+		if (type->parent)
+			DrawFields(object, type->parent);
+
+		if (!type->HasFields())
+			return;
+
+		for (const FieldInfo* field = type->Begin(); field != type->End(); ++field)
 		{
-			for (FieldInfo* field = type->Begin(); field != type->End(); ++field)
+			ImGui::PushID(field->name);
+
+			switch (field->kind)
 			{
-				ImGui::PushID(field->name);
-				
-				if (field->kind == FieldKind::Int32)
+				case FieldKind::Bool:
 				{
-					int32_t value = 0;
-					ImGui::DragInt(field->name, &value);
+					bool* value = field->GetPtrAs<bool>(object);
+					ImGui::Checkbox(field->name, value);
+					break;
 				}
-				else if (field->kind == FieldKind::UInt32)
+				case FieldKind::Int32:
 				{
-					int32_t signedValue = 0;
-					ImGui::DragInt(field->name, &signedValue);
-					uint32_t value = signedValue;
+					int32_t* value = field->GetPtrAs<int32_t>(object);
+					ImGui::DragInt(field->name, value);
+					break;
 				}
-				else if (field->kind == FieldKind::Float)
+				case FieldKind::UInt32:
 				{
-					float value = 0.0f;
-					ImGui::DragFloat(field->name, &value);
+					uint32_t* value = field->GetPtrAs<uint32_t>(object);
+					ImGui::DragScalar(field->name, ImGuiDataType_U32, value);
+					break;
 				}
-				else if (field->kind == FieldKind::Bool)
+				case FieldKind::Float:
 				{
-					bool value = false;
-					ImGui::Checkbox(field->name, &value);
+					float* value = field->GetPtrAs<float>(object);
+					ImGui::DragFloat(field->name, value, 0.01f);
+					break;
 				}
-				else if (field->kind == FieldKind::String)
+				case FieldKind::Double:
 				{
-					std::string value = "";
+					double* value = field->GetPtrAs<double>(object);
+					ImGui::DragScalar(field->name, ImGuiDataType_Double, value);
+					break;
+				}
+				case FieldKind::String:
+				{
+					std::string* value = field->GetPtrAs<std::string>(object);
 					char buffer[256];
-					std::strncpy(buffer, value.c_str(), sizeof(buffer));
-					ImGui::InputText(field->name, buffer, sizeof(buffer));
+					std::strncpy(buffer, value->c_str(), sizeof(buffer));
+					if (ImGui::InputText(field->name, buffer, sizeof(buffer)))
+						*value = buffer;
+					break;
 				}
-				else if (field->kind == FieldKind::Vector2)
+				case FieldKind::Vector2:
 				{
-					glm::vec3 value = glm::vec3();
-					ImGui::DragFloat3(field->name, glm::value_ptr(value), 0.01f);
+					glm::vec2* value = field->GetPtrAs<glm::vec2>(object);
+					ImGui::DragFloat2(field->name, glm::value_ptr(*value), 0.01f);
+					break;
 				}
-				else if (field->kind == FieldKind::Quat)
+				case FieldKind::Vector3:
 				{
-					glm::quat value = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-					ImGui::DragFloat4(field->name, glm::value_ptr(value), 0.01f);
+					glm::vec3* value = field->GetPtrAs<glm::vec3>(object);
+					ImGui::DragFloat3(field->name, glm::value_ptr(*value), 0.01f);
+					break;
 				}
-				else if (field->kind == FieldKind::Object)
+				case FieldKind::Vector4:
+				{
+					glm::vec4* value = field->GetPtrAs<glm::vec4>(object);
+					ImGui::DragFloat4(field->name, glm::value_ptr(*value), 0.01f);
+					break;
+				}
+				case FieldKind::Quat:
+				{
+					glm::quat* value = field->GetPtrAs<glm::quat>(object);
+					ImGui::DragFloat4(field->name, glm::value_ptr(*value), 0.01f);
+					break;
+				}
+				case FieldKind::Object:
 				{
 					if (field->type)
-						DrawFields(field->type);
+					{
+						if (ImGui::TreeNodeEx(field->name, ImGuiTreeNodeFlags_DefaultOpen))
+						{
+							void* fieldObject = field->GetPtr(object);
+							DrawFields(fieldObject, field->type);
+							ImGui::TreePop();
+						}
+					}
+					break;
 				}
-				else if (field->kind == FieldKind::Unknown)
+				case FieldKind::UUID:
 				{
-					ImGui::LabelText("Unknown field: %s", field->name);
+					ImGui::TextDisabled("UUID: %s", field->name);
+					break;
 				}
-
-				ImGui::PopID();
+				case FieldKind::Unknown:
+				{
+					ImGui::TextDisabled("Unknown field: %s", field->name);
+					break;
+				}
+				default:
+				{
+					ImGui::TextDisabled("Missing field type: %s", field->name);
+					break;
+				}
 			}
+
+			ImGui::PopID();
 		}
 	}
 }

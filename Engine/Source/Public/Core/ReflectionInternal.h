@@ -15,7 +15,7 @@ namespace Nightbird::Detail
 	struct HasTypeInfo<T, std::void_t<decltype(T::s_TypeInfo)>> : std::true_type {};
 
 	template<typename T>
-	TypeInfo* GetFieldTypeInfo()
+	const TypeInfo* GetFieldTypeInfo()
 	{
 		if constexpr (HasTypeInfo<T>::value)
 			return &T::s_TypeInfo;

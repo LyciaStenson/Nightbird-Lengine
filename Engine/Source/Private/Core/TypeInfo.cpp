@@ -2,12 +2,12 @@
 
 namespace Nightbird
 {
-	FieldInfo* TypeInfo::Begin() const noexcept
+	const FieldInfo* TypeInfo::Begin() const noexcept
 	{
 		return fields;
 	}
 
-	FieldInfo* TypeInfo::End() const noexcept
+	const FieldInfo* TypeInfo::End() const noexcept
 	{
 		return fields + fieldCount;
 	}

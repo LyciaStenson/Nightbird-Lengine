@@ -35,7 +35,7 @@
 	namespace NB_CONCAT(NB_Reflection, Type) \
 	{ \
 		using _NB_CurrentType = Type; \
-		static ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
+		static const ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
 		inline void _nb_ApplyReflection() \
 		{ \
 			Type::s_TypeInfo.fields = _nb_fields; \
