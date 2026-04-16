@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Core/TypeInfo.h"
-
 #include <cstdint>
 
 namespace Nightbird::Core
@@ -15,7 +13,6 @@ namespace Nightbird::Core
 	class RenderSurface
 	{
 	public:
-		//NB_OBJECT_BASE()
 		virtual ~RenderSurface() = default;
 
 		virtual uint32_t GetWidth() const = 0;

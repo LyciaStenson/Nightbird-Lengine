@@ -13,7 +13,6 @@ namespace Nightbird::Vulkan
 	class OffscreenSurface : public RenderSurface
 	{
 	public:
-		//NB_OBJECT()
 		OffscreenSurface(Device* device, uint32_t width, uint32_t height, VkFormat colorFormat, VkFormat depthFormat);
 		~OffscreenSurface();
 
@@ -25,6 +24,7 @@ namespace Nightbird::Vulkan
 		VkExtent2D GetExtent() const override;
 		RenderPass& GetRenderPass() const override;
 		bool NeedsResize() const override;
+		RenderSurfaceType GetSurfaceType() const override;
 		
 		uint32_t GetWidth() const override;
 		uint32_t GetHeight() const override;

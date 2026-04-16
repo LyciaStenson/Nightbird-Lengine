@@ -89,109 +89,123 @@ namespace Nightbird::Vulkan
 		m_PointLights = scene.CollectPointLights();
 	}
 	
-	bool Renderer::BeginFrame(Core::RenderSurface& surface)
+	bool Renderer::BeginFrame(Core::RenderSurface& coreSurface)
 	{
-		//if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
-		//{
-		//	if (swapChainSurface->NeedsResize())
-		//	{
-		//		vkDeviceWaitIdle(m_Device->GetLogical());
+		Vulkan::RenderSurface& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
 
-		//		int width = 0;
-		//		int height = 0;
+		if (surface.GetSurfaceType() == RenderSurfaceType::SwapChain)
+		{
+			SwapChainSurface& swapChainSurface = static_cast<SwapChainSurface&>(surface);
+			if (swapChainSurface.NeedsResize())
+			{
+				vkDeviceWaitIdle(m_Device->GetLogical());
 
-		//		m_Platform->GetFramebufferSize(&width, &height);
+				int width = 0;
+				int height = 0;
 
-		//		swapChainSurface->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-		//		return false;
-		//	}
+				m_Platform->GetFramebufferSize(&width, &height);
 
-		//	vkWaitForFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex], VK_TRUE, UINT64_MAX);
+				swapChainSurface.Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+				return false;
+			}
 
-		//	VkFramebuffer framebuffer = swapChainSurface->AcquireFramebuffer(m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]);
-		//	if (framebuffer == VK_NULL_HANDLE)
-		//		return false;
+			vkWaitForFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex], VK_TRUE, UINT64_MAX);
 
-		//	vkResetFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]);
+			VkFramebuffer framebuffer = swapChainSurface.AcquireFramebuffer(m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]);
+			if (framebuffer == VK_NULL_HANDLE)
+				return false;
 
-		//	m_CurrentFrame.commandBuffer = m_Device->GetCommandBuffer(m_CurrentFrame.frameIndex);
-		//	vkResetCommandBuffer(m_CurrentFrame.commandBuffer, 0);
+			vkResetFences(m_Device->GetLogical(), 1, &m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]);
 
-		//	RenderPass& renderPass = swapChainSurface->GetRenderPass();
-		//	renderPass.BeginCommandBuffer(m_CurrentFrame.commandBuffer);
-		//	renderPass.Begin(m_CurrentFrame.commandBuffer, framebuffer, swapChainSurface->GetExtent());
+			m_CurrentFrame.commandBuffer = m_Device->GetCommandBuffer(m_CurrentFrame.frameIndex);
+			vkResetCommandBuffer(m_CurrentFrame.commandBuffer, 0);
 
-		//	return true;
-		//}
-		//else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
-		//{
-		//	offscreenSurface->m_CommandBuffer = m_Device->BeginSingleTimeCommands();
-		//	offscreenSurface->GetColorTexture().TransitionToColor(offscreenSurface->m_CommandBuffer);
+			RenderPass& renderPass = swapChainSurface.GetRenderPass();
+			renderPass.BeginCommandBuffer(m_CurrentFrame.commandBuffer);
+			renderPass.Begin(m_CurrentFrame.commandBuffer, framebuffer, swapChainSurface.GetExtent());
 
-		//	RenderPass& renderPass = offscreenSurface->GetRenderPass();
-		//	renderPass.Begin(offscreenSurface->m_CommandBuffer, offscreenSurface->GetFramebuffer(), offscreenSurface->GetExtent());
+			return true;
+		}
+		else if (surface.GetSurfaceType() == RenderSurfaceType::Offscreen)
+		{
+			OffscreenSurface& offscreenSurface = static_cast<OffscreenSurface&>(surface);
+			offscreenSurface.m_CommandBuffer = m_Device->BeginSingleTimeCommands();
+			offscreenSurface.GetColorTexture().TransitionToColor(offscreenSurface.m_CommandBuffer);
 
-		//	return true;
-		//}
+			RenderPass& renderPass = offscreenSurface.GetRenderPass();
+			renderPass.Begin(offscreenSurface.m_CommandBuffer, offscreenSurface.GetFramebuffer(), offscreenSurface.GetExtent());
+
+			return true;
+		}
 
 		return false;
 	}
 
-	void Renderer::EndFrame(Core::RenderSurface& surface)
+	void Renderer::EndFrame(Core::RenderSurface& coreSurface)
 	{
-		//if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
-		//{
-		//	RenderPass& renderPass = swapChainSurface->GetRenderPass();
+		Vulkan::RenderSurface& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
 
-		//	renderPass.End(m_CurrentFrame.commandBuffer);
-		//	renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
-		//	
-		//	VkSubmitInfo submitInfo{};
-		//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		if (surface.GetSurfaceType() == RenderSurfaceType::SwapChain)
+		{
+			SwapChainSurface& swapChainSurface = static_cast<SwapChainSurface&>(surface);
+			
+			RenderPass& renderPass = swapChainSurface.GetRenderPass();
+			renderPass.End(m_CurrentFrame.commandBuffer);
+			renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
+			
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		//	VkSemaphore waitSemaphores[] = {m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]};
-		//	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-		//	submitInfo.waitSemaphoreCount = 1;
-		//	submitInfo.pWaitSemaphores = waitSemaphores;
-		//	submitInfo.pWaitDstStageMask = waitStages;
-		//	submitInfo.commandBufferCount = 1;
-		//	submitInfo.pCommandBuffers = &m_CurrentFrame.commandBuffer;
+			VkSemaphore waitSemaphores[] = {m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]};
+			VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = waitSemaphores;
+			submitInfo.pWaitDstStageMask = waitStages;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &m_CurrentFrame.commandBuffer;
 
-		//	VkSemaphore signalSemaphores[] = {m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]};
-		//	submitInfo.signalSemaphoreCount = 1;
-		//	submitInfo.pSignalSemaphores = signalSemaphores;
+			VkSemaphore signalSemaphores[] = {m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]};
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = signalSemaphores;
 
-		//	if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]) != VK_SUCCESS)
-		//	{
-		//		Core::Log::Error("Failed to submit draw command buffer");
-		//		return;
-		//	}
+			if (vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_Sync->m_InFlightFences[m_CurrentFrame.frameIndex]) != VK_SUCCESS)
+			{
+				Core::Log::Error("Failed to submit draw command buffer");
+				return;
+			}
 
-		//	swapChainSurface->Present(m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]);
+			swapChainSurface.Present(m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]);
 
-		//	m_CurrentFrame.frameIndex = (m_CurrentFrame.frameIndex + 1) % Config::MAX_FRAMES_IN_FLIGHT;
-		//}
-		//else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
-		//{
-		//	RenderPass& renderPass = offscreenSurface->GetRenderPass();
-		//	renderPass.End(offscreenSurface->m_CommandBuffer);
-		//	offscreenSurface->GetColorTexture().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		//	
-		//	m_Device->EndSingleTimeCommands(offscreenSurface->m_CommandBuffer);
-		//	offscreenSurface->m_CommandBuffer = VK_NULL_HANDLE;
-		//}
+			m_CurrentFrame.frameIndex = (m_CurrentFrame.frameIndex + 1) % Config::MAX_FRAMES_IN_FLIGHT;
+		}
+		else if (surface.GetSurfaceType() == RenderSurfaceType::Offscreen)
+		{
+			OffscreenSurface& offscreenSurface = static_cast<OffscreenSurface&>(surface);
+
+			RenderPass& renderPass = offscreenSurface.GetRenderPass();
+			renderPass.End(offscreenSurface.m_CommandBuffer);
+			
+			offscreenSurface.GetColorTexture().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			
+			m_Device->EndSingleTimeCommands(offscreenSurface.m_CommandBuffer);
+			offscreenSurface.m_CommandBuffer = VK_NULL_HANDLE;
+		}
 	}
 
-	void Renderer::DrawScene(Core::RenderSurface& surface)
+	void Renderer::DrawScene(Core::RenderSurface& coreSurface)
 	{
-		//if (auto* swapChainSurface = Cast<SwapChainSurface>(&surface))
-		//{
-		//	DrawScene(m_CurrentFrame.commandBuffer, swapChainSurface->GetExtent(), m_CurrentFrame.frameIndex);
-		//}
-		//else if (auto* offscreenSurface = Cast<OffscreenSurface>(&surface))
-		//{
-		//	DrawScene(offscreenSurface->m_CommandBuffer, offscreenSurface->GetExtent(), 0);
-		//}
+		Vulkan::RenderSurface& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
+
+		if (surface.GetSurfaceType() == RenderSurfaceType::SwapChain)
+		{
+			SwapChainSurface& swapChainSurface = static_cast<SwapChainSurface&>(surface);
+			DrawScene(m_CurrentFrame.commandBuffer, swapChainSurface.GetExtent(), m_CurrentFrame.frameIndex);
+		}
+		else if (surface.GetSurfaceType() == RenderSurfaceType::Offscreen)
+		{
+			OffscreenSurface& offscreenSurface = static_cast<OffscreenSurface&>(surface);
+			DrawScene(offscreenSurface.m_CommandBuffer, offscreenSurface.GetExtent(), 0);
+		}
 	}
 
 	void Renderer::DrawScene(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t frameIndex)
