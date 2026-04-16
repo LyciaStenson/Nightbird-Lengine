@@ -81,6 +81,9 @@ namespace Nightbird
 
 		const TypeInfo* type = nullptr;
 		FieldKind kind = FieldKind::Unknown;
+
+		uint32_t offset = 0;
+		uint32_t size = 0;
 	};
 	
 	template<typename T, typename U>

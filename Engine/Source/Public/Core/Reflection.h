@@ -20,6 +20,9 @@
 #define NB_FACTORY(T) ([]() -> void* { return new T(); })
 #define NB_NO_FACTORY nullptr
 
+#define NB_CONCAT_IMPL(a, b) a##b
+#define NB_CONCAT(a, b) NB_CONCAT_IMPL(a, b)
+
 #define NB_REFLECT(Type, Parent, Factory, ...) \
 	::Nightbird::TypeInfo Type::s_TypeInfo = { \
 		#Type, \
@@ -29,7 +32,7 @@
 		nullptr, \
 		0 \
 	}; \
-	namespace NB_Reflection_##__COUNTER__ \
+	namespace NB_CONCAT(NB_Reflection, Type) \
 	{ \
 		using _NB_CurrentType = Type; \
 		static const ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
@@ -55,7 +58,7 @@
 		nullptr, \
 		0 \
 	}; \
-	namespace NB_Reflection_##__COUNTER__ \
+	namespace NB_CONCAT(NB_Reflection, Type) \
 	{ \
 		inline void _nb_ApplyReflection() \
 		{ \
@@ -72,5 +75,7 @@
 		#Name, \
 		::Nightbird::FNVHash(#Name), \
 		::Nightbird::Detail::GetFieldTypeInfo<std::decay_t<decltype(_NB_CurrentType::Name)>>(), \
-		::Nightbird::Detail::DeduceFieldKind<std::decay_t<decltype(_NB_CurrentType::Name)>>() \
+		::Nightbird::Detail::DeduceFieldKind<std::decay_t<decltype(_NB_CurrentType::Name)>>(), \
+		static_cast<uint32_t>(offsetof(_NB_CurrentType, Name)), \
+		static_cast<uint32_t>(sizeof(_NB_CurrentType::Name)) \
 	}

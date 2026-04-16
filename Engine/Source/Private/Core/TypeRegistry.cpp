@@ -44,6 +44,8 @@ namespace Nightbird
 		if (!type)
 			return;
 
+		Core::Log::Info("TypeRegistry::Register: type: " + std::string(type->name) + ", hash: " + std::to_string(type->nameHash));
+
 		auto& map = GetMap();
 		auto [it, inserted] = map.emplace(type->nameHash, type);
 

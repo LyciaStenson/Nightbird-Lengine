@@ -18,9 +18,7 @@ namespace Nightbird::Editor
 
 	private:
 		void MainMenuBar();
-		void Toolbar();
-		void DockSpace();
-
+		
 		EditorContext& m_Context;
 		WindowManager& m_WindowManager;
 	};
