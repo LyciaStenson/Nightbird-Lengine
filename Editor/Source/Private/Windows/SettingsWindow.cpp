@@ -2,10 +2,10 @@
 
 #include <unordered_map>
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::SettingsWindow, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(SettingsWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	SettingsWindow::SettingsWindow(const std::string& title, bool open)
 		: ImGuiWindow(title, open, { ImGuiWindowFlags_NoDocking })
 	{

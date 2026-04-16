@@ -2,12 +2,12 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+NB_REFLECT(Nightbird::Core::Camera, NB_PARENT(Nightbird::Core::SpatialObject), NB_FACTORY(Nightbird::Core::Camera),
+	NB_FIELD(m_Fov)
+)
+
 namespace Nightbird::Core
 {
-	NB_REFLECT(Camera, NB_PARENT(SpatialObject), NB_FACTORY(Camera),
-		NB_FIELD(m_Fov)
-	)
-		
 	glm::mat4 Camera::GetViewMatrix() const
 	{
 		return glm::inverse(GetWorldMatrix());

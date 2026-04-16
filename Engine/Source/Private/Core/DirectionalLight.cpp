@@ -1,9 +1,6 @@
 #include "Core/DirectionalLight.h"
 
-namespace Nightbird::Core
-{
-	NB_REFLECT(DirectionalLight, NB_PARENT(SceneObject), NB_FACTORY(DirectionalLight),
-		NB_FIELD(m_Color),
-		NB_FIELD(m_Intensity)
-	)
-}
+NB_REFLECT(Nightbird::Core::DirectionalLight, NB_PARENT(Nightbird::Core::SceneObject), NB_FACTORY(Nightbird::Core::DirectionalLight),
+	NB_FIELD(m_Color),
+	NB_FIELD(m_Intensity)
+)

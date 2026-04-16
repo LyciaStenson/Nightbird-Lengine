@@ -2,14 +2,14 @@
 
 #include "Core/Log.h"
 
+NB_REFLECT(Nightbird::Core::Transform, NB_NO_PARENT, NB_FACTORY(Nightbird::Core::Transform),
+	NB_FIELD(position),
+	NB_FIELD(rotation),
+	NB_FIELD(scale)
+)
+
 namespace Nightbird::Core
 {
-	NB_REFLECT(Transform, NB_NO_PARENT, NB_FACTORY(Transform),
-		NB_FIELD(position),
-		NB_FIELD(rotation),
-		NB_FIELD(scale)
-	)
-
 	glm::mat4 Transform::GetLocalMatrix() const
 	{
 		glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(position));

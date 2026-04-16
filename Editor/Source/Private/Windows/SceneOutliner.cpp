@@ -7,10 +7,10 @@
 #include "Core/SceneObject.h"
 #include "Core/Log.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::SceneOutliner, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(SceneOutliner, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
 		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)
 	{

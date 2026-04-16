@@ -1,9 +1,9 @@
 #include "Windows/ProjectSettingsWindow.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::ProjectSettingsWindow, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(ProjectSettingsWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	ProjectSettingsWindow::ProjectSettingsWindow(ProjectSettings& settings)
 		: SettingsWindow("Project Settings")
 	{

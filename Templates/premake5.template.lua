@@ -92,16 +92,12 @@ project "%PROJECT_NAME%"
 		enginePath .. "Engine/Vendor/stb",
 		enginePath .. "Engine/Vendor/stduuid",
 	}
-
-	filter { "configurations:EditorDebug or EditorRelease" }
-		includedirs { enginePath .. "Editor/Vendor/rttr/src" }
-	filter { }
-
+	
 	libdirs { enginePath .. "Binaries/" .. outputdir }
 
 	filter { "configurations:EditorDebug or EditorRelease" }
-		links { "Engine", "rttr" }
-		defines { "EDITOR_BUILD", "RTTR_DLL" }
+		links { "Engine" }
+		defines { "EDITOR_BUILD" }
 	filter { }
 
 	filter { "configurations:AppDebug or AppRelease", "platforms:Desktop" }

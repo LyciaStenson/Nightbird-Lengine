@@ -29,7 +29,7 @@
 		nullptr, \
 		0 \
 	}; \
-	namespace NB_Reflection_##Type \
+	namespace NB_Reflection_##__COUNTER__ \
 	{ \
 		using _NB_CurrentType = Type; \
 		static const ::Nightbird::FieldInfo _nb_fields[] = { __VA_ARGS__ }; \
@@ -55,7 +55,7 @@
 		nullptr, \
 		0 \
 	}; \
-	namespace NB_Reflection_##Type \
+	namespace NB_Reflection_##__COUNTER__ \
 	{ \
 		inline void _nb_ApplyReflection() \
 		{ \

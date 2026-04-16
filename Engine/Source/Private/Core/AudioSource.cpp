@@ -5,12 +5,12 @@
 #include "Core/Engine.h"
 #include "Core/Log.h"
 
+NB_REFLECT(Nightbird::Core::AudioSource, NB_PARENT(Nightbird::Core::SceneObject), NB_FACTORY(Nightbird::Core::AudioSource),
+	NB_FIELD(m_AudioUUID)
+)
+
 namespace Nightbird::Core
 {
-	NB_REFLECT(AudioSource, NB_PARENT(SceneObject), NB_FACTORY(AudioSource),
-		NB_FIELD(m_AudioUUID)
-	)
-
 	void AudioSource::LoadAssets(AssetLoader& assetLoader)
 	{
 		m_AudioAsset = assetLoader.LoadAudio(m_AudioUUID);

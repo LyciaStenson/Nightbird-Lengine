@@ -9,10 +9,10 @@
 #include "Core/Scene.h"
 #include "Core/Log.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::AssetBrowser, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(AssetBrowser, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	AssetBrowser::AssetBrowser(EditorContext& context, bool open)
 		: ImGuiWindow("Asset Browser", open), m_Context(context)
 	{

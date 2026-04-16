@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/TypeInfo.h"
 #include "Core/Reflection.h"
 
 #include "Core/AssetLoader.h"

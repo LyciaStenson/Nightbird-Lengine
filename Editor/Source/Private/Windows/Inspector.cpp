@@ -5,10 +5,10 @@
 #include "Core/SceneObject.h"
 #include "Core/Transform.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::Inspector, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(Inspector, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	Inspector::Inspector(EditorContext& context, bool open)
 		: ImGuiWindow("Inspector", open), m_Context(context)
 	{

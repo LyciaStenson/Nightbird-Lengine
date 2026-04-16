@@ -11,10 +11,10 @@
 #include "Core/Camera.h"
 #include "Core/Log.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::SceneWindow, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(SceneWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	SceneWindow::SceneWindow(EditorContext& context, bool open)
 		: ImGuiWindow("Scene", open, { ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse }), m_Context(context)
 	{

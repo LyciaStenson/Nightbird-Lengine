@@ -1,9 +1,9 @@
 #include "ImGuiWindow.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::ImGuiWindow, NB_NO_PARENT, NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(ImGuiWindow, NB_NO_PARENT, NB_NO_FACTORY)
-
 	ImGuiWindow::ImGuiWindow(const std::string& title, bool open, const ImGuiWindowConfig& config)
 		: m_Title(title), m_Open(open), m_Config(config)
 	{

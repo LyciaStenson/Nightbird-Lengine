@@ -4,12 +4,12 @@
 #include "Core/Scene.h"
 #include "Core/Log.h"
 
+NB_REFLECT(Nightbird::Core::SceneObject, NB_NO_PARENT, NB_FACTORY(Nightbird::Core::SceneObject),
+	NB_FIELD(m_Name)
+)
+
 namespace Nightbird::Core
 {
-	NB_REFLECT(SceneObject, NB_NO_PARENT, NB_FACTORY(SceneObject),
-		NB_FIELD(m_Name)
-	)
-
 	SceneObject::SceneObject()
 		: m_Name("SceneObject")
 	{

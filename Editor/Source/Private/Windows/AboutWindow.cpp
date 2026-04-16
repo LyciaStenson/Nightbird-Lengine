@@ -1,9 +1,9 @@
 #include "Windows/AboutWindow.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::AboutWindow, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(AboutWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	AboutWindow::AboutWindow(bool open)
 	: ImGuiWindow("About Nightbird", open, { ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize, ImVec2(512, 448) })
 	{

@@ -1,11 +1,11 @@
 #include "Core/MeshInstance.h"
 
+NB_REFLECT(Nightbird::Core::MeshInstance, NB_PARENT(Nightbird::Core::SpatialObject), NB_FACTORY(Nightbird::Core::MeshInstance),
+	NB_FIELD(m_MeshUUID)
+)
+
 namespace Nightbird::Core
 {
-	NB_REFLECT(MeshInstance, NB_PARENT(SpatialObject), NB_FACTORY(MeshInstance),
-		NB_FIELD(m_MeshUUID)
-	)
-
 	MeshInstance::MeshInstance()
 		: SpatialObject(), m_Mesh(std::make_shared<Mesh>())
 	{

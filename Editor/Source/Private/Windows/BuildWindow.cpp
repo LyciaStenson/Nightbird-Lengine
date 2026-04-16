@@ -6,10 +6,10 @@
 #include "Import/ImportManager.h"
 #include "Import/AssetInfo.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Editor::BuildWindow, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
+
 namespace Nightbird::Editor
 {
-	NB_REFLECT_NO_FIELDS(BuildWindow, NB_PARENT(ImGuiWindow), NB_NO_FACTORY)
-
 	BuildWindow::BuildWindow(EditorContext& context, bool open)
 	: ImGuiWindow("Build Window", open, { ImGuiWindowFlags_NoDocking }), m_Context(context)
 	{
