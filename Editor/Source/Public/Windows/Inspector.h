@@ -2,8 +2,6 @@
 
 #include "ImGuiWindow.h"
 
-//#include <rttr/type.h>
-
 namespace Nightbird::Editor
 {
 	class EditorContext;
@@ -19,7 +17,7 @@ namespace Nightbird::Editor
 		void OnRender() override;
 
 	private:
-		//void DrawProperties(rttr::instance instance);
+		void DrawFields(TypeInfo* type);
 
 		EditorContext& m_Context;
 	};

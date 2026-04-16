@@ -27,7 +27,7 @@ namespace Nightbird
 		using FactoryFn = void* (*)();
 		FactoryFn factory = nullptr;
 
-		const FieldInfo* fields = nullptr;
+		FieldInfo* fields = nullptr;
 		uint32_t fieldCount = 0;
 
 		bool IsA(const TypeInfo* other) const noexcept
@@ -61,8 +61,8 @@ namespace Nightbird
 			return fields != nullptr && fieldCount > 0;
 		}
 
-		const FieldInfo* Begin() const noexcept;
-		const FieldInfo* End() const noexcept;
+		FieldInfo* Begin() const noexcept;
+		FieldInfo* End() const noexcept;
 	};
 
 	enum class FieldKind : uint8_t
@@ -79,7 +79,7 @@ namespace Nightbird
 		const char* name = nullptr;
 		uint32_t nameHash = 0;
 
-		const TypeInfo* type = nullptr;
+		TypeInfo* type = nullptr;
 		FieldKind kind = FieldKind::Unknown;
 
 		uint32_t offset = 0;
