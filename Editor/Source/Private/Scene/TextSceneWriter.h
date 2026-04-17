@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/TypeInfo.h"
+
 #include <uuid.h>
 #include <toml.hpp>
 
@@ -11,7 +13,6 @@ namespace Nightbird::Core
 {
 	class Scene;
 	class SceneObject;
-	class Mesh;
 }
 
 namespace Nightbird::Editor
@@ -28,8 +29,7 @@ namespace Nightbird::Editor
 		void AssignNodeUUIDs(Core::SceneObject* object);
 
 		void WriteNode(Core::SceneObject* object, Core::SceneObject* parent, toml::array& nodesArray);
-
-		//toml::table VariantToToml(const rttr::variant& variant);
+		void WriteFields(void* object, const TypeInfo* type, toml::table& table);
 
 		uuids::uuid GenerateUUID() const;
 	};

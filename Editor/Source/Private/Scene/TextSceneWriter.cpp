@@ -2,13 +2,11 @@
 
 #include "Core/Scene.h"
 #include "Core/SceneObject.h"
-#include "Core/SpatialObject.h"
-#include "Core/MeshInstance.h"
-#include "Core/DirectionalLight.h"
-#include "Core/PointLight.h"
 #include "Core/Camera.h"
-#include "Core/AudioSource.h"
 #include "Core/Log.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace Nightbird::Editor
 {
@@ -24,8 +22,8 @@ namespace Nightbird::Editor
 		toml::table sceneTable;
 		sceneTable.insert("name", sceneName);
 		sceneTable.insert("uuid", uuids::to_string(sceneUUID));
-		Core::Camera* activeCamera = scene.GetActiveCamera();
-		sceneTable.insert("active_camera", uuids::to_string(m_NodeUUIDs[activeCamera]));
+		const Core::Camera* activeCamera = scene.GetActiveCamera();
+		sceneTable.insert("active_camera", activeCamera ? uuids::to_string(m_NodeUUIDs[activeCamera]) : std::string{});
 		document.insert("scene", sceneTable);
 
 		toml::array nodesArray;
@@ -62,21 +60,14 @@ namespace Nightbird::Editor
 			return;
 
 		toml::table node;
-
-		node.insert("uuid", uuids::to_string(m_NodeUUIDs[object]));
-		node.insert("name", object->GetName());
-		node.insert("parent", parent ? uuids::to_string(m_NodeUUIDs[parent]) : std::string{});
 		
-		//rttr::type type = rttr::type::get(*object);
-		//node.insert("type", type.get_name().to_string());
+		node.insert("name", object->GetName());
+		node.insert("uuid", uuids::to_string(m_NodeUUIDs[object]));
+		node.insert("parent", parent ? uuids::to_string(m_NodeUUIDs[parent]) : std::string{});
+		node.insert("type", object->GetTypeInfo()->name);
 
 		toml::table properties;
-		//for (auto& property : type.get_properties())
-		//{
-			//rttr::variant value = property.get_value(*object);
-			//toml::table tomlValue = VariantToToml(value);
-			//properties.insert(property.get_name().to_string(), tomlValue);
-		//}
+		WriteFields(static_cast<void*>(object), object->GetTypeInfo(), properties);
 		node.insert("properties", properties);
 		
 		if (object->HasSourceScene())
@@ -92,41 +83,83 @@ namespace Nightbird::Editor
 			WriteNode(child.get(), object, nodesArray);
 	}
 
-	//toml::table TextSceneWriter::VariantToToml(const rttr::variant& variant)
-	//{
-	//	toml::table result;
+	void TextSceneWriter::WriteFields(void* object, const TypeInfo* type, toml::table& table)
+	{
+		if (!object || !type)
+			return;
 
-	//	rttr::type type = variant.get_type();
-	//	result.insert("type", type.get_name().to_string());
+		if (type->parent)
+			WriteFields(object, type->parent, table);
 
-	//	if (type == rttr::type::get<int>())
-	//		result.insert("value", variant.get_value<int>());
-	//	else if (variant.is_type<float>())
-	//		result.insert("value", variant.get_value<float>());
-	//	else if (variant.is_type<bool>())
-	//		result.insert("value", variant.get_value<bool>());
-	//	else if (variant.is_type<std::string>())
-	//		result.insert("value", variant.get_value<std::string>());
-	//	else if (variant.is_type<uuids::uuid>())
-	//		result.insert("value", uuids::to_string(variant.get_value<uuids::uuid>()));
-	//	else if (type.is_class())
-	//	{
-	//		toml::table nested;
-	//		for (auto& prop : type.get_properties())
-	//		{
-	//			rttr::variant propVariant = prop.get_value(variant);
-	//			nested.insert(prop.get_name().to_string(), VariantToToml(propVariant));
-	//		}
-	//		result.insert("value", nested);
-	//	}
-	//	else
-	//	{
-	//		Core::Log::Warning("TextSceneWriter: Unsupported type: " + type.get_name().to_string());
-	//	}
-	//	
-	//	return result;
-	//}
+		if (!type->HasFields())
+			return;
 
+		for (const FieldInfo* field = type->Begin(); field != type->End(); ++field)
+		{
+			switch (field->kind)
+			{
+			case FieldKind::Bool:
+				table.insert(field->name, *field->GetPtrAs<bool>(object));
+				break;
+			case FieldKind::Int32:
+				table.insert(field->name, *field->GetPtrAs<int32_t>(object));
+				break;
+			case FieldKind::UInt32:
+				table.insert(field->name, *field->GetPtrAs<uint32_t>(object));
+				break;
+			case FieldKind::Float:
+				table.insert(field->name, *field->GetPtrAs<float>(object));
+				break;
+			case FieldKind::Double:
+				table.insert(field->name, *field->GetPtrAs<double>(object));
+				break;
+			case FieldKind::String:
+				table.insert(field->name, *field->GetPtrAs<std::string>(object));
+				break;
+			case FieldKind::Vector2:
+			{
+				auto* vec = field->GetPtrAs<glm::vec2>(object);
+				table.insert(field->name, toml::array{vec->x, vec->y});
+				break;
+			}
+			case FieldKind::Vector3:
+			{
+				auto* vec = field->GetPtrAs<glm::vec3>(object);
+				table.insert(field->name, toml::array{vec->x, vec->y, vec->z});
+				break;
+			}
+			case FieldKind::Vector4:
+			{
+				auto* vec = field->GetPtrAs<glm::vec4>(object);
+				table.insert(field->name, toml::array{vec->x, vec->y, vec->z, vec->w});
+				break;
+			}
+			case FieldKind::Quat:
+			{
+				auto* quat = field->GetPtrAs<glm::quat>(object);
+				table.insert(field->name, toml::array{ quat->x, quat->y, quat->z, quat->w });
+				break;
+			}
+			case FieldKind::UUID:
+			{
+				auto* uuid = field->GetPtrAs<uuids::uuid>(object);
+				table.insert(field->name, uuids::to_string(*uuid));
+				break;
+			}
+			case FieldKind::Object:
+				if (field->name)
+				{
+					toml::table nested;
+					WriteFields(field->GetPtr(object), field->type, nested);
+					table.insert(field->name, nested);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
 	uuids::uuid TextSceneWriter::GenerateUUID() const
 	{
 		std::random_device randomDevice;
