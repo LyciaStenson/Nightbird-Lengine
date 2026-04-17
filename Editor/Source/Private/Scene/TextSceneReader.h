@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/TypeInfo.h"
 #include "Core/SceneReadResult.h"
 
 #include <uuid.h>
@@ -15,8 +16,7 @@ namespace Nightbird::Editor
 	public:
 		Core::SceneReadResult Read(const std::filesystem::path& path);
 
-	//private:
-		//void DeserializeToml(const toml::table& table, rttr::instance instance);
-		//rttr::variant TableToVariant(const toml::table& table);
+	private:
+		void ReadFields(void* object, const TypeInfo* type, const toml::table& table);
 	};
 }

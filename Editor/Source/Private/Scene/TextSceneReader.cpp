@@ -72,16 +72,12 @@ namespace Nightbird::Editor
 			}
 
 			std::unique_ptr<Core::SceneObject> object;
-			//rttr::type type = rttr::type::get_by_name(typeName);
-			//if (type.is_valid())
-			//{
-			//	rttr::variant variant = type.create();
-			//	if (variant.is_valid() && variant.can_convert<Core::SceneObject*>())
-			//	{
-			//		object.reset(variant.get_value<Core::SceneObject*>());
-			//		object->SetName(name);
-			//	}
-			//}
+			const TypeInfo* type = TypeRegistry::Find(typeName);
+			if (type && type->HasFactory())
+			{
+				object.reset(type->CreateAs<Core::SceneObject>());
+				object->SetName(type->name);
+			}
 
 			if (!object)
 			{
@@ -90,18 +86,14 @@ namespace Nightbird::Editor
 				object->SetName(name);
 			}
 
-			//if (auto* propertiesTable = (*nodeTable)["properties"].as_table())
-			//{
-			//	rttr::instance objectInstance = *object;
-			//	DeserializeToml(*propertiesTable, objectInstance);
-			//}
+			if (auto* fieldsTable = (*nodeTable)["fields"].as_table())
+				ReadFields(static_cast<void*>(object.get()), object->GetTypeInfo(), *fieldsTable);
 
-			std::string sceneUUIDString = (*nodeTable)["scene_uuid"].value_or(std::string{});
-			if (!sceneUUIDString.empty())
+			std::string sourceSceneUUIDString = (*nodeTable)["scene_uuid"].value_or(std::string{});
+			if (!sourceSceneUUIDString.empty())
 			{
-				auto sceneUUID = uuids::uuid::from_string(sceneUUIDString);
-				if (sceneUUID)
-					object->SetSourceSceneUUID(*sceneUUID);
+				if (auto sourceSceneUUID = uuids::uuid::from_string(sourceSceneUUIDString))
+					object->SetSourceSceneUUID(*sourceSceneUUID);
 			}
 
 			Core::SceneObject* objectPtr = object.get();
@@ -139,92 +131,132 @@ namespace Nightbird::Editor
 		std::string activeCameraUUIDString = document["scene"]["active_camera"].value_or(std::string{});
 		auto activeCameraUUID = uuids::uuid::from_string(activeCameraUUIDString);
 		if (activeCameraUUID && nodeMap.count(*activeCameraUUID))
-		{
 			result.activeCamera = Cast<Core::Camera>(nodeMap[*activeCameraUUID]);
-		}
 
 		Core::Log::Info("TextSceneReader: Loaded scene: " + sceneName);
 		return result;
 	}
 
-	//void TextSceneReader::DeserializeToml(const toml::table& table, rttr::instance instance)
-	//{
-	//	rttr::type type = instance.get_derived_type();
-	//	if (!type.is_class())
-	//		return;
-	//	
-	//	for (auto& prop : type.get_properties())
-	//	{
-	//		if (!prop.is_valid() || prop.is_readonly())
-	//			continue;
+	void TextSceneReader::ReadFields(void* object, const TypeInfo* type, const toml::table& table)
+	{
+		if (!object || !type)
+			return;
 
-	//		std::string propName = prop.get_name().to_string();
-	//		const auto* propNode = table.get(propName);
-	//		if (!propNode)
-	//			continue;
+		if (type->parent)
+			ReadFields(object, type->parent, table);
 
-	//		const auto* propTable = propNode->as_table();
-	//		if (!propTable)
-	//			continue;
+		if (!type->HasFields())
+			return;
 
-	//		rttr::type propType = prop.get_type().get_raw_type();
-	//		rttr::variant variant;
-	//		
-	//		if (propType.is_class())
-	//		{
-	//			rttr::variant propVariant = prop.get_value(instance);
-	//			if (!propVariant.is_valid())
-	//				continue;
-
-	//			auto* valueTable = (*propTable)["value"].as_table();
-	//			if (!valueTable)
-	//				continue;
-
-	//			rttr::instance propInstance = propVariant;
-	//			if (!propInstance.is_valid())
-	//				continue;
-
-	//			DeserializeToml(*valueTable, propInstance);
-	//			variant = propVariant;
-	//		}
-	//		else
-	//		{
-	//			variant = TableToVariant(*propTable);
-	//		}
-
-	//		if (variant.is_valid())
-	//		{
-	//			bool success = prop.set_value(instance, variant);
-	//			if (!success)
-	//				Core::Log::Warning("TextSceneReader: Failed to set value for property " + propName);
-	//		}
-	//		else
-	//		{
-	//			Core::Log::Warning("TextSceneReader: Failed to deserialize property " + propName);
-	//		}
-	//	}
-	//}
-
-	//rttr::variant TextSceneReader::TableToVariant(const toml::table& table)
-	//{
-	//	std::string typeName = table["type"].value_or(std::string{});
-
-	//	if (typeName == "int")
-	//		return table["value"].value_or(0);
-	//	else if (typeName == "float")
-	//		return table["value"].value_or(0.0f);
-	//	else if (typeName == "bool")
-	//		return table["value"].value_or(false);
-	//	else if (typeName == "string")
-	//		return table["value"].value_or(std::string{});
-	//	else if (typeName == "uuid")
-	//	{
-	//		std::string uuidString = table["value"].value_or(std::string{});
-	//		auto uuid = uuids::uuid::from_string(uuidString);
-	//		return uuid ? rttr::variant(*uuid) : rttr::variant{};
-	//	}
-
-	//	Core::Log::Warning("TextSceneReader: TableToVariant: Unknown type: " + typeName);
-	//	return {};
-	//}
+		for (const FieldInfo* field = type->Begin(); field != type->End(); ++field)
+		{
+			switch (field->kind)
+			{
+			case FieldKind::Bool:
+			{
+				if (auto value = table[field->name].value<bool>())
+					*field->GetPtrAs<bool>(object) = *value;
+				break;
+			}
+			case FieldKind::Int32:
+			{
+				if (auto value = table[field->name].value<int32_t>())
+					*field->GetPtrAs<int32_t>(object) = *value;
+				break;
+			}
+			case FieldKind::UInt32:
+			{
+				if (auto value = table[field->name].value<uint32_t>())
+					*field->GetPtrAs<uint32_t>(object) = *value;
+				break;
+			}
+			case FieldKind::Float:
+			{
+				if (auto value = table[field->name].value<double>())
+					*field->GetPtrAs<float>(object) = static_cast<float>(*value);
+				break;
+			}
+			case FieldKind::Double:
+			{
+				if (auto value = table[field->name].value<double>())
+					*field->GetPtrAs<double>(object) = *value;
+				break;
+			}
+			case FieldKind::String:
+			{
+				if (auto value = table[field->name].value<std::string>())
+					*field->GetPtrAs<std::string>(object) = *value;
+				break;
+			}
+			case FieldKind::Vector2:
+			{
+				if (auto* array = table[field->name].as_array(); array && array->size() >= 2)
+				{
+					auto* value = field->GetPtrAs<glm::vec2>(object);
+					value->x = static_cast<float>(array->get(0)->value_or(0.0));
+					value->y = static_cast<float>(array->get(1)->value_or(0.0));
+				}
+				break;
+			}
+			case FieldKind::Vector3:
+			{
+				if (auto* array = table[field->name].as_array(); array && array->size() >= 3)
+				{
+					auto* value = field->GetPtrAs<glm::vec3>(object);
+					value->x = static_cast<float>(array->get(0)->value_or(0.0));
+					value->y = static_cast<float>(array->get(1)->value_or(0.0));
+					value->z = static_cast<float>(array->get(2)->value_or(0.0));
+				}
+				break;
+			}
+			case FieldKind::Vector4:
+			{
+				if (auto* array = table[field->name].as_array(); array && array->size() >= 4)
+				{
+					auto* value = field->GetPtrAs<glm::vec4>(object);
+					value->x = static_cast<float>(array->get(0)->value_or(0.0));
+					value->y = static_cast<float>(array->get(1)->value_or(0.0));
+					value->z = static_cast<float>(array->get(2)->value_or(0.0));
+					value->w = static_cast<float>(array->get(3)->value_or(0.0));
+				}
+				break;
+			}
+			case FieldKind::Quat:
+			{
+				if (auto* array = table[field->name].as_array(); array && array->size() >= 4)
+				{
+					auto* value = field->GetPtrAs<glm::vec4>(object);
+					value->x = static_cast<float>(array->get(0)->value_or(0.0));
+					value->y = static_cast<float>(array->get(1)->value_or(0.0));
+					value->z = static_cast<float>(array->get(2)->value_or(0.0));
+					value->w = static_cast<float>(array->get(3)->value_or(1.0));
+				}
+				break;
+			}
+			case FieldKind::UUID:
+			{
+				if (auto value = table[field->name].value<std::string>())
+				{
+					if (auto uuid = uuids::uuid::from_string(*value))
+						*field->GetPtrAs<uuids::uuid>(object) = *uuid;
+				}
+				break;
+			}
+			case FieldKind::Object:
+			{
+				if (field->type)
+				{
+					if (auto* nested = table[field->name].as_table())
+						ReadFields(field->GetPtr(object), field->type, *nested);
+				}
+				break;
+			}
+			case FieldKind::Unknown:
+				Core::Log::Info("TextSceneReader: Unknown FieldKind");
+			default:
+				Core::Log::Info("TextSceneReader: Unhandled FieldKind: " + std::to_string(static_cast<uint8_t>(field->kind)));
+				break;
+			}
+		}
+	}
 }

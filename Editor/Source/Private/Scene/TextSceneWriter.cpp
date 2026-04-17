@@ -14,7 +14,7 @@ namespace Nightbird::Editor
 		const uuids::uuid& sceneUUID, const std::filesystem::path& outputPath)
 	{
 		m_NodeUUIDs.clear();
-		
+
 		AssignNodeUUIDs(scene.GetRoot());
 
 		toml::table document;
@@ -46,10 +46,10 @@ namespace Nightbird::Editor
 			return;
 
 		m_NodeUUIDs[object] = GenerateUUID();
-		
+
 		if (object->HasSourceScene())
 			return;
-		
+
 		for (const auto& child : object->GetChildren())
 			AssignNodeUUIDs(child.get());
 	}
@@ -66,10 +66,10 @@ namespace Nightbird::Editor
 		node.insert("parent", parent ? uuids::to_string(m_NodeUUIDs[parent]) : std::string{});
 		node.insert("type", object->GetTypeInfo()->name);
 
-		toml::table properties;
-		WriteFields(static_cast<void*>(object), object->GetTypeInfo(), properties);
-		node.insert("properties", properties);
-		
+		toml::table fields;
+		WriteFields(static_cast<void*>(object), object->GetTypeInfo(), fields);
+		node.insert("fields", fields);
+
 		if (object->HasSourceScene())
 		{
 			node.insert("scene_uuid", uuids::to_string(object->GetSourceSceneUUID().value()));
@@ -154,7 +154,10 @@ namespace Nightbird::Editor
 					table.insert(field->name, nested);
 				}
 				break;
+			case FieldKind::Unknown:
+				Core::Log::Info("TextSceneWriter: Unknown FieldKind");
 			default:
+				Core::Log::Info("TextSceneWriter: Unhandled FieldKind: " + std::to_string(static_cast<uint8_t>(field->kind)));
 				break;
 			}
 		}
