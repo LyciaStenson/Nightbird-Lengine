@@ -14,11 +14,9 @@ namespace Nightbird::Editor
 {
 	void TextSceneWriter::Write(Core::Scene& scene, const std::string& sceneName,
 		const uuids::uuid& sceneUUID, const std::filesystem::path& outputPath)
-		//const std::unordered_map<const Core::Mesh*, uuids::uuid>& meshUUIDs)
 	{
 		m_NodeUUIDs.clear();
-		//m_MeshUUIDs = &meshUUIDs;
-
+		
 		AssignNodeUUIDs(scene.GetRoot());
 
 		toml::table document;
