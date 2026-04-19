@@ -26,7 +26,8 @@ namespace Nightbird::Core
 	private:
 		AssetLoader& m_AssetLoader;
 
-		void ReadProperties(SceneObject* object, const TypeInfo* typeInfo, uint16_t propCount, BinaryReader& reader);
-		void ReadIntoDesc(uint8_t* objectBase, const TypeInfo* typeInfo, uint32_t incomingHash, uint16_t incomingSize, BinaryReader& reader);
+		void ReadFields(uint8_t* object, const TypeInfo* type, BinaryReader& reader);
+		void ReadField(uint8_t* object, const TypeInfo* type, uint32_t nameHash, uint16_t size, BinaryReader& reader);
+		void SkipFields(uint16_t fieldCount, BinaryReader& reader);
 	};
 }

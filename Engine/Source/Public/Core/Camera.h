@@ -12,7 +12,7 @@ namespace Nightbird::Core
 		NB_TYPE()
 
 		using SpatialObject::SpatialObject;
-
+		
 		float m_Fov = 70.0f;
 
 		glm::mat4 GetViewMatrix() const;

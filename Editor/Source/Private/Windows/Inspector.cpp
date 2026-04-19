@@ -75,12 +75,6 @@ namespace Nightbird::Editor
 					ImGui::DragFloat(field->name, value, 0.01f);
 					break;
 				}
-				case FieldKind::Double:
-				{
-					double* value = field->GetPtrAs<double>(object);
-					ImGui::DragScalar(field->name, ImGuiDataType_Double, value);
-					break;
-				}
 				case FieldKind::String:
 				{
 					std::string* value = field->GetPtrAs<std::string>(object);

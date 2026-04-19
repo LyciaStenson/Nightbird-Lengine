@@ -176,12 +176,6 @@ namespace Nightbird::Editor
 					*field->GetPtrAs<float>(object) = static_cast<float>(*value);
 				break;
 			}
-			case FieldKind::Double:
-			{
-				if (auto value = table[field->name].value<double>())
-					*field->GetPtrAs<double>(object) = *value;
-				break;
-			}
 			case FieldKind::String:
 			{
 				if (auto value = table[field->name].value<std::string>())
@@ -253,6 +247,7 @@ namespace Nightbird::Editor
 			}
 			case FieldKind::Unknown:
 				Core::Log::Info("TextSceneReader: Unknown FieldKind");
+				break;
 			default:
 				Core::Log::Info("TextSceneReader: Unhandled FieldKind: " + std::to_string(static_cast<uint8_t>(field->kind)));
 				break;

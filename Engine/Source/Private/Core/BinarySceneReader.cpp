@@ -13,6 +13,9 @@
 #include "Core/AudioSource.h"
 #include "Core/Log.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <vector>
 
 namespace Nightbird::Core
@@ -37,10 +40,11 @@ namespace Nightbird::Core
 			return result;
 		}
 
+
 		// Validate type
-		uint8_t type[4] = {};
-		reader.ReadRawBytes(type, 4);
-		if (type[0] != 'S' || type[1] != 'C' || type[2] != 'N' || type[3] != 'E')
+		uint8_t signature[4] = {};
+		reader.ReadRawBytes(signature, 4);
+		if (signature[0] != 'S' || signature[1] != 'C' || signature[2] != 'N' || signature[3] != 'E')
 		{
 			Core::Log::Error("BinarySceneReader: Invalid type signature in: " + path);
 			return result;
@@ -90,7 +94,7 @@ namespace Nightbird::Core
 			reader.ReadRawBytes(parentUUIDBytes.data(), 16);
 			uuids::uuid parentUUID(parentUUIDBytes);
 
-			// Source scene UUID
+			// Source scene flag and UUID
 			uint8_t hasSceneUUID = reader.ReadUInt8();
 			uuids::uuid sourceSceneUUID;
 			if (hasSceneUUID)
@@ -105,41 +109,26 @@ namespace Nightbird::Core
 			std::string typeName(typeNameLength, '\0');
 			reader.ReadRawBytes(reinterpret_cast<uint8_t*>(typeName.data()), typeNameLength);
 
-			// Property count
-			uint16_t propCount = reader.ReadUInt16();
+			// Field count
+			uint16_t fieldCount = reader.ReadUInt16();
 
-			// Construct object via TypeInfo factory
-			//const TypeInfo* typeInfo = TypeInfo::Find(typeName);
+			// Construct object via TypeRegistry
 			std::unique_ptr<Core::SceneObject> object;
-
-			//if (typeInfo && typeInfo->factory)
-			//{
-				//OwnedObject owned = typeInfo->factory();
-				//if (owned.IsValid())
-					//object.reset(static_cast<SceneObject*>(owned.Release()));
-			//}
-
-			if (!object)
+			const TypeInfo* type = TypeRegistry::Find(typeName);
+			
+			if (type && type->factory)
 			{
-				Log::Warning("BinarySceneReader: Unknown type " + typeName + ", defaulting to SceneObject");
-				object = std::make_unique<SceneObject>();
-				// Skip all properties
-				for (uint16_t i = 0; i < propCount; ++i)
-				{
-					reader.ReadUInt32(); // Hash
-					uint16_t size = reader.ReadUInt16();
-					if (size > 0)
-					{
-						std::vector<uint8_t> discard(size);
-						reader.ReadRawBytes(discard.data(), size);
-					}
-				}
+				object.reset(type->CreateAs<SceneObject>());
+				object->SetName(typeName);
+				ReadFields(reinterpret_cast<uint8_t*>(object.get()), type, reader);
 			}
 			else
 			{
-				//ReadProperties(object.get(), typeInfo, propCount, reader);
+				Log::Warning("BinarySceneReader: Unknown type " + typeName + ", defaulting to SceneObject");
+				object = std::make_unique<SceneObject>();
+				SkipFields(fieldCount, reader);
 			}
-
+			
 			if (hasSceneUUID)
 				object->SetSourceSceneUUID(sourceSceneUUID);
 
@@ -172,76 +161,151 @@ namespace Nightbird::Core
 		return result;
 	}
 
-	void BinarySceneReader::ReadProperties(SceneObject* object, const TypeInfo* typeInfo, uint16_t propCount, BinaryReader& reader)
+	void BinarySceneReader::ReadFields(uint8_t* object, const TypeInfo* type, BinaryReader& reader)
 	{
-		uint8_t* objectBase = reinterpret_cast<uint8_t*>(object);
+		if (!object || !type)
+			return;
 
-		for (uint16_t i = 0; i < propCount; ++i)
+		if (type->parent)
+			ReadFields(object, type->parent, reader);
+
+		if (!type->HasFields())
+			return;
+
+		for (uint32_t i = 0; i < type->fieldCount; ++i)
 		{
-			uint32_t hash = reader.ReadUInt32();
+			uint32_t nameHash = reader.ReadUInt32();
 			uint16_t size = reader.ReadUInt16();
-			ReadIntoDesc(objectBase, typeInfo, hash, size, reader);
+			ReadField(object, type, nameHash, size, reader);
 		}
 	}
-
-	void BinarySceneReader::ReadIntoDesc(uint8_t* objectBase, const TypeInfo* typeInfo, uint32_t incomingHash, uint16_t incomingSize, BinaryReader& reader)
+	
+	void BinarySceneReader::ReadField(uint8_t* object, const TypeInfo* type, uint32_t nameHash, uint16_t size, BinaryReader& reader)
 	{
-		for (const TypeInfo* t = typeInfo; t!= nullptr; t = t->parent)
+		for (const TypeInfo* t = type; t!= nullptr; t = t->parent)
 		{
 			for (uint16_t i = 0; i < t->fieldCount; ++i)
 			{
 				const FieldInfo& field = t->fields[i];
-				if (field.nameHash != incomingHash)
+				if (field.nameHash != nameHash)
 					continue;
 
-				//if (incomingSize == 0)
-				//{
-					// Size of 0 means nested type
-					//if (field.type)
-					//{
-						//uint8_t* nestedBase = objectBase + field.offset;
-						//uint16_t nestedFieldCount = field.type->fieldCount;
+				uint8_t* fieldPtr = object + field.offset;
+				
+				if (size == 0)
+				{
+					if (field.kind == FieldKind::Object && field.type)
+						ReadFields(fieldPtr, field.type, reader);
+					else
+						Log::Warning("BinarySceneReader: Size 0 for non-object field with hash: " + std::to_string(nameHash));
+					return;
+				}
 
-						//for (uint16_t nf = 0; nf < nestedFieldCount; ++nf)
-						//{
-							//uint32_t nestedHash = reader.ReadUInt32();
-							//uint16_t nestedSize = reader.ReadUInt16();
-							//ReadIntoDesc(nestedBase, field.type, nestedHash, nestedSize, reader);
-						//}
-					//}
-					//else
-					//{
-						//Log::Warning("BinarySceneReader: Nested type marker with no nestedType for hash " + std::to_string(incomingHash));
-					//}
-				//}
-				//else
-				//{
-					//if (incomingSize == field.size)
-					//{
-						//reader.ReadRawBytes(objectBase + field.offset, incomingSize);
-					//}
-					//else
-					//{
-						//Log::Warning("BinarySceneReader: Size mismatch for property " + std::to_string(incomingHash) + ": Expected " + std::to_string(field.size) + " but got " + std::to_string(incomingSize));
-						//std::vector<uint8_t> discard(incomingSize);
-						//reader.ReadRawBytes(discard.data(), incomingSize);
-					//}
-				//}
-
+				switch (field.kind)
+				{
+				case FieldKind::Bool:
+					*reinterpret_cast<bool*>(fieldPtr) = reader.ReadUInt8() != 0;
+					break;
+				case FieldKind::Int32:
+					*reinterpret_cast<int32_t*>(fieldPtr) = reader.ReadInt32();
+					break;
+				case FieldKind::UInt32:
+					*reinterpret_cast<uint32_t*>(fieldPtr) = reader.ReadUInt32();
+					break;
+				case FieldKind::Float:
+					*reinterpret_cast<float*>(fieldPtr) = reader.ReadFloat();
+					break;
+				case FieldKind::String:
+				{
+					uint32_t length = reader.ReadUInt32();
+					std::string string(length, '\0');
+					reader.ReadRawBytes(reinterpret_cast<uint8_t*>(string.data()), length);
+					*reinterpret_cast<std::string*>(fieldPtr) = std::move(string);
+					break;
+				}
+				case FieldKind::Vector2:
+				{
+					auto* vec = reinterpret_cast<glm::vec2*>(fieldPtr);
+					vec->x = reader.ReadFloat();
+					vec->y = reader.ReadFloat();
+					break;
+				}
+				case FieldKind::Vector3:
+				{
+					auto* vec = reinterpret_cast<glm::vec3*>(fieldPtr);
+					vec->x = reader.ReadFloat();
+					vec->y = reader.ReadFloat();
+					vec->z = reader.ReadFloat();
+					break;
+				}
+				case FieldKind::Vector4:
+				{
+					auto* vec = reinterpret_cast<glm::vec4*>(fieldPtr);
+					vec->x = reader.ReadFloat();
+					vec->y = reader.ReadFloat();
+					vec->z = reader.ReadFloat();
+					vec->w = reader.ReadFloat();
+					break;
+				}
+				case FieldKind::Quat:
+				{
+					auto* quat = reinterpret_cast<glm::quat*>(fieldPtr);
+					quat->x = reader.ReadFloat();
+					quat->y = reader.ReadFloat();
+					quat->z = reader.ReadFloat();
+					quat->w = reader.ReadFloat();
+					break;
+				}
+				case FieldKind::UUID:
+				{
+					std::array<uint8_t, 16> bytes;
+					reader.ReadRawBytes(bytes.data(), 16);
+					*reinterpret_cast<uuids::uuid*>(fieldPtr) = uuids::uuid(bytes);
+					break;
+				}
+				default:
+					Core::Log::Info("BinarySceneReader: Unhandled FieldKind:");
+				case FieldKind::Unknown:
+					Core::Log::Info("BinarySceneReader: Unknown FieldKind for hash: " + std::to_string(nameHash));
+					if (size > 0)
+					{
+						std::vector<uint8_t> discard(size);
+						reader.ReadRawBytes(discard.data(), size);
+					}
+					break;
+				}
 				return;
 			}
 		}
 
-		// Mo matching PropDesc found
-		if (incomingSize > 0)
+		// Mo matching FieldKind found
+		if (size > 0)
 		{
-			Log::Warning("BinarySceneReader: No matching PropDesc found for property " + std::to_string(incomingHash));
-			std::vector<uint8_t> discard(incomingSize);
-			reader.ReadRawBytes(discard.data(), incomingSize);
+			Log::Warning("BinarySceneReader: No matching FieldKind found for hash: " + std::to_string(nameHash) + ", skipping " + std::to_string(size) + " bytes");
+			std::vector<uint8_t> discard(size);
+			reader.ReadRawBytes(discard.data(), size);
 		}
 		else
 		{
-			Log::Warning("BinarySceneReader: Unknown nested type with hash " + std::to_string(incomingHash));
+			Log::Warning("BinarySceneReader: Unknown nested type with hash " + std::to_string(nameHash) + ", cannot skip safely");
+		}
+	}
+
+	void BinarySceneReader::SkipFields(uint16_t fieldCount, BinaryReader& reader)
+	{
+		for (uint16_t i = 0; i < fieldCount; ++i)
+		{
+			reader.ReadUInt32(); // nameHash
+			uint16_t size = reader.ReadUInt16();
+			if (size > 0)
+			{
+				std::vector<uint8_t> discard(size);
+				reader.ReadRawBytes(discard.data(), size);
+			}
+			else
+			{
+				Log::Warning("BinarySceneReader: Cannot safely skip unknown nested Object field");
+			}
 		}
 	}
 }

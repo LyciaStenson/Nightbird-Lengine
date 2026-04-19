@@ -13,6 +13,9 @@
 
 #include "Cook/BinaryWriter.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 namespace Nightbird::Editor
 {
 	void BinarySceneWriter::Write(Core::SceneObject* root, const uuids::uuid& sceneUUID,
@@ -91,12 +94,7 @@ namespace Nightbird::Editor
 		// Parent UUID
 		auto parentUUIDBytes = parentUUID.as_bytes();
 		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(parentUUIDBytes.data()), 16);
-
-		// Name
-		//std::string name = object->GetName();
-		//writer.WriteUInt32(static_cast<uint32_t>(name.size()));
-		//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(name.data()), name.size());
-
+		
 		if (object->HasSourceScene())
 		{
 			// Has Scene UUID (true)
@@ -112,20 +110,19 @@ namespace Nightbird::Editor
 		}
 
 		// Type name
-		//rttr::type type = rttr::type::get(*object);
-		//std::string typeName = type.get_name().to_string();
-		//writer.WriteUInt16(static_cast<uint16_t>(typeName.size()));
-		//writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName.data()), typeName.size());
+		const char* typeName = object->GetTypeInfo()->name;
+		uint16_t typeNameLength = static_cast<uint16_t>(std::strlen(typeName));
+		writer.WriteUInt16(typeNameLength);
+		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(typeName), typeNameLength);
 
-		// Collect leaf properties
-		//std::vector<LeafProperty> leaves;
-		//CollectLeaves(rttr::instance(*object), type, leaves);
+		// Field count
+		uint16_t fieldCount = 0;
+		for (const TypeInfo* type = object->GetTypeInfo(); type; type = type->parent)
+			fieldCount += static_cast<uint16_t>(type->fieldCount);
+		writer.WriteUInt16(fieldCount);
 
-		// Leaves size
-		//writer.WriteUInt16(static_cast<uint16_t>(leaves.size()));
-
-		//for (const auto& leaf : leaves)
-			//WriteLeaf(leaf, writer);
+		// Fields
+		WriteFields(static_cast<void*>(object), object->GetTypeInfo(), writer);
 
 		// Do not serialize children of scene instance
 		if (object->HasSourceScene())
@@ -135,103 +132,117 @@ namespace Nightbird::Editor
 			WriteNode(child.get(), m_NodeUUIDs[object], writer);
 	}
 
-	//void BinarySceneWriter::CollectLeaves(const rttr::instance& instance, const rttr::type& type, std::vector<LeafProperty>& leaves)
-	//{
-	//	for (auto& prop : type.get_properties())
-	//	{
-	//		rttr::variant variant = prop.get_value(instance);
-	//		rttr::type propType = variant.get_type();
-	//		uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
+	void BinarySceneWriter::WriteFields(void* object, const TypeInfo* type, BinaryWriter& writer)
+	{
+		if (!object || !type)
+			return;
 
-	//		if (propType == rttr::type::get<int>() ||
-	//			propType == rttr::type::get<float>() ||
-	//			propType == rttr::type::get<bool>() ||
-	//			propType == rttr::type::get<std::string>() ||
-	//			propType == rttr::type::get<uuids::uuid>())
-	//		{
-	//			leaves.push_back({ nameHash, variant });
-	//		}
-	//		else if (propType.is_class() && !propType.get_properties().empty())
-	//		{
-	//			leaves.push_back({ nameHash, variant });
-	//			CollectLeavesRecursive(variant, propType, leaves);
-	//		}
-	//		else
-	//		{
-	//			Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
-	//		}
-	//	}
-	//}
+		if (type->parent)
+			WriteFields(object, type->parent, writer);
 
-	//void BinarySceneWriter::CollectLeavesRecursive(const rttr::variant& variant, const rttr::type& type, std::vector<LeafProperty>& leaves)
-	//{
-	//	for (auto& prop : type.get_properties())
-	//	{
-	//		rttr::variant propVariant = prop.get_value(variant);
-	//		rttr::type propType = propVariant.get_type();
-	//		uint32_t nameHash = Nightbird::FNVHash(prop.get_name().to_string());
+		if (!type->HasFields())
+			return;
 
-	//		if (propType == rttr::type::get<int>() ||
-	//			propType == rttr::type::get<float>() ||
-	//			propType == rttr::type::get<bool>() ||
-	//			propType == rttr::type::get<std::string>() ||
-	//			propType == rttr::type::get<uuids::uuid>())
-	//		{
-	//			leaves.push_back({ nameHash, propVariant});
-	//		}
-	//		else if (propType.is_class() && !propType.get_properties().empty())
-	//		{
-	//			leaves.push_back({ nameHash, propVariant});
-	//			CollectLeavesRecursive(propVariant, propType, leaves);
-	//		}
-	//		else
-	//		{
-	//			Core::Log::Warning("BinarySceneWriter: Skipping unsupported property " + prop.get_name().to_string() + " of type " + propType.get_name().to_string());
-	//		}
-	//	}
-	//}
+		for (const FieldInfo* field = type->Begin(); field != type->End(); ++field)
+		{
+			writer.WriteUInt32(field->nameHash);
 
-	//void BinarySceneWriter::WriteLeaf(const LeafProperty& leaf, BinaryWriter& writer)
-	//{
-	//	rttr::type type = leaf.variant.get_type();
-
-	//	writer.WriteUInt32(leaf.nameHash);
-
-	//	if (type == rttr::type::get<int>())
-	//	{
-	//		writer.WriteUInt16(sizeof(int32_t));
-	//		writer.WriteInt32(leaf.variant.get_value<int>());
-	//	}
-	//	else if (type == rttr::type::get<float>())
-	//	{
-	//		writer.WriteUInt16(sizeof(float));
-	//		writer.WriteFloat(leaf.variant.get_value<float>());
-	//	}
-	//	else if (type == rttr::type::get<bool>())
-	//	{
-	//		writer.WriteUInt16(sizeof(uint8_t));
-	//		writer.WriteUInt8(leaf.variant.get_value<bool>() ? 1 : 0);
-	//	}
-	//	else if (type == rttr::type::get<std::string>())
-	//	{
-	//		const auto& value = leaf.variant.get_value<std::string>();
-	//		writer.WriteUInt16(static_cast<uint16_t>(sizeof(uint32_t) + value.size()));
-	//		writer.WriteUInt32(static_cast<uint32_t>(value.size()));
-	//		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(value.data()), value.size());
-	//	}
-	//	else if (type == rttr::type::get<uuids::uuid>())
-	//	{
-	//		writer.WriteUInt16(16);
-	//		auto bytes = leaf.variant.get_value<uuids::uuid>().as_bytes();
-	//		writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
-	//	}
-	//	else if (type.is_class())
-	//	{
-	//		// Struct
-	//		writer.WriteUInt16(0);
-	//	}
-	//}
-
+			switch (field->kind)
+			{
+			case FieldKind::Bool:
+			{
+				writer.WriteUInt16(sizeof(uint8_t));
+				writer.WriteUInt8(*field->GetPtrAs<bool>(object) ? 1 : 0);
+				break;
+			}
+			case FieldKind::Int32:
+			{
+				writer.WriteUInt16(sizeof(int32_t));
+				writer.WriteInt32(*field->GetPtrAs<int32_t>(object));
+				break;
+			}
+			case FieldKind::UInt32:
+			{
+				writer.WriteUInt16(sizeof(uint32_t));
+				writer.WriteUInt32(*field->GetPtrAs<uint32_t>(object));
+				break;
+			}
+			case FieldKind::Float:
+			{
+				writer.WriteUInt16(sizeof(float));
+				writer.WriteUInt32(*field->GetPtrAs<uint32_t>(object));
+				break;
+			}
+			case FieldKind::String:
+			{
+				const std::string& string = *field->GetPtrAs<std::string>(object);
+				uint32_t length = static_cast<uint32_t>(string.size());
+				writer.WriteUInt16(static_cast<uint16_t>(sizeof(uint32_t) + length));
+				writer.WriteUInt32(length);
+				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(string.data()), length);
+				break;
+			}
+			case FieldKind::Vector2:
+			{
+				writer.WriteUInt16(sizeof(float) * 2);
+				auto* vec = field->GetPtrAs<glm::vec2>(object);
+				writer.WriteFloat(vec->x);
+				writer.WriteFloat(vec->y);
+				break;
+			}
+			case FieldKind::Vector3:
+			{
+				writer.WriteUInt16(sizeof(float) * 3);
+				auto* vec = field->GetPtrAs<glm::vec3>(object);
+				writer.WriteFloat(vec->x);
+				writer.WriteFloat(vec->y);
+				writer.WriteFloat(vec->z);
+				break;
+			}
+			case FieldKind::Vector4:
+			{
+				writer.WriteUInt16(sizeof(float) * 4);
+				auto* vec = field->GetPtrAs<glm::vec4>(object);
+				writer.WriteFloat(vec->x);
+				writer.WriteFloat(vec->y);
+				writer.WriteFloat(vec->z);
+				writer.WriteFloat(vec->w);
+				break;
+			}
+			case FieldKind::Quat:
+			{
+				writer.WriteUInt16(sizeof(float) * 4);
+				auto* quat = field->GetPtrAs<glm::quat>(object);
+				writer.WriteFloat(quat->x);
+				writer.WriteFloat(quat->y);
+				writer.WriteFloat(quat->z);
+				writer.WriteFloat(quat->w);
+				break;
+			}
+			case FieldKind::UUID:
+			{
+				writer.WriteUInt16(16);
+				auto bytes = field->GetPtrAs<uuids::uuid>(object)->as_bytes();
+				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
+				break;
+			}
+			case FieldKind::Object:
+			{
+				writer.WriteUInt16(0);
+				if (field->type)
+					WriteFields(field->GetPtr(object), field->type, writer);
+				break;
+			}
+			case FieldKind::Unknown:
+				Core::Log::Info("BinarySceneWriter: Unknown FieldKind");
+				break;
+			default:
+				Core::Log::Info("BinarySceneWriter: Unhandled FieldKind: " + std::to_string(static_cast<uint8_t>(field->kind)));
+				break;
+			}
+		}
+	}
+	
 	uuids::uuid BinarySceneWriter::GenerateUUID() const
 	{
 		std::random_device randomDevice;

@@ -1,5 +1,7 @@
 #include "Core/Camera.h"
 
+#include "Core/Log.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 NB_REFLECT(Nightbird::Core::Camera, NB_PARENT(Nightbird::Core::SpatialObject), NB_FACTORY(Nightbird::Core::Camera),

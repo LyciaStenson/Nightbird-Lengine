@@ -110,9 +110,6 @@ namespace Nightbird::Editor
 			case FieldKind::Float:
 				table.insert(field->name, *field->GetPtrAs<float>(object));
 				break;
-			case FieldKind::Double:
-				table.insert(field->name, *field->GetPtrAs<double>(object));
-				break;
 			case FieldKind::String:
 				table.insert(field->name, *field->GetPtrAs<std::string>(object));
 				break;
@@ -156,6 +153,7 @@ namespace Nightbird::Editor
 				break;
 			case FieldKind::Unknown:
 				Core::Log::Info("TextSceneWriter: Unknown FieldKind");
+				break;
 			default:
 				Core::Log::Info("TextSceneWriter: Unhandled FieldKind: " + std::to_string(static_cast<uint8_t>(field->kind)));
 				break;
