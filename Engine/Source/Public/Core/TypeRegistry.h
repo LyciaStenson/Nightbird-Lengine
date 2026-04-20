@@ -7,6 +7,9 @@
 
 namespace Nightbird
 {
+	using RegisterTypeFn = void(*)(TypeInfo* type);
+	using ProjectInitFn = void(*)(RegisterTypeFn registerType);
+
 	using ReflectionApplyFn = void(*)();
 	void RegisterReflectionApply(ReflectionApplyFn fn) noexcept;
 

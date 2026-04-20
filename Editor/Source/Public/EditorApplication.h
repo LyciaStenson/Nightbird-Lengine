@@ -18,6 +18,12 @@
 #include <memory>
 #include <filesystem>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 namespace Nightbird::Editor
 {
 	class EditorApplication
@@ -31,6 +37,7 @@ namespace Nightbird::Editor
 	private:
 		void InitializeEngine();
 		int LoadProject();
+		void UnloadProject();
 		void InitializeEditor();
 		void InitializeSettings();
 		void InitializeWindows();
@@ -56,5 +63,11 @@ namespace Nightbird::Editor
 
 		std::filesystem::path m_ProjectPath;
 		bool m_ProjectLoaded = false;
+
+#ifdef _WIN32
+		HMODULE m_ProjectLibHandle = nullptr;
+#else
+		void* m_ProjectLibHandle = nullptr;
+#endif
 	};
 }

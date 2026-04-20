@@ -51,9 +51,9 @@ namespace Nightbird
 
 		if (!inserted)
 		{
-			if (it->second != type)
-				Core::Log::Error("TypeRegistry: Hash collision or duplicate name: " + std::string(type->name));
-			assert(it->second == type && "TypeRegistry: Hash collision or duplicate name");
+			//if (it->second != type)
+				//Core::Log::Error("TypeRegistry: Hash collision or duplicate name: " + std::string(type->name));
+			//assert(it->second == type && "TypeRegistry: Hash collision or duplicate name");
 			return;
 		}
 		

@@ -11,22 +11,11 @@
 
 #include <chrono>
 
-//#ifndef EDITOR_BUILD
-//namespace Nightbird
-//{
-//	void ForceRegistrationLink();
-//}
-//#endif
-
 namespace Nightbird::Core
 {
 	Engine::Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer)
 		: m_Platform(std::move(platform)), m_Renderer(std::move(renderer))
 	{
-//#ifndef EDITOR_BUILD
-		//ForceRegistrationLink();
-//#endif
-
 		m_Scene = std::make_unique<Scene>();
 
 		m_Platform->Initialize();

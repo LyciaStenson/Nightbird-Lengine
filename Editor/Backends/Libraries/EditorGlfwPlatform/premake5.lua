@@ -10,7 +10,7 @@ project "EditorGlfwPlatform"
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	defines {
-		"EDITOR_BUILD",
+		"NB_EDITOR_BUILD",
 	}
 
 	files {

@@ -25,5 +25,5 @@ project "Engine"
 	}
 
 	filter { "configurations:EditorDebug or EditorRelease" }
-		defines { "EDITOR_BUILD" }
+		defines { "NB_EDITOR_BUILD" }
 	filter { }

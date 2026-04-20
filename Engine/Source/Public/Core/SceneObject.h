@@ -24,6 +24,11 @@ namespace Nightbird::Core
 		SceneObject();
 		virtual ~SceneObject() = default;
 
+		SceneObject(const SceneObject&) = delete;
+		SceneObject& operator=(const SceneObject&) = delete;
+		SceneObject(SceneObject&&) = default;
+		SceneObject& operator=(SceneObject&&) = default;
+
 		const std::string& GetName() const;
 		void SetName(std::string name);
 

@@ -32,7 +32,7 @@ project "Editor"
 		"%{wks.location}/Engine/Vendor/stduuid"
 	}
 
-	defines { "EDITOR_BUILD" }
+	defines { "NB_EDITOR_BUILD" }
 
 	filter { "configurations:EditorDebug or EditorRelease" }
 		links { "EditorGlfwVulkanBackend", "EditorGlfwPlatform", "EditorVulkanRenderer", "GlfwVulkanBackend", "GlfwPlatform", "VulkanRenderer", "GLFW", "imgui", "fastgltf", "Engine" }

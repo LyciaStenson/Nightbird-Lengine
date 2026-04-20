@@ -16,7 +16,7 @@ namespace Nightbird::Editor
 	public:
 		NB_TYPE()
 		SceneOutliner(EditorContext& context, bool open = true);
-
+	
 	protected:
 		void OnRender() override;
 

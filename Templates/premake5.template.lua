@@ -82,7 +82,8 @@ project "%PROJECT_NAME%"
 
 	files {
 		"Source/**.h",
-		"Source/**.cpp"
+		"Source/**.cpp",
+		enginePath .. "Engine/Source/Public/Core/ProjectInit.cpp"
 	}
 
 	includedirs {
@@ -97,7 +98,7 @@ project "%PROJECT_NAME%"
 
 	filter { "configurations:EditorDebug or EditorRelease" }
 		links { "Engine" }
-		defines { "EDITOR_BUILD" }
+		defines { "NB_EDITOR_BUILD" }
 	filter { }
 
 	filter { "configurations:AppDebug or AppRelease", "platforms:Desktop" }

@@ -56,45 +56,34 @@ namespace Nightbird::Editor
 
 	void SceneOutliner::DrawAddObjectPopup()
 	{
-		static std::vector<const TypeInfo*> objectTypes;
-		static bool objectTypesDirty = true;
-
-		if (objectTypesDirty)
-		{
-			objectTypes.clear();
-
-			for (const TypeInfo* type : TypeRegistry::GetAll())
-			{
-				if (type->IsA(&Core::SceneObject::s_TypeInfo))
-					if (type != &Core::SceneObject::s_TypeInfo)
-						if (type->HasFactory())
-						{
-							objectTypes.push_back(type);
-						}
-			}
-
-			objectTypesDirty = false;
-		}
-
 		if (ImGui::Button("Add"))
 			ImGui::OpenPopup("AddObject");
 		
 		if (ImGui::BeginPopup("AddObject"))
 		{
-			for (const TypeInfo* type : objectTypes)
+			for (const TypeInfo* type : TypeRegistry::GetAll())
 			{
-				if (ImGui::MenuItem(type->name))
-				{
-					auto* rawObject = type->CreateAs<Core::SceneObject>();
-					if (rawObject)
-					{
-						rawObject->SetName(type->name);
-						std::unique_ptr<Core::SceneObject> object(rawObject);
+				//if (type->parent)
+					//Core::Log::Info(std::string(type->name) + " has parent: " + std::string(type->parent->name));
+				//else
+					//Core::Log::Info(std::string(type->name) + " has no parent");
 
-						if (auto* selectObject = m_Context.GetSelectedObject())
-							selectObject->AddChild(std::move(object));
-						else
-							m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
+				//if (type->IsA(&Core::SceneObject::s_TypeInfo) && type->HasFactory())
+				if (type->HasFactory())
+				{
+					if (ImGui::MenuItem(type->name))
+					{
+						auto* rawObject = type->CreateAs<Core::SceneObject>();
+						if (rawObject)
+						{
+							rawObject->SetName(type->name);
+							std::unique_ptr<Core::SceneObject> object(rawObject);
+
+							if (auto* selectObject = m_Context.GetSelectedObject())
+								selectObject->AddChild(std::move(object));
+							else
+								m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(object));
+						}
 					}
 				}
 			}

@@ -14,7 +14,7 @@ project "EditorGlfwVulkanBackend"
 		"IMGUI_IMPL_VULKAN_NO_PROTOTYPES",
 		"VMA_DYNAMIC_VULKAN_FUNCTIONS",
 		"GLFW_INCLUDE_VULKAN",
-		"EDITOR_BUILD"
+		"NB_EDITOR_BUILD"
 	}
 
 	files {

@@ -24,6 +24,10 @@
 
 #include <cstdlib>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 namespace Nightbird::Editor
 {
 	int EditorApplication::Run(int argc, char** argv)
@@ -51,7 +55,7 @@ namespace Nightbird::Editor
 
 		m_Engine = std::make_unique<Core::Engine>(std::move(platform), std::move(renderer));
 	}
-
+	
 	int EditorApplication::LoadProject()
 	{
 		if (m_ProjectPath.empty())
@@ -66,7 +70,7 @@ namespace Nightbird::Editor
 		if (!envPath)
 			return 1;
 		
-		std::filesystem::path installPath = std::filesystem::path(std::getenv("NIGHTBIRD_PATH"));
+		std::filesystem::path installPath = std::filesystem::path(envPath);
 
 		ProjectConfig projectConfig = LoadProjectConfig(m_ProjectPath);
 		if (projectConfig.name.empty())
@@ -101,22 +105,61 @@ namespace Nightbird::Editor
 #endif
 
 		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / libraryStr;
-		//rttr::library projectLib(sharedLibPath.string());
-		//m_ProjectLoaded = projectLib.load();
-		//if (m_ProjectLoaded)
-		//{
-			//Core::Log::Info("Loaded project: " + sharedLibPath.string());
-			//return 0;
-		//}
-		//else
-		//{
-			//Core::Log::Error("Failed to load project: " + sharedLibPath.string());
-			//Core::Log::Info("Make sure to build the project");
-			//Core::Log::Error(projectLib.get_error_string().to_string());
-			//return 1;
-		//}
+
+#ifdef _WIN32
+		m_ProjectLibHandle = LoadLibraryA(sharedLibPath.string().c_str());
+		if (!m_ProjectLibHandle)
+		{
+			DWORD error = GetLastError();
+			Core::Log::Error("Failed to load project: " + sharedLibPath.string());
+			Core::Log::Error(std::to_string(error));
+			return 1;
+		}
+#else
+		m_ProjectLibHandle = dlopen(sharedLibPath.string().c_str(), RTLD_NOW | RTLD_GLOBAL);
+		if (!m_ProjectLibHandle)
+		{
+			Core::Log::Error("Failed to load project: " + sharedLibPath.string());
+			Core::Log::Error(dlerror());
+			return 1;
+		}
+#endif
+		Core::Log::Info("Loaded project: " + sharedLibPath.string());
+
+#ifdef _WIN32
+		auto initProjectFn = reinterpret_cast<ProjectInitFn>(GetProcAddress(m_ProjectLibHandle, "NB_InitProject"));
+#else
+		auto initProjectFn = reinterpret_cast<ProjectInitFn>(dlsym(m_ProjectLibHandle, "NB_InitProject"));
+#endif
+
+		if (!initProjectFn)
+		{
+			Core::Log::Error("Failed to find NB_InitProject in Project shared library");
+			UnloadProject();
+			return 1;
+		}
+
+		initProjectFn([](TypeInfo* type)
+			{
+				TypeRegistry::Register(type);
+			}
+		);
 
 		return 0;
+	}
+
+	void EditorApplication::UnloadProject()
+	{
+		if (m_ProjectLibHandle)
+		{
+#ifdef _WIN32
+			FreeLibrary(m_ProjectLibHandle);
+#else
+			dlclose(m_ProjectLibHandle);
+#endif
+			m_ProjectLibHandle = nullptr;
+			m_ProjectLoaded = false;
+		}
 	}
 
 	void EditorApplication::InitializeEditor()
