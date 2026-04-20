@@ -34,8 +34,6 @@ namespace Nightbird::Detail
 			return FieldKind::UInt32;
 		else if constexpr (std::is_same_v<T, float>)
 			return FieldKind::Float;
-		else if constexpr (std::is_same_v<T, double>)
-			return FieldKind::Double;
 		else if constexpr (std::is_same_v<T, std::string>)
 			return FieldKind::String;
 		else if constexpr (std::is_same_v<T, glm::vec3>)
