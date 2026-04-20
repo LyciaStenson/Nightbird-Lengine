@@ -34,7 +34,7 @@ namespace Nightbird
 		{
 			for (auto* current = this; current; current = current->parent)
 			{
-				if (current == other)
+				if (current->nameHash == other->nameHash)
 					return true;
 			}
 			return false;

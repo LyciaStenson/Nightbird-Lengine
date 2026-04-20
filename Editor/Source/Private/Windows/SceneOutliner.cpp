@@ -63,13 +63,7 @@ namespace Nightbird::Editor
 		{
 			for (const TypeInfo* type : TypeRegistry::GetAll())
 			{
-				//if (type->parent)
-					//Core::Log::Info(std::string(type->name) + " has parent: " + std::string(type->parent->name));
-				//else
-					//Core::Log::Info(std::string(type->name) + " has no parent");
-
-				//if (type->IsA(&Core::SceneObject::s_TypeInfo) && type->HasFactory())
-				if (type->HasFactory())
+				if (type->IsA(&Core::SceneObject::s_TypeInfo) && type->HasFactory())
 				{
 					if (ImGui::MenuItem(type->name))
 					{
