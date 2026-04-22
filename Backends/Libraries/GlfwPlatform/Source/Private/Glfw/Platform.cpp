@@ -44,7 +44,7 @@ namespace Nightbird::Glfw
 
 	std::string Platform::GetCookedAssetsPath() const
 	{
-		return "Cooked/Desktop";
+		return "Cooked";
 	}
 
 	Input::Provider& Platform::GetInputProvider()

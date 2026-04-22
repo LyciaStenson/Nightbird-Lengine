@@ -6,19 +6,22 @@
 #include "Core/Log.h"
 
 NB_REFLECT(Nightbird::Core::AudioSource, NB_PARENT(Nightbird::Core::SceneObject), NB_FACTORY(Nightbird::Core::AudioSource),
-	NB_FIELD(m_AudioUUID)
+	NB_FIELD(m_Audio), NB_FIELD(m_Loop), NB_FIELD(m_PlayOnStart), NB_FIELD(m_Volume)
 )
+
+volatile int nb_link_AudioSource = 0;
 
 namespace Nightbird::Core
 {
-	void AudioSource::LoadAssets(AssetLoader& assetLoader)
+	void AudioSource::ResolveAssets(AssetManager& assetManager)
 	{
-		m_AudioAsset = assetLoader.LoadAudio(m_AudioUUID);
+		Log::Info("AudioSource::ResolveAssets");
+		m_Audio.Resolve(assetManager.Load<AudioAsset>(m_Audio.GetUUID()));
 	}
 
 	void AudioSource::EnterScene()
 	{
-		if (m_PlayOnStart && m_AudioAsset)
+		if (m_PlayOnStart && m_Audio)
 			Play();
 	}
 
@@ -35,8 +38,8 @@ namespace Nightbird::Core
 			Core::Log::Warning("AudioSource: Play called before added to scene");
 			return;
 		}
-
-		if (!m_AudioAsset)
+		
+		if (!m_Audio)
 		{
 			Core::Log::Warning("AudioSource: Missing audio asset");
 			return;
@@ -44,8 +47,8 @@ namespace Nightbird::Core
 
 		if (m_Handle != Audio::InvalidHandle)
 			Stop();
-
-		m_Handle = engine->GetAudioProvider().Play(*m_AudioAsset, m_Loop);
+		
+		m_Handle = engine->GetAudioProvider().Play(*m_Audio.Get(), m_Loop);
 
 		if (m_Handle == Audio::InvalidHandle)
 		{
@@ -121,17 +124,7 @@ namespace Nightbird::Core
 
 		engine->GetAudioProvider().SetVolume(m_Handle, volume);
 	}
-
-	const std::shared_ptr<AudioAsset>& AudioSource::GetAudioAsset() const
-	{
-		return m_AudioAsset;
-	}
-
-	void AudioSource::SetAudioAsset(std::shared_ptr<AudioAsset> asset)
-	{
-		m_AudioAsset = std::move(asset);
-	}
-
+	
 	bool AudioSource::GetLoop() const
 	{
 		return m_Loop;
@@ -150,15 +143,5 @@ namespace Nightbird::Core
 	void AudioSource::SetPlayOnStart(bool playOnStart)
 	{
 		m_PlayOnStart = playOnStart;
-	}
-
-	const uuids::uuid& AudioSource::GetAudioUUID() const
-	{
-		return m_AudioUUID;
-	}
-
-	void AudioSource::SetAudioUUID(const uuids::uuid& uuid)
-	{
-		m_AudioUUID = uuid;
 	}
 }

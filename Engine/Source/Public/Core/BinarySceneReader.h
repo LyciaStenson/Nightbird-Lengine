@@ -12,20 +12,15 @@ namespace Nightbird::Core
 {
 	class Camera;
 	struct Transform;
-
-	class AssetLoader;
+	
 	class BinaryReader;
 
 	class BinarySceneReader
 	{
 	public:
-		BinarySceneReader(AssetLoader& assetLoader);
-
 		SceneReadResult Read(const std::string& cookedDir, const uuids::uuid& uuid);
 
 	private:
-		AssetLoader& m_AssetLoader;
-
 		void ReadFields(uint8_t* object, const TypeInfo* type, BinaryReader& reader);
 		void ReadField(uint8_t* object, const TypeInfo* type, uint32_t nameHash, uint16_t size, BinaryReader& reader);
 		void SkipFields(uint16_t fieldCount, BinaryReader& reader);

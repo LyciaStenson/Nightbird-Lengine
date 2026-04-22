@@ -1,6 +1,15 @@
 #pragma once
 
+#include "Core/IAssetLoader.h"
+
 #include "Core/SceneReadResult.h"
+
+#include "Core/BinarySceneReader.h"
+#include "Core/ProjectLoader.h"
+#include "Core/MeshLoader.h"
+#include "Core/TextureLoader.h"
+#include "Core/MaterialLoader.h"
+#include "Core/AudioLoader.h"
 
 #include <uuid.h>
 
@@ -13,26 +22,20 @@ namespace Nightbird::Core
 	class SceneObject;
 	class Mesh;
 	class AudioAsset;
-
-	class BinarySceneReader;
-	class ProjectLoader;
+	
 	struct ProjectInfo;
-	class TextureLoader;
-	class MaterialLoader;
-	class MeshLoader;
-	class AudioLoader;
 
-	class AssetLoader
+	class AssetLoader : public IAssetLoader
 	{
 	public:
-		AssetLoader(const std::string& cookedDir);
-
-		ProjectInfo LoadProject();
+		explicit AssetLoader(const std::string& cookedDir);
+		
+		std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) override;
+		std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
 
 		SceneReadResult LoadScene(const uuids::uuid& uuid);
 
-		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid);
-		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);
+		ProjectInfo LoadProject();
 
 	private:
 		std::string m_CookedDir;
@@ -43,11 +46,7 @@ namespace Nightbird::Core
 		std::unique_ptr<MaterialLoader> m_MaterialLoader;
 		std::unique_ptr<MeshLoader> m_MeshLoader;
 		std::unique_ptr<AudioLoader> m_AudioLoader;
-
-		std::unordered_map<uuids::uuid, std::shared_ptr<Core::Mesh>> m_MeshCache;
-		std::unordered_map<uuids::uuid, std::shared_ptr<Core::AudioAsset>> m_AudioCache;
-
+		
 		void LoadNestedScenes(SceneObject* object);
-		void LoadAssetsRecursive(SceneObject* object);
 	};
 }

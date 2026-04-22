@@ -16,7 +16,9 @@ namespace Nightbird::Editor
 	class AudioImporter : public Importer
 	{
 	public:
+		//AssetType GetAssetType() const override { return AssetType::Audio; }
 		AudioImporter* AsAudioImporter() override { return this; }
+
 		virtual std::shared_ptr<Core::AudioAsset> Load(const AssetInfo& assetInfo) = 0;
 	};
 }

@@ -17,7 +17,7 @@ namespace Nightbird::Editor
 		virtual ~Importer() = default;
 		virtual std::string GetName() const = 0;
 		virtual bool SupportsExtension(const std::string& extensions) const = 0;
-
+		
 		virtual bool HasEmbeddedAssetInfo() const { return false; }
 		virtual std::optional<AssetInfo> ReadEmbeddedAssetInfo(const std::filesystem::path& path) const { return std::nullopt; }
 

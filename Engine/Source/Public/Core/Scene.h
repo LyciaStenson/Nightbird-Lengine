@@ -29,6 +29,8 @@ namespace Nightbird::Core
 		Camera* GetActiveCamera() const;
 		void SetActiveCamera(Camera* camera);
 
+		void ResolveAssets(AssetManager& assetManager);
+
 		std::vector<Renderable> CollectRenderables() const;
 		std::vector<DirectionalLight*> CollectDirectionalLights() const;
 		std::vector<PointLight*> CollectPointLights() const;
@@ -39,6 +41,8 @@ namespace Nightbird::Core
 		std::unique_ptr<SceneObject> m_Root;
 
 		Camera* m_ActiveCamera = nullptr;
+
+		void ResolveAssetsRecursive(SceneObject* object, AssetManager& assetManager);
 
 		void UpdateRecursive(SceneObject* object, float delta);
 

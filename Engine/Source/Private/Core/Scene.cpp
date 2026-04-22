@@ -44,6 +44,19 @@ namespace Nightbird::Core
 		m_ActiveCamera = camera;
 	}
 
+	void Scene::ResolveAssets(AssetManager& assetManager)
+	{
+		ResolveAssetsRecursive(m_Root.get(), assetManager);
+	}
+
+	void Scene::ResolveAssetsRecursive(SceneObject* object, AssetManager& assetManager)
+	{
+		object->ResolveAssets(assetManager);
+
+		for (auto& child : object->GetChildren())
+			ResolveAssetsRecursive(child.get(), assetManager);
+	}
+
 	std::vector<Renderable> Scene::CollectRenderables() const
 	{
 		std::vector<Renderable> renderables;
@@ -82,14 +95,14 @@ namespace Nightbird::Core
 		
 		if (auto* meshInstance = Cast<MeshInstance>(object))
 		{
-			const Mesh* mesh = meshInstance->GetMesh().get();
-			for (size_t i = 0; i < mesh->GetPrimitiveCount(); i++)
-			{
-				Renderable renderable;
-				renderable.primitive = &mesh->GetPrimitives()[i];
-				renderable.transform = meshInstance->GetWorldMatrix();
-				renderables.push_back(renderable);
-			}
+			//const Mesh* mesh = meshInstance->GetMesh().get();
+			//for (size_t i = 0; i < mesh->GetPrimitiveCount(); i++)
+			//{
+				//Renderable renderable;
+				//renderable.primitive = &mesh->GetPrimitives()[i];
+				//renderable.transform = meshInstance->GetWorldMatrix();
+				//renderables.push_back(renderable);
+			//}
 		}
 
 		for (const auto& child : object->GetChildren())

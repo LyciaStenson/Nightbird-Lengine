@@ -67,11 +67,12 @@ namespace Nightbird
 
 	enum class FieldKind : uint8_t
 	{
-		Object, // Has TypeInfo
 		Bool, Int32, UInt32, Float,
 		String,
 		Vector2, Vector3, Vector4, Quat,
 		UUID,
+		AssetRef,
+		Object, // Has TypeInfo
 		Unknown
 	};
 

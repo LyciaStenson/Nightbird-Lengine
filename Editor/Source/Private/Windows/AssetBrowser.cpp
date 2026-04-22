@@ -6,6 +6,7 @@
 #include "Import/ImportManager.h"
 
 #include "Core/Engine.h"
+#include "Core/Platform.h"
 #include "Core/Scene.h"
 #include "Core/Log.h"
 
@@ -16,7 +17,7 @@ namespace Nightbird::Editor
 	AssetBrowser::AssetBrowser(EditorContext& context, bool open)
 		: ImGuiWindow("Asset Browser", open), m_Context(context)
 	{
-		m_CurrentPath = std::filesystem::path("Assets");
+		m_CurrentPath = context.GetImportManager().GetAssetsDir();
 	}
 
 	void AssetBrowser::OnRender()
@@ -55,18 +56,29 @@ namespace Nightbird::Editor
 				{
 					m_SelectedPath = path;
 				}
+
+				if (ImGui::BeginDragDropSource())
+				{
+					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
+					if (assetInfo)
+					{
+						ImGui::SetDragDropPayload("ASSET_UUID", &assetInfo->uuid, sizeof(uuids::uuid));
+						ImGui::Text(name.c_str());
+					}
+					ImGui::EndDragDropSource();
+				}
+
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
 					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
 					if (assetInfo)
 					{
-						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid);
+						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid, &m_Context.GetEngine().GetAssetManager());
 						if (result.root)
 						{
 							auto scene = std::make_unique<Core::Scene>();
 							scene->SetActiveCamera(result.activeCamera);
-
-							Core::Log::Info(result.root ? "result.root valid" : "result.root invalid");
+							
 							for (auto& child : result.root->GetChildren())
 								scene->GetRoot()->AddChild(std::move(child));
 
@@ -77,7 +89,7 @@ namespace Nightbird::Editor
 			}
 		}
 
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
 		{
 			m_SelectedPath.clear();
 		}

@@ -1,18 +1,17 @@
 #pragma once
 
-#include "Core/TypeInfo.h"
+#include "Core/Reflection.h"
 
 #include "Core/MeshPrimitive.h"
 
 #include <vector>
-#include <memory>
 
 namespace Nightbird::Core
 {
 	class Mesh
 	{
 	public:
-		//NB_OBJECT_BASE()
+		NB_TYPE_BASE()
 
 		Mesh() = default;
 		Mesh(std::vector<MeshPrimitive> primitives);

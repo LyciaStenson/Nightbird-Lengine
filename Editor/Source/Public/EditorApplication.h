@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Core/Engine.h"
+#include "Core/Platform.h"
+#include "Core/Renderer.h"
+#include "Import/ImportManager.h"
+#include "Core/AssetManager.h"
 
 #include "SettingsManager.h"
 #include "EditorSettings.h"
@@ -12,7 +16,6 @@
 #include "EditorUI.h"
 #include "EditorContext.h"
 #include "WindowManager.h"
-#include "Import/ImportManager.h"
 #include "Cook/CookManager.h"
 
 #include <memory>
@@ -49,12 +52,15 @@ namespace Nightbird::Editor
 		void Render();
 		void Shutdown();
 
+		std::unique_ptr<Core::Platform> m_Platform;
+		std::unique_ptr<Core::Renderer> m_Renderer;
+		std::unique_ptr<ImportManager> m_ImportManager;
+		std::unique_ptr<Core::AssetManager> m_AssetManager;
 		std::unique_ptr<Core::Engine> m_Engine;
 		std::unique_ptr<EditorUIBackend> m_EditorUIBackend;
 		std::unique_ptr<EditorUI> m_EditorUI;
 		std::unique_ptr<EditorContext> m_EditorContext;
 		std::unique_ptr<WindowManager> m_WindowManager;
-		std::unique_ptr<ImportManager> m_ImportManager;
 		std::unique_ptr<CookManager> m_CookManager;
 
 		SettingsManager m_SettingsManager;

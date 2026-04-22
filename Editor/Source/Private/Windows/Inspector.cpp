@@ -2,7 +2,11 @@
 
 #include "EditorContext.h"
 
+#include "Core/Engine.h"
+#include "Core/AssetManager.h"
 #include "Core/SceneObject.h"
+#include "Core/AudioAsset.h"
+#include "Core/Log.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -108,6 +112,49 @@ namespace Nightbird::Editor
 					ImGui::DragFloat4(field->name, glm::value_ptr(*value), 0.01f);
 					break;
 				}
+				case FieldKind::UUID:
+				{
+					//ImVec2 size(200, 40);
+					//ImGui::InvisibleButton(field->name, size);
+
+					//if (ImGui::BeginDragDropTarget())
+					//{
+					//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+					//	{
+					//		const uuids::uuid* uuid = static_cast<const uuids::uuid*>(payload->Data);
+
+					//		uuids::uuid* value = field->GetPtrAs<uuids::uuid>(object);
+					//		*value = *uuid;
+					//	}
+
+					//	ImGui::EndDragDropTarget();
+					//}
+					//
+					//ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(100, 100, 100, 255));
+					break;
+				}
+				case FieldKind::AssetRef:
+				{
+					uuids::uuid* uuid = reinterpret_cast<uuids::uuid*>(static_cast<char*>(object) + field->offset);
+
+					std::string label = uuid->is_nil() ? std::string("None (") + (field->type ? field->type->name : "Asset") + ")" : uuids::to_string(*uuid);
+
+					ImGui::Button(label.c_str(), ImVec2(-1, 0));
+
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+						{
+							const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
+							*uuid = *droppedUUID;
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::SameLine();
+					ImGui::Text(field->name);
+					break;
+				}
 				case FieldKind::Object:
 				{
 					if (field->type)
@@ -121,11 +168,6 @@ namespace Nightbird::Editor
 					}
 					break;
 				}
-				case FieldKind::UUID:
-				{
-					ImGui::TextDisabled("UUID: %s", field->name);
-					break;
-				}
 				case FieldKind::Unknown:
 				{
 					ImGui::TextDisabled("Unknown field: %s", field->name);
@@ -133,7 +175,7 @@ namespace Nightbird::Editor
 				}
 				default:
 				{
-					ImGui::TextDisabled("Missing field type: %s", field->name);
+					ImGui::TextDisabled("Unhandled field type: %s", field->name);
 					break;
 				}
 			}

@@ -236,6 +236,15 @@ namespace Nightbird::Editor
 				}
 				break;
 			}
+			case FieldKind::AssetRef:
+			{
+				if (auto value = table[field->name].value<std::string>())
+				{
+					if (auto uuid = uuids::uuid::from_string(*value))
+						*field->GetPtrAs<uuids::uuid>(object) = *uuid;
+				}
+				break;
+			}
 			case FieldKind::Object:
 			{
 				if (field->type)

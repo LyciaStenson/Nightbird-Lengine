@@ -143,6 +143,12 @@ namespace Nightbird::Editor
 				table.insert(field->name, uuids::to_string(*uuid));
 				break;
 			}
+			case FieldKind::AssetRef:
+			{
+				auto* uuid = field->GetPtrAs<uuids::uuid>(object);
+				table.insert(field->name, uuids::to_string(*uuid));
+				break;
+			}
 			case FieldKind::Object:
 				if (field->name)
 				{

@@ -14,6 +14,6 @@ namespace Nightbird::Editor
 		bool HasEmbeddedAssetInfo() const override { return true; }
 		std::optional<AssetInfo> ReadEmbeddedAssetInfo(const std::filesystem::path& path) const override;
 
-		Core::SceneReadResult Load(const AssetInfo& assetInfo) override;
+		Core::SceneReadResult Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager = nullptr) override;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/SceneReadResult.h"
+#include "Core/SceneObject.h"
 
 #include "Cook/Target.h"
 #include "Cook/ProjectCooker.h"
@@ -19,12 +20,11 @@
 
 namespace Nightbird::Core
 {
-	class SceneObject;
 	class Camera;
 	class AudioSource;
 	class Mesh;
-	class Texture;
 	struct Material;
+	class Texture;
 }
 
 namespace Nightbird::Editor

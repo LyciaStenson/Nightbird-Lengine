@@ -7,11 +7,15 @@
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
 
+
+#include "Import/ImportManager.h"
+
 #include "Scene/TextSceneWriter.h"
 
 #include "EditorContext.h"
 
 #include "Core/Engine.h"
+#include "Core/Platform.h"
 
 namespace Nightbird::Editor
 {
@@ -70,7 +74,7 @@ namespace Nightbird::Editor
 				if (ImGui::MenuItem("Save Scene"))
 				{
 					TextSceneWriter sceneWriter;
-					sceneWriter.Write(m_Context.GetEngine().GetScene(), "TestScene", GenerateUUID(), "Assets/Scenes/TestScene.ntscene");
+					sceneWriter.Write(m_Context.GetEngine().GetScene(), "TestScene", GenerateUUID(), m_Context.GetImportManager().GetAssetsDir() / "Scenes/TestScene.ntscene");
 				}
 				if (ImGui::MenuItem("Build"))
 				{

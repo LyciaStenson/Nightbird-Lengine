@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/AssetManager.h"
+#include "Core/IAssetLoader.h"
+
 #include "Core/SceneReadResult.h"
 #include "Import/AssetInfo.h"
 #include "Import/Importer.h"
@@ -11,20 +14,16 @@
 #include <vector>
 #include <string>
 
-namespace Nightbird::Core
-{
-	class SceneObject;
-	class AudioAsset;
-}
-
 namespace Nightbird::Editor
 {
-	class ImportManager
+	class ImportManager : public Core::IAssetLoader
 	{
 	public:
 		ImportManager(const std::filesystem::path& assetsDir);
 
 		void Scan();
+
+		const std::filesystem::path& GetAssetsDir() const;
 
 		const std::unordered_map<uuids::uuid, AssetInfo>& GetAssetInfos() const;
 
@@ -32,9 +31,11 @@ namespace Nightbird::Editor
 		const AssetInfo* GetAssetInfo(const std::filesystem::path& path) const;
 
 		Importer* FindImporter(const std::filesystem::path& path) const;
+		
+		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid) override;
+		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
 
-		Core::SceneReadResult LoadScene(const uuids::uuid& uuid);
-		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid);
+		Core::SceneReadResult LoadScene(const uuids::uuid& uuid, Core::AssetManager* assetManager = nullptr);
 
 	private:
 		std::filesystem::path m_AssetsDir;

@@ -1,6 +1,5 @@
 #include "Cook/CookManager.h"
 
-#include "Core/SceneObject.h"
 #include "Core/AudioSource.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
@@ -119,10 +118,10 @@ namespace Nightbird::Editor
 		{
 			Core::Log::Info("CookManager: Found MeshInstance: " + object->GetName());
 
-			const auto& mesh = meshInstance->GetMesh();
-			if (mesh && m_MeshUUIDs.find(mesh.get()) == m_MeshUUIDs.end())
+			const auto* mesh = meshInstance->m_Mesh.Get().get();
+			if (mesh && m_MeshUUIDs.find(mesh) == m_MeshUUIDs.end())
 			{
-				m_MeshUUIDs[mesh.get()] = GenerateUUID();
+				m_MeshUUIDs[mesh] = meshInstance->m_Mesh.GetUUID();
 
 				for (size_t i = 0; i < mesh->GetPrimitiveCount(); ++i)
 				{
@@ -148,7 +147,7 @@ namespace Nightbird::Editor
 		else if (auto* audioSource = Cast<Core::AudioSource>(object))
 		{
 			Core::Log::Info("CookManager: Found AudioSouce: " + object->GetName());
-			uuids::uuid audioUUID = audioSource->GetAudioUUID();
+			uuids::uuid audioUUID = audioSource->m_Audio.GetUUID();
 			Core::Log::Info("CookManager: Audio UUID: " + uuids::to_string(audioUUID));
 			if (!audioUUID.is_nil() && m_AudioPathUUIDs.find(audioUUID) == m_AudioPathUUIDs.end())
 			{

@@ -52,6 +52,11 @@ namespace Nightbird::Editor
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
+		{
+			m_Context.ClearSelection();
+		}
 	}
 
 	void SceneOutliner::DrawAddObjectPopup()
@@ -99,7 +104,7 @@ namespace Nightbird::Editor
 
 		bool opened = ImGui::TreeNodeEx(object, flags, "%s", object->GetName().c_str());
 
-		if (ImGui::IsItemClicked())
+		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			m_Context.SelectObject(object);
 
 		if (ImGui::BeginDragDropSource())

@@ -1,35 +1,19 @@
 #include "Core/MeshInstance.h"
 
 NB_REFLECT(Nightbird::Core::MeshInstance, NB_PARENT(Nightbird::Core::SpatialObject), NB_FACTORY(Nightbird::Core::MeshInstance),
-	NB_FIELD(m_MeshUUID)
+	NB_FIELD(m_Mesh)
 )
 
 namespace Nightbird::Core
 {
-	MeshInstance::MeshInstance()
-		: SpatialObject(), m_Mesh(std::make_shared<Mesh>())
+	void MeshInstance::ResolveAssets(AssetManager& assetManager)
 	{
-
+		//if (!m_Mesh && !m_MeshUUID.is_nil())
+			//m_Mesh = assetManager.Get<Mesh>(m_MeshUUID);
 	}
 
-	MeshInstance::MeshInstance(std::shared_ptr<Mesh> mesh)
-		: SpatialObject(), m_Mesh(std::move(mesh))
+	void MeshInstance::EnterScene()
 	{
 
-	}
-
-	void MeshInstance::LoadAssets(AssetLoader& assetLoader)
-	{
-		m_Mesh = assetLoader.LoadMesh(m_MeshUUID);
-	}
-
-	std::shared_ptr<const Mesh> MeshInstance::GetMesh() const
-	{
-		return m_Mesh;
-	}
-
-	void MeshInstance::SetMesh(std::shared_ptr<Mesh> mesh)
-	{
-		m_Mesh = mesh;
 	}
 }

@@ -1,6 +1,5 @@
 #include "Core/BinarySceneReader.h"
 
-#include "Core/AssetLoader.h"
 #include "Core/BinaryReader.h"
 
 #include "Core/Transform.h"
@@ -20,12 +19,6 @@
 
 namespace Nightbird::Core
 {
-	BinarySceneReader::BinarySceneReader(AssetLoader& assetLoader)
-		: m_AssetLoader(assetLoader)
-	{
-
-	}
-
 	SceneReadResult BinarySceneReader::Read(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		SceneReadResult result;
@@ -39,8 +32,7 @@ namespace Nightbird::Core
 			Core::Log::Error("BinarySceneReader: Failed to open: " + path);
 			return result;
 		}
-
-
+		
 		// Validate type
 		uint8_t signature[4] = {};
 		reader.ReadRawBytes(signature, 4);
@@ -127,6 +119,12 @@ namespace Nightbird::Core
 				Log::Warning("BinarySceneReader: Unknown type " + typeName + ", defaulting to SceneObject");
 				object = std::make_unique<SceneObject>();
 				SkipFields(fieldCount, reader);
+
+				Log::Info("BinarySceneReader: Available types are: ");
+				for (const auto* type : TypeRegistry::GetAll())
+				{
+					Log::Info("BinarySceneReader: Available type: " + std::string(type->name));
+				}
 			}
 			
 			if (hasSceneUUID)
@@ -257,6 +255,13 @@ namespace Nightbird::Core
 					break;
 				}
 				case FieldKind::UUID:
+				{
+					std::array<uint8_t, 16> bytes;
+					reader.ReadRawBytes(bytes.data(), 16);
+					*reinterpret_cast<uuids::uuid*>(fieldPtr) = uuids::uuid(bytes);
+					break;
+				}
+				case FieldKind::AssetRef:
 				{
 					std::array<uint8_t, 16> bytes;
 					reader.ReadRawBytes(bytes.data(), 16);

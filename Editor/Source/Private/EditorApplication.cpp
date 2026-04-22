@@ -1,7 +1,5 @@
 #include "EditorApplication.h"
 
-#include "Core/Platform.h"
-#include "Core/Renderer.h"
 #include "Core/Scene.h"
 #include "Core/BackendFactory.h"
 #include "Core/SceneObject.h"
@@ -50,10 +48,15 @@ namespace Nightbird::Editor
 
 	void EditorApplication::InitializeEngine()
 	{
-		auto platform = Core::CreatePlatform();
-		auto renderer = Core::CreateRenderer();
+		Nightbird::TypeRegistry::InitReflection();
 
-		m_Engine = std::make_unique<Core::Engine>(std::move(platform), std::move(renderer));
+		m_Platform = Core::CreatePlatform();
+		m_Renderer = Core::CreateRenderer();
+
+		m_ImportManager = std::make_unique<ImportManager>(m_ProjectPath.parent_path() / "Assets");
+		m_AssetManager = std::make_unique<Core::AssetManager>(*m_ImportManager);
+
+		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_AssetManager);
 	}
 	
 	int EditorApplication::LoadProject()
@@ -61,7 +64,7 @@ namespace Nightbird::Editor
 		if (m_ProjectPath.empty())
 		{
 			Core::Log::Error("No project specified");
-			return 0;
+			return 1;
 		}
 		
 		std::filesystem::path projectDir = m_ProjectPath.parent_path();
@@ -207,7 +210,6 @@ namespace Nightbird::Editor
 
 	void EditorApplication::InitializeImportManager()
 	{
-		m_ImportManager = std::make_unique<ImportManager>("Assets");
 		m_ImportManager->Scan();
 	}
 

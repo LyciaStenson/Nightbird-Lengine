@@ -1,8 +1,12 @@
 #include "Import/GltfSceneImporter.h"
 
+#include "Core/SceneObject.h"
 #include "Core/SpatialObject.h"
-#include "Core/MeshPrimitive.h"
 #include "Core/MeshInstance.h"
+#include "Core/MeshPrimitive.h"
+#include "Core/Mesh.h"
+#include "Core/Material.h"
+#include "Core/Texture.h"
 #include "Core/Transform.h"
 #include "Core/Log.h"
 
@@ -22,7 +26,7 @@ namespace Nightbird::Editor
 		return extension == ".glb" || extension == ".gltf";
 	}
 
-	Core::SceneReadResult GltfSceneImporter::Load(const AssetInfo& assetInfo)
+	Core::SceneReadResult GltfSceneImporter::Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager)
 	{
 		Core::SceneReadResult result;
 
@@ -77,7 +81,8 @@ namespace Nightbird::Editor
 		if (node.meshIndex.has_value())
 		{
 			auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
-			auto meshInstance = std::make_unique<Core::MeshInstance>(mesh);
+			auto meshInstance = std::make_unique<Core::MeshInstance>();
+			//meshInstance->m_Mesh = mesh; // Doesn't work as m_Mesh is now AssetRef<Mesh>
 			meshInstance->SetName(std::string(node.name));
 			spatialPtr = meshInstance.get();
 			object = std::move(meshInstance);
@@ -330,5 +335,18 @@ namespace Nightbird::Editor
 			}, image.data);
 		
 		return decoded;
+	}
+
+	uuids::uuid GltfSceneImporter::GenerateUUID() const
+	{
+		std::random_device randomDevice;
+
+		auto seedData = std::array<int, std::mt19937::state_size>{};
+		std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+		std::seed_seq seq(std::begin(seedData), std::end(seedData));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{generator};
+
+		return gen();
 	}
 }

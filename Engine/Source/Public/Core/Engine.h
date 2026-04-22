@@ -11,11 +11,12 @@ namespace Nightbird::Core
 	class Platform;
 	class Renderer;
 	class Scene;
+	class AssetManager;
 
 	class Engine
 	{
 	public:
-		Engine(std::unique_ptr<Platform> platform, std::unique_ptr<Renderer> renderer);
+		Engine(Platform& platform, Renderer& renderer, AssetManager& assetManager);
 		~Engine();
 
 		bool ShouldClose() const;
@@ -30,9 +31,13 @@ namespace Nightbird::Core
 		Scene& GetScene();
 		void SetScene(std::unique_ptr<Scene> scene);
 
+		AssetManager& GetAssetManager();
+
 	private:
-		std::unique_ptr<Platform> m_Platform;
-		std::unique_ptr<Renderer> m_Renderer;
+		Platform& m_Platform;
+		Renderer& m_Renderer;
+
+		AssetManager& m_AssetManager;
 
 		std::unique_ptr<Scene> m_Scene;
 

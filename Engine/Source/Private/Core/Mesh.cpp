@@ -1,9 +1,9 @@
 #include "Core/Mesh.h"
 
+NB_REFLECT_NO_FIELDS(Nightbird::Core::Mesh, NB_NO_PARENT, NB_NO_FACTORY)
+
 namespace Nightbird::Core
 {
-	//NB_OBJECT_BASE_IMPL(Nightbird::Core::Mesh)
-
 	Mesh::Mesh(std::vector<MeshPrimitive> primitives)
 		: m_Primitives(std::move(primitives))
 	{

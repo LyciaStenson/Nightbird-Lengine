@@ -49,7 +49,7 @@ namespace Nightbird::Editor
 		return assetInfo;
 	}
 
-	Core::SceneReadResult TextSceneImporter::Load(const AssetInfo& assetInfo)
+	Core::SceneReadResult TextSceneImporter::Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager)
 	{
 		TextSceneReader sceneReader;
 		return sceneReader.Read(assetInfo.sourcePath);

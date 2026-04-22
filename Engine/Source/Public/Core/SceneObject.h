@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Core/Reflection.h"
-
-#include "Core/AssetLoader.h"
+#include "Core/AssetManager.h"
 
 #include <uuid.h>
 
@@ -49,7 +48,7 @@ namespace Nightbird::Core
 
 		void EnterSceneRecursive();
 
-		virtual void LoadAssets(AssetLoader& assetLoader) {}
+		virtual void ResolveAssets(AssetManager& assetManager) {}
 		virtual void EnterScene();
 		virtual void Tick(float delta);
 

@@ -226,6 +226,13 @@ namespace Nightbird::Editor
 				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
 				break;
 			}
+			case FieldKind::AssetRef:
+			{
+				writer.WriteUInt16(16);
+				auto bytes = field->GetPtrAs<uuids::uuid>(object)->as_bytes();
+				writer.WriteRawBytes(reinterpret_cast<const uint8_t*>(bytes.data()), 16);
+				break;
+			}
 			case FieldKind::Object:
 			{
 				writer.WriteUInt16(0);
