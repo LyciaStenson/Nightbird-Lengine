@@ -133,6 +133,16 @@ namespace Nightbird::Editor
 				if (received && received != object)
 					received->SetParent(object);
 			}
+			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+			{
+				const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
+				if (droppedUUID && !droppedUUID->is_nil())
+				{
+					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID, &m_Context.GetEngine().GetAssetManager());
+					result.root->SetSourceSceneUUID(*droppedUUID);
+					object->AddChild(std::move(result.root));
+				}
+			}
 			ImGui::EndDragDropTarget();
 		}
 
