@@ -1,6 +1,7 @@
 #include "Windows/SceneOutliner.h"
 
 #include "EditorContext.h"
+#include "Import/ImportManager.h"
 
 #include "Core/Engine.h"
 #include "Core/Scene.h"
@@ -49,6 +50,16 @@ namespace Nightbird::Editor
 				Core::SceneObject* received = *static_cast<Core::SceneObject**>(payload->Data);
 				if (received)
 					received->SetParent(m_Context.GetEngine().GetScene().GetRoot());
+			}
+			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+			{
+				const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
+				if (droppedUUID && !droppedUUID->is_nil())
+				{
+					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID, &m_Context.GetEngine().GetAssetManager());
+					result.root->SetSourceSceneUUID(*droppedUUID);
+					m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(result.root));
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}

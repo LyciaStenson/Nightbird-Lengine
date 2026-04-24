@@ -52,7 +52,7 @@ namespace Nightbird::Editor
 		auto materials = LoadMaterials(gltfAsset, textures);
 
 		result.root = std::make_unique<Core::SpatialObject>();
-		result.root->SetSourceSceneUUID(assetInfo.uuid);
+		//result.root->SetSourceSceneUUID(assetInfo.uuid);
 
 		if (gltfAsset.defaultScene.has_value())
 		{
@@ -60,7 +60,7 @@ namespace Nightbird::Editor
 			
 			for (size_t nodeIndex : scene.nodeIndices)
 			{
-				ProcessNode(gltfAsset, nodeIndex, result.root.get(), materials);
+				ProcessNode(gltfAsset, nodeIndex, result.root.get(), materials, assetManager);
 			}
 		}
 		else
@@ -71,7 +71,7 @@ namespace Nightbird::Editor
 		return result;
 	}
 
-	void GltfSceneImporter::ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SceneObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials)
+	void GltfSceneImporter::ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SceneObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials, Core::AssetManager* assetManager)
 	{
 		const fastgltf::Node& node = gltfAsset.nodes[nodeIndex];
 
@@ -82,7 +82,15 @@ namespace Nightbird::Editor
 		{
 			auto mesh = LoadMesh(gltfAsset, gltfAsset.meshes[node.meshIndex.value()], materials);
 			auto meshInstance = std::make_unique<Core::MeshInstance>();
-			//meshInstance->m_Mesh = mesh; // Doesn't work as m_Mesh is now AssetRef<Mesh>
+
+			if (assetManager && mesh)
+			{
+				uuids::uuid meshUUID = GenerateUUID();
+				assetManager->Insert(meshUUID, mesh);
+				meshInstance->m_Mesh.SetUUID(meshUUID);
+				meshInstance->m_Mesh.Resolve(assetManager->Load<Core::Mesh>(meshUUID));
+			}
+
 			meshInstance->SetName(std::string(node.name));
 			spatialPtr = meshInstance.get();
 			object = std::move(meshInstance);
@@ -103,7 +111,7 @@ namespace Nightbird::Editor
 		}
 
 		for (size_t childIndex : node.children)
-			ProcessNode(gltfAsset, childIndex, spatialPtr, materials);
+			ProcessNode(gltfAsset, childIndex, spatialPtr, materials, assetManager);
 
 		parent->AddChild(std::move(object));
 	}

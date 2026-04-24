@@ -29,7 +29,7 @@ namespace Nightbird::Editor
 		Core::SceneReadResult Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager) override;
 
 	private:
-		void ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SceneObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials);
+		void ProcessNode(const fastgltf::Asset& gltfAsset, size_t nodeIndex, Core::SceneObject* parent, const std::vector<std::shared_ptr<Core::Material>>& materials, Core::AssetManager* assetManager);
 
 		std::vector<std::shared_ptr<Core::Texture>> LoadTextures(const fastgltf::Asset& gltfAsset);
 		std::vector<std::shared_ptr<Core::Material>> LoadMaterials(const fastgltf::Asset& gltfAsset, const std::vector<std::shared_ptr<Core::Texture>>& textures);

@@ -74,7 +74,7 @@ namespace Nightbird::Core
 			return;
 
 		m_Children.push_back(std::move(child));
-
+		
 		m_Children.back()->SetScene(m_Scene);
 		m_Children.back()->SetParent(this);
 

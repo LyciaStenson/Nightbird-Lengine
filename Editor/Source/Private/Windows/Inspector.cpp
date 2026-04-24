@@ -33,9 +33,15 @@ namespace Nightbird::Editor
 
 		const TypeInfo* type = selected->GetTypeInfo();
 		ImGui::Text("%s", type->name);
+		
 		ImGui::Separator();
-
 		DrawFields(selected, type);
+		
+		if (selected->HasSourceScene())
+		{
+			ImGui::Separator();
+			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(selected->GetSourceSceneUUID().value()).c_str());
+		}
 	}
 
 	void Inspector::DrawFields(void* object, const TypeInfo* type)
@@ -114,23 +120,7 @@ namespace Nightbird::Editor
 				}
 				case FieldKind::UUID:
 				{
-					//ImVec2 size(200, 40);
-					//ImGui::InvisibleButton(field->name, size);
-
-					//if (ImGui::BeginDragDropTarget())
-					//{
-					//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
-					//	{
-					//		const uuids::uuid* uuid = static_cast<const uuids::uuid*>(payload->Data);
-
-					//		uuids::uuid* value = field->GetPtrAs<uuids::uuid>(object);
-					//		*value = *uuid;
-					//	}
-
-					//	ImGui::EndDragDropTarget();
-					//}
-					//
-					//ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(100, 100, 100, 255));
+					ImGui::TextDisabled("UUID: %s", field->name);
 					break;
 				}
 				case FieldKind::AssetRef:

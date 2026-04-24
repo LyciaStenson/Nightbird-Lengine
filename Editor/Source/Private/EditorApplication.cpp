@@ -40,6 +40,7 @@ namespace Nightbird::Editor
 			return result;
 
 		InitializeEditor();
+		
 		RunEditorLoop();
 		Shutdown();
 

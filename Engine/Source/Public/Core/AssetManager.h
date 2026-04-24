@@ -27,6 +27,12 @@ namespace Nightbird::Core
 			return asset;
 		}
 
+		template<typename T>
+		void Insert(const uuids::uuid& uuid, std::shared_ptr<T> asset)
+		{
+			m_Cache[uuid] = asset;
+		}
+
 		void Unload(const uuids::uuid& uuid)
 		{
 			m_Cache.erase(uuid);
