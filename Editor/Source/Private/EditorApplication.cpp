@@ -216,7 +216,7 @@ namespace Nightbird::Editor
 
 	void EditorApplication::InitializeCookManager()
 	{
-		m_CookManager = std::make_unique<CookManager>("Cooked", *m_ImportManager);
+		m_CookManager = std::make_unique<CookManager>("Cooked", *m_AssetManager, *m_ImportManager);
 	}
 
 	void EditorApplication::RunEditorLoop()

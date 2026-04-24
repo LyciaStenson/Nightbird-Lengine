@@ -15,7 +15,6 @@ namespace Nightbird::Core
 {
 	void AudioSource::ResolveAssets(AssetManager& assetManager)
 	{
-		Log::Info("AudioSource::ResolveAssets");
 		m_Audio.Resolve(assetManager.Load<AudioAsset>(m_Audio.GetUUID()));
 	}
 

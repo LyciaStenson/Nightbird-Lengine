@@ -96,12 +96,15 @@ namespace Nightbird::Core
 		if (auto* meshInstance = Cast<MeshInstance>(object))
 		{
 			const Mesh* mesh = meshInstance->m_Mesh.Get().get();
-			for (size_t i = 0; i < mesh->GetPrimitiveCount(); i++)
+			if (mesh)
 			{
-				Renderable renderable;
-				renderable.primitive = &mesh->GetPrimitives()[i];
-				renderable.transform = meshInstance->GetWorldMatrix();
-				renderables.push_back(renderable);
+				for (size_t i = 0; i < mesh->GetPrimitiveCount(); i++)
+				{
+					Renderable renderable;
+					renderable.primitive = &mesh->GetPrimitives()[i];
+					renderable.transform = meshInstance->GetWorldMatrix();
+					renderables.push_back(renderable);
+				}
 			}
 		}
 

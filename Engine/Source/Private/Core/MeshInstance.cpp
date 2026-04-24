@@ -8,8 +8,7 @@ namespace Nightbird::Core
 {
 	void MeshInstance::ResolveAssets(AssetManager& assetManager)
 	{
-		//if (!m_Mesh && !m_MeshUUID.is_nil())
-			//m_Mesh = assetManager.Get<Mesh>(m_MeshUUID);
+		m_Mesh.Resolve(assetManager.Load<Mesh>(m_Mesh.GetUUID()));
 	}
 
 	void MeshInstance::EnterScene()

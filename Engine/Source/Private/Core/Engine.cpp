@@ -85,8 +85,6 @@ namespace Nightbird::Core
 
 	void Engine::SetScene(std::unique_ptr<Scene> scene)
 	{
-		Log::Info("Engine::SetScene");
-
 		m_Scene = std::move(scene);
 
 		if (m_Scene)

@@ -34,6 +34,28 @@ workspace "%PROJECT_NAME%"
 
 	outputdir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
+group "Nightbird"
+
+project "EngineSource"
+	kind "StaticLib"
+	language "C++"
+	cppdialect "C++20"
+	excludefrombuild "On"
+
+	files {
+		enginePath .. "Engine/Source/Public/**.h",
+		enginePath .. "Engine/Source/Private/**.h",
+		enginePath .. "Engine/Source/Private/**.cpp",
+	}
+	
+	includedirs {
+		enginePath .. "Engine/Source/Public",
+		enginePath .. "Engine/Source/Private",
+		enginePath .. "Engine/Vendor/glm",
+		enginePath .. "Engine/Vendor/stb",
+		enginePath .. "Engine/Vendor/stduuid"
+	}
+
 project "Editor"
 	kind "None"
 
@@ -56,6 +78,8 @@ project "Editor"
 	debugargs { "%{wks.location}/%PROJECT_NAME%.nproject" }
 
 	dependson { "%PROJECT_NAME%" }
+
+group ""
 
 project "%PROJECT_NAME%"
 	language "C++"

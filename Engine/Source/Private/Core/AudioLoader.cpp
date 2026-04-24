@@ -9,8 +9,6 @@ namespace Nightbird::Core
 {
 	std::shared_ptr<AudioAsset> AudioLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
 	{
-		Core::Log::Info("AudioLoader::Load");
-
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbaudio";
 		BinaryReader reader(path);
 		if (!reader.IsValid())

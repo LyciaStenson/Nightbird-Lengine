@@ -1,5 +1,6 @@
 #include "Cook/CookManager.h"
 
+#include "Core/AssetManager.h"
 #include "Core/AudioSource.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
@@ -14,15 +15,15 @@
 
 namespace Nightbird::Editor
 {
-	CookManager::CookManager(const std::filesystem::path& outputDir, ImportManager& importManager)
-		: m_RootOutputDir(outputDir), m_ImportManager(importManager)
+	CookManager::CookManager(const std::filesystem::path& outputDir, Core::AssetManager& assetManager, ImportManager& importManager)
+		: m_RootOutputDir(outputDir), m_AssetManager(assetManager), m_ImportManager(importManager)
 	{
 
 	}
 
 	void CookManager::CookScene(const uuids::uuid& sceneUUID, CookTarget target)
 	{
-		Core::SceneReadResult result = m_ImportManager.LoadScene(sceneUUID);
+		Core::SceneReadResult result = m_ImportManager.LoadScene(sceneUUID, &m_AssetManager);
 		if (!result.root)
 		{
 			Core::Log::Error("CookManager: Failed to load scene: " + uuids::to_string(sceneUUID));
@@ -55,7 +56,7 @@ namespace Nightbird::Editor
 		m_Endianness = GetEndianness(target);
 		m_CookOutputDir = GetOutputDir(target);
 		std::filesystem::create_directories(m_CookOutputDir);
-
+		
 		CollectAssets(result.root.get());
 		
 		CookTextures(m_CookOutputDir, target, m_Endianness);
@@ -100,7 +101,7 @@ namespace Nightbird::Editor
 				return;
 			}
 
-			Core::SceneReadResult nestedResult = m_ImportManager.LoadScene(assetInfo->uuid);
+			Core::SceneReadResult nestedResult = m_ImportManager.LoadScene(assetInfo->uuid, &m_AssetManager);
 			if (!nestedResult.root)
 			{
 				Core::Log::Warning("CookManager: Failed to load nested scene: " + object->GetName());

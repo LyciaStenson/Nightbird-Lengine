@@ -8,14 +8,12 @@ project "Engine"
 	targetdir ("%{wks.location}/Binaries/" .. outputdir)
 	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
-	defines { }
-	
 	files {
 		"Source/Public/**.h",
 		"Source/Private/**.h",
 		"Source/Private/**.cpp",
 	}
-	
+
 	includedirs {
 		"Source/Public",
 		"Source/Private",

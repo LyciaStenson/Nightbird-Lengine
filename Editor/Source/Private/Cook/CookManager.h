@@ -25,6 +25,7 @@ namespace Nightbird::Core
 	class Mesh;
 	struct Material;
 	class Texture;
+	class AssetManager;
 }
 
 namespace Nightbird::Editor
@@ -34,7 +35,7 @@ namespace Nightbird::Editor
 	class CookManager
 	{
 	public:
-		CookManager(const std::filesystem::path& outputDir, ImportManager& importManager);
+		CookManager(const std::filesystem::path& outputDir, Core::AssetManager& assetManager, ImportManager& importManager);
 
 		void CookScene(const uuids::uuid& sceneUUID, CookTarget target);
 		void CookScene(Core::SceneReadResult, CookTarget target);
@@ -45,6 +46,7 @@ namespace Nightbird::Editor
 
 		Endianness m_Endianness = Endianness::Little;
 
+		Core::AssetManager& m_AssetManager;
 		ImportManager& m_ImportManager;
 		
 		ProjectCooker m_ProjectCooker;

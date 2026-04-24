@@ -88,7 +88,8 @@ namespace Nightbird::Editor
 				uuids::uuid meshUUID = GenerateUUID();
 				assetManager->Insert(meshUUID, mesh);
 				meshInstance->m_Mesh.SetUUID(meshUUID);
-				meshInstance->m_Mesh.Resolve(assetManager->Load<Core::Mesh>(meshUUID));
+				std::weak_ptr<Core::Mesh> weakMesh = assetManager->Load<Core::Mesh>(meshUUID);
+				meshInstance->m_Mesh.Resolve(weakMesh);
 			}
 
 			meshInstance->SetName(std::string(node.name));
