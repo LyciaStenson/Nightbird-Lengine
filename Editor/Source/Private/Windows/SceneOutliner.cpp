@@ -33,7 +33,9 @@ namespace Nightbird::Editor
 
 		DrawAddObjectPopup();
 
+		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 
 		bool dropHandled = false;
 

@@ -7,7 +7,6 @@
 #include "Windows/ProjectSettingsWindow.h"
 #include "Windows/AboutWindow.h"
 
-
 #include "Import/ImportManager.h"
 
 #include "Scene/TextSceneWriter.h"
@@ -36,11 +35,32 @@ namespace Nightbird::Editor
 				break;
 			case EditorTheme::Dark:
 				ImGui::StyleColorsDark();
+
+				ImVec4* colors = ImGui::GetStyle().Colors;
+				colors[ImGuiCol_WindowBg]					= ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
+				colors[ImGuiCol_TitleBg]					= ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+				colors[ImGuiCol_TitleBgActive]				= ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+				colors[ImGuiCol_TitleBgCollapsed]			= ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+				colors[ImGuiCol_Tab]						= ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+				colors[ImGuiCol_TabSelected]				= ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+				colors[ImGuiCol_TabSelectedOverline]		= ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+				colors[ImGuiCol_TabDimmed]					= ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+				colors[ImGuiCol_TabDimmedSelected]			= ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+				colors[ImGuiCol_TabDimmedSelectedOverline]	= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_Border]						= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_BorderShadow]				= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_Separator]					= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+				colors[ImGuiCol_SeparatorHovered]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+				colors[ImGuiCol_SeparatorActive]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+
 				break;
 		}
-
+		
 		style.FramePadding = ImVec2(8.0f, 8.0f);
 		style.WindowPadding = ImVec2(12.0f, 12.0f);
+		style.FrameRounding = 3.0f;
+		style.WindowRounding = 6.0f;
+		style.WindowBorderSize = 0.0f;
 	}
 
 	void EditorUI::Render()

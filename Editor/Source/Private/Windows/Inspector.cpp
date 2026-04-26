@@ -34,12 +34,18 @@ namespace Nightbird::Editor
 		const TypeInfo* type = selected->GetTypeInfo();
 		ImGui::Text("%s", type->name);
 		
+		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0.0f, 1.0f));
+
 		DrawFields(selected, type);
 		
 		if (selected->HasSourceScene())
 		{
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+
 			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(selected->GetSourceSceneUUID().value()).c_str());
 		}
 	}
