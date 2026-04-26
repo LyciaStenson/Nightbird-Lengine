@@ -43,14 +43,14 @@ project "GlfwVulkanBackend"
 
 	filter { "system:windows" }
 		postbuildcommands {
-			"%{wks.location}/Tools/glslc.exe " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
-			"%{wks.location}/Tools/glslc.exe " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
+			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
 		}
 
 	filter { "system:linux" }
 		postbuildcommands {
-			"%{wks.location}/Tools/glslc " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
-			"%{wks.location}/Tools/glslc " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
+			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
 		}
 
 	filter { }

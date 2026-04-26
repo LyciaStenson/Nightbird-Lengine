@@ -13,10 +13,10 @@ if not exist "%MSYS2_SHELL%" (
 set PROJECT_DIR=%~dp0
 
 echo Compiling shaders (WSL required)
-wsl bash -c "cd $(wslpath '%PROJECT_DIR%') && mkdir -p Intermediate/wiiu && Tools/glslcompiler.elf -vs Backends/WiiUBackend/Shaders/Shader.vert -ps Backends/WiiUBackend/Shaders/Shader.frag -o Intermediate/wiiu/Shader.gsh"
+wsl bash -c "cd $(wslpath '%PROJECT_DIR%') && mkdir -p Intermediate/wiiu && Tools/CafeGLSL/glslcompiler.elf -vs Backends/WiiUBackend/Shaders/Shader.vert -ps Backends/WiiUBackend/Shaders/Shader.frag -o Intermediate/wiiu/Shader.gsh"
 
 if %errorlevel% neq 0 (
-	echo Shader compilation failed. Ensure WSL is installed and Tools/glslcompiler.elf has execution permission.
+	echo Shader compilation failed. Ensure WSL is installed and Tools/CafeGLSL/glslcompiler.elf has execution permission.
 	pause
 	exit /b %errorlevel%
 )

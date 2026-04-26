@@ -8,7 +8,7 @@ fi
 
 echo "Compiling shaders..."
 mkdir -p Intermediate/wiiu
-Tools/glslcompiler.elf \
+Tools/CafeGLSL/glslcompiler.elf \
 	-vs Backends/WiiUBackend/Shaders/Shader.vert \
 	-ps Backends/WiiUBackend/Shaders/Shader.frag \
 	-o Intermediate/wiiu/Shader.gsh
