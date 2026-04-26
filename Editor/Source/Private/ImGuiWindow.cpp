@@ -46,7 +46,7 @@ namespace Nightbird::Editor
 		if (m_Config.padding)
 			ImGui::PopStyleVar();
 
-		DrawBorder(m_Title, 8.0f, IM_COL32(186, 186, 186, 255), 1.5f, 2.0f);
+		DrawBorder(m_Title, 8.0f, IM_COL32(180, 180, 180, 255), 1.5f, 2.0f);
 	}
 
 	void ImGuiWindow::SetOpen(bool open)

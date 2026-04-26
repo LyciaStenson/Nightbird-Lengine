@@ -13,24 +13,13 @@ NB_REFLECT_NO_FIELDS(Nightbird::Editor::SceneOutliner, NB_PARENT(Nightbird::Edit
 namespace Nightbird::Editor
 {
 	SceneOutliner::SceneOutliner(EditorContext& context, bool open)
-		: ImGuiWindow("Scene Outliner", open, { ImGuiWindowFlags_MenuBar, ImVec2(300, 500) }), m_Context(context)
+		: ImGuiWindow("Scene Outliner", open), m_Context(context)
 	{
 
 	}
 
 	void SceneOutliner::OnRender()
 	{
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("View"))
-			{
-				ImGui::MenuItem("Expand All");
-				ImGui::MenuItem("CollapseAll");
-				ImGui::EndMenu();
-			}
-		}
-		ImGui::EndMenuBar();
-
 		DrawAddObjectPopup();
 
 		ImGui::Dummy(ImVec2(0.0f, 1.0f));

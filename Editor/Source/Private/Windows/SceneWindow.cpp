@@ -16,7 +16,7 @@ NB_REFLECT_NO_FIELDS(Nightbird::Editor::SceneWindow, NB_PARENT(Nightbird::Editor
 namespace Nightbird::Editor
 {
 	SceneWindow::SceneWindow(EditorContext& context, bool open)
-		: ImGuiWindow("Scene", open, { .flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse, .padding = ImVec2(2.0f, 2.0f) }), m_Context(context)
+		: ImGuiWindow("Scene", open, { .flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse, .padding = ImVec2(4.0f, 4.0f) }), m_Context(context)
 	{
 		m_Surface = context.GetEngine().GetRenderer().CreateOffscreenSurface(m_CurrentWidth, m_CurrentHeight, Core::RenderSurfaceFormat::Default);
 		
