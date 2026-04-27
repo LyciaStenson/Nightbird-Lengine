@@ -37,10 +37,17 @@ workspace "%PROJECT_NAME%"
 group "Nightbird"
 
 project "EngineSource"
-	kind "StaticLib"
 	language "C++"
 	cppdialect "C++20"
 	excludefrombuild "On"
+
+	filter "system:windows"
+		kind "StaticLib"
+	filter { }
+
+	filter "system:not windows"
+		kind "None"
+	filter { }
 
 	files {
 		enginePath .. "Engine/Source/Public/**.h",
