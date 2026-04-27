@@ -114,10 +114,13 @@ namespace Nightbird::GX2
 		WHBGfxFinishRender();
 	}
 
-	void Renderer::DrawScene(Core::RenderSurface& surface)
+	void Renderer::DrawScene(Core::RenderSurface& coreSurface)
 	{
 		if (!m_ActiveCamera)
 			return;
+
+		RenderSurface& surface = static_cast<RenderSurface&>(coreSurface);
+		surface.Begin();
 		
 		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -126,8 +129,8 @@ namespace Nightbird::GX2
 		GX2SetVertexShader(m_ShaderGroup.vertexShader);
 		GX2SetPixelShader(m_ShaderGroup.pixelShader);
 		
-		GX2SetViewport(0.0f, 0.0f, static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetWidth()), 0.0f, 1.0f);
-		GX2SetScissor(0, 0, surface.GetWidth(), surface.GetWidth());
+		GX2SetViewport(0.0f, 0.0f, static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetHeight()), 0.0f, 1.0f);
+		GX2SetScissor(0, 0, surface.GetWidth(), surface.GetHeight());
 
 		GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_FUNC_LESS);
 		GX2SetColorControl(GX2_LOGIC_OP_COPY, 0, GX2_DISABLE, GX2_ENABLE);
@@ -140,18 +143,18 @@ namespace Nightbird::GX2
 
 		glm::vec4 cameraPos = glm::vec4(glm::vec3(m_ActiveCamera->GetWorldMatrix()[3]), 1.0f);
 		UploadMatrix(m_CameraData, m_ActiveCamera->GetViewMatrix());
-		UploadMatrix(m_CameraData + 16, m_ActiveCamera->GetProjectionMatrix(static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetWidth())));
+		UploadMatrix(m_CameraData + 16, m_ActiveCamera->GetProjectionMatrix(static_cast<float>(surface.GetWidth()), static_cast<float>(surface.GetHeight())));
 		UploadVec4(m_CameraData + 32, cameraPos);
 
-		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);
 		GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_CameraData, 36 * sizeof(float));
+		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);
 		
 		for (const auto& renderable : m_Renderables)
 		{
 			UploadMatrix(m_ModelData, renderable.transform);
 
-			GX2SetVertexUniformBlock(m_ModelBlockLocation, 16 * sizeof(float), m_ModelData);
 			GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_ModelData, 16 * sizeof(float));
+			GX2SetVertexUniformBlock(m_ModelBlockLocation, 16 * sizeof(float), m_ModelData);
 
 			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
 			Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
@@ -163,6 +166,8 @@ namespace Nightbird::GX2
 			GX2RSetAttributeBuffer(&geometry.GetTexCoordBuffer(), 1, geometry.GetTexCoordBuffer().elemSize, 0);
 			GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, geometry.GetIndexCount(), GX2_INDEX_TYPE_U16, geometry.GetIndexBuffer().buffer, 0, 1);
 		}
+
+		surface.Finish();
 	}
 
 	Core::RenderSurface& Renderer::GetDefaultSurface()
