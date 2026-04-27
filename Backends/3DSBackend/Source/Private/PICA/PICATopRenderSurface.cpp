@@ -29,6 +29,11 @@ namespace Nightbird::PICA
 		return 400;
 	}
 
+	void TopRenderSurface::Resize(uint32_t width, uint32_t height)
+	{
+
+	}
+
 	void TopRenderSurface::Begin()
 	{
 		C3D_RenderTargetClear(m_Target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);

@@ -36,8 +36,9 @@ namespace Nightbird::GX2
 		void Initialize() override;
 		void Shutdown() override;
 		Core::RenderSurface& GetDefaultSurface() override;
+		std::unique_ptr<Core::RenderSurface> CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format) override;
 		void SubmitScene(const Core::Scene& scene, const Core::Camera& camera) override;
-		void BeginFrame(Core::RenderSurface& surface) override;
+		bool BeginFrame(Core::RenderSurface& surface) override;
 		void EndFrame(Core::RenderSurface& surface) override;
 		void DrawScene(Core::RenderSurface& surface) override;
 

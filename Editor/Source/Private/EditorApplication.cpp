@@ -5,7 +5,6 @@
 #include "Core/SceneObject.h"
 #include "Core/Log.h"
 
-#include "ProjectConfig.h"
 #include "EditorBackendFactory.h"
 #include "SettingsManager.h"
 
@@ -30,8 +29,38 @@ namespace Nightbird::Editor
 {
 	int EditorApplication::Run(int argc, char** argv)
 	{
-		if (argc > 1)
-			m_ProjectPath = argv[1];
+		if (argc < 2)
+		{
+			Core::Log::Error("Usage: Editor <project_path> [options]");
+			return 1;
+		}
+		
+		m_ProjectConfig = LoadProjectConfig(argv[1]);
+		if (m_ProjectConfig.name.empty())
+		{
+			Core::Log::Error("Invalid project name in: " + m_ProjectConfig.path.string());
+			return 1;
+		}
+
+		const char* envPath = std::getenv("NIGHTBIRD_PATH");
+		if (!envPath)
+			return 1;
+
+		std::filesystem::path installPath = std::filesystem::path(envPath);
+
+		for (int i = 2; i < argc; ++i)
+		{
+			std::string arg = argv[i];
+			if (arg == "--generate")
+			{
+				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "premake5.template.lua", m_ProjectConfig.path.parent_path() / "premake5.lua");
+				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Makefile.template.wiiu", m_ProjectConfig.path.parent_path() / "Makefile.wiiu");
+				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Makefile.template.3ds", m_ProjectConfig.path.parent_path() / "Makefile.3ds");
+
+				Core::Log::Info("Generated project build files for " + m_ProjectConfig.name);
+				return 0;
+			}
+		}
 		
 		InitializeEngine();
 
@@ -54,7 +83,7 @@ namespace Nightbird::Editor
 		m_Platform = Core::CreatePlatform();
 		m_Renderer = Core::CreateRenderer();
 
-		m_ImportManager = std::make_unique<ImportManager>(m_ProjectPath.parent_path() / "Assets");
+		m_ImportManager = std::make_unique<ImportManager>(m_ProjectConfig.path.parent_path() / "Assets");
 		m_AssetManager = std::make_unique<Core::AssetManager>(*m_ImportManager);
 
 		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_AssetManager);
@@ -62,35 +91,12 @@ namespace Nightbird::Editor
 	
 	int EditorApplication::LoadProject()
 	{
-		if (m_ProjectPath.empty())
+		if (m_ProjectConfig.path.empty())
 		{
 			Core::Log::Error("No project specified");
 			return 1;
 		}
 		
-		std::filesystem::path projectDir = m_ProjectPath.parent_path();
-
-		const char* envPath = std::getenv("NIGHTBIRD_PATH");
-		if (!envPath)
-			return 1;
-		
-		std::filesystem::path installPath = std::filesystem::path(envPath);
-
-		ProjectConfig projectConfig = LoadProjectConfig(m_ProjectPath);
-		if (projectConfig.name.empty())
-		{
-			Core::Log::Error("Invalid project name in: " + m_ProjectPath.string());
-			return 1;
-		}
-
-		std::filesystem::path premakePath = projectDir / "premake5.lua";
-		if (!std::filesystem::exists(premakePath))
-		{
-			GeneratePremake(projectConfig, installPath, projectDir);
-			Core::Log::Info("Generated premake5.lua for " + projectConfig.name + ", now build the project");
-			return 1;
-		}
-
 		// EDITORDEBUG ONLY
 		std::string configStr = "EditorDebug";
 
@@ -103,12 +109,12 @@ namespace Nightbird::Editor
 
 		std::string libraryStr;
 #ifdef _WIN32
-		libraryStr = projectConfig.name + ".dll";
+		libraryStr = m_ProjectConfig.name + ".dll";
 #else
-		libraryStr = "lib" + projectConfig.name + ".so";
+		libraryStr = "lib" + m_ProjectConfig.name + ".so";
 #endif
 
-		std::filesystem::path sharedLibPath = projectDir / "Binaries" / platformStr / configStr / libraryStr;
+		std::filesystem::path sharedLibPath = m_ProjectConfig.path.parent_path() / "Binaries" / platformStr / configStr / libraryStr;
 
 #ifdef _WIN32
 		m_ProjectLibHandle = LoadLibraryA(sharedLibPath.string().c_str());
@@ -185,7 +191,7 @@ namespace Nightbird::Editor
 	{
 		m_EditorSettings = m_SettingsManager.LoadEditorSettings();
 		if (m_ProjectLoaded)
-			m_ProjectSettings = m_SettingsManager.LoadProjectSettings(m_ProjectPath.string());
+			m_ProjectSettings = m_SettingsManager.LoadProjectSettings(m_ProjectConfig.path.string());
 	}
 
 	void EditorApplication::InitializeWindows()

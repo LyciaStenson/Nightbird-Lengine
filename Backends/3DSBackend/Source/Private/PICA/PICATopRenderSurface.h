@@ -15,6 +15,8 @@ namespace Nightbird::PICA
 		uint32_t GetWidth() const override;
 		uint32_t GetHeight() const override;
 
+		void Resize(uint32_t width, uint32_t height) override;
+
 		void Begin();
 
 	private:

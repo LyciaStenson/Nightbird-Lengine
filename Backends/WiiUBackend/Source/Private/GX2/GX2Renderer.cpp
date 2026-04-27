@@ -103,9 +103,10 @@ namespace Nightbird::GX2
 		m_Renderables = scene.CollectRenderables();
 	}
 
-	void Renderer::BeginFrame(Core::RenderSurface& surface)
+	bool Renderer::BeginFrame(Core::RenderSurface& surface)
 	{
 		WHBGfxBeginRender();
+		return true;
 	}
 
 	void Renderer::EndFrame(Core::RenderSurface& surface)
@@ -117,7 +118,7 @@ namespace Nightbird::GX2
 	{
 		if (!m_ActiveCamera)
 			return;
-
+		
 		WHBGfxClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		GX2SetShaderMode(GX2_SHADER_MODE_UNIFORM_BLOCK);
@@ -144,7 +145,7 @@ namespace Nightbird::GX2
 
 		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);
 		GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_CameraData, 36 * sizeof(float));
-
+		
 		for (const auto& renderable : m_Renderables)
 		{
 			UploadMatrix(m_ModelData, renderable.transform);
@@ -162,6 +163,16 @@ namespace Nightbird::GX2
 			GX2RSetAttributeBuffer(&geometry.GetTexCoordBuffer(), 1, geometry.GetTexCoordBuffer().elemSize, 0);
 			GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, geometry.GetIndexCount(), GX2_INDEX_TYPE_U16, geometry.GetIndexBuffer().buffer, 0, 1);
 		}
+	}
+
+	Core::RenderSurface& Renderer::GetDefaultSurface()
+	{
+		return *m_SurfaceTV;
+	}
+
+	std::unique_ptr<Core::RenderSurface> Renderer::CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format)
+	{
+		return nullptr;
 	}
 
 	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
@@ -184,10 +195,5 @@ namespace Nightbird::GX2
 		// Create and add to cache if does not exist
 		m_MaterialCache.emplace(material, Material(*material, *m_DefaultTexture));
 		return m_MaterialCache.at(material);
-	}
-
-	Core::RenderSurface& Renderer::GetDefaultSurface()
-	{
-		return *m_SurfaceTV;
 	}
 }

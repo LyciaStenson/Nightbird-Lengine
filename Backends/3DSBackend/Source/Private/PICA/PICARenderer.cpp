@@ -69,11 +69,12 @@ namespace Nightbird::PICA
 		m_Renderables = scene.CollectRenderables();
 	}
 
-	void Renderer::BeginFrame(Core::RenderSurface& surface)
+	bool Renderer::BeginFrame(Core::RenderSurface& surface)
 	{
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
 		m_TopSurface->Begin();
+		return true;
 	}
 
 	void Renderer::EndFrame(Core::RenderSurface& surface)
@@ -121,6 +122,16 @@ namespace Nightbird::PICA
 		}
 	}
 
+	Core::RenderSurface& Renderer::GetDefaultSurface()
+	{
+		return *m_TopSurface;
+	}
+
+	std::unique_ptr<Core::RenderSurface> Renderer::CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format)
+	{
+		return nullptr;
+	}
+
 	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
 	{
 		auto it = m_GeometryCache.find(primitive);
@@ -159,10 +170,5 @@ namespace Nightbird::PICA
 		auto tex = std::make_shared<PICA::Texture>(*texture);
 		m_TextureCache.emplace(texture, tex);
 		return m_TextureCache.at(texture);
-	}
-
-	Core::RenderSurface& Renderer::GetDefaultSurface()
-	{
-		return *m_TopSurface;
 	}
 }

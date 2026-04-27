@@ -6,6 +6,12 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifeq ($(strip $(NIGHTBIRD_PATH)),)
+$(error "Please set NIGHTBIRD_PATH in your environment.")
+endif
+
+NIGHTBIRD_PATH := $(subst \,/,$(NIGHTBIRD_PATH))
+
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
@@ -34,31 +40,31 @@ include $(DEVKITARM)/3ds_rules
 
 NO_SMDH := 1
 
-TARGET		:=	Engine
-BUILD		:=	Intermediate/3ds
-BUILD_DIR	:=	3ds
-SOURCES		:=	App/Source/Private \
-				Engine/Source/Private \
-				Engine/Source/Private/Core \
-				Engine/Source/Private/Input \
-				Engine/Source/Private/Audio \
-				Engine/Source/Private/Load \
-				Engine/Source/Private/Scene \
-				Backends/3DSBackend/Source/Private \
-				Backends/3DSBackend/Source/Private/3DS \
-				Backends/3DSBackend/Source/Private/PICA
-DATA		:=	data \
-				Intermediate/3ds/data
-INCLUDES	:=	Engine/Source/Public \
-				Engine/Source/Private \
-				App/Source/Public \
-				Backends/3DSBackend/Source/Public \
-				Backends/3DSBackend/Source/Private \
-				Backends/3DSBackend/Source/Private/3DS \
-				Backends/3DSBackend/Source/Private/PICA \
-				Engine/Vendor/glm \
-				Engine/Vendor/stb \
-				Engine/Vendor/stduuid
+TARGET				:=	"%PROJECT_NAME%"
+BUILD				:=	Intermediate/3ds
+BUILD_DIR			:=	3ds
+SOURCES				:=	Source/Private
+DATA				:=	data
+RELATIVE_INCLUDES	:=	Source/Public
+ABSOLUTE_INCLUDES	:=	$(NIGHTBIRD_PATH)/Engine/Source/Public \
+						$(NIGHTBIRD_PATH)/Engine/Vendor/glm \
+						$(NIGHTBIRD_PATH)/Engine/Vendor/stb \
+						$(NIGHTBIRD_PATH)/Engine/Vendor/stduuid
+
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:= $(CTRULIB) $(NIGHTBIRD_PATH)/Binaries/3ds
+
+TOPDIR ?= $(CURDIR)
+
+export TOPDIR RELATIVE_INCLUDES ABSOLUTE_INCLUDES LIBDIRS BUILD
+
+export INCLUDE	:=	$(foreach dir,$(RELATIVE_INCLUDES),-I$(TOPDIR)/$(dir)) \
+					$(foreach dir,$(ABSOLUTE_INCLUDES),-I$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(TOPDIR)/$(BUILD)
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -74,12 +80,9 @@ CFLAGS	+=	$(INCLUDE) -D__3DS__
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions -fno-rtti -std=c++20
 
 ASFLAGS	:=	-g $(ARCH)
+LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:= $(CTRULIB)
+export LIBS := -Wl,--whole-archive -lEngine -Wl,--no-whole-archive -lcitro3d -lctru -lm
 
 
 #---------------------------------------------------------------------------------
@@ -89,12 +92,11 @@ LIBDIRS	:= $(CTRULIB)
 ifneq ($(BUILD_DIR),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/Binaries/3ds/lib$(TARGET).a
-export TOPDIR	:=	$(CURDIR)
+export OUTPUT	:=	$(CURDIR)/Binaries/3ds/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+					$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -103,6 +105,20 @@ CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
 export OFILES_SOURCES 	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
@@ -114,11 +130,8 @@ export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
 export HFILES	:=	$(PICAFILES:.v.pica=_shbin.h) $(SHLISTFILES:.shlist=_shbin.h) \
 			$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
-
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
+					-L$(NIGHTBIRD_PATH)/Binaries/3ds
 
 export _3DSXDEPS	:=	$(if $(NO_SMDH),,$(OUTPUT).smdh)
 
@@ -143,8 +156,6 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
-export AR_TARGET = $(TARGET)
-
 .PHONY: all clean
 
 #---------------------------------------------------------------------------------
@@ -163,7 +174,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) Binaries/3ds/lib$(TARGET).a
+	@rm -fr $(BUILD) Binaries/3ds/$(TARGET).3dsx Binaries/3ds/$(TARGET).elf
 
 #---------------------------------------------------------------------------------
 else
@@ -171,21 +182,16 @@ else
 
 DEPENDS := $(OFILES:.o=.d)
 
-all: $(OUTPUT)
+all: $(OUTPUT).3dsx
 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-#$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
 
-$(OUTPUT): $(OFILES)
-	@echo building engine static library $@
-	@rm -f $@
-	@$(AR) rcs $@ $^
+$(OUTPUT).elf	:	$(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
-
-#$(OUTPUT).elf	:	$(OFILES)
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data

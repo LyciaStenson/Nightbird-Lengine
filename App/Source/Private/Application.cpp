@@ -22,11 +22,11 @@ namespace Nightbird::App
 
 	void Application::Initialize()
 	{
-		Nightbird::TypeRegistry::InitReflection();
-
 		m_Platform = Core::CreatePlatform();
 		m_Renderer = Core::CreateRenderer();
-		
+
+		Nightbird::TypeRegistry::InitReflection();
+
 		m_AssetLoader = std::make_unique<Core::AssetLoader>(m_Platform->GetCookedAssetsPath());
 		m_AssetManager = std::make_unique<Core::AssetManager>(*m_AssetLoader);
 

@@ -29,35 +29,36 @@ namespace Nightbird::Editor
 		toml::table table = parse.table();
 
 		config.name = table["project"]["name"].value_or(std::string{});
+		config.path = projectPath;
 
 		return config;
 	}
 
-	void GeneratePremake(const ProjectConfig& projectConfig, const std::filesystem::path& installPath, const std::filesystem::path& projectPath)
+	void GenerateProjectFile(const ProjectConfig& projectConfig, const std::filesystem::path& templatePath, const std::filesystem::path& outputPath)
 	{
-		std::filesystem::path templatePath = installPath / "Templates" / "premake5.template.lua";
-		std::filesystem::path outputPath = projectPath / "premake5.lua";
+		//std::filesystem::path templatePath = installPath / "Templates" / "premake5.template.lua";
+		//std::filesystem::path outputPath = projectPath / "premake5.lua";
 
 		if (!std::filesystem::exists(templatePath))
 		{
-			Nightbird::Core::Log::Error("Premake template not found at: " + templatePath.string());
+			Nightbird::Core::Log::Error("Template not found at: " + templatePath.string());
 			return;
 		}
 
 		std::ifstream templateFile(templatePath);
 		std::stringstream buffer;
 		buffer << templateFile.rdbuf();
-		std::string premakeContent = buffer.str();
+		std::string fileContent = buffer.str();
 
 		size_t pos = 0;
 		const std::string placeholder = "%PROJECT_NAME%";
-		while ((pos = premakeContent.find(placeholder, pos)) != std::string::npos)
+		while ((pos = fileContent.find(placeholder, pos)) != std::string::npos)
 		{
-			premakeContent.replace(pos, placeholder.length(), projectConfig.name);
+			fileContent.replace(pos, placeholder.length(), projectConfig.name);
 			pos += projectConfig.name.size();
 		}
 
 		std::ofstream outFile(outputPath);
-		outFile << premakeContent;
+		outFile << fileContent;
 	}
 }

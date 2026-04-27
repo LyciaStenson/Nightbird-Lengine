@@ -18,6 +18,8 @@
 #include "WindowManager.h"
 #include "Cook/CookManager.h"
 
+#include "ProjectConfig.h"
+
 #include <memory>
 #include <filesystem>
 
@@ -67,7 +69,7 @@ namespace Nightbird::Editor
 		EditorSettings m_EditorSettings;
 		ProjectSettings m_ProjectSettings;
 
-		std::filesystem::path m_ProjectPath;
+		ProjectConfig m_ProjectConfig;
 		bool m_ProjectLoaded = false;
 
 #ifdef _WIN32
