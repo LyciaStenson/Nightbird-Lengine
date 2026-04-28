@@ -51,10 +51,7 @@ namespace Nightbird::Core
 		m_Platform.Update();
 		m_InputSystem.Update(m_Platform.GetInputProvider());
 		m_Scene->Update(deltaTime);
-
-		if (m_InputSystem.WasButtonPressed(Input::Button::A))
-			Log::Info("A Pressed");
-
+		
 		return deltaTime;
 	}
 

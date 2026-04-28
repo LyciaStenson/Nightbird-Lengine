@@ -34,14 +34,14 @@ namespace Nightbird::Input
 
 	struct State
 	{
-		std::array<bool, static_cast<size_t>(Key::SIZE)> keysDown;
-		std::array<bool, static_cast<size_t>(Key::SIZE)> keysPressed;
-		std::array<bool, static_cast<size_t>(Key::SIZE)> keysReleased;
+		std::array<bool, static_cast<size_t>(Key::SIZE)> keysDown{};
+		std::array<bool, static_cast<size_t>(Key::SIZE)> keysPressed{};
+		std::array<bool, static_cast<size_t>(Key::SIZE)> keysReleased{};
 
-		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsDown;
-		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsPressed;
-		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsReleased;
+		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsDown{};
+		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsPressed{};
+		std::array<bool, static_cast<size_t>(Button::SIZE)> buttonsReleased{};
 
-		std::array<glm::vec2, static_cast<size_t>(Axis::SIZE)> axes;
+		std::array<glm::vec2, static_cast<size_t>(Axis::SIZE)> axes{};
 	};
 }
