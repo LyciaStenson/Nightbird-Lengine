@@ -70,6 +70,8 @@ namespace Nightbird::GX2
 				m_ModelBlockLocation = b.offset;
 		}
 
+		Core::Log::Info("m_CameraBlockLocation: " + std::to_string(m_CameraBlockLocation) + ", m_ModelBlockLocation: " + std::to_string(m_ModelBlockLocation));
+
 		// CameraUBO: view(16) + projection(16) + position(4) = 36 floats
 		m_CameraData = (float*)MEMAllocFromDefaultHeapEx(36 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 
@@ -81,6 +83,15 @@ namespace Nightbird::GX2
 
 		m_SurfaceTV = std::make_unique<RenderSurfaceTV>();
 		m_SurfaceDRC = std::make_unique<RenderSurfaceDRC>();
+
+		for (uint32_t i = 0; i < m_ShaderGroup.vertexShader->uniformBlockCount; i++)
+		{
+			auto& b = m_ShaderGroup.vertexShader->uniformBlocks[i];
+			Core::Log::Info("Uniform block " + std::to_string(i) +
+			": name=" + std::string(b.name) +
+			" offset=" + std::to_string(b.offset) +
+			" size=" + std::to_string(b.size));
+		}
 	}
 
 	void Renderer::Shutdown()

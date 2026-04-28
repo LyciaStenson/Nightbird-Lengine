@@ -15,6 +15,10 @@ namespace Nightbird::Core
 
 	glm::mat4 Camera::GetProjectionMatrix(float width, float height) const
 	{
+#ifdef __WIIU__
+		return glm::perspectiveRH_ZO(glm::radians(m_Fov), width / height, 0.001f, 1000.0f);
+#else
 		return glm::perspective(glm::radians(m_Fov), width / height, 0.001f, 1000.0f);
+#endif
 	}
 }

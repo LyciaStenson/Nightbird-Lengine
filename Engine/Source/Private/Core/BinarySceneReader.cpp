@@ -126,7 +126,7 @@ namespace Nightbird::Core
 					Log::Info("BinarySceneReader: Available type: " + std::string(type->name));
 				}
 			}
-			
+
 			if (hasSceneUUID)
 				object->SetSourceSceneUUID(sourceSceneUUID);
 

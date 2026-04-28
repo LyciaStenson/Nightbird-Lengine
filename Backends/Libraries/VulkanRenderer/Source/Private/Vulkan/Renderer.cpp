@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Nightbird::Vulkan
 {
 	Renderer::Renderer(Core::Platform* platform, std::vector<const char*> extensions, SurfaceCreator surfaceCreator)
@@ -37,9 +39,9 @@ namespace Nightbird::Vulkan
 		m_Platform->GetFramebufferSize(&width, &height);
 
 		m_SwapChain = std::make_unique<SwapChain>(m_Device.get(), m_Sync.get(), m_Surface, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-		
+
 		m_SwapChainSurface = std::make_unique<SwapChainSurface>(m_Platform, *m_Device, *m_Sync, *m_SwapChain);
-		
+
 		CreateDescriptorPool();
 
 		m_DescriptorSetLayoutManager = std::make_unique<DescriptorSetLayoutManager>(m_Device.get());
@@ -74,7 +76,7 @@ namespace Nightbird::Vulkan
 		m_Sync.reset();
 		m_SwapChainSurface.reset();
 		m_SwapChain.reset();
-		
+
 		vkDestroySurfaceKHR(m_Instance->Get(), m_Surface, nullptr);
 
 		m_Device.reset();
@@ -88,7 +90,7 @@ namespace Nightbird::Vulkan
 		m_DirectionalLights = scene.CollectDirectionalLights();
 		m_PointLights = scene.CollectPointLights();
 	}
-	
+
 	bool Renderer::BeginFrame(Core::RenderSurface& coreSurface)
 	{
 		Vulkan::RenderSurface& surface = static_cast<Vulkan::RenderSurface&>(coreSurface);
@@ -148,11 +150,11 @@ namespace Nightbird::Vulkan
 		if (surface.GetSurfaceType() == RenderSurfaceType::SwapChain)
 		{
 			SwapChainSurface& swapChainSurface = static_cast<SwapChainSurface&>(surface);
-			
+
 			RenderPass& renderPass = swapChainSurface.GetRenderPass();
 			renderPass.End(m_CurrentFrame.commandBuffer);
 			renderPass.EndCommandBuffer(m_CurrentFrame.commandBuffer);
-			
+
 			VkSubmitInfo submitInfo{};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -184,9 +186,9 @@ namespace Nightbird::Vulkan
 
 			RenderPass& renderPass = offscreenSurface.GetRenderPass();
 			renderPass.End(offscreenSurface.m_CommandBuffer);
-			
+
 			offscreenSurface.GetColorTexture().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			
+
 			m_Device->EndSingleTimeCommands(offscreenSurface.m_CommandBuffer);
 			offscreenSurface.m_CommandBuffer = VK_NULL_HANDLE;
 		}
@@ -212,7 +214,7 @@ namespace Nightbird::Vulkan
 	{
 		if (!m_ActiveCamera)
 			return;
-		
+
 		std::vector<DirectionalLightData> directionalLightData;
 		for (const auto* directionalLight : m_DirectionalLights)
 		{
@@ -278,14 +280,14 @@ namespace Nightbird::Vulkan
 		for (const auto* renderable : transparentRenderables)
 			DrawRenderable(commandBuffer, *renderable, m_TransparentPipeline.get(), frameIndex);
 	}
-	
+
 	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline, uint32_t frameIndex)
 	{
 		Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
 		Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
 
 		VkDescriptorSet transformDescriptorSet = m_TransformPool->Acquire(renderable.transform, frameIndex);
-		
+
 		VkBuffer vertexBuffers[] = { geometry.GetVertexBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
@@ -338,7 +340,7 @@ namespace Nightbird::Vulkan
 		m_GeometryCache.emplace(primitive, Geometry(m_Device.get(), *primitive));
 		return m_GeometryCache.at(primitive);
 	}
-	
+
 	Material& Renderer::GetOrCreateMaterial(const Core::Material* material)
 	{
 		auto it = m_MaterialCache.find(material);
@@ -353,7 +355,7 @@ namespace Nightbird::Vulkan
 	{
 		return *m_SwapChainSurface;
 	}
-	
+
 	std::unique_ptr<Core::RenderSurface> Renderer::CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format)
 	{
 		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -361,7 +363,7 @@ namespace Nightbird::Vulkan
 			colorFormat = VK_FORMAT_UNDEFINED;
 
 		VkFormat depthFormat = m_Device->FindSupportedDepthFormat();
-		
+
 		return std::make_unique<OffscreenSurface>(m_Device.get(), width, height, colorFormat, depthFormat);
 	}
 
@@ -379,7 +381,7 @@ namespace Nightbird::Vulkan
 	{
 		return *m_SwapChain;
 	}
-	
+
 	VkCommandBuffer Renderer::GetCurrentCommandBuffer() const
 	{
 		return m_CurrentFrame.commandBuffer;

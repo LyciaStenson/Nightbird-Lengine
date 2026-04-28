@@ -8,6 +8,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize2.h>
+
 namespace Nightbird::Editor
 {
 	static bool WritePNG(const std::filesystem::path& path, uint32_t width, uint32_t height, const std::vector<uint8_t>& pixels)
@@ -32,6 +35,17 @@ namespace Nightbird::Editor
 		return msysPath;
 	}
 #endif
+
+	static uint32_t NextPow2(uint32_t v)
+	{
+		v--;			// E.g. 1024 -> 1023
+		v |= v >> 1;	// Smear highest set bit rightward, 1 position
+		v |= v >> 2;	// Smear 2 more
+		v |= v >> 4;	// Smear 4 more
+		v |= v >> 8;	// Smear 8 more
+		v |= v >> 16;	// Smear 16 more so all bits below highest are 1
+		return ++v;		// Add 1 to get the next power of two: e.g. 1024
+	}
 
 	void TextureCooker::Cook(const Core::Texture& texture, const uuids::uuid& uuid, const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
@@ -114,8 +128,20 @@ namespace Nightbird::Editor
 			// Force opaque
 			pixels[i + 3] = 255;
 		}
-		
-		if (!WritePNG(inputPath, texture.GetWidth(), texture.GetHeight(), pixels))
+
+		uint32_t srcWidth = texture.GetWidth();
+		uint32_t srcHeight = texture.GetHeight();
+		uint32_t dstWidth = std::min(NextPow2(srcWidth), 1024u);
+		uint32_t dstHeight = std::min(NextPow2(srcHeight), 1024u);
+
+		if (dstWidth != srcWidth || dstHeight != srcHeight)
+		{
+			std::vector<uint8_t> resized(dstWidth * dstHeight * 4);
+			stbir_resize_uint8_linear(pixels.data(), srcWidth, srcHeight, 0, resized.data(), dstWidth, dstHeight, 0, STBIR_RGBA);
+			pixels = std::move(resized);
+		}
+
+		if (!WritePNG(inputPath, dstWidth, dstHeight, pixels))
 		{
 			Core::Log::Error("TextureCooker: Failed to write temporator PNG for tex3ds.");
 			return {};
@@ -128,7 +154,7 @@ namespace Nightbird::Editor
 #else
 		std::string command = "tex3ds \"" + inputPath.string() + "\" -f rgba5551 -z auto -o \"" + outputPath.string() + "\"";
 #endif
-		
+
 		int result = std::system(command.c_str());
 		if (result != 0)
 		{
@@ -142,11 +168,11 @@ namespace Nightbird::Editor
 			Core::Log::Error("TextureCooker: Failed to open tex3ds output.");
 			return {};
 		}
-		
+
 		std::vector<uint8_t> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		
+
 		file.close();
-		
+
 		std::filesystem::remove(inputPath);
 		std::filesystem::remove(outputPath);
 		return data;
