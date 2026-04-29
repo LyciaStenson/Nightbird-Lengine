@@ -74,7 +74,7 @@ namespace Nightbird::GX2
 		m_CameraData = (float*)MEMAllocFromDefaultHeapEx(36 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 
 		// ModelUBO: model(16) = 16 floats
-		m_ModelData = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
+		//m_ModelData = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float), GX2_UNIFORM_BLOCK_ALIGNMENT);
 
 		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
 		m_DefaultTexture = std::make_shared<Core::Texture>(1, 1, Core::TextureFormat::RGBA8, pixels);
@@ -88,7 +88,7 @@ namespace Nightbird::GX2
 		GX2DrawDone();
 
 		MEMFreeToDefaultHeap(m_CameraData);
-		MEMFreeToDefaultHeap(m_ModelData);
+		//MEMFreeToDefaultHeap(m_ModelData);
 
 		m_MaterialCache.clear();
 		m_GeometryCache.clear();
@@ -149,15 +149,19 @@ namespace Nightbird::GX2
 		GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_CameraData, 36 * sizeof(float));
 		GX2SetVertexUniformBlock(m_CameraBlockLocation, 36 * sizeof(float), m_CameraData);
 		
-		for (const auto& renderable : m_Renderables)
+		uint32_t renderableCount = static_cast<uint32_t>(m_Renderables.size());
+		float* modelDataPool = (float*)MEMAllocFromDefaultHeapEx(16 * sizeof(float) * renderableCount, GX2_UNIFORM_BLOCK_ALIGNMENT);
+
+		for (uint32_t i = 0; i < renderableCount; ++i)
 		{
-			UploadMatrix(m_ModelData, renderable.transform);
+			float* modelData = modelDataPool + 16 * i;
+			UploadMatrix(modelData, m_Renderables[i].transform);
 
-			GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, m_ModelData, 16 * sizeof(float));
-			GX2SetVertexUniformBlock(m_ModelBlockLocation, 16 * sizeof(float), m_ModelData);
+			GX2Invalidate(GX2_INVALIDATE_MODE_CPU | GX2_INVALIDATE_MODE_UNIFORM_BLOCK, modelData, 16 * sizeof(float));
+			GX2SetVertexUniformBlock(m_ModelBlockLocation, 16 * sizeof(float), modelData);
 
-			Geometry& geometry = GetOrCreateGeometry(renderable.primitive);
-			Material& material = GetOrCreateMaterial(renderable.primitive->GetMaterial().get());
+			Geometry& geometry = GetOrCreateGeometry(m_Renderables[i].primitive);
+			Material& material = GetOrCreateMaterial(m_Renderables[i].primitive->GetMaterial().get());
 
 			GX2SetPixelTexture(&material.GetBaseColorTexture().GetTexture(), 3);
 			GX2SetPixelSampler(&material.GetBaseColorTexture().GetSampler(), 3);
@@ -166,6 +170,8 @@ namespace Nightbird::GX2
 			GX2RSetAttributeBuffer(&geometry.GetTexCoordBuffer(), 1, geometry.GetTexCoordBuffer().elemSize, 0);
 			GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, geometry.GetIndexCount(), GX2_INDEX_TYPE_U16, geometry.GetIndexBuffer().buffer, 0, 1);
 		}
+
+		MEMFreeToDefaultHeap(modelDataPool);
 
 		surface.Finish();
 	}

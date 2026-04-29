@@ -59,7 +59,7 @@ namespace Nightbird::GX2
 		uint32_t m_ModelBlockLocation = 0;
 
 		float* m_CameraData = nullptr;
-		float* m_ModelData = nullptr;
+		//float* m_ModelData = nullptr;
 
 		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 		Material& GetOrCreateMaterial(const Core::Material* material);
