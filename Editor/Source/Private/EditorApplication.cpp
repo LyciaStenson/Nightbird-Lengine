@@ -230,6 +230,16 @@ namespace Nightbird::Editor
 		while (!m_Engine->ShouldClose())
 		{
 			Update();
+
+			int width, height;
+			m_Platform->GetFramebufferSize(&width, &height);
+
+			if (width == 0 || height == 0)
+			{
+				m_Platform->WaitEvents();
+				continue;
+			}
+
 			Render();
 		}
 	}

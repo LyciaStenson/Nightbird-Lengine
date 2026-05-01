@@ -61,6 +61,16 @@ namespace Nightbird::App
 		while (!m_Engine->ShouldClose())
 		{
 			m_Engine->Update();
+
+			int width, height;
+			m_Platform->GetFramebufferSize(&width, &height);
+			
+			if (width == 0 || height == 0)
+			{
+				m_Platform->WaitEvents();
+				continue;
+			}
+
 			auto& surface = m_Renderer->GetDefaultSurface();
 			if (!m_Renderer->BeginFrame(surface))
 				continue;
