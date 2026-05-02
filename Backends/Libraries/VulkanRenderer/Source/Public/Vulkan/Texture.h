@@ -2,8 +2,6 @@
 
 #include "Vulkan/Image.h"
 
-#include <volk.h>
-
 #include <memory>
 
 namespace Nightbird::Core
@@ -37,7 +35,7 @@ namespace Nightbird::Vulkan
 
 		VkSampler m_Sampler = VK_NULL_HANDLE;
 
-		Device* m_Device;
+		Device* m_Device = nullptr;
 
 		void CreateFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, bool sRGB);
 		void CreateTextureSampler();
