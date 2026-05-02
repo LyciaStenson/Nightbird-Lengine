@@ -56,14 +56,18 @@ namespace Nightbird::Editor
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "premake5.template.lua", m_ProjectConfig.path.parent_path() / "premake5.lua");
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Makefile.template.wiiu", m_ProjectConfig.path.parent_path() / "Makefile.wiiu");
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Makefile.template.3ds", m_ProjectConfig.path.parent_path() / "Makefile.3ds");
+				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-wiiu.template.bat", m_ProjectConfig.path.parent_path() / "Build-wiiu.bat");
+				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-3ds.template.bat", m_ProjectConfig.path.parent_path() / "Build-3ds.bat");
+
+#ifdef _WIN32
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-vs2022.template.bat", m_ProjectConfig.path.parent_path() / "Build-vs2022.bat");
+#else
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-linux.template.sh", m_ProjectConfig.path.parent_path() / "Build-linux.sh");
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Run-linux.template.sh", m_ProjectConfig.path.parent_path() / "Run-linux.sh");
-				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-wiiu.template.bat", m_ProjectConfig.path.parent_path() / "Build-wiiu.bat");
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-wiiu.template.sh", m_ProjectConfig.path.parent_path() / "Build-wiiu.sh");
-				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-3ds.template.bat", m_ProjectConfig.path.parent_path() / "Build-3ds.bat");
 				GenerateProjectFile(m_ProjectConfig, installPath / "Templates" / "Build-3ds.template.sh", m_ProjectConfig.path.parent_path() / "Build-3ds.sh");
-
+#endif
+				
 				Core::Log::Info("Generated project build files for " + m_ProjectConfig.name);
 				return 0;
 			}
@@ -91,9 +95,8 @@ namespace Nightbird::Editor
 		m_Renderer = Core::CreateRenderer();
 
 		m_ImportManager = std::make_unique<ImportManager>(m_ProjectConfig.path.parent_path() / "Assets");
-		m_AssetManager = std::make_unique<Core::AssetManager>(*m_ImportManager);
 
-		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_AssetManager);
+		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_ImportManager);
 	}
 	
 	int EditorApplication::LoadProject()
@@ -229,7 +232,7 @@ namespace Nightbird::Editor
 
 	void EditorApplication::InitializeCookManager()
 	{
-		m_CookManager = std::make_unique<CookManager>("Cooked", *m_AssetManager, *m_ImportManager);
+		m_CookManager = std::make_unique<CookManager>("Cooked", *m_ImportManager);
 	}
 
 	void EditorApplication::RunEditorLoop()

@@ -105,6 +105,18 @@ namespace Nightbird::Editor
 		return nullptr;
 	}
 
+	std::shared_ptr<Core::Material> ImportManager::LoadMaterial(const uuids::uuid& uuid)
+	{
+		Core::Log::Warning("ImportManager: Material loading not yet supported");
+		return nullptr;
+	}
+
+	std::shared_ptr<Core::Texture> ImportManager::LoadTexture(const uuids::uuid& uuid)
+	{
+		Core::Log::Warning("ImportManager: Texture loading not yet supported");
+		return nullptr;
+	}
+
 	std::shared_ptr<Core::AudioAsset> ImportManager::LoadAudio(const uuids::uuid& uuid)
 	{
 		const AssetInfo* assetInfo = GetAssetInfo(uuid);
@@ -127,7 +139,7 @@ namespace Nightbird::Editor
 		return nullptr;
 	}
 
-	Core::SceneReadResult ImportManager::LoadScene(const uuids::uuid& uuid, Core::AssetManager* assetManager)
+	Core::SceneReadResult ImportManager::LoadScene(const uuids::uuid& uuid)
 	{
 		Core::SceneReadResult result;
 
@@ -144,7 +156,7 @@ namespace Nightbird::Editor
 			{
 				if (auto* sceneImporter = importer->AsSceneImporter())
 				{
-					result = sceneImporter->Load(*assetInfo, assetManager);
+					result = sceneImporter->Load(*assetInfo, this);
 					break;
 				}
 			}
@@ -160,7 +172,7 @@ namespace Nightbird::Editor
 		{
 			if (const auto& sceneUUID = object->GetSourceSceneUUID())
 			{
-				Core::SceneReadResult nestedResult = LoadScene(*sceneUUID, assetManager);
+				Core::SceneReadResult nestedResult = LoadScene(*sceneUUID);
 				if (nestedResult.root)
 				{
 					for (auto& nestedChild : nestedResult.root->GetChildren())

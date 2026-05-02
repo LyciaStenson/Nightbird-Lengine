@@ -4,7 +4,6 @@
 #include "Core/Platform.h"
 #include "Core/Renderer.h"
 #include "Import/ImportManager.h"
-#include "Core/AssetManager.h"
 
 #include "SettingsManager.h"
 #include "EditorSettings.h"
@@ -57,7 +56,6 @@ namespace Nightbird::Editor
 		std::unique_ptr<Core::Platform> m_Platform;
 		std::unique_ptr<Core::Renderer> m_Renderer;
 		std::unique_ptr<ImportManager> m_ImportManager;
-		std::unique_ptr<Core::AssetManager> m_AssetManager;
 		std::unique_ptr<Core::Engine> m_Engine;
 		std::unique_ptr<EditorUIBackend> m_EditorUIBackend;
 		std::unique_ptr<EditorUI> m_EditorUI;

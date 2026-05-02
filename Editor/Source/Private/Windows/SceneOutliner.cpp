@@ -47,7 +47,7 @@ namespace Nightbird::Editor
 				const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
 				if (droppedUUID && !droppedUUID->is_nil())
 				{
-					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID, &m_Context.GetEngine().GetAssetManager());
+					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID);
 					result.root->SetSourceSceneUUID(*droppedUUID);
 					m_Context.GetEngine().GetScene().GetRoot()->AddChild(std::move(result.root));
 				}
@@ -129,7 +129,7 @@ namespace Nightbird::Editor
 				const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
 				if (droppedUUID && !droppedUUID->is_nil())
 				{
-					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID, &m_Context.GetEngine().GetAssetManager());
+					Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(*droppedUUID);
 					result.root->SetSourceSceneUUID(*droppedUUID);
 					object->AddChild(std::move(result.root));
 				}

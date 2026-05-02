@@ -73,7 +73,7 @@ namespace Nightbird::Editor
 					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
 					if (assetInfo)
 					{
-						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid, &m_Context.GetEngine().GetAssetManager());
+						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid);
 						if (result.root)
 						{
 							auto scene = std::make_unique<Core::Scene>();

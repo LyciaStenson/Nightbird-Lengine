@@ -1,7 +1,7 @@
 #include "Core/MaterialLoader.h"
 
+#include "Core/AssetManager.h"
 #include "Core/BinaryReader.h"
-#include "Core/TextureLoader.h"
 
 #include "Core/Material.h"
 #include "Core/Texture.h"
@@ -12,13 +12,7 @@
 
 namespace Nightbird::Core
 {
-	MaterialLoader::MaterialLoader(TextureLoader& textureLoader)
-		: m_TextureLoader(textureLoader)
-	{
-
-	}
-
-	std::shared_ptr<Material> MaterialLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Material> MaterialLoader::Load(AssetManager& assetManager, const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		std::string path = cookedDir  + "/" + uuids::to_string(uuid) + ".nbmaterial";
 
@@ -63,7 +57,7 @@ namespace Nightbird::Core
 			std::array<uint8_t, 16> uuidBytes;
 			reader.ReadRawBytes(uuidBytes.data(), 16);
 			uuids::uuid textureUUID(uuidBytes);
-			material->baseColorTexture = LoadTexture(cookedDir, textureUUID);
+			material->baseColorTexture = assetManager.Load<Texture>(textureUUID).lock();
 		}
 
 		uint8_t hasMetallicRoughness = reader.ReadUInt8();
@@ -72,7 +66,7 @@ namespace Nightbird::Core
 			std::array<uint8_t, 16> uuidBytes;
 			reader.ReadRawBytes(uuidBytes.data(), 16);
 			uuids::uuid textureUUID(uuidBytes);
-			material->metallicRoughnessTexture = LoadTexture(cookedDir, textureUUID);
+			material->metallicRoughnessTexture = assetManager.Load<Texture>(textureUUID).lock();
 		}
 
 		uint8_t hasNormal = reader.ReadUInt8();
@@ -81,20 +75,9 @@ namespace Nightbird::Core
 			std::array<uint8_t, 16> uuidBytes;
 			reader.ReadRawBytes(uuidBytes.data(), 16);
 			uuids::uuid textureUUID(uuidBytes);
-			material->normalTexture = LoadTexture(cookedDir, textureUUID);
+			material->normalTexture = assetManager.Load<Texture>(textureUUID).lock();
 		}
 
 		return material;
-	}
-
-	std::shared_ptr<Texture> MaterialLoader::LoadTexture(const std::string& cookedDir, const uuids::uuid& uuid)
-	{
-		auto it = m_TextureCache.find(uuid);
-		if (it != m_TextureCache.end())
-			return it->second;
-
-		auto texture = m_TextureLoader.Load(cookedDir, uuid);
-		m_TextureCache[uuid] = texture;
-		return texture;
 	}
 }

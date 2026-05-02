@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Core/IAssetLoader.h"
+#include "Core/AssetManager.h"
 
 #include "Core/SceneReadResult.h"
-
 #include "Core/BinarySceneReader.h"
 #include "Core/ProjectLoader.h"
 #include "Core/MeshLoader.h"
-#include "Core/TextureLoader.h"
 #include "Core/MaterialLoader.h"
+#include "Core/TextureLoader.h"
 #include "Core/AudioLoader.h"
 
 #include <uuid.h>
@@ -25,17 +24,20 @@ namespace Nightbird::Core
 	
 	struct ProjectInfo;
 
-	class AssetLoader : public IAssetLoader
+	class BinaryAssetManager : public AssetManager
 	{
 	public:
-		explicit AssetLoader(const std::string& cookedDir);
+		explicit BinaryAssetManager(const std::string& cookedDir);
 		
-		std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) override;
-		std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
-
-		SceneReadResult LoadScene(const uuids::uuid& uuid);
-
 		ProjectInfo LoadProject();
+
+		SceneReadResult LoadScene(const uuids::uuid& uuid) override;
+		
+	protected:
+		std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) override;
+		std::shared_ptr<Material> LoadMaterial(const uuids::uuid& uuid) override;
+		std::shared_ptr<Texture> LoadTexture(const uuids::uuid& uuid) override;
+		std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
 
 	private:
 		std::string m_CookedDir;

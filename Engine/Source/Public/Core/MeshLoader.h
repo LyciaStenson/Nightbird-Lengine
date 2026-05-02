@@ -7,22 +7,12 @@
 
 namespace Nightbird::Core
 {
+	class AssetManager;
 	class Mesh;
-	struct Material;
-
-	class MaterialLoader;
 
 	class MeshLoader
 	{
 	public:
-		MeshLoader(MaterialLoader& materialLoader);
-
-		std::shared_ptr<Mesh> Load(const std::string& cookedDir, const uuids::uuid& uuid);
-
-	private:
-		MaterialLoader& m_MaterialLoader;
-		std::unordered_map<uuids::uuid, std::shared_ptr<Material>> m_MaterialCache;
-
-		std::shared_ptr<Material> LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid);
+		std::shared_ptr<Mesh> Load(AssetManager& assetManager, const std::string& cookedDir, const uuids::uuid& uuid);
 	};
 }

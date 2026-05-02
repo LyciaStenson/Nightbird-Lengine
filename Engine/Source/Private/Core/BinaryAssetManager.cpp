@@ -1,39 +1,51 @@
-#include "Core/AssetLoader.h"
+#include "Core/BinaryAssetManager.h"
 
 #include "Core/Scene.h"
 #include "Core/Mesh.h"
+#include "Core/Material.h"
+#include "Core/Texture.h"
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
 namespace Nightbird::Core
 {
-	AssetLoader::AssetLoader(const std::string& cookedDir)
+	BinaryAssetManager::BinaryAssetManager(const std::string& cookedDir)
 		: m_CookedDir(cookedDir)
 	{
 		m_SceneReader = std::make_unique<BinarySceneReader>();
 		m_ProjectLoader = std::make_unique<ProjectLoader>();
 		m_TextureLoader = std::make_unique<TextureLoader>();
-		m_MaterialLoader = std::make_unique<MaterialLoader>(*m_TextureLoader);
-		m_MeshLoader = std::make_unique<MeshLoader>(*m_MaterialLoader);
+		m_MaterialLoader = std::make_unique<MaterialLoader>();
+		m_MeshLoader = std::make_unique<MeshLoader>();
 		m_AudioLoader = std::make_unique<AudioLoader>();
 	}
 
-	ProjectInfo AssetLoader::LoadProject()
+	ProjectInfo BinaryAssetManager::LoadProject()
 	{
 		return m_ProjectLoader->Load(m_CookedDir);
 	}
 	
-	std::shared_ptr<Mesh> AssetLoader::LoadMesh(const uuids::uuid& uuid)
+	std::shared_ptr<Mesh> BinaryAssetManager::LoadMesh(const uuids::uuid& uuid)
 	{
-		return m_MeshLoader->Load(m_CookedDir, uuid);
+		return m_MeshLoader->Load(*this, m_CookedDir, uuid);
 	}
 	
-	std::shared_ptr<AudioAsset> AssetLoader::LoadAudio(const uuids::uuid& uuid)
+	std::shared_ptr<Material> BinaryAssetManager::LoadMaterial(const uuids::uuid& uuid)
+	{
+		return m_MaterialLoader->Load(*this, m_CookedDir, uuid);
+	}
+
+	std::shared_ptr<Texture> BinaryAssetManager::LoadTexture(const uuids::uuid& uuid)
+	{
+		return m_TextureLoader->Load(m_CookedDir, uuid);
+	}
+
+	std::shared_ptr<AudioAsset> BinaryAssetManager::LoadAudio(const uuids::uuid& uuid)
 	{
 		return m_AudioLoader->Load(m_CookedDir, uuid);
 	}
 
-	SceneReadResult AssetLoader::LoadScene(const uuids::uuid& uuid)
+	SceneReadResult BinaryAssetManager::LoadScene(const uuids::uuid& uuid)
 	{
 		SceneReadResult result = m_SceneReader->Read(m_CookedDir, uuid);
 		if (!result.root)
@@ -48,7 +60,7 @@ namespace Nightbird::Core
 		return result;
 	}
 
-	void AssetLoader::LoadNestedScenes(SceneObject* object)
+	void BinaryAssetManager::LoadNestedScenes(SceneObject* object)
 	{
 		if (!object)
 			return;

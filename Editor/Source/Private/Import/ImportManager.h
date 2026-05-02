@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/AssetManager.h"
-#include "Core/IAssetLoader.h"
 
 #include "Core/SceneReadResult.h"
 #include "Import/AssetInfo.h"
@@ -16,10 +15,10 @@
 
 namespace Nightbird::Editor
 {
-	class ImportManager : public Core::IAssetLoader
+	class ImportManager : public Core::AssetManager
 	{
 	public:
-		ImportManager(const std::filesystem::path& assetsDir);
+		explicit ImportManager(const std::filesystem::path& assetsDir);
 
 		void Scan();
 
@@ -32,10 +31,13 @@ namespace Nightbird::Editor
 
 		Importer* FindImporter(const std::filesystem::path& path) const;
 		
-		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid) override;
-		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
+		Core::SceneReadResult LoadScene(const uuids::uuid& uuid) override;
 
-		Core::SceneReadResult LoadScene(const uuids::uuid& uuid, Core::AssetManager* assetManager = nullptr);
+	protected:
+		std::shared_ptr<Core::Mesh> LoadMesh(const uuids::uuid& uuid) override;
+		std::shared_ptr<Core::Material> LoadMaterial(const uuids::uuid& uuid) override;
+		std::shared_ptr<Core::Texture> LoadTexture(const uuids::uuid& uuid) override;
+		std::shared_ptr<Core::AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
 
 	private:
 		std::filesystem::path m_AssetsDir;

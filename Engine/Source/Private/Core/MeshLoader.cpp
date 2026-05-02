@@ -1,7 +1,7 @@
 #include "Core/MeshLoader.h"
 
+#include "Core/AssetManager.h"
 #include "Core/BinaryReader.h"
-#include "Core/MaterialLoader.h"
 
 #include "Core/Mesh.h"
 #include "Core/MeshPrimitive.h"
@@ -12,13 +12,7 @@
 
 namespace Nightbird::Core
 {
-	MeshLoader::MeshLoader(MaterialLoader& materialLoader)
-		: m_MaterialLoader(materialLoader)
-	{
-
-	}
-
-	std::shared_ptr<Mesh> MeshLoader::Load(const std::string& cookedDir, const uuids::uuid& uuid)
+	std::shared_ptr<Mesh> MeshLoader::Load(AssetManager& assetManager, const std::string& cookedDir, const uuids::uuid& uuid)
 	{
 		std::string path = cookedDir + "/" + uuids::to_string(uuid) + ".nbmesh";
 		
@@ -66,23 +60,12 @@ namespace Nightbird::Core
 				std::array<uint8_t, 16> uuidBytes;
 				reader.ReadRawBytes(uuidBytes.data(), 16);
 				uuids::uuid materialUUID(uuidBytes);
-				material = LoadMaterial(cookedDir, materialUUID);
+				material = assetManager.Load<Material>(materialUUID).lock();
 			}
 
 			primitives.emplace_back(std::move(vertices), std::move(indices), material);
 		}
 
 		return std::make_shared<Mesh>(std::move(primitives));
-	}
-
-	std::shared_ptr<Material> MeshLoader::LoadMaterial(const std::string& cookedDir, const uuids::uuid& uuid)
-	{
-		auto it = m_MaterialCache.find(uuid);
-		if (it != m_MaterialCache.end())
-			return it->second;
-
-		auto material = m_MaterialLoader.Load(cookedDir, uuid);
-		m_MaterialCache[uuid] = material;
-		return material;
 	}
 }

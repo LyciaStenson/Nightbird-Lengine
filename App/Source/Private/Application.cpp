@@ -1,7 +1,6 @@
 #include "Application.h"
 
 #include "Core/BackendFactory.h"
-#include "Core/AssetManager.h"
 #include "Core/ProjectLoader.h"
 #include "Core/Scene.h"
 #include "Core/Log.h"
@@ -27,17 +26,16 @@ namespace Nightbird::App
 
 		Nightbird::TypeRegistry::InitReflection();
 
-		m_AssetLoader = std::make_unique<Core::AssetLoader>(m_Platform->GetCookedAssetsPath());
-		m_AssetManager = std::make_unique<Core::AssetManager>(*m_AssetLoader);
+		m_AssetManager = std::make_unique<Core::BinaryAssetManager>(m_Platform->GetCookedAssetsPath());
 
 		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_AssetManager);
 	}
 
 	int Application::LoadProject()
 	{
-		Core::ProjectInfo project = m_AssetLoader->LoadProject();
+		Core::ProjectInfo project = m_AssetManager->LoadProject();
 
-		Core::SceneReadResult result = m_AssetLoader->LoadScene(project.mainSceneUUID);
+		Core::SceneReadResult result = m_AssetManager->LoadScene(project.mainSceneUUID);
 		if (result.root)
 		{
 			auto scene = std::make_unique<Core::Scene>();

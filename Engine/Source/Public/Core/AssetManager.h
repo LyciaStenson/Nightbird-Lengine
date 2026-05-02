@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/IAssetLoader.h"
+#include "Core/SceneReadResult.h"
 
 #include <uuid.h>
 
@@ -8,11 +8,15 @@
 
 namespace Nightbird::Core
 {
+	class Mesh;
+	struct Material;
+	class Texture;
+	class AudioAsset;
+
 	class AssetManager
 	{
 	public:
-		explicit AssetManager(IAssetLoader& loader)
-			: m_Loader(loader) {}
+		virtual ~AssetManager() = default;
 		
 		template<typename T>
 		std::weak_ptr<T> Load(const uuids::uuid& uuid)
@@ -43,19 +47,28 @@ namespace Nightbird::Core
 			m_Cache.clear();
 		}
 
+	protected:
+		virtual SceneReadResult LoadScene(const uuids::uuid& uuid) = 0;
+		virtual std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) = 0;
+		virtual std::shared_ptr<Material> LoadMaterial(const uuids::uuid& uuid) = 0;
+		virtual std::shared_ptr<Texture> LoadTexture(const uuids::uuid& uuid) = 0;
+		virtual std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) = 0;
+
 	private:
 		template<typename T>
 		std::shared_ptr<T> LoadInternal(const uuids::uuid& uuid)
 		{
 			if constexpr (std::is_same_v<T, Mesh>)
-				return m_Loader.LoadMesh(uuid);
+				return LoadMesh(uuid);
+			if constexpr (std::is_same_v <T, Material>)
+				return LoadMaterial(uuid);
+			if constexpr (std::is_same_v <T, Texture>)
+				return LoadTexture(uuid);
 			if constexpr (std::is_same_v<T, AudioAsset>)
-				return m_Loader.LoadAudio(uuid);
-			else
-				return nullptr;
+				return LoadAudio(uuid);
+			return nullptr;
 		}
-
-		IAssetLoader& m_Loader;
+		
 		std::unordered_map<uuids::uuid, std::shared_ptr<void>> m_Cache;
 	};
 }

@@ -15,15 +15,15 @@
 
 namespace Nightbird::Editor
 {
-	CookManager::CookManager(const std::filesystem::path& outputDir, Core::AssetManager& assetManager, ImportManager& importManager)
-		: m_RootOutputDir(outputDir), m_AssetManager(assetManager), m_ImportManager(importManager)
+	CookManager::CookManager(const std::filesystem::path& outputDir, ImportManager& importManager)
+		: m_RootOutputDir(outputDir), m_ImportManager(importManager)
 	{
 
 	}
 
 	void CookManager::CookScene(const uuids::uuid& sceneUUID, CookTarget target)
 	{
-		Core::SceneReadResult result = m_ImportManager.LoadScene(sceneUUID, &m_AssetManager);
+		Core::SceneReadResult result = m_ImportManager.LoadScene(sceneUUID);
 		if (!result.root)
 		{
 			Core::Log::Error("CookManager: Failed to load scene: " + uuids::to_string(sceneUUID));
@@ -101,7 +101,7 @@ namespace Nightbird::Editor
 				return;
 			}
 
-			Core::SceneReadResult nestedResult = m_ImportManager.LoadScene(assetInfo->uuid, &m_AssetManager);
+			Core::SceneReadResult nestedResult = m_ImportManager.LoadScene(assetInfo->uuid);
 			if (!nestedResult.root)
 			{
 				Core::Log::Warning("CookManager: Failed to load nested scene: " + object->GetName());
