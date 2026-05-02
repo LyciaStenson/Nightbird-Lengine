@@ -36,9 +36,6 @@ namespace Nightbird::Editor
 
 	void GenerateProjectFile(const ProjectConfig& projectConfig, const std::filesystem::path& templatePath, const std::filesystem::path& outputPath)
 	{
-		//std::filesystem::path templatePath = installPath / "Templates" / "premake5.template.lua";
-		//std::filesystem::path outputPath = projectPath / "premake5.lua";
-
 		if (!std::filesystem::exists(templatePath))
 		{
 			Nightbird::Core::Log::Error("Template not found at: " + templatePath.string());

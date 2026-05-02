@@ -23,7 +23,7 @@ include $(DEVKITPRO)/wut/share/wut_rules
 # DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
 #-------------------------------------------------------------------------------
-TARGET				:=	"%PROJECT_NAME%"
+TARGET				:=	%PROJECT_NAME%
 BUILD				:=	Intermediate/wiiu
 BUILD_DIR			:=	wiiu
 SOURCES				:=	Source/Private

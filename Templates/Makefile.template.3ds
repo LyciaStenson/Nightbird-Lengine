@@ -40,7 +40,7 @@ include $(DEVKITARM)/3ds_rules
 
 NO_SMDH := 1
 
-TARGET				:=	"%PROJECT_NAME%"
+TARGET				:=	%PROJECT_NAME%
 BUILD				:=	Intermediate/3ds
 BUILD_DIR			:=	3ds
 SOURCES				:=	Source/Private
