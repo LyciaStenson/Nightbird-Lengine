@@ -88,7 +88,25 @@ namespace Nightbird::Editor
 	{
 		for (const auto& [uuid, assetInfo] : m_AssetInfos)
 		{
-			if (assetInfo.sourcePath == path)
+			if (assetInfo.path == path)
+				return &assetInfo;
+		}
+		return nullptr;
+	}
+
+	AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid)
+	{
+		auto it = m_AssetInfos.find(uuid);
+		if (it != m_AssetInfos.end())
+			return &it->second;
+		return nullptr;
+	}
+
+	AssetInfo* ImportManager::GetAssetInfo(const std::filesystem::path& path)
+	{
+		for (auto& [uuid, assetInfo] : m_AssetInfos)
+		{
+			if (assetInfo.path == path)
 				return &assetInfo;
 		}
 		return nullptr;
@@ -102,6 +120,12 @@ namespace Nightbird::Editor
 				return importer.get();
 		}
 		return nullptr;
+	}
+
+	void ImportManager::Register(AssetInfo assetInfo)
+	{
+		uuids::uuid uuid = assetInfo.uuid;
+		m_AssetInfos[uuid] = std::move(assetInfo);
 	}
 
 	std::shared_ptr<Core::Mesh> ImportManager::LoadMesh(const uuids::uuid& uuid)
@@ -118,7 +142,23 @@ namespace Nightbird::Editor
 
 	std::shared_ptr<Core::Texture> ImportManager::LoadTexture(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Individual texture loading not yet supported");
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+		{
+			Core::Log::Warning("ImportManager: AssetInfo not found for texture UUID: " + uuids::to_string(uuid));
+			return nullptr;
+		}
+
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (auto* textureImporter = importer->AsTextureImporter())
+					return textureImporter->Load(*assetInfo);
+			}
+		}
+
+		Core::Log::Warning("ImportManager: No texture importer found for: " + assetInfo->importer);
 		return nullptr;
 	}
 
@@ -231,19 +271,19 @@ namespace Nightbird::Editor
 		return gen();
 	}
 
-	std::string ImportManager::FindImporterName(const std::filesystem::path& sourcePath)
+	std::string ImportManager::FindImporterName(const std::filesystem::path& assetPath)
 	{
 		for (const auto& importer : m_Importers)
 		{
-			if (importer->SupportsExtension(sourcePath.extension().string()))
+			if (importer->SupportsExtension(assetPath.extension().string()))
 				return importer->GetName();
 		}
 		return {};
 	}
 
-	void ImportManager::GenerateAssetInfoFile(const std::filesystem::path& sourcePath)
+	void ImportManager::GenerateAssetInfoFile(const std::filesystem::path& assetPath)
 	{
-		std::string importerName = FindImporterName(sourcePath);
+		std::string importerName = FindImporterName(assetPath);
 		if (importerName.empty())
 			return;
 
@@ -257,7 +297,7 @@ namespace Nightbird::Editor
 		toml::table table;
 		table.insert("info", info);
 
-		std::filesystem::path assetInfoPath = sourcePath.string() + ".assetinfo";
+		std::filesystem::path assetInfoPath = assetPath.string() + ".assetinfo";
 		std::ofstream file(assetInfoPath);
 		file << table;
 		file.close();
@@ -295,18 +335,9 @@ namespace Nightbird::Editor
 		AssetInfo assetInfo;
 		assetInfo.uuid = *uuid;
 		assetInfo.importer = table["info"]["importer"].value_or(std::string{});
-
-		//for (const auto& importer : m_Importers)
-		//{
-		//	if (importer->GetName() == assetInfo.importer)
-		//	{
-		//		assetInfo.assetType = importer->GetAssetType();
-		//		break;
-		//	}
-		//}
-
+		
 		std::string assetInfoPathString = assetInfoPath.string();
-		assetInfo.sourcePath = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
+		assetInfo.path = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
 		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
 	}

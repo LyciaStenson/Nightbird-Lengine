@@ -127,9 +127,22 @@ namespace Nightbird::Editor
 
 			if (ImGui::MenuItem("New Cubemap"))
 			{
+				uuids::uuid uuid = GenerateUUID();
+				std::filesystem::path outputPath = m_CurrentPath / "NewCubemap.ntcubemap";
+
+				AssetInfo assetInfo;
+				assetInfo.uuid = uuid;
+				assetInfo.importer = "text_cubemap";
+				assetInfo.path = outputPath;
+
+				static constexpr const char* s_FaceKeys[6] = {"pos_x", "neg_x", "pos_y", "neg_y", "pos_z", "neg_z"};
+				for (const char* key : s_FaceKeys)
+					assetInfo.tags[key] = {};
+
 				TextCubemapWriter writer;
-				Core::Cubemap cubemap;
-				writer.Write(cubemap, GenerateUUID(), m_CurrentPath / "NewCubemap.ntcubemap");
+				writer.Write(assetInfo, outputPath);
+
+				m_Context.GetImportManager().Register(std::move(assetInfo));
 			}
 
 			ImGui::EndPopup();

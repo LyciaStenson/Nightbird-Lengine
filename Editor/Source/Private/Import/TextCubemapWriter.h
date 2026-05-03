@@ -4,16 +4,13 @@
 
 #include <filesystem>
 
-namespace Nightbird::Core
-{
-	class Cubemap;
-}
-
 namespace Nightbird::Editor
 {
+	struct AssetInfo;
+
 	class TextCubemapWriter
 	{
 	public:
-		void Write(const Core::Cubemap& cubemap, const uuids::uuid& cubemapUUID, const std::filesystem::path& outputPath);
+		void Write(const AssetInfo& assetInfo, const std::filesystem::path& outputPath);
 	};
 }

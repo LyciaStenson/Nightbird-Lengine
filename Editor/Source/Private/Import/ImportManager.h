@@ -28,8 +28,12 @@ namespace Nightbird::Editor
 
 		const AssetInfo* GetAssetInfo(const uuids::uuid& uuid) const;
 		const AssetInfo* GetAssetInfo(const std::filesystem::path& path) const;
+		AssetInfo* GetAssetInfo(const uuids::uuid& uuid);
+		AssetInfo* GetAssetInfo(const std::filesystem::path& path);
 
 		Importer* FindImporter(const std::filesystem::path& path) const;
+
+		void Register(AssetInfo assetInfo);
 		
 		Core::SceneReadResult LoadScene(const uuids::uuid& uuid) override;
 
@@ -47,9 +51,9 @@ namespace Nightbird::Editor
 
 		uuids::uuid GenerateUUID() const;
 
-		std::string FindImporterName(const std::filesystem::path& sourcePath);
+		std::string FindImporterName(const std::filesystem::path& assetPath);
 
-		void GenerateAssetInfoFile(const std::filesystem::path& sourcePath);
+		void GenerateAssetInfoFile(const std::filesystem::path& assetPath);
 		void ReadAssetInfoFile(const std::filesystem::path& assetInfoPath);
 	};
 }

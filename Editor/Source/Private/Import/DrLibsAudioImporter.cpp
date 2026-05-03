@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 
 	std::shared_ptr<Core::AudioAsset> DrLibsAudioImporter::Load(const AssetInfo& assetInfo)
 	{
-		std::string extension = assetInfo.sourcePath.extension().string();
+		std::string extension = assetInfo.path.extension().string();
 		for (auto& c : extension)
 			c = tolower(c);
 
@@ -28,10 +28,10 @@ namespace Nightbird::Editor
 		if (extension == ".wav")
 		{
 			drwav_uint64 frameCount;
-			drwav_int16* decoded = drwav_open_file_and_read_pcm_frames_s16(assetInfo.sourcePath.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
+			drwav_int16* decoded = drwav_open_file_and_read_pcm_frames_s16(assetInfo.path.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
 			if (!decoded)
 			{
-				Core::Log::Error("DrLibsAudioImporter: Failed to decode WAV: " + assetInfo.sourcePath.string());
+				Core::Log::Error("DrLibsAudioImporter: Failed to decode WAV: " + assetInfo.path.string());
 				return nullptr;
 			}
 			uint64_t sampleCount = frameCount * channels;
@@ -45,10 +45,10 @@ namespace Nightbird::Editor
 		else if (extension == ".flac")
 		{
 			drflac_uint64 frameCount;
-			drflac_int16* decoded = drflac_open_file_and_read_pcm_frames_s16(assetInfo.sourcePath.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
+			drflac_int16* decoded = drflac_open_file_and_read_pcm_frames_s16(assetInfo.path.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
 			if (!decoded)
 			{
-				Core::Log::Error("DrLibsAudioImporter: Failed to decode FLAC: " + assetInfo.sourcePath.string());
+				Core::Log::Error("DrLibsAudioImporter: Failed to decode FLAC: " + assetInfo.path.string());
 				return nullptr;
 			}
 			uint64_t sampleCount = frameCount * channels;

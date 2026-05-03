@@ -197,36 +197,41 @@ namespace Nightbird::Editor
 
 	bool Inspector::DrawAsset(const std::filesystem::path& path)
 	{
-		const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
+		AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
 		if (!assetInfo || assetInfo->importer.empty())
 			return false;
 		
 		if (assetInfo->importer == "text_cubemap")
 		{
-			auto cubemap = m_Context.GetImportManager().Load<Core::Cubemap>(assetInfo->uuid).lock();
-			if (!cubemap)
-			{
-				ImGui::TextDisabled("Failed to load cubemap");
-				return true;
-			}
-
+			static constexpr const char* s_FaceKeys[6] = {"pos_x", "neg_x", "pos_y", "neg_y", "pos_z", "neg_z"};
 			static constexpr const char* faceNames[6] = {"+X", "-X", "+Y", "-Y", "+Z", "-Z"};
-
-			bool modified = false;
-
+			
 			ImGui::Text("Cubemap");
-
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 			ImGui::Separator();
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+
+			bool modified = false;
 
 			for (int i = 0; i < 6; ++i)
 			{
 				ImGui::PushID(i);
 
-				uuids::uuid& faceUUID = cubemap->m_FaceUUIDs[i];
-				
-				std::string label = faceUUID.is_nil() ? std::string("None (Texture)") : uuids::to_string(faceUUID);
+				auto it = assetInfo->tags.find(s_FaceKeys[i]);
+				std::string currentValue = it != assetInfo->tags.end() ? it->second : std::string{};
+
+				std::string label = currentValue.empty() ? std::string("None (Texture)") : currentValue;
+
+				if (!currentValue.empty())
+				{
+					auto faceUUID = uuids::uuid::from_string(currentValue);
+					if (faceUUID)
+					{
+						const AssetInfo* faceAssetInfo = m_Context.GetImportManager().GetAssetInfo(*faceUUID);
+						if (faceAssetInfo)
+							label = faceAssetInfo->path.filename().string();
+					}
+				}
 
 				ImGui::Button(label.c_str(), ImVec2(-1, 0));
 
@@ -235,7 +240,7 @@ namespace Nightbird::Editor
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
 					{
 						const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
-						faceUUID = *droppedUUID;
+						assetInfo->tags[s_FaceKeys[i]] = uuids::to_string(*droppedUUID);
 						modified = true;
 					}
 					ImGui::EndDragDropTarget();
@@ -249,8 +254,10 @@ namespace Nightbird::Editor
 
 			if (modified)
 			{
+				m_Context.GetImportManager().Unload(assetInfo->uuid);
+
 				TextCubemapWriter writer;
-				writer.Write(*cubemap, assetInfo->uuid, path);
+				writer.Write(*assetInfo, path);
 			}
 
 			return true;
@@ -258,7 +265,7 @@ namespace Nightbird::Editor
 		else
 		{
 			ImGui::Text(assetInfo->importer.c_str());
-			ImGui::Text(assetInfo->sourcePath.string().c_str());
+			ImGui::Text(assetInfo->path.string().c_str());
 			ImGui::TextDisabled(uuids::to_string(assetInfo->uuid).c_str());
 			return true;
 		}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Import/CubemapReadResult.h"
-#include "Core/AssetManager.h"
+#include "Import/ImportManager.h"
 #include "Import/Importer.h"
 
 #include <memory>
@@ -20,6 +20,6 @@ namespace Nightbird::Editor
 	public:
 		CubemapImporter* AsCubemapImporter() override { return this; }
 
-		virtual CubemapReadResult Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager = nullptr) = 0;
+		virtual CubemapReadResult Load(const AssetInfo& assetInfo, ImportManager* importManager) = 0;
 	};
 }

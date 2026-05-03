@@ -1,5 +1,7 @@
 #include "Import/TextCubemapWriter.h"
 
+#include "Import/AssetInfo.h"
+
 #include "Core/Cubemap.h"
 #include "Core/Log.h"
 
@@ -7,30 +9,29 @@
 
 namespace Nightbird::Editor
 {
-	void TextCubemapWriter::Write(const Core::Cubemap& cubemap, const uuids::uuid& cubemapUUID, const std::filesystem::path& outputPath)
+	static constexpr const char* s_FaceKeys[6] = {"pos_x", "neg_x", "pos_y", "neg_y", "pos_z", "neg_z"};
+	
+	void TextCubemapWriter::Write(const AssetInfo& assetInfo, const std::filesystem::path& outputPath)
 	{
 		toml::table document;
 
 		toml::table cubemapTable;
-		cubemapTable.insert("uuid", uuids::to_string(cubemapUUID));
+		cubemapTable.insert("uuid", uuids::to_string(assetInfo.uuid));
 		document.insert("cubemap", cubemapTable);
-
-		const auto& faceUUIDs = cubemap.m_FaceUUIDs;
-
+		
 		toml::table facesTable;
-		facesTable.insert("pos_x", uuids::to_string(faceUUIDs[0]));
-		facesTable.insert("neg_x", uuids::to_string(faceUUIDs[1]));
-		facesTable.insert("pos_y", uuids::to_string(faceUUIDs[2]));
-		facesTable.insert("neg_y", uuids::to_string(faceUUIDs[3]));
-		facesTable.insert("pos_z", uuids::to_string(faceUUIDs[4]));
-		facesTable.insert("neg_z", uuids::to_string(faceUUIDs[5]));
+		for (const char* key : s_FaceKeys)
+		{
+			auto it = assetInfo.tags.find(key);
+			facesTable.insert(key, it != assetInfo.tags.end() ? it->second : std::string{});
+		}
 		document.insert("faces", facesTable);
-
+		
 		std::filesystem::create_directories(outputPath.parent_path());
 		std::ofstream file(outputPath);
 		file << document;
 		file.close();
 
-		Core::Log::Info("Written .ntcubemap: " + outputPath.string());
+		Core::Log::Info("TextCubemapWriter: Written .ntcubemap: " + outputPath.string());
 	}
 }

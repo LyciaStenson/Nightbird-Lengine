@@ -155,7 +155,7 @@ namespace Nightbird::Editor
 				const AssetInfo* assetInfo = m_ImportManager.GetAssetInfo(audioUUID);
 				Core::Log::Info("CookManager: AssetInfo found: " + std::to_string(assetInfo != nullptr));
 				if (assetInfo)
-					m_AudioPathUUIDs[audioUUID] = assetInfo->sourcePath;
+					m_AudioPathUUIDs[audioUUID] = assetInfo->path;
 				else
 					Core::Log::Warning("CookManager: No asset info found for: " + uuids::to_string(audioUUID));
 			}
@@ -185,8 +185,8 @@ namespace Nightbird::Editor
 
 	void CookManager::CookAudio(const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
-		for (const auto& [uuid, sourcePath] : m_AudioPathUUIDs)
-			m_AudioCooker.Cook(sourcePath, uuid, outputDir, target, endianness);
+		for (const auto& [uuid, path] : m_AudioPathUUIDs)
+			m_AudioCooker.Cook(path, uuid, outputDir, target, endianness);
 	}
 
 	uuids::uuid CookManager::GenerateUUID() const

@@ -64,21 +64,21 @@ namespace Nightbird::Editor
 		std::array<std::shared_ptr<Core::Texture>, 6> textures;
 		for (int i = 0; i < 6; ++i)
 		{
-			const uuids::uuid& faceUUID = cubemap.m_FaceUUIDs[i];
-			if (faceUUID.is_nil())
-			{
-				Core::Log::Error("CubemapCooker: Face " + std::string(faceNames[i]) + " UUID is invalid");
-				return {};
-			}
+			//const uuids::uuid& faceUUID = cubemap.m_FaceUUIDs[i];
+			//if (faceUUID.is_nil())
+			//{
+			//	Core::Log::Error("CubemapCooker: Face " + std::string(faceNames[i]) + " UUID is invalid");
+			//	return {};
+			//}
 
-			auto texture = assetManager.Load<Core::Texture>(faceUUID).lock();
-			if (!texture)
-			{
-				Core::Log::Error("CubemapCooker: Failed to load face: " + std::string(faceNames[i]));
-				return {};
-			}
+			//auto texture = assetManager.Load<Core::Texture>(faceUUID).lock();
+			//if (!texture)
+			//{
+			//	Core::Log::Error("CubemapCooker: Failed to load face: " + std::string(faceNames[i]));
+			//	return {};
+			//}
 
-			textures[i] = texture;
+			//textures[i] = texture;
 		}
 
 		for (int i = 0; i < 6; ++i)

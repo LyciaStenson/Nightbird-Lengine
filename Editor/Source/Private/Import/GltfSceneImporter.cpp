@@ -32,17 +32,17 @@ namespace Nightbird::Editor
 
 		fastgltf::Parser parser;
 
-		auto data = fastgltf::GltfDataBuffer::FromPath(assetInfo.sourcePath);
+		auto data = fastgltf::GltfDataBuffer::FromPath(assetInfo.path);
 		if (data.error() != fastgltf::Error::None)
 		{
-			Core::Log::Error("Failed to load file with fastgltf: " + std::string(fastgltf::getErrorMessage(data.error())));
+			Core::Log::Error("GltfSceneImporter: Failed to load file with fastgltf: " + std::string(fastgltf::getErrorMessage(data.error())));
 			return result;
 		}
 
-		auto gltfAssetExpected = parser.loadGltfBinary(data.get(), assetInfo.sourcePath.parent_path(), fastgltf::Options::None);
+		auto gltfAssetExpected = parser.loadGltfBinary(data.get(), assetInfo.path.parent_path(), fastgltf::Options::None);
 		if (gltfAssetExpected.error() != fastgltf::Error::None)
 		{
-			Core::Log::Error("Failed to parse file with fastgltf: " + std::string(fastgltf::getErrorMessage(gltfAssetExpected.error())));
+			Core::Log::Error("GltfSceneImporter: Failed to parse file with fastgltf: " + std::string(fastgltf::getErrorMessage(gltfAssetExpected.error())));
 			return result;
 		}
 
@@ -65,7 +65,7 @@ namespace Nightbird::Editor
 		}
 		else
 		{
-			Core::Log::Warning("No default scene found in glTF file");
+			Core::Log::Warning("GltfSceneImporter: No default scene found in glTF file");
 		}
 
 		return result;
@@ -127,7 +127,7 @@ namespace Nightbird::Editor
 			if (DecodeImage(gltfAsset, gltfAsset.images[i], pixels, width, height))
 				decodedImages[i] = {std::move(pixels), width, height};
 			else
-				Core::Log::Error("Failed to decode image at index " + std::to_string(i));
+				Core::Log::Error("GltfSceneImporter: Failed to decode image at index " + std::to_string(i));
 		}
 		
 		std::vector<std::shared_ptr<Core::Texture>> textures(gltfAsset.textures.size());
@@ -331,14 +331,14 @@ namespace Nightbird::Editor
 							decoded = true;
 						}
 						else
-							Core::Log::Error("Failed to decode image with stb_image");
+							Core::Log::Error("GltfSceneImporter: Failed to decode image, " + std::string(stbi_failure_reason()));
 					},
 					[](auto&) {}
 				}, buffer.data);
 			},
 			[&](const fastgltf::sources::URI&)
 			{
-				Core::Log::Warning("Exteneral textures not supported, please use .glb");
+				Core::Log::Warning("GltfSceneImporter: Exteneral textures not supported, please use .glb");
 			},
 			[](auto&) {}
 			}, image.data);
