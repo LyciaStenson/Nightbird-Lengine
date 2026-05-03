@@ -2,8 +2,10 @@
 
 #include "Import/AssetInfo.h"
 #include "Import/TextSceneImporter.h"
-#include "Import/GltfSceneImporter.h"
 #include "Import/TextCubemapImporter.h"
+
+#include "Import/GltfSceneImporter.h"
+#include "Import/StbTextureImporter.h"
 #include "Import/DrLibsAudioImporter.h"
 
 #include "Core/AssetManager.h"
@@ -21,6 +23,7 @@ namespace Nightbird::Editor
 		m_Importers.push_back(std::make_unique<TextSceneImporter>());
 		m_Importers.push_back(std::make_unique<GltfSceneImporter>());
 		m_Importers.push_back(std::make_unique<TextCubemapImporter>());
+		m_Importers.push_back(std::make_unique<StbTextureImporter>());
 		m_Importers.push_back(std::make_unique<DrLibsAudioImporter>());
 	}
 
@@ -121,7 +124,26 @@ namespace Nightbird::Editor
 
 	std::shared_ptr<Core::Cubemap> ImportManager::LoadCubemap(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Individual cubemap loading not yet supported");
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+		{
+			Core::Log::Warning("ImportManager: AssetInfo not found for cubemap UUID: " + uuids::to_string(uuid));
+			return nullptr;
+		}
+
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (auto* cubemapImporter = importer->AsCubemapImporter())
+				{
+					CubemapReadResult result = cubemapImporter->Load(*assetInfo, this);
+					return result.cubemap;
+				}
+			}
+		}
+
+		Core::Log::Warning("ImportManager: No cubemap importer found for: " + assetInfo->importer);
 		return nullptr;
 	}
 

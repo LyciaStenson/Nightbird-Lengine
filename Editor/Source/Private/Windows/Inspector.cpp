@@ -2,10 +2,12 @@
 
 #include "EditorContext.h"
 #include "Import/ImportManager.h"
+#include "Import/TextCubemapWriter.h"
 
 #include "Core/Engine.h"
 #include "Core/AssetManager.h"
 #include "Core/SceneObject.h"
+#include "Core/Cubemap.h"
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
@@ -196,14 +198,71 @@ namespace Nightbird::Editor
 	bool Inspector::DrawAsset(const std::filesystem::path& path)
 	{
 		const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
-
-		if (assetInfo)
+		if (!assetInfo || assetInfo->importer.empty())
+			return false;
+		
+		if (assetInfo->importer == "text_cubemap")
 		{
+			auto cubemap = m_Context.GetImportManager().Load<Core::Cubemap>(assetInfo->uuid).lock();
+			if (!cubemap)
+			{
+				ImGui::TextDisabled("Failed to load cubemap");
+				return true;
+			}
 
-			ImGui::Text(assetInfo->importer.c_str());
+			static constexpr const char* faceNames[6] = {"+X", "-X", "+Y", "-Y", "+Z", "-Z"};
+
+			bool modified = false;
+
+			ImGui::Text("Cubemap");
+
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+
+			for (int i = 0; i < 6; ++i)
+			{
+				ImGui::PushID(i);
+
+				uuids::uuid& faceUUID = cubemap->m_FaceUUIDs[i];
+				
+				std::string label = faceUUID.is_nil() ? std::string("None (Texture)") : uuids::to_string(faceUUID);
+
+				ImGui::Button(label.c_str(), ImVec2(-1, 0));
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+					{
+						const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
+						faceUUID = *droppedUUID;
+						modified = true;
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::SameLine();
+				ImGui::Text(faceNames[i]);
+
+				ImGui::PopID();
+			}
+
+			if (modified)
+			{
+				TextCubemapWriter writer;
+				writer.Write(*cubemap, assetInfo->uuid, path);
+			}
+
 			return true;
 		}
-
+		else
+		{
+			ImGui::Text(assetInfo->importer.c_str());
+			ImGui::Text(assetInfo->sourcePath.string().c_str());
+			ImGui::TextDisabled(uuids::to_string(assetInfo->uuid).c_str());
+			return true;
+		}
+		
 		return false;
 	}
 }

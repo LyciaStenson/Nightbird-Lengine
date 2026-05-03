@@ -9,6 +9,7 @@
 namespace Nightbird::Editor
 {
 	class SceneImporter;
+	class TextureImporter;
 	class CubemapImporter;
 	class AudioImporter;
 
@@ -23,6 +24,7 @@ namespace Nightbird::Editor
 		virtual std::optional<AssetInfo> ReadEmbeddedAssetInfo(const std::filesystem::path& path) const { return std::nullopt; }
 		
 		virtual SceneImporter* AsSceneImporter() { return nullptr; }
+		virtual TextureImporter* AsTextureImporter() { return nullptr; }
 		virtual CubemapImporter* AsCubemapImporter() { return nullptr; }
 		virtual AudioImporter* AsAudioImporter() { return nullptr; }
 	};

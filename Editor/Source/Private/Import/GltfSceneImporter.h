@@ -24,7 +24,7 @@ namespace Nightbird::Editor
 	public:
 		GltfSceneImporter() = default;
 
-		std::string GetName() const override { return "gltf"; }
+		std::string GetName() const override { return "gltf_scene"; }
 		bool SupportsExtension(const std::string& extension) const override;
 		Core::SceneReadResult Load(const AssetInfo& assetInfo, Core::AssetManager* assetManager) override;
 

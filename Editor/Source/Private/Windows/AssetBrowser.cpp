@@ -74,9 +74,9 @@ namespace Nightbird::Editor
 					m_Context.m_SelectedPath = path;
 				}
 
-				if (ImGui::BeginDragDropSource())
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoDisableHover | ImGuiDragDropFlags_SourceNoHoldToOpenOthers))
 				{
-					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_Context.m_SelectedPath);
+					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
 					if (assetInfo)
 					{
 						ImGui::SetDragDropPayload("ASSET_UUID", &assetInfo->uuid, sizeof(uuids::uuid));
