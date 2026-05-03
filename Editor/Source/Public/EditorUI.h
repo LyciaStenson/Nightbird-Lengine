@@ -1,57 +1,25 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <string>
-#include <unordered_map>
+#include "EditorTheme.h"
 
-#include "ImGuiWindow.h"
-
-#include <volk.h>
-#include <glfw/glfw3.h>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
-
-namespace Nightbird
+namespace Nightbird::Editor
 {
-	class VulkanInstance;
-	class VulkanDevice;
-	class VulkanSwapChain;
-	class VulkanRenderPass;
-	class ImGuiDescriptorPool;
-	class SceneObject;
-	class Scene;
-	class ModelManager;
-	class Engine;
-	
+	class EditorContext;
+	class WindowManager;
+
 	class EditorUI
 	{
 	public:
-		EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine);
-		~EditorUI();
-		
-		ImGuiWindow* GetWindow(const std::string& title);
-		
-		SceneObject* GetSelectedObject() const;
-		void SelectObject(SceneObject* object);
-		
-		void Render(VkCommandBuffer commandBuffer);
-		
-		void OpenWindow(const std::string& title);
+		EditorUI(EditorContext& context, WindowManager& windowManager);
+
+		void ApplyTheme(EditorTheme theme);
+
+		void Render();
 
 	private:
-		GLFWwindow* m_Window;
-
-		std::unique_ptr<ImGuiDescriptorPool> m_DescriptorPool;
-
-		Scene* m_Scene = nullptr;
-		SceneObject* m_SelectedObject = nullptr;
-
-		std::unordered_map<std::string, std::unique_ptr<ImGuiWindow>> m_Windows;
+		void MainMenuBar();
 		
-		void NewFrame();
-		void Draw(VkCommandBuffer commandBuffer);
+		EditorContext& m_Context;
+		WindowManager& m_WindowManager;
 	};
 }

@@ -1,41 +1,21 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <string>
-
-#include <volk.h>
-
 #include "Core/SpatialObject.h"
-#include "Core/Transform.h"
+#include "Core/AssetRef.h"
+#include "Core/Mesh.h"
 
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class VulkanDevice;
-	class VulkanUniformBuffer;
-	class Mesh;
-	
 	class MeshInstance : public SpatialObject
 	{
 	public:
-		MeshInstance(const std::string& name, std::shared_ptr<Mesh> mesh, VulkanDevice* device, VkDescriptorPool descriptorPool);
-		~MeshInstance() override;
+		NB_TYPE()
 
-		std::shared_ptr<const Mesh> GetMesh() const;
-		const std::vector<VkDescriptorSet>& GetUniformDescriptorSets() const;
+		using SpatialObject::SpatialObject;
 		
-		void UpdateUniformBuffer(uint32_t currentImage);
-
-	protected:
-		VulkanDevice* device;
-
-		std::vector<VkDescriptorSet> uniformDescriptorSets;
-
-		std::vector<VulkanUniformBuffer> uniformBuffers;
+		void ResolveAssets(AssetManager& assetManager) override;
+		void EnterScene() override;
 		
-		std::shared_ptr<Mesh> mesh;
-
-		void CreateUniformBuffers();
-		void CreateUniformDescriptorSets(VkDescriptorPool descriptorPool);
+		AssetRef<Mesh> m_Mesh;
 	};
 }

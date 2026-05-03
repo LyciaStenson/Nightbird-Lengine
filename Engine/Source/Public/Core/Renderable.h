@@ -1,13 +1,14 @@
 #pragma once
 
-namespace Nightbird
+#include <glm/glm.hpp>
+
+namespace Nightbird::Core
 {
-	class MeshInstance;
 	class MeshPrimitive;
 
 	struct Renderable
 	{
-		MeshInstance* instance;
-		MeshPrimitive* primitive;
+		const MeshPrimitive* primitive;
+		glm::mat4 transform;
 	};
 }

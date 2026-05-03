@@ -1,50 +1,24 @@
-dofile("../shared_lib_copy.lua")
-
 project "App"
-	kind "ConsoleApp"
+	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
-	local outBinDir = "%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}"
+	removeconfigurations { "EditorDebug", "EditorRelease" }
 
-	targetdir (outBinDir)
-	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
-
-	debugdir (outBinDir)
-
-	defines { "VK_NO_PROTOTYPES" }
-	defines { "GLFW_INCLUDE_VULKAN" }
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
+	targetdir ("%{wks.location}/Binaries/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/%{prj.name}")
 
 	files {
-		"Source/**.h",
-		"Source/**.cpp"
+		"Source/Public/**.h",
+		"Source/Private/**.h",
+		"Source/Private/**.cpp"
 	}
 
 	includedirs {
 		"Source/Public",
+		"Source/Private",
 		"%{wks.location}/Engine/Source/Public",
-		"%{wks.location}/Engine/Modules/Input/Source/Public",
-		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
-		"%{wks.location}/Engine/Vendor/volk",
-		"%{wks.location}/Engine/Vendor/vma",
-		"%{wks.location}/Engine/Vendor/glfw/include",
 		"%{wks.location}/Engine/Vendor/glm",
 		"%{wks.location}/Engine/Vendor/stb",
-		"%{wks.location}/Engine/Vendor/fastgltf/include",
-		"%{wks.location}/Engine/Vendor/rttr/src",
-		"%{wks.location}/Engine/Vendor/json"
+		"%{wks.location}/Engine/Vendor/stduuid"
 	}
-
-	links { "Engine" }
-
-	filter { "system:windows" }
-		links { "rttr" }
-		copy_shared_lib("rttr", "windows", outputdir)
-		copy_shared_lib("glfw", "windows", outputdir)
-		copy_shared_lib("Input", "windows", outputdir)
-	filter { "system:linux" }
-		copy_shared_lib("rttr", "linux", outputdir)
-		copy_shared_lib("glfw", "linux", outputdir)
-		copy_shared_lib("Input", "linux", outputdir)
-	filter {}

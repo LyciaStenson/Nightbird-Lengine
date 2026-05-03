@@ -1,46 +1,22 @@
 #include "Core/Mesh.h"
 
-#include <iostream>
-#include <chrono>
+NB_REFLECT_NO_FIELDS(Nightbird::Core::Mesh, NB_NO_PARENT, NB_NO_FACTORY)
 
-#include "Vulkan/Device.h"
-#include "Vulkan/Texture.h"
-#include "Core/MeshPrimitive.h"
-
-#include <stb_image.h>
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	Mesh::Mesh(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout)
-		: device(device), uniformDescriptorSetLayout(uniformDescriptorSetLayout)
+	Mesh::Mesh(std::vector<MeshPrimitive> primitives)
+		: m_Primitives(std::move(primitives))
 	{
 
 	}
 
-	Mesh::~Mesh()
+	const std::vector<MeshPrimitive>& Mesh::GetPrimitives() const
 	{
-
+		return m_Primitives;
 	}
 
 	size_t Mesh::GetPrimitiveCount() const
 	{
-		return primitives.size();
-	}
-
-	MeshPrimitive* Mesh::GetPrimitive(size_t index) const
-	{
-		if (index < primitives.size() && primitives[index])
-			return primitives[index].get();
-		return nullptr;
-	}
-
-	VkDescriptorSetLayout Mesh::GetUniformDescriptorSetLayout() const
-	{
-		return uniformDescriptorSetLayout;
-	}
-
-	void Mesh::AddPrimitive(std::unique_ptr<MeshPrimitive> meshPrimitive)
-	{
-		primitives.push_back(std::move(meshPrimitive));
+		return m_Primitives.size();
 	}
 }

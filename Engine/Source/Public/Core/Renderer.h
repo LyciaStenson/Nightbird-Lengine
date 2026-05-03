@@ -1,77 +1,28 @@
 #pragma once
 
+#include "RenderSurface.h"
+
 #include <memory>
-#include <vector>
+#include <cstdint>
 
-#include <volk.h>
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class VulkanInstance;
-	class VulkanDevice;
-	class VulkanSwapChain;
-	class VulkanRenderPass;
-	class VulkanDescriptorSetLayoutManager;
-	class GlobalDescriptorSetManager;
-	class VulkanPipeline;
-	class VulkanDescriptorPool;
-	class VulkanSync;
-	class GlfwWindow;
 	class Scene;
-	class SceneObject;
 	class Camera;
-	class MeshInstance;
-	class MeshPrimitive;
-	class RenderTarget;
-	struct Renderable;
+	class OffscreenSurface;
 	
 	class Renderer
 	{
 	public:
-		Renderer(GlfwWindow* glfwWindow);
-		~Renderer();
-		
-		VulkanDevice* GetDevice() const;
-		VulkanInstance* GetInstance() const;
-		VulkanSwapChain* GetSwapChain() const;
-		VulkanRenderPass* GetRenderPass() const;
-		VulkanDescriptorSetLayoutManager* GetDescriptorSetLayoutManager() const;
-		GlobalDescriptorSetManager* GetGlobalDescriptorSetManager() const;
-		VulkanDescriptorPool* GetDescriptorPool() const;
-		
-		void SetRenderTarget(RenderTarget* renderTarget);
+		virtual ~Renderer() = default;
 
-		void DrawFrame(Scene* scene);
-
-		void DrawScene(Scene* scene, Camera* camera, VkCommandBuffer commandBuffer, VkExtent2D extent);
-
-		void FramebufferResized();
-
-	private:
-		void RecreateSwapChain();
-
-		void CollectRenderables(SceneObject* object, std::vector<Renderable>& opaque, std::vector<Renderable>& opaqueDoubleSided, std::vector<Renderable>& transparent);
-
-		std::unique_ptr<VulkanInstance> instance;
-		std::unique_ptr<VulkanDevice> device;
-		std::unique_ptr<VulkanSwapChain> swapChain;
-		std::unique_ptr<VulkanRenderPass> renderPass;
-		std::unique_ptr<VulkanDescriptorSetLayoutManager> descriptorSetLayoutManager;
-		std::unique_ptr<VulkanDescriptorPool> descriptorPool;
-		std::unique_ptr<GlobalDescriptorSetManager> globalDescriptorSetManager;
-		std::unique_ptr<VulkanSync> sync;
-
-		std::unique_ptr<VulkanPipeline> opaquePipeline;
-		std::unique_ptr<VulkanPipeline> transparentPipeline;
-		std::unique_ptr<VulkanPipeline> opaqueDoubleSidedPipeline;
-		std::unique_ptr<VulkanPipeline> transparentDoubleSidedPipeline;
-		
-		RenderTarget* renderTarget = nullptr;
-
-		GlfwWindow* glfwWindow = nullptr;
-
-		int currentFrame = 0;
-
-		bool framebufferResized = false;
+		virtual void Initialize() = 0;
+		virtual void Shutdown() = 0;
+		virtual RenderSurface& GetDefaultSurface() = 0;
+		virtual std::unique_ptr<RenderSurface> CreateOffscreenSurface(uint32_t width, uint32_t height, RenderSurfaceFormat format) = 0;
+		virtual void SubmitScene(const Scene& scene, const Camera& camera) = 0;
+		virtual bool BeginFrame(RenderSurface& surface) = 0;
+		virtual void EndFrame(RenderSurface& surface) = 0;
+		virtual void DrawScene(RenderSurface& surface) = 0;
 	};
 }

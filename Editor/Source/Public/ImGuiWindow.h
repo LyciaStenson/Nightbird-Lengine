@@ -1,43 +1,40 @@
 #pragma once
 
+#include "Core/Reflection.h"
+
+#include <optional>
 #include <string>
 
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
 
-namespace Nightbird
+namespace Nightbird::Editor
 {
-	struct ImGuiWindowProperties
+	struct ImGuiWindowConfig
 	{
-		bool hasMenuBar = false;
-		bool fixedSize = false;
-		ImVec2 size;
-		bool changePadding = false;
-		ImVec2 padding;
-		bool enableDocking = true;
+		ImGuiWindowFlags flags = 0;
+		std::optional<ImVec2> size;
+		std::optional<ImVec2> padding;
 	};
 
 	class ImGuiWindow
 	{
 	public:
-		ImGuiWindow(const std::string& title, bool open = true, const ImGuiWindowProperties& properties = {});
+		NB_TYPE_BASE()
+
+		ImGuiWindow(const std::string& title, bool open = true, const ImGuiWindowConfig& config = {});
 		virtual ~ImGuiWindow() = default;
 
-		void SetOpen(bool open);
-
 		void Render();
+		void SetOpen(bool open);
+		bool IsOpen() const;
+		const std::string& GetTitle() const;
 
 	protected:
 		virtual void OnRender() = 0;
 
+	private:
 		std::string m_Title;
 		bool m_Open;
-		bool m_HasMenuBar;
-		bool m_FixedSize;
-		ImVec2 m_Size;
-		bool m_ChangePadding;
-		ImVec2 m_Padding;
-		bool m_EnableDocking;
+		ImGuiWindowConfig m_Config;
 	};
 }

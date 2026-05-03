@@ -1,12 +1,12 @@
 #include "Core/Camera.h"
 
-#include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include "Vulkan/Config.h"
-#include "Vulkan/Device.h"
-#include "Core/CameraUBO.h"
+NB_REFLECT(Nightbird::Core::Camera, NB_PARENT(Nightbird::Core::SpatialObject), NB_FACTORY(Nightbird::Core::Camera),
+	NB_FIELD(m_Fov)
+)
 
-namespace Nightbird
+namespace Nightbird::Core
 {
 	glm::mat4 Camera::GetViewMatrix() const
 	{
@@ -15,33 +15,10 @@ namespace Nightbird
 
 	glm::mat4 Camera::GetProjectionMatrix(float width, float height) const
 	{
-		glm::mat4 proj = glm::perspective(glm::radians(fov), width / height, 0.01f, 100.0f);
-		return proj;
+#ifdef __WIIU__
+		return glm::perspectiveRH_ZO(glm::radians(m_Fov), width / height, 0.001f, 1000.0f);
+#else
+		return glm::perspective(glm::radians(m_Fov), width / height, 0.001f, 1000.0f);
+#endif
 	}
-
-	CameraUBO Camera::GetUBO(VkExtent2D extent) const
-	{
-		CameraUBO ubo{};
-		
-		ubo.view = GetViewMatrix();
-		
-		glm::mat4 proj = GetProjectionMatrix((float)extent.width, (float)extent.height);
-		proj[1][1] *= -1;
-		ubo.projection = proj;
-		ubo.position = glm::vec4(GetWorldMatrix()[3]);
-		
-		return ubo;
-	}
-}
-
-RTTR_REGISTRATION
-{
-	rttr::registration::class_<Nightbird::Camera>("Camera")
-	.constructor<std::string>()
-	.property("FOV", &Nightbird::Camera::fov);
-
-	rttr::registration::method("CreateCamera", [](const std::string& name) -> Nightbird::SceneObject*
-	{
-		return new Nightbird::Camera(name);
-	});
 }

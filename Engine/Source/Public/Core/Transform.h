@@ -1,27 +1,20 @@
 #pragma once
 
-#include <vector>
+#include "Core/Reflection.h"
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
 
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class SceneObject;
-	
-	class Transform
+	struct Transform
 	{
-	public:
-		Transform();
-		Transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-		~Transform();
+		NB_TYPE_BASE()
 		
 		glm::mat4 GetLocalMatrix() const;
-		
-		glm::vec3 position;
-		glm::quat rotation;
-		glm::vec3 scale;
-		
-		glm::vec3 eulerCache = glm::vec3(0.0f);
+
+		glm::vec3 position = glm::vec3(0.0f);
+		glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		glm::vec3 scale = glm::vec3(1.0f);
 	};
 }

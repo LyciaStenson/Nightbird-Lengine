@@ -1,29 +1,18 @@
 #pragma once
 
-#include <string>
-
 #include "Core/SpatialObject.h"
 
-#include <volk.h>
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class VulkanDevice;
-	class VulkanUniformBuffer;
-	struct PointLightData;
-	
 	class PointLight : public SpatialObject
 	{
 	public:
+		NB_TYPE()
+			
 		using SpatialObject::SpatialObject;
-		~PointLight() override;
 
-		PointLightData GetData() const;
-		
-		glm::vec3 color = glm::vec3(1.0f);
-		float intensity = 1.0f;
-		float radius = 10.0f;
-		
-		RTTR_ENABLE(Nightbird::SpatialObject)
+		glm::vec3 m_Color = glm::vec3(1.0f);
+		float m_Intensity = 1.0f;
+		float m_Radius = 10.0f;
 	};
 }

@@ -1,198 +1,162 @@
 #include "EditorUI.h"
 
-#include <vector>
-#include <iostream>
+#include "WindowManager.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Windows/BuildWindow.h"
+#include "Windows/EditorSettingsWindow.h"
+#include "Windows/ProjectSettingsWindow.h"
+#include "Windows/AboutWindow.h"
 
-#include "Vulkan/Instance.h"
-#include "Vulkan/Device.h"
-#include "Vulkan/SwapChain.h"
-#include "Vulkan/RenderPass.h"
+#include "Import/ImportManager.h"
 
-#include "Core/MeshInstance.h"
-#include "Core/Camera.h"
-#include "Core/Scene.h"
-#include "Core/ModelManager.h"
+#include "Scene/TextSceneWriter.h"
+
+#include "EditorContext.h"
+
 #include "Core/Engine.h"
+#include "Core/Platform.h"
 
-#include "ImGuiDescriptorPool.h"
-#include "SceneOutliner.h"
-#include "LoadModelWindow.h"
-#include "CreateObjectWindow.h"
-#include "InstantiateModelWindow.h"
-#include "Inspector.h"
-#include "AssetBrowser.h"
-#include "SceneWindow.h"
-#include "AboutWindow.h"
-#include "EditorCamera.h"
-
-namespace Nightbird
+namespace Nightbird::Editor
 {
-	EditorUI::EditorUI(VulkanInstance* instance, VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, GLFWwindow* glfwWindow, Scene* scene, ModelManager* modelManager, Engine* engine)
-		: m_Window(glfwWindow), m_Scene(scene)
+	EditorUI::EditorUI(EditorContext& context, WindowManager& windowManager)
+		: m_Context(context), m_WindowManager(windowManager)
 	{
-		m_DescriptorPool = std::make_unique<ImGuiDescriptorPool>(device);
 
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& imGuiIO = ImGui::GetIO(); (void)imGuiIO;
-		imGuiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		imGuiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		
-		imGuiIO.Fonts->AddFontFromFileTTF("Assets/Fonts/RobotoFlex-Regular.ttf", 16.0f);
-		
+	}
+
+	void EditorUI::ApplyTheme(EditorTheme theme)
+	{
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.TabRounding = 4.0f;
-		style.FrameRounding = 4.0f;
-		style.WindowRounding = 6.0f;
-		style.WindowPadding = ImVec2(8.0f, 8.0f);
-		style.FramePadding = ImVec2(8.0f, 6.0f);
-		style.ItemSpacing = ImVec2(10.0f, 8.0f);
-		style.TabBarBorderSize = 0.0f;
-		style.WindowBorderSize = 0.0f;
-		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
 
-		ImGui_ImplGlfw_InitForVulkan(glfwWindow, true);
-
-		ImGui_ImplVulkan_InitInfo imGuiInitInfo = {};
-		imGuiInitInfo.ApiVersion = VK_API_VERSION_1_3;
-		imGuiInitInfo.Instance = instance->Get();
-		imGuiInitInfo.PhysicalDevice = device->GetPhysical();
-		imGuiInitInfo.Device = device->GetLogical();
-		imGuiInitInfo.QueueFamily = device->graphicsQueueFamily;
-		imGuiInitInfo.Queue = device->graphicsQueue;
-		imGuiInitInfo.DescriptorPool = m_DescriptorPool->Get();
-		imGuiInitInfo.RenderPass = renderPass->Get();
-		imGuiInitInfo.Subpass = 0;
-		imGuiInitInfo.MinImageCount = swapChain->GetMinImageCount();
-		imGuiInitInfo.ImageCount = swapChain->GetImageCount();
-		imGuiInitInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-
-		ImGui_ImplVulkan_Init(&imGuiInitInfo);
-		
-		m_Windows["Scene Outliner"] = std::make_unique<SceneOutliner>(scene, this);
-		m_Windows["Load Model Window"] = std::make_unique<LoadModelWindow>(modelManager);
-		m_Windows["Instantiate Model Window"] = std::make_unique<InstantiateModelWindow>(modelManager, scene);
-		m_Windows["Create Object Window"] = std::make_unique<CreateObjectWindow>(scene);
-		m_Windows["Inspector"] = std::make_unique<Inspector>(scene, this);
-		m_Windows["Asset Browser"] = std::make_unique<AssetBrowser>(scene, this);
-		m_Windows["Scene Window"] = std::make_unique<SceneWindow>(engine, this, device, swapChain->GetColorFormat(), swapChain->GetDepthFormat());
-		m_Windows["About"] = std::make_unique<AboutWindow>();
-	}
-	
-	EditorUI::~EditorUI()
-	{
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-	}
-
-	ImGuiWindow* EditorUI::GetWindow(const std::string& title)
-	{
-		if (m_Windows.count(title))
+		switch (theme)
 		{
-			return m_Windows[title].get();
+			case EditorTheme::Light:
+				ImGui::StyleColorsLight();
+				break;
+			case EditorTheme::Dark:
+				ImGui::StyleColorsDark();
+
+				ImVec4* colors = ImGui::GetStyle().Colors;
+				colors[ImGuiCol_WindowBg]					= ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+				colors[ImGuiCol_Border]						= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_BorderShadow]				= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_TitleBg]					= ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+				colors[ImGuiCol_TitleBgActive]				= ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+				colors[ImGuiCol_TitleBgCollapsed]			= ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+				colors[ImGuiCol_Button]						= ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
+				colors[ImGuiCol_ButtonHovered]				= ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+				colors[ImGuiCol_ButtonActive]				= ImVec4(0.36f, 0.36f, 0.36f, 1.00f);
+				colors[ImGuiCol_Header]						= colors[ImGuiCol_Button];
+				colors[ImGuiCol_HeaderHovered]				= colors[ImGuiCol_ButtonHovered];
+				colors[ImGuiCol_HeaderActive]				= colors[ImGuiCol_Button];
+				colors[ImGuiCol_Separator]					= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+				colors[ImGuiCol_SeparatorHovered]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+				colors[ImGuiCol_SeparatorActive]			= ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+				colors[ImGuiCol_Tab]						= colors[ImGuiCol_Button];
+				colors[ImGuiCol_TabHovered]					= colors[ImGuiCol_ButtonHovered];
+				colors[ImGuiCol_TabSelected]				= colors[ImGuiCol_Button];
+				colors[ImGuiCol_TabSelectedOverline]		= ImVec4(0.50f, 0.05f, 0.50f, 0.00f);
+				colors[ImGuiCol_TabDimmed]					= colors[ImGuiCol_Button];
+				colors[ImGuiCol_TabDimmedSelected]			= colors[ImGuiCol_Button];
+				colors[ImGuiCol_TabDimmedSelectedOverline]	= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+				colors[ImGuiCol_DragDropTarget]				= ImVec4(0.70f, 0.70f, 0.70f, 1.00f);
+				colors[ImGuiCol_DragDropTargetBg]			= ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+
+				break;
 		}
-		return nullptr;
-	}
-	
-	SceneObject* EditorUI::GetSelectedObject() const
-	{
-		return m_SelectedObject;
+		
+		style.FramePadding = ImVec2(8.0f, 8.0f);
+		style.WindowPadding = ImVec2(12.0f, 12.0f);
+		style.FrameRounding = 3.0f;
+		style.WindowRounding = 10.0f;
+		style.FrameBorderSize = 0.0f;
+		style.WindowBorderSize = 0.0f;
 	}
 
-	void EditorUI::SelectObject(SceneObject* object)
+	void EditorUI::Render()
 	{
-		m_SelectedObject = object;
-	}
-	
-	void EditorUI::Render(VkCommandBuffer commandBuffer)
-	{
-		NewFrame();
+		MainMenuBar();
 
+		ImGui::DockSpaceOverViewport();
+
+		m_WindowManager.Render();
+	}
+
+	uuids::uuid GenerateUUID()
+	{
+		std::random_device randomDevice;
+
+		auto seedData = std::array<int, std::mt19937::state_size>{};
+		std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+		std::seed_seq seq(std::begin(seedData), std::end(seedData));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{generator};
+
+		return gen();
+	}
+
+	void EditorUI::MainMenuBar()
+	{
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Save Scene (Binary)"))
+				if (ImGui::MenuItem("Save Scene"))
 				{
-					std::string path = "Assets/Scenes/Scene.scene";
-					m_Scene->SaveSceneBIN(path);
+					TextSceneWriter sceneWriter;
+					sceneWriter.Write(m_Context.GetEngine().GetScene(), "TestScene", GenerateUUID(), m_Context.GetImportManager().GetAssetsDir() / "Scenes/TestScene.ntscene");
 				}
-				if (ImGui::MenuItem("Save Scene (Text)"))
+				if (ImGui::MenuItem("Build"))
 				{
-					std::string path = "Assets/Scenes/Scene.tscene";
-					m_Scene->SaveSceneJSON(path);
+					if (auto* window = m_WindowManager.GetWindow<BuildWindow>())
+						window->SetOpen(true);
 				}
-				if (ImGui::MenuItem("Quit"))
-					glfwSetWindowShouldClose(m_Window, true);
+				if (ImGui::MenuItem("Exit"))
+				{
+
+				}
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Edit"))
+			{
+				if (ImGui::MenuItem("Editor Settings"))
+				{
+					if (auto* window = m_WindowManager.GetWindow<EditorSettingsWindow>())
+						window->SetOpen(true);
+				}
+
+				if (ImGui::MenuItem("Project Settings"))
+				{
+					if (auto* window = m_WindowManager.GetWindow<ProjectSettingsWindow>())
+						window->SetOpen(true);
+				}
+
+				ImGui::EndMenu();
+			}
+
 			if (ImGui::BeginMenu("Window"))
 			{
-				if (ImGui::MenuItem("Scene Window"))
+				for (auto& window : m_WindowManager.GetWindows())
 				{
-					if (m_Windows.count("Scene Window"))
-						m_Windows["Scene Window"]->SetOpen(true);
-				}
-				if (ImGui::MenuItem("Scene Outliner"))
-				{
-					if (m_Windows.count("Scene Outliner"))
-						m_Windows["Scene Outliner"]->SetOpen(true);
-				}
-				if (ImGui::MenuItem("Inspector"))
-				{
-					if (m_Windows.count("Inspector"))
-						m_Windows["Inspector"]->SetOpen(true);
-				}
-				if (ImGui::MenuItem("Asset Browser"))
-				{
-					if (m_Windows.count("Asset Browser"))
-						m_Windows["Asset Browser"]->SetOpen(true);
+					bool open = window->IsOpen();
+					if (ImGui::MenuItem(window->GetTitle().c_str(), nullptr, &open))
+						window->SetOpen(open);
 				}
 				ImGui::EndMenu();
 			}
+
 			if (ImGui::BeginMenu("Help"))
 			{
 				if (ImGui::MenuItem("About"))
 				{
-					if (m_Windows.count("About"))
-						m_Windows["About"]->SetOpen(true);
+					if (auto* aboutWindow = m_WindowManager.GetWindow<AboutWindow>())
+						aboutWindow->SetOpen(true);
 				}
 				ImGui::EndMenu();
 			}
+
 			ImGui::EndMainMenuBar();
 		}
-
-		for (auto& [_, window] : m_Windows)
-		{
-			window->Render();
-		}
-		
-		Draw(commandBuffer);
-	}
-
-	void EditorUI::OpenWindow(const std::string& title)
-	{
-		if (m_Windows.count(title))
-			m_Windows[title]->SetOpen(true);
-	}
-	
-	void EditorUI::NewFrame()
-	{
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-		ImGuizmo::BeginFrame();
-		
-		ImGui::DockSpaceOverViewport();
-	}
-	
-	void EditorUI::Draw(VkCommandBuffer commandBuffer)
-	{
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	}
 }

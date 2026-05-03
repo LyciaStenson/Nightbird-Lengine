@@ -1,93 +1,98 @@
 #include "Core/Engine.h"
 
-#include <iostream>
-#include <algorithm>
-
-#include <volk.h>
-
-#include "Core/GlfwWindow.h"
-#include "Core/ModelManager.h"
-#include "Core/Scene.h"
-#include "Core/RenderTarget.h"
+#include "Core/Platform.h"
 #include "Core/Renderer.h"
-#include "Vulkan/Device.h"
-#include "Vulkan/DescriptorPool.h"
-#include "Vulkan/DescriptorSetLayoutManager.h"
-#include "Vulkan/GlobalDescriptorSetManager.h"
-#include "Core/GlmRegistration.h"
-#include "Input.h"
+#include "Core/Scene.h"
+#include "Core/SceneObject.h"
+#include "Core/AssetManager.h"
+#include "Core/Log.h"
 
-namespace Nightbird
+#include "Input/InputProvider.h"
+
+#include <chrono>
+
+extern volatile int nb_link_AudioSource;
+
+namespace Nightbird::Core
 {
-	Engine::Engine()
+	Engine::Engine(Platform& platform, Renderer& renderer, AssetManager& assetManager)
+		: m_Platform(platform), m_Renderer(renderer), m_AssetManager(assetManager)
 	{
-		GlmRegistration();
+		m_Scene = std::make_unique<Scene>();
 
-		if (volkInitialize() != VK_SUCCESS)
-		{
-			std::cerr << "Failed to initialize Volk" << std::endl;
-		}
-		
-		glfwWindow = std::make_unique<GlfwWindow>();
-		Input::Get().Init(glfwWindow->Get());
-		
-		renderer = std::make_unique<Renderer>(glfwWindow.get());
-		glfwWindow->SetUserPointer(renderer.get());
+		m_Platform.Initialize();
+		m_Renderer.Initialize();
 
-		modelManager = std::make_unique<ModelManager>(renderer->GetDevice(), renderer->GetDescriptorSetLayoutManager()->GetMeshDescriptorSetLayout(), renderer->GetDescriptorSetLayoutManager()->GetMaterialDescriptorSetLayout(), renderer->GetDescriptorPool()->Get());
-		
-		scene = std::make_unique<Scene>(renderer->GetDevice(), modelManager.get(), renderer->GetGlobalDescriptorSetManager(), renderer->GetDescriptorPool()->Get());
+		if (m_Scene)
+			m_Scene->SetEngine(this);
+
+		static volatile int sink = nb_link_AudioSource;
 	}
-	
+
 	Engine::~Engine()
 	{
-
+		m_Renderer.Shutdown();
+		m_Platform.Shutdown();
 	}
 
-	GlfwWindow* Engine::GetGlfwWindow() const
+	bool Engine::ShouldClose() const
 	{
-		return glfwWindow.get();
+		return m_Platform.ShouldClose();
 	}
 
-	Renderer* Engine::GetRenderer() const
+	float Engine::Update()
 	{
-		return renderer.get();
-	}
+		static auto lastTime = std::chrono::high_resolution_clock::now();
 
-	Scene* Engine::GetScene() const
-	{
-		return scene.get();
-	}
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+		lastTime = currentTime;
 
-	ModelManager* Engine::GetModelManager() const
-	{
-		return modelManager.get();
-	}
-
-	float Engine::GetDeltaTime() const
-	{
+		m_Platform.Update();
+		m_InputSystem.Update(m_Platform.GetInputProvider());
+		m_Scene->Update(deltaTime);
+		
 		return deltaTime;
 	}
 
-	void Engine::Run()
+	Platform& Engine::GetPlatform()
 	{
-		double lastTime = glfwGetTime();
+		return m_Platform;
+	}
 
-		while (!glfwWindowShouldClose(glfwWindow->Get()))
+	Renderer& Engine::GetRenderer()
+	{
+		return m_Renderer;
+	}
+
+	Input::System& Engine::GetInputSystem()
+	{
+		return m_InputSystem;
+	}
+
+	Audio::Provider& Engine::GetAudioProvider()
+	{
+		return m_Platform.GetAudioProvider();
+	}
+
+	Scene& Engine::GetScene()
+	{
+		return *m_Scene;
+	}
+
+	void Engine::SetScene(std::unique_ptr<Scene> scene)
+	{
+		m_Scene = std::move(scene);
+
+		if (m_Scene)
 		{
-			glfwPollEvents();
-			Input::Get().ProcessEvents();
-
-			double currentTime = glfwGetTime();
-			deltaTime = static_cast<float>(currentTime - lastTime);
-			lastTime = currentTime;
-
-			if (bSimulationRunning)
-				scene->Update(deltaTime);
-
-			modelManager->ProcessUploadQueue();
-			renderer->DrawFrame(scene.get());
+			m_Scene->ResolveAssets(m_AssetManager);
+			m_Scene->SetEngine(this);
 		}
-		vkDeviceWaitIdle(renderer->GetDevice()->GetLogical());
+	}
+
+	AssetManager& Engine::GetAssetManager()
+	{
+		return m_AssetManager;
 	}
 }

@@ -1,46 +1,46 @@
 #pragma once
 
-#include <unordered_set>
-#include <vector>
 #include <memory>
 
-#include <volk.h>
+#include "Input/InputSystem.h"
+#include "Audio/AudioProvider.h"
+#include "Core/AudioAsset.h"
 
-#include <GLFW/glfw3.h>
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class GlfwWindow;
-	class ModelManager;
-	class MeshInstance;
-	class Scene;
+	class Platform;
 	class Renderer;
-	
+	class Scene;
+	class AssetManager;
+
 	class Engine
 	{
 	public:
-		Engine();
+		Engine(Platform& platform, Renderer& renderer, AssetManager& assetManager);
 		~Engine();
-		
-		GlfwWindow* GetGlfwWindow() const;
-		Renderer* GetRenderer() const;
-		Scene* GetScene() const;
-		ModelManager* GetModelManager() const;
 
-		float GetDeltaTime() const;
-		
-		void Run();
+		bool ShouldClose() const;
+		float Update();
 
-		bool bSimulationRunning = false;
+		Platform& GetPlatform();
+		Renderer& GetRenderer();
+
+		Input::System& GetInputSystem();
+		Audio::Provider& GetAudioProvider();
+
+		Scene& GetScene();
+		void SetScene(std::unique_ptr<Scene> scene);
+
+		AssetManager& GetAssetManager();
 
 	private:
-		std::unique_ptr<GlfwWindow> glfwWindow;
+		Platform& m_Platform;
+		Renderer& m_Renderer;
 
-		std::unique_ptr<Renderer> renderer;
-		
-		std::unique_ptr<Scene> scene;
-		std::unique_ptr<ModelManager> modelManager;
+		AssetManager& m_AssetManager;
 
-		float deltaTime = 0.0f;
+		std::unique_ptr<Scene> m_Scene;
+
+		Input::System m_InputSystem;
 	};
 }

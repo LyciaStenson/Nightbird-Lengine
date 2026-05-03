@@ -1,31 +1,24 @@
 #include "Core/SpatialObject.h"
 
-namespace Nightbird
+NB_REFLECT(Nightbird::Core::SpatialObject, NB_PARENT(Nightbird::Core::SceneObject), NB_FACTORY(Nightbird::Core::SpatialObject),
+	NB_FIELD(m_Transform)
+)
+
+namespace Nightbird::Core
 {
 	glm::mat4 SpatialObject::GetLocalMatrix() const
 	{
-		return transform.GetLocalMatrix();
+		return m_Transform.GetLocalMatrix();
 	}
 
 	glm::mat4 SpatialObject::GetWorldMatrix() const
 	{
-		if (parent)
+		if (m_Parent)
 		{
-			if (SpatialObject* spatialParent = dynamic_cast<SpatialObject*>(parent))
-				return spatialParent->GetWorldMatrix() * transform.GetLocalMatrix();
+			if (auto* spatialParent = Cast<SpatialObject>(m_Parent))
+				return spatialParent->GetWorldMatrix() * GetLocalMatrix();
 		}
-		return transform.GetLocalMatrix();
+
+		return GetLocalMatrix();
 	}
-}
-
-RTTR_REGISTRATION
-{
-	rttr::registration::class_<Nightbird::SpatialObject>("SpatialObject")
-	.constructor<std::string>()
-	.property("Transform", &Nightbird::SpatialObject::transform);
-
-	rttr::registration::method("CreateSpatialObject", [](const std::string& name) -> Nightbird::SceneObject*
-	{
-		return new Nightbird::SpatialObject(name);
-	});
 }

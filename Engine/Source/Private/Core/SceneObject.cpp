@@ -1,85 +1,123 @@
 #include "Core/SceneObject.h"
 
-#include <iostream>
+#include "Core/Engine.h"
+#include "Core/Scene.h"
+#include "Core/Log.h"
 
-#include "Core/RTTRSerialization.h"
+NB_REFLECT(Nightbird::Core::SceneObject, NB_NO_PARENT, NB_FACTORY(Nightbird::Core::SceneObject),
+	NB_FIELD(m_Name)
+)
 
-namespace Nightbird
+namespace Nightbird::Core
 {
-	SceneObject::SceneObject(const char* name)
-		: name(name ? name : "")
+	SceneObject::SceneObject()
+		: m_Name("SceneObject")
 	{
 
 	}
 
-	SceneObject::SceneObject(const std::string& name)
-		: name(name)
-	{
-
-	}
-	
 	const std::string& SceneObject::GetName() const
 	{
-		return name;
+		return m_Name;
 	}
 
-	std::string SceneObject::GetPath() const
+	void SceneObject::SetName(std::string name)
 	{
-		if (!parent || !parent->parent)
-			return name;
-
-		return parent->GetPath() + '/' + name;
+		m_Name = std::move(name);
 	}
 
-	void SceneObject::SetParent(SceneObject* newParent)
+	Engine* SceneObject::GetEngine() const
 	{
-		if (newParent == parent || newParent == this)
-			return;
-		
-		std::unique_ptr<SceneObject> uniquePtr = nullptr;
-		if (parent)
-			uniquePtr = parent->DetachChild(this);
+		return m_Scene ? m_Scene->GetEngine() : nullptr;
+	}
 
-		parent = newParent;
-
-		if (newParent && uniquePtr)
-			newParent->AddChild(std::move(uniquePtr));
+	void SceneObject::SetScene(Scene* scene)
+	{
+		m_Scene = scene;
+		for (auto& child : m_Children)
+			child->SetScene(scene);
 	}
 
 	SceneObject* SceneObject::GetParent() const
 	{
-		return parent;
+		return m_Parent;
+	}
+
+	void SceneObject::SetParent(SceneObject* newParent)
+	{
+		if (newParent == m_Parent || newParent == this)
+			return;
+
+		std::unique_ptr<SceneObject> detachedChild = nullptr;
+		if (m_Parent)
+			detachedChild = m_Parent->DetachChild(this);
+
+		m_Parent = newParent;
+
+		if (newParent && detachedChild)
+			newParent->AddChild(std::move(detachedChild));
 	}
 
 	const std::vector<std::unique_ptr<SceneObject>>& SceneObject::GetChildren() const
 	{
-		return children;
+		return m_Children;
 	}
-	
+
+	std::vector<std::unique_ptr<SceneObject>>& SceneObject::GetChildren()
+	{
+		return m_Children;
+	}
+
 	void SceneObject::AddChild(std::unique_ptr<SceneObject> child)
 	{
-		child->parent = this;
-		children.push_back(std::move(child));
+		if (!child)
+			return;
+
+		m_Children.push_back(std::move(child));
+		
+		m_Children.back()->SetScene(m_Scene);
+		m_Children.back()->SetParent(this);
+
+		if (m_Scene && m_Scene->GetEngine())
+			m_Children.back()->EnterSceneRecursive();
 	}
 
 	std::unique_ptr<SceneObject> SceneObject::DetachChild(SceneObject* child)
 	{
-		auto it = std::find_if(children.begin(), children.end(),
-			[child](const std::unique_ptr<SceneObject>& existingChild)
-			{
-				return existingChild.get() == child;
-			}
-		);
-
-		if (it != children.end())
+		for (auto it = m_Children.begin(); it != m_Children.end(); ++it)
 		{
-			std::unique_ptr<SceneObject> detachedChild = std::move(*it);
-			children.erase(it);
-			detachedChild->parent = nullptr;
-			return detachedChild;
+			if (it->get() == child)
+			{
+				auto detatched = std::move(*it);
+				m_Children.erase(it);
+				detatched->SetParent(nullptr);
+				return detatched;
+			}
 		}
 
 		return nullptr;
+	}
+
+	bool SceneObject::HasSourceScene() const
+	{
+		return m_SourceSceneUUID.has_value();
+	}
+
+	const std::optional<uuids::uuid>& SceneObject::GetSourceSceneUUID() const
+	{
+		return m_SourceSceneUUID;
+	}
+
+	void SceneObject::SetSourceSceneUUID(const uuids::uuid& uuid)
+	{
+		m_SourceSceneUUID = uuid;
+	}
+
+	void SceneObject::EnterSceneRecursive()
+	{
+		EnterScene();
+		for (const auto& child : m_Children)
+			child->EnterSceneRecursive();
 	}
 
 	void SceneObject::EnterScene()
@@ -87,117 +125,8 @@ namespace Nightbird
 
 	}
 
-	void SceneObject::Tick(float deltaTime)
+	void SceneObject::Tick(float delta)
 	{
 
 	}
-	
-	void SceneObject::Serialize(json& out) const
-	{
-		SerializeBase(out);
-		
-		out["__children"] = json::array();
-		for (const auto& child : children)
-		{
-			json childJson;
-			child->Serialize(childJson);
-			out["__children"].push_back(childJson);
-		}
-	}
-
-	void SceneObject::Deserialize(const json& in)
-	{
-		DeserializeBase(in);
-
-		children.clear();
-		if (in.contains("__children"))
-		{
-			for (const auto& childJson : in.at("__children"))
-			{
-				if (!childJson.contains("__type"))
-				{
-					std::cerr << "SceneObject Deserialize Error: Missing __type" << std::endl;
-					continue;
-				}
-				
-				std::string childTypeName = childJson["__type"];
-				rttr::type childType = rttr::type::get_by_name(childTypeName);
-				
-				if (!childType.is_valid())
-				{
-					std::cerr << "SceneObject Deserialize Error: Unknown type: " << childTypeName << std::endl;
-					continue;
-				}
-				
-				auto create = rttr::type::get_global_method("Create" + childTypeName);
-				if (create.is_valid())
-				{
-					rttr::variant variant = create.invoke({}, childTypeName);
-					if (variant.is_type<Nightbird::SceneObject*>())
-					{
-						SceneObject* rawChild = variant.get_value<Nightbird::SceneObject*>();
-						rawChild->Deserialize(childJson);
-						
-						std::unique_ptr<Nightbird::SceneObject> child(rawChild);
-						AddChild(std::move(child));
-					}
-				}
-				else
-					std::cerr << "SceneObject Deserialize Error: No factory method found for type: " << childTypeName << std::endl;
-			}
-		}
-	}
-	
-	void SceneObject::SerializeBase(json& out) const
-	{
-		rttr::instance instance = *this;
-		rttr::type type = instance.get_derived_type();
-
-		out["__type"] = type.get_name().to_string();
-
-		for (auto& property : type.get_properties())
-		{
-			rttr::variant value = property.get_value(instance);
-			if (value.is_valid())
-				out["__properties"][property.get_name().to_string()] = SerializeRTTR(value);
-		}
-	}
-
-	void SceneObject::DeserializeBase(const json& in)
-	{
-		if (!in.contains("__type"))
-		{
-			std::cerr << "SceneObject Deserialize Error: Missing __type" << std::endl;
-			return;
-		}
-
-		std::string typeName = in["__type"];
-		rttr::type type = rttr::type::get_by_name(typeName);
-
-		if (!type.is_valid())
-		{
-			std::cerr << "SceneObject Deserialize Error: Unknown type: " << typeName << std::endl;
-			return;
-		}
-
-		rttr::instance instance = *this;
-
-		if (in.contains("__properties"))
-		{
-			const auto& propsJson = in.at("__properties");
-			DeserializeRTTR(propsJson, instance);
-		}
-	}
-}
-
-RTTR_REGISTRATION
-{
-	rttr::registration::class_<Nightbird::SceneObject>("SceneObject")
-	.constructor<std::string>()
-	.property("name", &Nightbird::SceneObject::name);
-
-	rttr::registration::method("CreateSceneObject", [](const std::string& name) -> Nightbird::SceneObject*
-	{
-		return new Nightbird::SceneObject(name);
-	});
 }

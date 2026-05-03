@@ -1,20 +1,17 @@
-project "ImGui"
+project "imgui"
 	kind "StaticLib"
 	language "C++"
+	cppdialect "C++20"
 
-	targetdir ("%{wks.location}/out/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/out/obj/" .. outputdir .. "/%{prj.name}")
+	removeconfigurations { "AppDebug", "AppRelease" }
+	removeplatforms { "WiiU", "3DS" }
 
-	defines { "IMGUI_IMPL_VULKAN_USE_VOLK" }
+	targetdir ("%{wks.location}/Intermediate/" .. outputdir)
+	objdir ("%{wks.location}/Intermediate/" .. outputdir .. "/imgui")
 
 	files { "**.h", "**.cpp" }
 
-	includedirs
-	{
-		"%{wks.location}/Engine/Vendor/vulkan-headers/include",
-		"%{wks.location}/Engine/Vendor/volk",
-		"%{wks.location}/Engine/Vendor/glfw/include"
-	}
+	includedirs { "." }
 
 	filter "configurations:Debug"
 		runtime "Debug"

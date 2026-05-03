@@ -1,33 +1,21 @@
 #pragma once
 
-#include <vector>
+#include "Core/SpatialObject.h"
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
-#include <volk.h>
-
-#include "Core/SpatialObject.h"
-#include "Core/Transform.h"
-#include "Vulkan/UniformBuffer.h"
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	struct CameraUBO;
-	
 	class Camera : public SpatialObject
 	{
 	public:
+		NB_TYPE()
+
 		using SpatialObject::SpatialObject;
-		~Camera() override = default;
+		
+		float m_Fov = 70.0f;
 
 		glm::mat4 GetViewMatrix() const;
 		glm::mat4 GetProjectionMatrix(float width, float height) const;
-		
-		CameraUBO GetUBO(VkExtent2D extent) const;
-		
-		float fov = 70.0f;
-		
-		RTTR_ENABLE(Nightbird::SpatialObject)
 	};
 }

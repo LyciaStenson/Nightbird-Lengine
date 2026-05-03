@@ -1,40 +1,25 @@
 #pragma once
 
+#include "Core/Reflection.h"
+
+#include "Core/MeshPrimitive.h"
+
 #include <vector>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <volk.h>
-
-#include "Core/Vertex.h"
-#include "Vulkan/UniformBuffer.h"
-
-namespace Nightbird
+namespace Nightbird::Core
 {
-	class VulkanDevice;
-	class VulkanTexture;
-	class MeshPrimitive;
-	struct MeshPrimitiveInfo;
-	
 	class Mesh
 	{
 	public:
-		Mesh(VulkanDevice* device, VkDescriptorSetLayout uniformDescriptorSetLayout);
-		~Mesh();
+		NB_TYPE_BASE()
 
+		Mesh() = default;
+		Mesh(std::vector<MeshPrimitive> primitives);
+
+		const std::vector<MeshPrimitive>& GetPrimitives() const;
 		size_t GetPrimitiveCount() const;
-		MeshPrimitive* GetPrimitive(size_t index) const;
-		
-		VkDescriptorSetLayout GetUniformDescriptorSetLayout() const;
-		
-		void AddPrimitive(std::unique_ptr<MeshPrimitive> meshPrimitive);
 
 	private:
-		VulkanDevice* device;
-		
-		std::vector<std::unique_ptr<MeshPrimitive>> primitives;
-
-		VkDescriptorSetLayout uniformDescriptorSetLayout;
+		std::vector<MeshPrimitive> m_Primitives;
 	};
 }
