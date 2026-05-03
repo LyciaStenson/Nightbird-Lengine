@@ -1,6 +1,7 @@
 #include "Windows/Inspector.h"
 
 #include "EditorContext.h"
+#include "Import/ImportManager.h"
 
 #include "Core/Engine.h"
 #include "Core/AssetManager.h"
@@ -25,28 +26,40 @@ namespace Nightbird::Editor
 	void Inspector::OnRender()
 	{
 		Core::SceneObject* selected = m_Context.GetSelectedObject();
-		if (!selected)
+		if (selected)
 		{
-			ImGui::TextDisabled("Select an object to edit");
+			DrawSceneObject(selected);
 			return;
 		}
 
-		const TypeInfo* type = selected->GetTypeInfo();
+		const std::filesystem::path& selectedPath = m_Context.m_SelectedPath;
+		if (!selectedPath.empty() && std::filesystem::is_regular_file(selectedPath))
+		{
+			if (DrawAsset(selectedPath))
+				return;
+		}
+
+		ImGui::TextDisabled("Select something to edit");
+	}
+
+	void Inspector::DrawSceneObject(Core::SceneObject* object)
+	{
+		const TypeInfo* type = object->GetTypeInfo();
 		ImGui::Text("%s", type->name);
-		
+
 		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 		ImGui::Separator();
 		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 
-		DrawFields(selected, type);
-		
-		if (selected->HasSourceScene())
+		DrawFields(object, type);
+
+		if (object->HasSourceScene())
 		{
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 			ImGui::Separator();
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 
-			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(selected->GetSourceSceneUUID().value()).c_str());
+			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(object->GetSourceSceneUUID().value()).c_str());
 		}
 	}
 
@@ -178,5 +191,19 @@ namespace Nightbird::Editor
 
 			ImGui::PopID();
 		}
+	}
+
+	bool Inspector::DrawAsset(const std::filesystem::path& path)
+	{
+		const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
+
+		if (assetInfo)
+		{
+
+			ImGui::Text(assetInfo->importer.c_str());
+			return true;
+		}
+
+		return false;
 	}
 }

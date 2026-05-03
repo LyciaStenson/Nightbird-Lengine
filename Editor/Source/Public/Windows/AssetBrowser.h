@@ -22,6 +22,5 @@ namespace Nightbird::Editor
 		EditorContext& m_Context;
 
 		std::filesystem::path m_CurrentPath;
-		std::filesystem::path m_SelectedPath;
 	};
 }

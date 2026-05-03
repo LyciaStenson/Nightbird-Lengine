@@ -11,6 +11,7 @@ namespace Nightbird::Core
 	class Mesh;
 	struct Material;
 	class Texture;
+	class Cubemap;
 	class AudioAsset;
 
 	class AssetManager
@@ -52,6 +53,7 @@ namespace Nightbird::Core
 		virtual std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) = 0;
 		virtual std::shared_ptr<Material> LoadMaterial(const uuids::uuid& uuid) = 0;
 		virtual std::shared_ptr<Texture> LoadTexture(const uuids::uuid& uuid) = 0;
+		virtual std::shared_ptr<Cubemap> LoadCubemap(const uuids::uuid& uuid) = 0;
 		virtual std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) = 0;
 
 	private:
@@ -64,6 +66,8 @@ namespace Nightbird::Core
 				return LoadMaterial(uuid);
 			if constexpr (std::is_same_v <T, Texture>)
 				return LoadTexture(uuid);
+			if constexpr (std::is_same_v <T, Cubemap>)
+				return LoadCubemap(uuid);
 			if constexpr (std::is_same_v<T, AudioAsset>)
 				return LoadAudio(uuid);
 			return nullptr;

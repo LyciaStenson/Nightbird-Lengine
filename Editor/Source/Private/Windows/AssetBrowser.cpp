@@ -2,18 +2,35 @@
 
 #include "EditorContext.h"
 
+#include "Scene/TextSceneWriter.h"
+#include "Import/TextCubemapWriter.h"
+
 #include "Scene/TextSceneReader.h"
 #include "Import/ImportManager.h"
 
 #include "Core/Engine.h"
 #include "Core/Platform.h"
 #include "Core/Scene.h"
+#include "Core/Cubemap.h"
 #include "Core/Log.h"
 
 NB_REFLECT_NO_FIELDS(Nightbird::Editor::AssetBrowser, NB_PARENT(Nightbird::Editor::ImGuiWindow), NB_NO_FACTORY)
 
 namespace Nightbird::Editor
 {
+	static uuids::uuid GenerateUUID()
+	{
+		std::random_device randomDevice;
+
+		auto seedData = std::array<int, std::mt19937::state_size>{};
+		std::generate(std::begin(seedData), std::end(seedData), std::ref(randomDevice));
+		std::seed_seq seq(std::begin(seedData), std::end(seedData));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{generator};
+
+		return gen();
+	}
+
 	AssetBrowser::AssetBrowser(EditorContext& context, bool open)
 		: ImGuiWindow("Asset Browser", open), m_Context(context)
 	{
@@ -27,7 +44,7 @@ namespace Nightbird::Editor
 			if (ImGui::Button("Up"))
 			{
 				m_CurrentPath = m_CurrentPath.parent_path();
-				m_SelectedPath.clear();
+				m_Context.m_SelectedPath.clear();
 			}
 		}
 
@@ -36,30 +53,30 @@ namespace Nightbird::Editor
 			const auto& path = entry.path();
 			const std::string name = path.filename().string();
 
-			bool selected = path == m_SelectedPath;
+			bool selected = path == m_Context.m_SelectedPath;
 
 			if (entry.is_directory())
 			{
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
-					m_SelectedPath = path;
+					m_Context.m_SelectedPath = path;
 				}
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
 					m_CurrentPath = path;
-					m_SelectedPath.clear();
+					m_Context.m_SelectedPath.clear();
 				}
 			}
 			else if (entry.is_regular_file())
 			{
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
-					m_SelectedPath = path;
+					m_Context.m_SelectedPath = path;
 				}
 
 				if (ImGui::BeginDragDropSource())
 				{
-					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
+					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_Context.m_SelectedPath);
 					if (assetInfo)
 					{
 						ImGui::SetDragDropPayload("ASSET_UUID", &assetInfo->uuid, sizeof(uuids::uuid));
@@ -70,7 +87,7 @@ namespace Nightbird::Editor
 
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_SelectedPath);
+					const AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(m_Context.m_SelectedPath);
 					if (assetInfo)
 					{
 						Core::SceneReadResult result = m_Context.GetImportManager().LoadScene(assetInfo->uuid);
@@ -91,7 +108,31 @@ namespace Nightbird::Editor
 
 		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
 		{
-			m_SelectedPath.clear();
+			m_Context.m_SelectedPath.clear();
+		}
+
+		if (ImGui::BeginPopupContextWindow("TestPopup", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (ImGui::MenuItem("New Folder"))
+			{
+				std::filesystem::create_directory(m_CurrentPath / "New Folder");
+			}
+
+			if (ImGui::MenuItem("New Scene"))
+			{
+				TextSceneWriter writer;
+				Core::Scene scene;
+				writer.Write(scene, "NewScene", GenerateUUID(), m_CurrentPath / "NewScene.ntscene");
+			}
+
+			if (ImGui::MenuItem("New Cubemap"))
+			{
+				TextCubemapWriter writer;
+				Core::Cubemap cubemap;
+				writer.Write(cubemap, GenerateUUID(), m_CurrentPath / "NewCubemap.ntcubemap");
+			}
+
+			ImGui::EndPopup();
 		}
 	}
 }

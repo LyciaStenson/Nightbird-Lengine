@@ -37,6 +37,7 @@ namespace Nightbird::Core
 		std::shared_ptr<Mesh> LoadMesh(const uuids::uuid& uuid) override;
 		std::shared_ptr<Material> LoadMaterial(const uuids::uuid& uuid) override;
 		std::shared_ptr<Texture> LoadTexture(const uuids::uuid& uuid) override;
+		std::shared_ptr<Cubemap> LoadCubemap(const uuids::uuid& uuid) override;
 		std::shared_ptr<AudioAsset> LoadAudio(const uuids::uuid& uuid) override;
 
 	private:

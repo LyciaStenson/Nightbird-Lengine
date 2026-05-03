@@ -9,11 +9,11 @@ namespace Nightbird::Vulkan
 {
 	class Device;
 	
-	class CubemapTexture
+	class Cubemap
 	{
 	public:
-		CubemapTexture(Device* device, uint32_t faceSize, const std::array<const uint8_t*, 6>& faceData);
-		~CubemapTexture();
+		Cubemap(Device* device, uint32_t faceSize, const std::array<const uint8_t*, 6>& faceData);
+		~Cubemap();
 
 		VkImageView GetImageView() const;
 		VkSampler GetSampler() const;

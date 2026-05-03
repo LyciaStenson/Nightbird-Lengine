@@ -82,7 +82,7 @@ namespace Nightbird::Editor
 
 		BinaryWriter writer(outputPath, endianness);
 
-		// Type
+		// Type signature
 		writer.WriteUInt8('T');
 		writer.WriteUInt8('E');
 		writer.WriteUInt8('X');

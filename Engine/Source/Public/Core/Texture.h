@@ -14,7 +14,7 @@ namespace Nightbird::Core
 	class Texture
 	{
 	public:
-		Texture(uint32_t width, uint32_t height, TextureFormat, std::vector<uint8_t> data);
+		Texture(uint32_t width, uint32_t height, TextureFormat format, std::vector<uint8_t> data);
 
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;

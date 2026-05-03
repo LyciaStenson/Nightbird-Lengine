@@ -12,6 +12,7 @@
 #include <chrono>
 
 extern volatile int nb_link_AudioSource;
+extern volatile int nb_link_Skybox;
 
 namespace Nightbird::Core
 {
@@ -26,7 +27,9 @@ namespace Nightbird::Core
 		if (m_Scene)
 			m_Scene->SetEngine(this);
 
-		static volatile int sink = nb_link_AudioSource;
+		static volatile int sink = 0;
+		sink += nb_link_AudioSource;
+		sink += nb_link_Skybox;
 	}
 
 	Engine::~Engine()

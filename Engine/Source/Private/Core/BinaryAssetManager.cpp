@@ -4,6 +4,7 @@
 #include "Core/Mesh.h"
 #include "Core/Material.h"
 #include "Core/Texture.h"
+#include "Core/Cubemap.h"
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
@@ -38,6 +39,11 @@ namespace Nightbird::Core
 	std::shared_ptr<Texture> BinaryAssetManager::LoadTexture(const uuids::uuid& uuid)
 	{
 		return m_TextureLoader->Load(m_CookedDir, uuid);
+	}
+
+	std::shared_ptr<Cubemap> BinaryAssetManager::LoadCubemap(const uuids::uuid& uuid)
+	{
+		return nullptr;
 	}
 
 	std::shared_ptr<AudioAsset> BinaryAssetManager::LoadAudio(const uuids::uuid& uuid)

@@ -9,6 +9,7 @@
 namespace Nightbird::Editor
 {
 	class SceneImporter;
+	class CubemapImporter;
 	class AudioImporter;
 
 	class Importer
@@ -20,8 +21,9 @@ namespace Nightbird::Editor
 		
 		virtual bool HasEmbeddedAssetInfo() const { return false; }
 		virtual std::optional<AssetInfo> ReadEmbeddedAssetInfo(const std::filesystem::path& path) const { return std::nullopt; }
-
+		
 		virtual SceneImporter* AsSceneImporter() { return nullptr; }
+		virtual CubemapImporter* AsCubemapImporter() { return nullptr; }
 		virtual AudioImporter* AsAudioImporter() { return nullptr; }
 	};
 }

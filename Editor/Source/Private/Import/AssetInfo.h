@@ -14,7 +14,5 @@ namespace Nightbird::Editor
 		
 		std::filesystem::path sourcePath;
 		std::string importer;
-		
-		toml::table params;
 	};
 }

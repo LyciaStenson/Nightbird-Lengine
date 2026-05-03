@@ -3,6 +3,7 @@
 #include "Import/AssetInfo.h"
 #include "Import/TextSceneImporter.h"
 #include "Import/GltfSceneImporter.h"
+#include "Import/TextCubemapImporter.h"
 #include "Import/DrLibsAudioImporter.h"
 
 #include "Core/AssetManager.h"
@@ -19,6 +20,7 @@ namespace Nightbird::Editor
 	{
 		m_Importers.push_back(std::make_unique<TextSceneImporter>());
 		m_Importers.push_back(std::make_unique<GltfSceneImporter>());
+		m_Importers.push_back(std::make_unique<TextCubemapImporter>());
 		m_Importers.push_back(std::make_unique<DrLibsAudioImporter>());
 	}
 
@@ -101,19 +103,25 @@ namespace Nightbird::Editor
 
 	std::shared_ptr<Core::Mesh> ImportManager::LoadMesh(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Mesh loading not yet supported");
+		Core::Log::Warning("ImportManager: Individual mesh loading not yet supported");
 		return nullptr;
 	}
 
 	std::shared_ptr<Core::Material> ImportManager::LoadMaterial(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Material loading not yet supported");
+		Core::Log::Warning("ImportManager: Individual material loading not yet supported");
 		return nullptr;
 	}
 
 	std::shared_ptr<Core::Texture> ImportManager::LoadTexture(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Texture loading not yet supported");
+		Core::Log::Warning("ImportManager: Individual texture loading not yet supported");
+		return nullptr;
+	}
+
+	std::shared_ptr<Core::Cubemap> ImportManager::LoadCubemap(const uuids::uuid& uuid)
+	{
+		Core::Log::Warning("ImportManager: Individual cubemap loading not yet supported");
 		return nullptr;
 	}
 
@@ -226,7 +234,6 @@ namespace Nightbird::Editor
 
 		toml::table table;
 		table.insert("info", info);
-		table.insert("params", toml::table{});
 
 		std::filesystem::path assetInfoPath = sourcePath.string() + ".assetinfo";
 		std::ofstream file(assetInfoPath);
@@ -278,9 +285,6 @@ namespace Nightbird::Editor
 
 		std::string assetInfoPathString = assetInfoPath.string();
 		assetInfo.sourcePath = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
-
-		if (table.contains("params"))
-			assetInfo.params = *table["params"].as_table();
 		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
 	}
