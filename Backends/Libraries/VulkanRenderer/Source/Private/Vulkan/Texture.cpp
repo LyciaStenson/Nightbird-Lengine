@@ -160,7 +160,7 @@ namespace Nightbird::Vulkan
 		ImageConfig config;
 		config.width = faceSize;
 		config.height = faceSize;
-		config.format = VK_FORMAT_R8G8B8A8_SRGB;
+		config.format = VK_FORMAT_R8G8B8A8_UNORM;
 		config.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		config.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 		config.arrayLayers = 6;
