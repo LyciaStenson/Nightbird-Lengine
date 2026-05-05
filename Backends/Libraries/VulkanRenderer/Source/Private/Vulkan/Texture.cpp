@@ -29,7 +29,7 @@ namespace Nightbird::Vulkan
 		CreateSampler();
 	}
 
-	Texture::Texture(Device* device, const Core::Cubemap& cubemap)
+	Texture::Texture(Device* device, const Core::Cubemap& cubemap, bool sRGB)
 		: m_Device(device)
 	{
 		if (!cubemap.HasData())
@@ -38,7 +38,7 @@ namespace Nightbird::Vulkan
 			return;
 		}
 
-		CreateFromCubemap(cubemap.GetData().data(), cubemap.GetFaceSize());
+		CreateFromCubemap(cubemap.GetData().data(), cubemap.GetFaceSize(), sRGB);
 		CreateSampler(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
 	}
 
@@ -130,13 +130,11 @@ namespace Nightbird::Vulkan
 		void* mapped = stagingBuffer.Map();
 		memcpy(mapped, data, static_cast<size_t>(imageSize));
 		stagingBuffer.Unmap();
-
-		VkFormat format = sRGB ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_SNORM;
-
+		
 		ImageConfig config;
 		config.width = width;
 		config.height = height;
-		config.format = format;
+		config.format = sRGB ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
 		config.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		config.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 		m_Image = std::make_unique<Image>(m_Device, config);
@@ -146,7 +144,7 @@ namespace Nightbird::Vulkan
 		m_Image->TransitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
-	void Texture::CreateFromCubemap(const uint8_t* data, uint32_t faceSize)
+	void Texture::CreateFromCubemap(const uint8_t* data, uint32_t faceSize, bool sRGB)
 	{
 		VkDeviceSize faceBytes = faceSize * faceSize * 4;
 		VkDeviceSize totalBytes = faceBytes * 6;
@@ -160,7 +158,7 @@ namespace Nightbird::Vulkan
 		ImageConfig config;
 		config.width = faceSize;
 		config.height = faceSize;
-		config.format = VK_FORMAT_R8G8B8A8_UNORM;
+		config.format = sRGB ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
 		config.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		config.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 		config.arrayLayers = 6;

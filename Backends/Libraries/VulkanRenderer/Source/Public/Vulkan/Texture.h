@@ -20,7 +20,7 @@ namespace Nightbird::Vulkan
 		// Create from CPU texture data
 		Texture(Device* device, const Core::Texture& texture, bool sRGB = true);
 		// Create from CPU cubemap data
-		Texture(Device* device, const Core::Cubemap& cubemap);
+		Texture(Device* device, const Core::Cubemap& cubemap, bool sRGB = false);
 		// Create for render target
 		Texture(Device* device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImageAspectFlags aspectFlags);
 
@@ -49,7 +49,7 @@ namespace Nightbird::Vulkan
 		Device* m_Device = nullptr;
 
 		void CreateFromTexture(const uint8_t* data, uint32_t width, uint32_t height, bool sRGB);
-		void CreateFromCubemap(const uint8_t* data, uint32_t faceSize);
+		void CreateFromCubemap(const uint8_t* data, uint32_t faceSize, bool sRGB);
 		void CreateSampler(VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT);
 	};
 }
