@@ -19,7 +19,7 @@ namespace Nightbird::Editor
 		: ImGuiWindow("Scene", open, { .flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse, .padding = ImVec2(4.0f, 4.0f) }), m_Context(context)
 	{
 		m_Surface = context.GetEngine().GetRenderer().CreateOffscreenSurface(m_CurrentWidth, m_CurrentHeight, Core::RenderSurfaceFormat::Default);
-		
+
 		m_TextureId = m_Context.GetEditorUIBackend().RegisterSurface(*m_Surface);
 
 		m_Camera = std::make_unique<Core::Camera>();
@@ -71,6 +71,67 @@ namespace Nightbird::Editor
 
 	void SceneWindow::OnRender()
 	{
+		static bool rightMouseHeld = false;
+		static bool firstFrame = true;
+
+		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		{
+			rightMouseHeld = true;
+			firstFrame = true;
+		}
+
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+			rightMouseHeld = false;
+
+		if (rightMouseHeld && ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		{
+			if (firstFrame)
+			{
+				ImVec2 mousePos = ImGui::GetMousePos();
+				m_LastX = mousePos.x;
+				m_LastY = mousePos.y;
+				firstFrame = false;
+			}
+
+			auto& inputSystem = m_Context.GetEngine().GetInputSystem();
+
+			glm::vec3 forward = m_Camera->m_Transform.rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+			glm::vec3 right = m_Camera->m_Transform.rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 up = m_Camera->m_Transform.rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+
+			glm::vec3 movementDir(0.0f);
+
+			if (inputSystem.IsButtonDown(Input::Button::Up) || inputSystem.IsKeyDown(Input::Key::W))
+				movementDir += forward;
+			if (inputSystem.IsButtonDown(Input::Button::Down) || inputSystem.IsKeyDown(Input::Key::S))
+				movementDir -= forward;
+			if (inputSystem.IsButtonDown(Input::Button::Right) || inputSystem.IsKeyDown(Input::Key::D))
+				movementDir += right;
+			if (inputSystem.IsButtonDown(Input::Button::Left) || inputSystem.IsKeyDown(Input::Key::A))
+				movementDir -= right;
+			if (inputSystem.IsButtonDown(Input::Button::A) || inputSystem.IsKeyDown(Input::Key::E))
+				movementDir += up;
+			if (inputSystem.IsButtonDown(Input::Button::B) || inputSystem.IsKeyDown(Input::Key::Q))
+				movementDir -= up;
+
+			m_Camera->m_Transform.position += movementDir * m_MovementSpeed * 0.01f;
+
+			ImVec2 mousePos = ImGui::GetMousePos();
+			float deltaX = m_LastX - mousePos.x;
+			float deltaY = m_LastY - mousePos.y;
+
+			m_LastX = mousePos.x;
+			m_LastY = mousePos.y;
+
+			float yawDelta = deltaX * m_LookSensitivity;
+			float pitchDelta = deltaY * m_LookSensitivity;
+
+			glm::quat pitchQuat = glm::angleAxis(pitchDelta, right);
+			glm::quat yawQuat = glm::angleAxis(yawDelta, glm::vec3(0.0f, 1.0f, 0.0f));
+
+			m_Camera->m_Transform.rotation = glm::normalize(yawQuat * pitchQuat * m_Camera->m_Transform.rotation);
+		}
+
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		uint32_t newWidth = static_cast<uint32_t>(std::max(1.0f, size.x));
 		uint32_t newHeight = static_cast<uint32_t>(std::max(1.0f, size.y));
