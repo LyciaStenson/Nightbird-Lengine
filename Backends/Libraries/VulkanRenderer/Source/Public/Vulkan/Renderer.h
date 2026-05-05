@@ -6,19 +6,23 @@
 #include "Core/Material.h"
 #include "Core/MeshInstance.h"
 #include "Core/Texture.h"
+#include "Core/Cubemap.h"
 #include "Core/Renderable.h"
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
+#include "Core/Skybox.h"
 
 #include "Vulkan/Instance.h"
 #include "Vulkan/Device.h"
 #include "Vulkan/SwapChain.h"
 #include "Vulkan/Sync.h"
 #include "Vulkan/DescriptorSetLayoutManager.h"
-#include "Vulkan/GlobalDescriptorSetManager.h"
+#include "Vulkan/EnvironmentDescriptorSetManager.h"
+#include "Vulkan/FrameDescriptorSetManager.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/Geometry.h"
 #include "Vulkan/Material.h"
+#include "Vulkan/Texture.h"
 #include "Vulkan/TransformPool.h"
 #include "Vulkan/FrameContext.h"
 
@@ -48,6 +52,7 @@ namespace Nightbird::Vulkan
 		Renderer(Core::Platform* platform, std::vector<const char*> extensions, SurfaceCreator surfaceCreator);
 
 		void Initialize() override;
+		void InitializeSurface(Core::RenderSurface& surface) override;
 		void Shutdown() override;
 		Core::RenderSurface& GetDefaultSurface() override;
 		std::unique_ptr<Core::RenderSurface> CreateOffscreenSurface(uint32_t width, uint32_t height, Core::RenderSurfaceFormat format) override;
@@ -78,34 +83,46 @@ namespace Nightbird::Vulkan
 		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
 
 		std::unique_ptr<DescriptorSetLayoutManager> m_DescriptorSetLayoutManager;
-		std::unique_ptr<GlobalDescriptorSetManager> m_GlobalDescriptorSetManager;
+		std::unique_ptr<FrameDescriptorSetManager> m_FrameDescriptorSetManager;
+		std::unique_ptr<EnvironmentDescriptorSetManager> m_EnvironmentDescriptorSetManager;
+
 		std::unique_ptr<Pipeline> m_OpaquePipeline;
 		std::unique_ptr<Pipeline> m_TransparentPipeline;
+		std::unique_ptr<Pipeline> m_SkyboxPipeline;
 
 		std::unique_ptr<TransformPool> m_TransformPool;
 
 		std::unordered_map<const Core::MeshPrimitive*, Geometry> m_GeometryCache;
 		std::unordered_map<const Core::Material*, Material> m_MaterialCache;
+		std::unordered_map<const Core::Texture*, Texture> m_TextureCache;
+		std::unordered_map<const Core::Cubemap*, Texture> m_CubemapCache;
 
 		const Core::Camera* m_ActiveCamera = nullptr;
 
 		std::vector<Core::Renderable> m_Renderables;
 		std::vector<Core::DirectionalLight*> m_DirectionalLights;
 		std::vector<Core::PointLight*> m_PointLights;
+		const Core::Skybox* m_Skybox = nullptr;
+		std::unique_ptr<Geometry> m_SkyboxGeometry;
 
 		FrameContext m_CurrentFrame;
 
 		std::shared_ptr<Core::Texture> m_DefaultTexture;
+		std::shared_ptr<Texture> m_DefaultCubemap;
 
 		void DrawScene(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t frameIndex);
-		
 		void DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable&, Pipeline* currentPipeline, uint32_t frameIndex);
+		void DrawSkybox(VkCommandBuffer commandBuffer, uint32_t frameIndex);
 
 		void CreateDescriptorPool();
 
 		std::shared_ptr<Core::Texture> CreateDefaultTexture();
 
+		void CreateSkyboxGeometry();
+
 		Geometry& GetOrCreateGeometry(const Core::MeshPrimitive* primitive);
 		Material& GetOrCreateMaterial(const Core::Material* material);
+		Texture& GetOrCreateTexture(const Core::Texture* texture);
+		Texture& GetOrCreateCubemap(const Core::Cubemap* cubemap);
 	};
 }

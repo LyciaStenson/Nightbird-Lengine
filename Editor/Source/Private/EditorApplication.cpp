@@ -93,10 +93,13 @@ namespace Nightbird::Editor
 
 		m_Platform = Core::CreatePlatform();
 		m_Renderer = Core::CreateRenderer();
-
+		
 		m_ImportManager = std::make_unique<ImportManager>(m_ProjectConfig.path.parent_path() / "Assets");
 
 		m_Engine = std::make_unique<Core::Engine>(*m_Platform, *m_Renderer, *m_ImportManager);
+
+		m_Platform->Initialize();
+		m_Renderer->Initialize();
 	}
 	
 	int EditorApplication::LoadProject()
@@ -195,6 +198,8 @@ namespace Nightbird::Editor
 		InitializeSettings();
 		InitializeWindows();
 		InitializeEditorUI();
+
+		m_Renderer->InitializeSurface(m_WindowManager->GetWindow<SceneWindow>()->GetSurface());
 	}
 
 	void EditorApplication::InitializeSettings()

@@ -20,10 +20,7 @@ namespace Nightbird::Core
 		: m_Platform(platform), m_Renderer(renderer), m_AssetManager(assetManager)
 	{
 		m_Scene = std::make_unique<Scene>();
-
-		m_Platform.Initialize();
-		m_Renderer.Initialize();
-
+		
 		if (m_Scene)
 			m_Scene->SetEngine(this);
 

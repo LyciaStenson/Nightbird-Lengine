@@ -1,42 +1,37 @@
-#include "Vulkan/GlobalDescriptorSetManager.h"
+#include "Vulkan/FrameDescriptorSetManager.h"
 
 #include "Vulkan/Config.h"
 #include "Vulkan/Device.h"
 #include "Vulkan/Buffer.h"
 #include "Vulkan/UniformBuffer.h"
-#include "Vulkan/StorageBuffer.h"
 #include "Vulkan/CameraUBO.h"
 #include "Vulkan/LightData.h"
 
+#include "Core/Log.h"
+
 #include <array>
 #include <cstring>
-#include <iostream>
 
 namespace Nightbird::Vulkan
 {
-	GlobalDescriptorSetManager::GlobalDescriptorSetManager(Device* device, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool)
+	FrameDescriptorSetManager::FrameDescriptorSetManager(Device* device, VkDescriptorSetLayout layout, VkDescriptorPool pool)
 		: m_Device(device)
 	{
 		CreateBuffers();
-		CreateDescriptorSets(descriptorSetLayout, descriptorPool);
+		CreateDescriptorSets(layout, pool);
 	}
-
-	GlobalDescriptorSetManager::~GlobalDescriptorSetManager()
-	{
-
-	}
-
-	const std::vector<VkDescriptorSet>& GlobalDescriptorSetManager::GetDescriptorSets() const
+	
+	const std::vector<VkDescriptorSet>& FrameDescriptorSetManager::GetDescriptorSets() const
 	{
 		return m_DescriptorSets;
 	}
 
-	void GlobalDescriptorSetManager::UpdateCamera(uint32_t frameIndex, const CameraUBO& cameraUBO)
+	void FrameDescriptorSetManager::UpdateCamera(uint32_t frameIndex, const CameraUBO& cameraUBO)
 	{
 		memcpy(m_CameraBuffers[frameIndex].GetMappedData(), &cameraUBO, sizeof(cameraUBO));
 	}
 
-	void GlobalDescriptorSetManager::UpdateDirectionalLights(uint32_t frameIndex, const std::vector<DirectionalLightData>& directionalLights)
+	void FrameDescriptorSetManager::UpdateDirectionalLights(uint32_t frameIndex, const std::vector<DirectionalLightData>& directionalLights)
 	{
 		VkDeviceSize size = sizeof(PointLightData) * directionalLights.size();
 		if (size > 0)
@@ -49,7 +44,7 @@ namespace Nightbird::Vulkan
 		}
 	}
 
-	void GlobalDescriptorSetManager::UpdatePointLights(uint32_t frameIndex, const std::vector<PointLightData>& pointLights)
+	void FrameDescriptorSetManager::UpdatePointLights(uint32_t frameIndex, const std::vector<PointLightData>& pointLights)
 	{
 		VkDeviceSize size = sizeof(PointLightData) * pointLights.size();
 		if (size > 0)
@@ -61,8 +56,8 @@ namespace Nightbird::Vulkan
 			memcpy(m_PointLightMetaBuffers[frameIndex].GetMappedData(), &metaUBO, sizeof(metaUBO));
 		}
 	}
-
-	void GlobalDescriptorSetManager::CreateBuffers()
+	
+	void FrameDescriptorSetManager::CreateBuffers()
 	{
 		VkDeviceSize cameraSize = sizeof(CameraUBO);
 		VkDeviceSize directionalLightBufferSize = sizeof(DirectionalLightData) * MAX_DIRECTIONAL_LIGHTS;
@@ -88,7 +83,7 @@ namespace Nightbird::Vulkan
 		}
 	}
 
-	void GlobalDescriptorSetManager::CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool)
+	void FrameDescriptorSetManager::CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool)
 	{
 		VkDevice logicalDevice = m_Device->GetLogical();
 
@@ -102,7 +97,7 @@ namespace Nightbird::Vulkan
 		m_DescriptorSets.resize(Config::MAX_FRAMES_IN_FLIGHT);
 		if (vkAllocateDescriptorSets(logicalDevice, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
 		{
-			std::cerr << "Failed to allocate global descriptor sets" << std::endl;
+			Core::Log::Error("Failed to allocate frame descriptor sets");
 			return;
 		}
 

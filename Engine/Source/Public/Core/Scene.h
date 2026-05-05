@@ -3,6 +3,7 @@
 #include "Core/Renderable.h"
 #include "Core/DirectionalLight.h"
 #include "Core/PointLight.h"
+#include "Core/Skybox.h"
 
 #include <memory>
 #include <vector>
@@ -34,6 +35,7 @@ namespace Nightbird::Core
 		std::vector<Renderable> CollectRenderables() const;
 		std::vector<DirectionalLight*> CollectDirectionalLights() const;
 		std::vector<PointLight*> CollectPointLights() const;
+		const Skybox* FindSkybox() const;
 
 	private:
 		Engine* m_Engine = nullptr;
@@ -49,5 +51,6 @@ namespace Nightbird::Core
 		void CollectRenderablesRecursive(SceneObject* object, std::vector<Renderable>& renderables) const;
 		void CollectDirectionalLightsRecursive(SceneObject* object, std::vector<DirectionalLight*>& directionalLights) const;
 		void CollectPointLightsRecursive(SceneObject* object, std::vector<PointLight*>& pointLights) const;
+		const Skybox* FindSkyboxRecursive(const SceneObject* object) const;
 	};
 }

@@ -136,7 +136,15 @@ namespace Nightbird::Vulkan
 	void SwapChain::CreateDepthResources(uint32_t width, uint32_t height)
 	{
 		m_DepthFormat = FindDepthFormat(m_Device->GetPhysical());
-		m_DepthImage = std::make_unique<Image>(m_Device, m_Extent.width, m_Extent.height, m_DepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+		ImageConfig config;
+		config.width = m_Extent.width;
+		config.height = m_Extent.height;
+		config.format = m_DepthFormat;
+		config.usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		config.aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+		m_DepthImage = std::make_unique<Image>(m_Device, config);
+		
 		m_DepthImage->TransitionImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	}
 

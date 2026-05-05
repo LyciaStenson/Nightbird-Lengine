@@ -78,6 +78,11 @@ namespace Nightbird::Core
 		return pointLights;
 	}
 
+	const Skybox* Scene::FindSkybox() const
+	{
+		return FindSkyboxRecursive(m_Root.get());
+	}
+
 	void Scene::UpdateRecursive(SceneObject* object, float delta)
 	{
 		if (!object)
@@ -134,5 +139,19 @@ namespace Nightbird::Core
 
 		for (const auto& child : object->GetChildren())
 			CollectPointLightsRecursive(child.get(), pointLights);
+	}
+
+	const Skybox* Scene::FindSkyboxRecursive(const SceneObject* object) const
+	{
+		if (!object)
+			return nullptr;
+		if (const auto* skybox = Cast<Skybox>(object))
+			return skybox;
+		for (const auto& child : object->GetChildren())
+		{
+			if (const auto* skybox = FindSkyboxRecursive(child.get()))
+				return skybox;
+		}
+		return nullptr;
 	}
 }
