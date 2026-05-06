@@ -45,14 +45,14 @@ namespace Nightbird::Core
 		static auto lastTime = std::chrono::high_resolution_clock::now();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
-		float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+		m_DeltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
 		lastTime = currentTime;
 
 		m_Platform.Update();
 		m_InputSystem.Update(m_Platform.GetInputProvider());
-		m_Scene->Update(deltaTime);
-		
-		return deltaTime;
+		m_Scene->Update(m_DeltaTime);
+
+		return m_DeltaTime;
 	}
 
 	Platform& Engine::GetPlatform()
@@ -94,5 +94,10 @@ namespace Nightbird::Core
 	AssetManager& Engine::GetAssetManager()
 	{
 		return m_AssetManager;
+	}
+
+	float Engine::GetDeltaTime() const
+	{
+		return m_DeltaTime;
 	}
 }

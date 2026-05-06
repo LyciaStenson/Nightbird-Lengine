@@ -114,7 +114,7 @@ namespace Nightbird::Editor
 			if (inputSystem.IsButtonDown(Input::Button::B) || inputSystem.IsKeyDown(Input::Key::Q))
 				movementDir -= up;
 
-			m_Camera->m_Transform.position += movementDir * m_MovementSpeed * 0.01f;
+			m_Camera->m_Transform.position += movementDir * m_MovementSpeed * m_Context.GetEngine().GetDeltaTime();
 
 			ImVec2 mousePos = ImGui::GetMousePos();
 			float deltaX = m_LastX - mousePos.x;
