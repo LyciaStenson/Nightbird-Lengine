@@ -101,17 +101,17 @@ namespace Nightbird::Editor
 
 			glm::vec3 movementDir(0.0f);
 
-			if (inputSystem.IsButtonDown(Input::Button::Up) || inputSystem.IsKeyDown(Input::Key::W))
+			if (inputSystem.IsDown(Input::Digital::Key_W) || inputSystem.IsDown(Input::Digital::Pad_Up))
 				movementDir += forward;
-			if (inputSystem.IsButtonDown(Input::Button::Down) || inputSystem.IsKeyDown(Input::Key::S))
+			if (inputSystem.IsDown(Input::Digital::Key_S) || inputSystem.IsDown(Input::Digital::Pad_Down))
 				movementDir -= forward;
-			if (inputSystem.IsButtonDown(Input::Button::Right) || inputSystem.IsKeyDown(Input::Key::D))
+			if (inputSystem.IsDown(Input::Digital::Key_D) || inputSystem.IsDown(Input::Digital::Pad_Right))
 				movementDir += right;
-			if (inputSystem.IsButtonDown(Input::Button::Left) || inputSystem.IsKeyDown(Input::Key::A))
+			if (inputSystem.IsDown(Input::Digital::Key_A) || inputSystem.IsDown(Input::Digital::Pad_Left))
 				movementDir -= right;
-			if (inputSystem.IsButtonDown(Input::Button::A) || inputSystem.IsKeyDown(Input::Key::E))
+			if (inputSystem.IsDown(Input::Digital::Key_E) || inputSystem.IsDown(Input::Digital::Pad_A))
 				movementDir += up;
-			if (inputSystem.IsButtonDown(Input::Button::B) || inputSystem.IsKeyDown(Input::Key::Q))
+			if (inputSystem.IsDown(Input::Digital::Key_Q) || inputSystem.IsDown(Input::Digital::Pad_B))
 				movementDir -= up;
 
 			m_Camera->m_Transform.position += movementDir * m_MovementSpeed * m_Context.GetEngine().GetDeltaTime();

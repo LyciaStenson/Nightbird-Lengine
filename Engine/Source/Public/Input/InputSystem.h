@@ -14,15 +14,12 @@ namespace Nightbird::Input
 
 		void Update(Provider& provider);
 
-		bool IsKeyDown(Key key) const;
-		bool WasKeyPressed(Key key) const;
-		bool WasKeyReleased(Key key) const;
-
-		bool IsButtonDown(Button button) const;
-		bool WasButtonPressed(Button button) const;
-		bool WasButtonReleased(Button button) const;
-
-		glm::vec2 GetAxis(Axis axis) const;
+		bool IsDown(Digital input) const;
+		bool WasPressed(Digital input) const;
+		bool WasReleased(Digital input) const;
+		
+		float GetAxis1D(Analog1D axis) const;
+		glm::vec2 GetAxis2D(Analog2D axis) const;
 
 	private:
 		State m_State;

@@ -20,7 +20,7 @@ namespace Nightbird::Glfw
 		void PollKeyboard(Input::State& state);
 		void PollGamepad(Input::State& state);
 
-		static Input::Key ResolveGlfwKey(int glfwKey);
-		static Input::Button ResolveGlfwButton(int glfwButton);
+		static Input::Digital ResolveGlfwKey(int glfwKey);
+		static Input::Digital ResolveGlfwButton(int glfwButton);
 	};
 }
