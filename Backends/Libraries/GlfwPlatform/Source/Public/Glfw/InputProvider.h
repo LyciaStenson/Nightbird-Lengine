@@ -17,7 +17,10 @@ namespace Nightbird::Glfw
 	private:
 		GLFWwindow* m_Window;
 
+		float m_ScrollDelta = 0.0f;
+
 		void PollKeyboard(Input::State& state);
+		void PollMouse(Input::State& state);
 		void PollGamepad(Input::State& state);
 
 		static Input::Digital ResolveGlfwKey(int glfwKey);

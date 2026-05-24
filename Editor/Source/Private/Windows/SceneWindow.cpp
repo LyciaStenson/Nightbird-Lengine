@@ -74,16 +74,18 @@ namespace Nightbird::Editor
 		static bool rightMouseHeld = false;
 		static bool firstFrame = true;
 
-		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+		auto& inputSystem = m_Context.GetEngine().GetInputSystem();
+
+		if (ImGui::IsWindowHovered() && inputSystem.WasPressed(Input::Digital::Mouse_Right))
 		{
 			rightMouseHeld = true;
 			firstFrame = true;
 		}
 
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+		if (inputSystem.WasReleased(Input::Digital::Mouse_Right))
 			rightMouseHeld = false;
 
-		if (rightMouseHeld && ImGui::IsMouseDown(ImGuiMouseButton_Right))
+		if (rightMouseHeld && inputSystem.IsDown(Input::Digital::Mouse_Right))
 		{
 			if (firstFrame)
 			{
@@ -93,8 +95,10 @@ namespace Nightbird::Editor
 				firstFrame = false;
 			}
 
-			auto& inputSystem = m_Context.GetEngine().GetInputSystem();
-
+			float mouseWheel = inputSystem.GetAxis1D(Input::Analog1D::Mouse_Wheel);
+			m_MovementSpeed += mouseWheel;
+			m_MovementSpeed = glm::clamp(m_MovementSpeed, 1.0f, 30.0f);
+			
 			glm::vec3 forward = m_Camera->m_Transform.rotation * glm::vec3(0.0f, 0.0f, -1.0f);
 			glm::vec3 right = m_Camera->m_Transform.rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 			glm::vec3 up = m_Camera->m_Transform.rotation * glm::vec3(0.0f, 1.0f, 0.0f);

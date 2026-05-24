@@ -5,15 +5,25 @@ namespace Nightbird::Glfw
 	InputProvider::InputProvider(GLFWwindow* window)
 		: m_Window(window)
 	{
+		glfwSetWindowUserPointer(window, this);
 
+		glfwSetScrollCallback(
+			window,
+			[](GLFWwindow* window, double xoffset, double yoffset)
+			{
+				auto* self = static_cast<InputProvider*>(glfwGetWindowUserPointer(window));
+				self->m_ScrollDelta += static_cast<float>(yoffset);
+			}
+		);
 	}
 
 	void InputProvider::Poll(Input::State& state)
 	{
 		state.pressed.fill(false);
 		state.released.fill(false);
-		
+
 		PollKeyboard(state);
+		PollMouse(state);
 		PollGamepad(state);
 	}
 
@@ -43,7 +53,50 @@ namespace Nightbird::Glfw
 				state.released[static_cast<size_t>(key)] = true;
 		}
 	}
+	
+	void InputProvider::PollMouse(Input::State& state)
+	{
+		struct MouseButtonPair
+		{
+			int glfwButton;
+			Input::Digital input;
+		};
 
+		static constexpr MouseButtonPair buttons[] =
+		{
+			{ GLFW_MOUSE_BUTTON_LEFT, Input::Digital::Mouse_Left },
+			{ GLFW_MOUSE_BUTTON_RIGHT, Input::Digital::Mouse_Right },
+			{ GLFW_MOUSE_BUTTON_MIDDLE, Input::Digital::Mouse_Middle }
+		};
+
+		for (const auto& [glfwButton, input] : buttons)
+		{
+			bool isDown = glfwGetMouseButton(m_Window, glfwButton) == GLFW_PRESS;
+
+			size_t index = static_cast<size_t>(input);
+
+			bool wasDown = state.down[index];
+
+			state.down[index] = isDown;
+
+			if (isDown && !wasDown)
+				state.pressed[index] = true;
+			else if (!isDown && wasDown)
+				state.released[index] = true;
+		}
+
+		state.axes1D[static_cast<size_t>(Input::Analog1D::Mouse_Wheel)] = m_ScrollDelta;
+		m_ScrollDelta = 0.0f;
+
+		double x, y;
+		glfwGetCursorPos(m_Window, &x, &y);
+
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Mouse_Move)] =
+		{
+			static_cast<float>(x), static_cast<float>(y)
+		};
+	}
+	
 	void InputProvider::PollGamepad(Input::State& state)
 	{
 		if (!glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
