@@ -33,6 +33,8 @@ namespace Nightbird::Core
 
 		AssetManager& GetAssetManager();
 
+		float GetDeltaTime() const;
+
 	private:
 		Platform& m_Platform;
 		Renderer& m_Renderer;
@@ -42,5 +44,7 @@ namespace Nightbird::Core
 		std::unique_ptr<Scene> m_Scene;
 
 		Input::System m_InputSystem;
+
+		float m_DeltaTime = 0.0f;
 	};
 }

@@ -4,8 +4,8 @@ namespace Nightbird::WiiU
 {
 	void InputProvider::Poll(Input::State& state)
 	{
-		state.buttonsPressed.fill(false);
-		state.buttonsReleased.fill(false);
+		state.pressed.fill(false);
+		state.released.fill(false);
 
 		PollGamepad(state);
 	}
@@ -30,58 +30,58 @@ namespace Nightbird::WiiU
 
 		for (uint32_t vpadButton : vpadButtons)
 		{
-			Input::Button button = ResolveVpadButton(vpadButton);
+			Input::Digital button = ResolveVpadButton(vpadButton);
 			bool isDown = vpadStatus.hold & vpadButton;
-			bool wasDown = state.buttonsDown[static_cast<size_t>(button)];
+			bool wasDown = state.down[static_cast<size_t>(button)];
 
-			state.buttonsDown[static_cast<size_t>(button)] = isDown;
+			state.down[static_cast<size_t>(button)] = isDown;
 
 			if (isDown && !wasDown)
-				state.buttonsPressed[static_cast<size_t>(button)] = true;
+				state.pressed[static_cast<size_t>(button)] = true;
 			else if (!isDown && wasDown)
-				state.buttonsReleased[static_cast<size_t>(button)] = true;
+				state.released[static_cast<size_t>(button)] = true;
 		}
 
-		state.axes[static_cast<size_t>(Input::Axis::Left)] = { vpadStatus.leftStick.x, vpadStatus.leftStick.y };
-		state.axes[static_cast<size_t>(Input::Axis::Right)] = { vpadStatus.rightStick.x, vpadStatus.rightStick.y };
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Pad_LeftStick)] = { vpadStatus.leftStick.x, vpadStatus.leftStick.y };
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Pad_RightStick)] = { vpadStatus.rightStick.x, vpadStatus.rightStick.y };
 	}
 
-	Input::Button InputProvider::ResolveVpadButton(uint32_t vpadButton)
+	Input::Digital InputProvider::ResolveVpadButton(uint32_t vpadButton)
 	{
 		switch (vpadButton)
 		{
 			case VPAD_BUTTON_A:
-				return Input::Button::A;
+				return Input::Digital::Pad_A;
 			case VPAD_BUTTON_B:
-				return Input::Button::B;
+				return Input::Digital::Pad_B;
 			case VPAD_BUTTON_X:
-				return Input::Button::X;
+				return Input::Digital::Pad_X;
 			case VPAD_BUTTON_Y:
-				return Input::Button::Y;
+				return Input::Digital::Pad_Y;
 			case VPAD_BUTTON_L:
-				return Input::Button::L;
+				return Input::Digital::Pad_L;
 			case VPAD_BUTTON_R:
-				return Input::Button::R;
+				return Input::Digital::Pad_R;
 			case VPAD_BUTTON_ZL:
-				return Input::Button::ZL;
+				return Input::Digital::Pad_ZL;
 			case VPAD_BUTTON_ZR:
-				return Input::Button::ZR;
+				return Input::Digital::Pad_ZR;
 			case VPAD_BUTTON_PLUS:
-				return Input::Button::Plus;
+				return Input::Digital::Pad_Plus;
 			case VPAD_BUTTON_MINUS:
-				return Input::Button::Minus;
+				return Input::Digital::Pad_Minus;
 			case VPAD_BUTTON_HOME:
-				return Input::Button::Home;
+				return Input::Digital::Pad_Home;
 			case VPAD_BUTTON_UP:
-				return Input::Button::Up;
+				return Input::Digital::Pad_Up;
 			case VPAD_BUTTON_DOWN:
-				return Input::Button::Down;
+				return Input::Digital::Pad_Down;
 			case VPAD_BUTTON_LEFT:
-				return Input::Button::Left;
+				return Input::Digital::Pad_Left;
 			case VPAD_BUTTON_RIGHT:
-				return Input::Button::Right;
+				return Input::Digital::Pad_Right;
 			default:
-				return Input::Button::UNKNOWN;
+				return Input::Digital::COUNT;
 		}
 	}
 }

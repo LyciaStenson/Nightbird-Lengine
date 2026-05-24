@@ -7,7 +7,6 @@
 #include "Core/TypeInfo.h"
 #include "Core/Log.h"
 
-#include "Vulkan/Texture.h"
 #include "Vulkan/CameraUBO.h"
 #include "Vulkan/LightData.h"
 #include "Vulkan/Config.h"
@@ -26,13 +25,15 @@ namespace Nightbird::Vulkan
 
 	void Renderer::Initialize()
 	{
-		m_DefaultTexture = CreateDefaultTexture();
-
 		m_Instance = std::make_unique<Instance>(m_Extensions);
 		m_Surface = m_SurfaceCreator(m_Instance->Get());
 
 		m_Device = std::make_unique<Device>(m_Instance->Get(), m_Surface);
 		m_Sync = std::make_unique<Sync>(m_Device->GetLogical());
+
+		m_DefaultTexture = CreateDefaultTexture();
+		m_DefaultCubemap = std::make_shared<Texture>(Texture::CreateDefaultCubemap(m_Device.get()));
+		CreateSkyboxGeometry();
 
 		int width = 0;
 		int height = 0;
@@ -45,15 +46,57 @@ namespace Nightbird::Vulkan
 		CreateDescriptorPool();
 
 		m_DescriptorSetLayoutManager = std::make_unique<DescriptorSetLayoutManager>(m_Device.get());
+		m_FrameDescriptorSetManager = std::make_unique<FrameDescriptorSetManager>(m_Device.get(), m_DescriptorSetLayoutManager->GetFrameDescriptorSetLayout(), m_DescriptorPool);
+		m_EnvironmentDescriptorSetManager = std::make_unique<EnvironmentDescriptorSetManager>(m_Device.get(), m_DescriptorSetLayoutManager->GetEnvironmentDescriptorSetLayout(), m_DescriptorPool);
 
-		m_GlobalDescriptorSetManager = std::make_unique<GlobalDescriptorSetManager>(m_Device.get(), m_DescriptorSetLayoutManager->GetGlobalDescriptorSetLayout(), m_DescriptorPool);
-
-		m_OpaquePipeline = std::make_unique<Pipeline>(m_Device.get(), &m_SwapChainSurface->GetRenderPass(), m_DescriptorSetLayoutManager.get(), PipelineType::Opaque, false);
-		m_TransparentPipeline = std::make_unique<Pipeline>(m_Device.get(), &m_SwapChainSurface->GetRenderPass(), m_DescriptorSetLayoutManager.get(), PipelineType::Transparent, false);
+		for (uint32_t i = 0; i < Config::MAX_FRAMES_IN_FLIGHT; ++i)
+			m_EnvironmentDescriptorSetManager->UpdateSkybox(i, m_DefaultCubemap->GetImageView(), m_DefaultCubemap->GetSampler());
 
 		m_TransformPool = std::make_unique<TransformPool>(m_Device.get(), m_DescriptorPool, m_DescriptorSetLayoutManager.get(), 1000);
 
 		Core::Log::Info("Vulkan Renderer Initialized");
+	}
+
+	void Renderer::InitializeSurface(Core::RenderSurface& coreSurface)
+	{
+		RenderSurface& surface = static_cast<RenderSurface&>(coreSurface);
+		RenderPass& renderPass = surface.GetRenderPass();
+
+		PipelineConfig opaqueConfig;
+		opaqueConfig.vertexShaderName = "Pbr.vert.spv";
+		opaqueConfig.fragShaderName = "Pbr.frag.spv";
+		opaqueConfig.descriptorSetLayouts = {
+			m_DescriptorSetLayoutManager->GetFrameDescriptorSetLayout(),
+			m_DescriptorSetLayoutManager->GetMeshDescriptorSetLayout(),
+			m_DescriptorSetLayoutManager->GetMaterialDescriptorSetLayout()
+		};
+		opaqueConfig.depthTestEnable = true;
+		opaqueConfig.depthWriteEnable = true;
+		opaqueConfig.depthCompareOp = VK_COMPARE_OP_LESS;
+		opaqueConfig.cullMode = VK_CULL_MODE_BACK_BIT;
+		opaqueConfig.blendEnable = false;
+		opaqueConfig.vertexLayout = VertexLayout::CreatePbrVertexLayout();
+		m_OpaquePipeline = std::make_unique<Pipeline>(m_Device.get(), &renderPass, opaqueConfig);
+
+		PipelineConfig transparentConfig = opaqueConfig;
+		transparentConfig.depthWriteEnable = false;
+		transparentConfig.blendEnable = true;
+		m_TransparentPipeline = std::make_unique<Pipeline>(m_Device.get(), &renderPass, transparentConfig);
+
+		PipelineConfig skyboxConfig;
+		skyboxConfig.vertexShaderName = "Skybox.vert.spv";
+		skyboxConfig.fragShaderName = "Skybox.frag.spv";
+		skyboxConfig.descriptorSetLayouts = {
+			m_DescriptorSetLayoutManager->GetFrameDescriptorSetLayout(),
+			m_DescriptorSetLayoutManager->GetEnvironmentDescriptorSetLayout()
+		};
+		skyboxConfig.depthTestEnable = true;
+		skyboxConfig.depthWriteEnable = false;
+		skyboxConfig.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		skyboxConfig.cullMode = VK_CULL_MODE_FRONT_BIT;
+		skyboxConfig.blendEnable = false;
+		skyboxConfig.vertexLayout = VertexLayout::CreatePosVertexLayout();
+		m_SkyboxPipeline = std::make_unique<Pipeline>(m_Device.get(), &renderPass, skyboxConfig);
 	}
 
 	void Renderer::Shutdown()
@@ -62,13 +105,17 @@ namespace Nightbird::Vulkan
 
 		m_GeometryCache.clear();
 		m_MaterialCache.clear();
+		m_TextureCache.clear();
+		m_CubemapCache.clear();
 
 		m_TransformPool.reset();
 
 		m_OpaquePipeline.reset();
 		m_TransparentPipeline.reset();
+		m_SkyboxPipeline.reset();
 
-		m_GlobalDescriptorSetManager.reset();
+		m_FrameDescriptorSetManager.reset();
+		m_EnvironmentDescriptorSetManager.reset();
 		m_DescriptorSetLayoutManager.reset();
 
 		vkDestroyDescriptorPool(m_Device->GetLogical(), m_DescriptorPool, nullptr);
@@ -78,6 +125,10 @@ namespace Nightbird::Vulkan
 		m_SwapChain.reset();
 
 		vkDestroySurfaceKHR(m_Instance->Get(), m_Surface, nullptr);
+
+		m_DefaultTexture.reset();
+		m_DefaultCubemap.reset();
+		m_SkyboxGeometry.reset();
 
 		m_Device.reset();
 		m_Instance.reset();
@@ -89,6 +140,7 @@ namespace Nightbird::Vulkan
 		m_Renderables = scene.CollectRenderables();
 		m_DirectionalLights = scene.CollectDirectionalLights();
 		m_PointLights = scene.CollectPointLights();
+		m_Skybox = scene.FindSkybox();
 	}
 
 	bool Renderer::BeginFrame(Core::RenderSurface& coreSurface)
@@ -158,7 +210,7 @@ namespace Nightbird::Vulkan
 			VkSubmitInfo submitInfo{};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-			VkSemaphore waitSemaphores[] = {m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex]};
+			VkSemaphore waitSemaphores[] = { m_Sync->m_ImageAvailableSemaphores[m_CurrentFrame.frameIndex] };
 			VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 			submitInfo.waitSemaphoreCount = 1;
 			submitInfo.pWaitSemaphores = waitSemaphores;
@@ -166,7 +218,7 @@ namespace Nightbird::Vulkan
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &m_CurrentFrame.commandBuffer;
 
-			VkSemaphore signalSemaphores[] = {m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex]};
+			VkSemaphore signalSemaphores[] = { m_Sync->m_RenderFinishedSemaphores[m_CurrentFrame.frameIndex] };
 			submitInfo.signalSemaphoreCount = 1;
 			submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -215,6 +267,17 @@ namespace Nightbird::Vulkan
 		if (!m_ActiveCamera)
 			return;
 
+		m_TransformPool->Reset();
+
+		CameraUBO cameraUBO{};
+		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
+		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(extent.width), static_cast<float>(extent.height));
+		proj[1][1] *= -1;
+		cameraUBO.projection = proj;
+		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
+
+		m_FrameDescriptorSetManager->UpdateCamera(frameIndex, cameraUBO);
+
 		std::vector<DirectionalLightData> directionalLightData;
 		for (const auto* directionalLight : m_DirectionalLights)
 		{
@@ -226,7 +289,7 @@ namespace Nightbird::Vulkan
 			data.colorIntensity = glm::vec4(color, directionalLight->m_Intensity);
 			directionalLightData.push_back(data);
 		}
-		m_GlobalDescriptorSetManager->UpdateDirectionalLights(frameIndex, directionalLightData);
+		m_FrameDescriptorSetManager->UpdateDirectionalLights(frameIndex, directionalLightData);
 
 		std::vector<PointLightData> pointLightData;
 		for (const auto* pointLight : m_PointLights)
@@ -238,18 +301,21 @@ namespace Nightbird::Vulkan
 			data.colorIntensity = glm::vec4(color, pointLight->m_Intensity);
 			pointLightData.push_back(data);
 		}
-		m_GlobalDescriptorSetManager->UpdatePointLights(frameIndex, pointLightData);
+		m_FrameDescriptorSetManager->UpdatePointLights(frameIndex, pointLightData);
 
-		m_TransformPool->Reset();
-
-		CameraUBO cameraUBO{};
-		cameraUBO.view = m_ActiveCamera->GetViewMatrix();
-		glm::mat4 proj = m_ActiveCamera->GetProjectionMatrix(static_cast<float>(extent.width), static_cast<float>(extent.height));
-		proj[1][1] *= -1;
-		cameraUBO.projection = proj;
-		cameraUBO.position = glm::vec4(m_ActiveCamera->GetWorldMatrix()[3]);
-
-		m_GlobalDescriptorSetManager->UpdateCamera(frameIndex, cameraUBO);
+		if (m_Skybox)
+		{
+			auto cubemap = m_Skybox->m_Cubemap.Get();
+			if (cubemap)
+			{
+				Texture& texture = GetOrCreateCubemap(cubemap.get());
+				m_EnvironmentDescriptorSetManager->UpdateSkybox(frameIndex, texture.GetImageView(), texture.GetSampler());
+			}
+		}
+		else
+		{
+			m_EnvironmentDescriptorSetManager->UpdateSkybox(frameIndex, m_DefaultCubemap->GetImageView(), m_DefaultCubemap->GetSampler());
+		}
 
 		std::vector<const Core::Renderable*> opaqueRenderables;
 		std::vector<const Core::Renderable*> transparentRenderables;
@@ -279,6 +345,9 @@ namespace Nightbird::Vulkan
 		m_TransparentPipeline->Bind(commandBuffer);
 		for (const auto* renderable : transparentRenderables)
 			DrawRenderable(commandBuffer, *renderable, m_TransparentPipeline.get(), frameIndex);
+
+		m_SkyboxPipeline->Bind(commandBuffer);
+		DrawSkybox(commandBuffer, frameIndex);
 	}
 
 	void Renderer::DrawRenderable(VkCommandBuffer commandBuffer, const Core::Renderable& renderable, Pipeline* currentPipeline, uint32_t frameIndex)
@@ -293,14 +362,32 @@ namespace Nightbird::Vulkan
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, geometry.GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
 
-		std::array<VkDescriptorSet, 3> descriptorSets =
-		{
-			m_GlobalDescriptorSetManager->GetDescriptorSets()[frameIndex], transformDescriptorSet, material.GetDescriptorSets()[frameIndex]
+		std::array<VkDescriptorSet, 3> descriptorSets = {
+			m_FrameDescriptorSetManager->GetDescriptorSets()[frameIndex], transformDescriptorSet, material.GetDescriptorSets()[frameIndex]
+		};
+		
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
+		vkCmdDrawIndexed(commandBuffer, geometry.GetIndexCount(), 1, 0, 0, 0);
+	}
+
+	void Renderer::DrawSkybox(VkCommandBuffer commandBuffer, uint32_t frameIndex)
+	{
+		if (!m_Skybox)
+			return;
+
+		VkBuffer vertexBuffers[] = { m_SkyboxGeometry->GetVertexBuffer() };
+		VkDeviceSize offsets[] = { 0 };
+
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, m_SkyboxGeometry->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+
+		std::array<VkDescriptorSet, 2> descriptorSets = {
+			m_FrameDescriptorSetManager->GetDescriptorSets()[frameIndex],
+			m_EnvironmentDescriptorSetManager->GetDescriptorSets()[frameIndex]
 		};
 
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
-
-		vkCmdDrawIndexed(commandBuffer, geometry.GetIndexCount(), 1, 0, 0, 0);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_SkyboxPipeline->GetLayout(), 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
+		vkCmdDrawIndexed(commandBuffer, m_SkyboxGeometry->GetIndexCount(), 1, 0, 0, 0);
 	}
 
 	void Renderer::CreateDescriptorPool()
@@ -327,8 +414,47 @@ namespace Nightbird::Vulkan
 
 	std::shared_ptr<Core::Texture> Renderer::CreateDefaultTexture()
 	{
-		std::vector<uint8_t> pixels = { 255, 255, 255, 255 };
+		std::vector<uint8_t> pixels = {255, 255, 255, 255};
 		return std::make_shared<Core::Texture>(1, 1, Core::TextureFormat::RGBA8, pixels);
+	}
+
+	void Renderer::CreateSkyboxGeometry()
+	{
+		std::vector<Core::VertexPos> vertices = {
+			// Back face
+			{{-1.0f, -1.0f, -1.0f}},
+			{{ 1.0f, -1.0f, -1.0f}},
+			{{ 1.0f,  1.0f, -1.0f}},
+			{{-1.0f,  1.0f, -1.0f}},
+
+			// Front face
+			{{ 1.0f, -1.0f,  1.0f}},
+			{{-1.0f, -1.0f,  1.0f}},
+			{{-1.0f,  1.0f,  1.0f}},
+			{{ 1.0f,  1.0f,  1.0f}},
+		};
+		
+		std::vector<uint16_t> indices = {
+			// Back
+			2, 1, 0, 0, 3, 2,
+
+			// Front
+			6, 5, 4, 4, 7, 6,
+
+			// Left
+			3, 0, 5, 5, 6, 3,
+
+			// Right
+			7, 4, 1, 1, 2, 7,
+
+			// Bottom
+			1, 4, 5, 5, 0, 1,
+
+			// Top
+			7, 2, 3, 3, 6, 7
+		};
+
+		m_SkyboxGeometry = std::make_unique<Geometry>(m_Device.get(), vertices.data(), sizeof(Core::VertexPos) * vertices.size(), indices.data(), sizeof(uint16_t) * indices.size(), static_cast<uint32_t>(indices.size()));
 	}
 
 	Geometry& Renderer::GetOrCreateGeometry(const Core::MeshPrimitive* primitive)
@@ -337,7 +463,9 @@ namespace Nightbird::Vulkan
 		if (it != m_GeometryCache.end())
 			return it->second;
 
-		m_GeometryCache.emplace(primitive, Geometry(m_Device.get(), *primitive));
+		const auto vertices = primitive->GetVertices();
+		const auto indices = primitive->GetIndices();
+		m_GeometryCache.emplace(primitive, Geometry(m_Device.get(), vertices.data(), sizeof(vertices[0]) * vertices.size(), indices.data(), sizeof(indices[0]) * indices.size(), static_cast<uint32_t>(indices.size())));
 		return m_GeometryCache.at(primitive);
 	}
 
@@ -349,6 +477,30 @@ namespace Nightbird::Vulkan
 
 		m_MaterialCache.emplace(material, Material(m_Device.get(), *material, m_DescriptorPool, m_DescriptorSetLayoutManager.get(), *m_DefaultTexture));
 		return m_MaterialCache.at(material);
+	}
+
+	Texture& Renderer::GetOrCreateTexture(const Core::Texture* texture)
+	{
+		auto it = m_TextureCache.find(texture);
+		if (it != m_TextureCache.end())
+			return it->second;
+
+		m_TextureCache.emplace(texture, Texture(m_Device.get(), *texture));
+		return m_TextureCache.at(texture);
+	}
+
+	Texture& Renderer::GetOrCreateCubemap(const Core::Cubemap* cubemap)
+	{
+		auto it = m_CubemapCache.find(cubemap);
+		if (it != m_CubemapCache.end())
+			return it->second;
+
+		if (!cubemap->HasData())
+			Core::Log::Error("Vulkan::Renderer: Cubemap has no data for GPU upload");
+
+		m_CubemapCache.emplace(cubemap, Texture(m_Device.get(), *cubemap));
+		const_cast<Core::Cubemap*>(cubemap)->DiscardData();
+		return m_CubemapCache.at(cubemap);
 	}
 
 	Core::RenderSurface& Renderer::GetDefaultSurface()

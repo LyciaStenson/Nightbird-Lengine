@@ -11,38 +11,28 @@ namespace Nightbird::Input
 		provider.Poll(m_State);
 	}
 
-	bool System::IsKeyDown(Key key) const
+	bool System::IsDown(Digital input) const
 	{
-		return m_State.keysDown[static_cast<size_t>(key)];
+		return m_State.down[static_cast<size_t>(input)];
 	}
 
-	bool System::WasKeyPressed(Key key) const
+	bool System::WasPressed(Digital input) const
 	{
-		return m_State.keysPressed[static_cast<size_t>(key)];
+		return m_State.pressed[static_cast<size_t>(input)];
 	}
 	
-	bool System::WasKeyReleased(Key key) const
+	bool System::WasReleased(Digital input) const
 	{
-		return m_State.keysReleased[static_cast<size_t>(key)];
-	}
-	
-	bool System::IsButtonDown(Button button) const
-	{
-		return m_State.buttonsDown[static_cast<size_t>(button)];
-	}
-	
-	bool System::WasButtonPressed(Button button) const
-	{
-		return m_State.buttonsPressed[static_cast<size_t>(button)];
-	}
-	
-	bool System::WasButtonReleased(Button button) const
-	{
-		return m_State.buttonsReleased[static_cast<size_t>(button)];
+		return m_State.released[static_cast<size_t>(input)];
 	}
 
-	glm::vec2 System::GetAxis(Axis axis) const
+	float System::GetAxis1D(Analog1D axis) const
 	{
-		return m_State.axes[static_cast<size_t>(axis)];
+		return m_State.axes1D[static_cast<size_t>(axis)];
+	}
+	
+	glm::vec2 System::GetAxis2D(Analog2D axis) const
+	{
+		return m_State.axes2D[static_cast<size_t>(axis)];
 	}
 }

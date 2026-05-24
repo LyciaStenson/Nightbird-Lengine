@@ -44,13 +44,17 @@ project "GlfwVulkanBackend"
 	filter { "system:windows" }
 		postbuildcommands {
 			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
-			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv",
+			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Skybox.vert -o " .. outDir .. "Skybox.vert.spv",
+			"%{wks.location}/Tools/glslc/glslc.exe " .. shaderDir .. "Skybox.frag -o " .. outDir .. "Skybox.frag.spv"
 		}
 
 	filter { "system:linux" }
 		postbuildcommands {
 			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Pbr.vert -o " .. outDir .. "Pbr.vert.spv",
-			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv"
+			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Pbr.frag -o " .. outDir .. "Pbr.frag.spv",
+			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Skybox.vert -o " .. outDir .. "Skybox.vert.spv",
+			"%{wks.location}/Tools/glslc/glslc " .. shaderDir .. "Skybox.frag -o " .. outDir .. "Skybox.frag.spv"
 		}
 
 	filter { }

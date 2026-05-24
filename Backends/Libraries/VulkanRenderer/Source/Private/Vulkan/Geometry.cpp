@@ -9,41 +9,35 @@
 
 namespace Nightbird::Vulkan
 {
-	Geometry::Geometry(Device* device, const Core::MeshPrimitive& primitive)
+	Geometry::Geometry(Device* device, const void* vertexData, VkDeviceSize vertexSize, const void* indexData, VkDeviceSize indexSide, uint32_t indexCount)
+		: m_IndexCount(indexCount)
 	{
-		m_IndexCount = static_cast<uint32_t>(primitive.GetIndices().size());
-		CreateVertexBuffer(device, primitive);
-		CreateIndexBuffer(device, primitive);
+		CreateVertexBuffer(device, vertexData, vertexSize);
+		CreateIndexBuffer(device, indexData, indexSide);
 	}
 
-	void Geometry::CreateVertexBuffer(Device* device, const Core::MeshPrimitive& primitive)
+	void Geometry::CreateVertexBuffer(Device* device, const void* data, VkDeviceSize size)
 	{
-		const auto& vertices = primitive.GetVertices();
-		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+		Buffer stagingBuffer(device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		Buffer stagingBuffer(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		void* data = stagingBuffer.Map();
-		memcpy(data, vertices.data(), (size_t)bufferSize);
+		void* mapped = stagingBuffer.Map();
+		memcpy(mapped, data, (size_t)size);
 		stagingBuffer.Unmap();
 
-		m_VertexBuffer = std::make_unique<Buffer>(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		CopyBuffer(device, stagingBuffer.Get(), m_VertexBuffer->Get(), bufferSize);
+		m_VertexBuffer = std::make_unique<Buffer>(device, size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		CopyBuffer(device, stagingBuffer.Get(), m_VertexBuffer->Get(), size);
 	}
 
-	void Geometry::CreateIndexBuffer(Device* device, const Core::MeshPrimitive& primitive)
+	void Geometry::CreateIndexBuffer(Device* device, const void* data, VkDeviceSize size)
 	{
-		const auto& indices = primitive.GetIndices();
-		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+		Buffer stagingBuffer(device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-		Buffer stagingBuffer(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		void* data = stagingBuffer.Map();
-		memcpy(data, indices.data(), (size_t)bufferSize);
+		void* mapped = stagingBuffer.Map();
+		memcpy(mapped, data, (size_t)size);
 		stagingBuffer.Unmap();
 
-		m_IndexBuffer = std::make_unique<Buffer>(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		CopyBuffer(device, stagingBuffer.Get(), m_IndexBuffer->Get(), bufferSize);
+		m_IndexBuffer = std::make_unique<Buffer>(device, size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		CopyBuffer(device, stagingBuffer.Get(), m_IndexBuffer->Get(), size);
 	}
 
 	VkBuffer Geometry::GetVertexBuffer() const

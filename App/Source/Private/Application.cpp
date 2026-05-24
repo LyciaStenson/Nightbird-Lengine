@@ -24,6 +24,10 @@ namespace Nightbird::App
 		m_Platform = Core::CreatePlatform();
 		m_Renderer = Core::CreateRenderer();
 
+		m_Platform->Initialize();
+		m_Renderer->Initialize();
+		m_Renderer->InitializeSurface(m_Renderer->GetDefaultSurface());
+
 		Nightbird::TypeRegistry::InitReflection();
 
 		m_AssetManager = std::make_unique<Core::BinaryAssetManager>(m_Platform->GetCookedAssetsPath());

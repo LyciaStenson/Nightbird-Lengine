@@ -13,7 +13,7 @@ namespace Nightbird::Core
 namespace Nightbird::Editor
 {
 	class EditorContext;
-
+	
 	class SceneWindow : public ImGuiWindow
 	{
 	public:
@@ -36,7 +36,12 @@ namespace Nightbird::Editor
 		EditorContext& m_Context;
 
 		std::unique_ptr<Core::RenderSurface> m_Surface;
+
 		std::unique_ptr<Core::Camera> m_Camera;
+		float m_MovementSpeed = 10.0f;
+		float m_LookSensitivity = 0.005f;
+		float m_LastX = 0.0f;
+		float m_LastY = 0.0f;
 
 		ImTextureID m_TextureId = 0;
 

@@ -11,17 +11,20 @@ namespace Nightbird::Vulkan
 	public:
 		DescriptorSetLayoutManager(Device* device);
 		~DescriptorSetLayoutManager();
-
-		VkDescriptorSetLayout GetGlobalDescriptorSetLayout() const;
+		
+		VkDescriptorSetLayout GetFrameDescriptorSetLayout() const;
+		VkDescriptorSetLayout GetEnvironmentDescriptorSetLayout() const;
 		VkDescriptorSetLayout GetMeshDescriptorSetLayout() const;
 		VkDescriptorSetLayout GetMaterialDescriptorSetLayout() const;
-
+	
 	private:
-		void CreateGlobalDescriptorSetLayout();
+		void CreateFrameDescriptorSetLayout();
+		void CreateEnvironmentDescriptorSetLayout();
 		void CreateMeshDescriptorSetLayout();
 		void CreateMaterialDescriptorSetLayout();
-
-		VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
+		
+		VkDescriptorSetLayout m_FrameDescriptorSetLayout;
+		VkDescriptorSetLayout m_EnvironmentDescriptorSetLayout;
 		VkDescriptorSetLayout m_MeshDescriptorSetLayout;
 		VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
 

@@ -35,7 +35,7 @@ namespace Nightbird::Editor
 		}
 	}
 
-	void AudioCooker::Cook(const std::filesystem::path& sourcePath, const uuids::uuid& uuid, const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
+	void AudioCooker::Cook(const std::filesystem::path& assetPath, const uuids::uuid& uuid, const std::filesystem::path& outputDir, CookTarget target, Endianness endianness)
 	{
 		std::filesystem::create_directories(outputDir);
 		std::filesystem::path outputPath = outputDir / (uuids::to_string(uuid) + ".nbaudio");
@@ -52,16 +52,16 @@ namespace Nightbird::Editor
 			case CookTarget::Desktop:
 				encoding = Core::AudioEncoding::PCM16;
 				planar = false;
-				data = CookPCM16(sourcePath, sampleRate, frameCount, channels, endianness, planar);
+				data = CookPCM16(assetPath, sampleRate, frameCount, channels, endianness, planar);
 				break;
 			case CookTarget::WiiU:
 				encoding = Core::AudioEncoding::PCM16;
 				planar = true;
-				data = CookPCM16(sourcePath, sampleRate, frameCount, channels, endianness, planar);
+				data = CookPCM16(assetPath, sampleRate, frameCount, channels, endianness, planar);
 				break;
 			case CookTarget::N3DS:
 				encoding = Core::AudioEncoding::DSP_ADPCM;
-				data = CookDSPADPCM(sourcePath, uuid, sampleRate, frameCount, channels);
+				data = CookDSPADPCM(assetPath, uuid, sampleRate, frameCount, channels);
 				break;
 			default:
 				Core::Log::Error("AudioCooker: Unknown target");
@@ -70,7 +70,7 @@ namespace Nightbird::Editor
 
 		if (data.empty())
 		{
-			Core::Log::Error("AudioCooker: Failed to cook: " + sourcePath.string());
+			Core::Log::Error("AudioCooker: Failed to cook: " + assetPath.string());
 			return;
 		}
 
@@ -109,9 +109,9 @@ namespace Nightbird::Editor
 		Core::Log::Info("Cooked audio: " + outputPath.string());
 	}
 
-	std::vector<uint8_t> AudioCooker::CookPCM16(const std::filesystem::path& sourcePath, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels, Endianness endianness, bool planar)
+	std::vector<uint8_t> AudioCooker::CookPCM16(const std::filesystem::path& assetPath, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels, Endianness endianness, bool planar)
 	{
-		std::string extension = sourcePath.extension().string();
+		std::string extension = assetPath.extension().string();
 		for (auto& c : extension)
 			c = tolower(c);
 
@@ -123,11 +123,11 @@ namespace Nightbird::Editor
 		// Collect metadata
 		if (extension == ".wav")
 		{
-			decoded = drwav_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drwav_uint64*>(&frameCount), nullptr);
+			decoded = drwav_open_file_and_read_pcm_frames_s16(assetPath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drwav_uint64*>(&frameCount), nullptr);
 		}
 		else if (extension == ".flac")
 		{
-			decoded = drflac_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drflac_uint64*>(&frameCount), nullptr);
+			decoded = drflac_open_file_and_read_pcm_frames_s16(assetPath.string().c_str(), &channels, &sampleRate, reinterpret_cast<drflac_uint64*>(&frameCount), nullptr);
 		}
 		else
 		{
@@ -137,7 +137,7 @@ namespace Nightbird::Editor
 
 		if (!decoded)
 		{
-			Core::Log::Error("AudioCooker: Failed to decode audio: " + sourcePath.string());
+			Core::Log::Error("AudioCooker: Failed to decode audio: " + assetPath.string());
 			return {};
 		}
 
@@ -179,9 +179,9 @@ namespace Nightbird::Editor
 		return result;
 	}
 
-	std::vector<uint8_t> AudioCooker::CookDSPADPCM(const std::filesystem::path& sourcePath, const uuids::uuid& uuid, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels)
+	std::vector<uint8_t> AudioCooker::CookDSPADPCM(const std::filesystem::path& assetPath, const uuids::uuid& uuid, uint32_t& outSampleRate, uint32_t& outFrameCount, uint8_t& outChannels)
 	{
-		std::string extension = sourcePath.extension().string();
+		std::string extension = assetPath.extension().string();
 		for (auto& c : extension)
 			c = tolower(c);
 
@@ -194,9 +194,9 @@ namespace Nightbird::Editor
 		if (extension == ".wav")
 		{
 			drwav wav;
-			if (!drwav_init_file(&wav, sourcePath.string().c_str(), nullptr))
+			if (!drwav_init_file(&wav, assetPath.string().c_str(), nullptr))
 			{
-				Core::Log::Error("AudioCooker: Failed to open WAV for metadata: " + sourcePath.string());
+				Core::Log::Error("AudioCooker: Failed to open WAV for metadata: " + assetPath.string());
 				return {};
 			}
 
@@ -206,7 +206,7 @@ namespace Nightbird::Editor
 
 			drwav_uninit(&wav);
 
-			wavPath = sourcePath;
+			wavPath = assetPath;
 		}
 		else if (extension == ".flac")
 		{
@@ -214,11 +214,11 @@ namespace Nightbird::Editor
 
 			drflac_uint64 frameCount;
 
-			drflac_int16* decoded = drflac_open_file_and_read_pcm_frames_s16(sourcePath.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
+			drflac_int16* decoded = drflac_open_file_and_read_pcm_frames_s16(assetPath.string().c_str(), &channels, &sampleRate, &frameCount, nullptr);
 
 			if (!decoded)
 			{
-				Core::Log::Error("AudioCooker: Failed to decode FLAC: " + sourcePath.string());
+				Core::Log::Error("AudioCooker: Failed to decode FLAC: " + assetPath.string());
 				return {};
 			}
 

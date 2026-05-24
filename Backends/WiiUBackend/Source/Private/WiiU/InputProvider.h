@@ -18,6 +18,6 @@ namespace Nightbird::WiiU
 	private:
 		void PollGamepad(Input::State& state);
 
-		static Input::Button ResolveVpadButton(uint32_t vpadButton);
+		static Input::Digital ResolveVpadButton(uint32_t vpadButton);
 	};
 }

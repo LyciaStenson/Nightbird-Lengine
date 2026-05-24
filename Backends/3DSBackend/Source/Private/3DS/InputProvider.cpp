@@ -6,39 +6,39 @@ namespace Nightbird::N3DS
 {
 	void InputProvider::Poll(Input::State& state)
 	{
-		state.buttonsPressed.fill(false);
-		state.buttonsReleased.fill(false);
+		state.pressed.fill(false);
+		state.released.fill(false);
 
 		u32 kDown = hidKeysDown();
 		u32 kHeld = hidKeysHeld();
 		u32 kUp = hidKeysUp();
 
-		auto processButton = [&](Input::Button button, u32 key)
+		auto processButton = [&](Input::Digital button, u32 key)
 		{
 			size_t idx = static_cast<size_t>(button);
 			bool isDown = kHeld & key;
-			state.buttonsDown[idx] = isDown;
+			state.down[idx] = isDown;
 			if (kDown & key)
-				state.buttonsPressed[idx] = true;
+				state.pressed[idx] = true;
 			if (kUp & key)
-				state.buttonsReleased[idx] = true;
+				state.released[idx] = true;
 		};
 
-		processButton(Input::Button::A, KEY_A);
-		processButton(Input::Button::B, KEY_B);
-		processButton(Input::Button::X, KEY_X);
-		processButton(Input::Button::Y, KEY_Y);
-		processButton(Input::Button::L, KEY_L);
-		processButton(Input::Button::R, KEY_R);
-		processButton(Input::Button::Start, KEY_START);
-		processButton(Input::Button::Select, KEY_SELECT);
-		processButton(Input::Button::Up, KEY_DUP);
-		processButton(Input::Button::Down, KEY_DDOWN);
-		processButton(Input::Button::Left, KEY_DLEFT);
-		processButton(Input::Button::Right, KEY_DRIGHT);
+		processButton(Input::Digital::Pad_A, KEY_A);
+		processButton(Input::Digital::Pad_B, KEY_B);
+		processButton(Input::Digital::Pad_X, KEY_X);
+		processButton(Input::Digital::Pad_Y, KEY_Y);
+		processButton(Input::Digital::Pad_L, KEY_L);
+		processButton(Input::Digital::Pad_R, KEY_R);
+		processButton(Input::Digital::Pad_Start, KEY_START);
+		processButton(Input::Digital::Pad_Select, KEY_SELECT);
+		processButton(Input::Digital::Pad_Up, KEY_DUP);
+		processButton(Input::Digital::Pad_Down, KEY_DDOWN);
+		processButton(Input::Digital::Pad_Left, KEY_DLEFT);
+		processButton(Input::Digital::Pad_Right, KEY_DRIGHT);
 
 		circlePosition circlePos;
 		hidCircleRead(&circlePos);
-		state.axes[static_cast<size_t>(Input::Axis::Left)] = { circlePos.dx / 156.0f, circlePos.dy / 156.0f };
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Pad_LeftStick)] = { circlePos.dx / 156.0f, circlePos.dy / 156.0f };
 	}
 }

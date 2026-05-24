@@ -49,11 +49,11 @@ namespace Nightbird::Editor
 				if (!importManager.GetAssetInfo(uuid))
 					continue;
 
-				auto* importer = importManager.FindImporter(assetInfo.sourcePath);
+				auto* importer = importManager.FindImporter(assetInfo.path);
 				if (!importer || !importer->AsSceneImporter())
 					continue;
 
-				std::string displayName = assetInfo.sourcePath.stem().string();
+				std::string displayName = assetInfo.path.stem().string();
 
 				bool selected = m_SelectedSceneUUID == uuid;
 				if (ImGui::Selectable(displayName.c_str(), selected))

@@ -2,20 +2,17 @@
 
 #include "Vulkan/Device.h"
 #include "Vulkan/RenderPass.h"
-#include "Vulkan/DescriptorSetLayoutManager.h"
 #include "Vulkan/Shader.h"
-#include "Vulkan/VertexInput.h"
+#include "Vulkan/VertexLayout.h"
 
 #include "Core/Log.h"
 
-#include <array>
-
 namespace Nightbird::Vulkan
 {
-	Pipeline::Pipeline(Device* device, RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided)
+	Pipeline::Pipeline(Device* device, RenderPass* renderPass, const PipelineConfig& config)
 		: m_Device(device)
 	{
-		CreateGraphicsPipeline(renderPass, descriptorSetLayoutManager, type, doubleSided);
+		CreateGraphicsPipeline(renderPass, config);
 	}
 
 	Pipeline::~Pipeline()
@@ -29,10 +26,10 @@ namespace Nightbird::Vulkan
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
 	}
 	
-	void Pipeline::CreateGraphicsPipeline(RenderPass* renderPass, DescriptorSetLayoutManager* descriptorSetLayoutManager, PipelineType type, bool doubleSided)
+	void Pipeline::CreateGraphicsPipeline(RenderPass* renderPass, const PipelineConfig& config)
 	{
-		Shader vertShader(m_Device->GetLogical(), "Pbr.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-		Shader fragShader(m_Device->GetLogical(), "Pbr.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+		Shader vertShader(m_Device->GetLogical(), config.vertexShaderName, VK_SHADER_STAGE_VERTEX_BIT);
+		Shader fragShader(m_Device->GetLogical(), config.fragShaderName, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		VkPipelineShaderStageCreateInfo shaderStages[] =
 		{
@@ -40,15 +37,12 @@ namespace Nightbird::Vulkan
 			fragShader.GetStageCreateInfo()
 		};
 		
-		auto bindingDescription = VertexInput::GetBindingDescription();
-		auto attributeDescriptions = VertexInput::GetAttributeDescriptions();
-
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+		vertexInputInfo.pVertexBindingDescriptions = &config.vertexLayout.bindingDescription;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(config.vertexLayout.attributeDescriptions.size());
+		vertexInputInfo.pVertexAttributeDescriptions = config.vertexLayout.attributeDescriptions.data();
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
 		inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -77,7 +71,7 @@ namespace Nightbird::Vulkan
 		rasterizationStateInfo.rasterizerDiscardEnable = VK_FALSE;
 		rasterizationStateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizationStateInfo.lineWidth = 1.0f;
-		rasterizationStateInfo.cullMode = doubleSided ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+		rasterizationStateInfo.cullMode = config.cullMode;
 		rasterizationStateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizationStateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationStateInfo.depthBiasConstantFactor = 0.0f;
@@ -95,34 +89,22 @@ namespace Nightbird::Vulkan
 
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
 		depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depthStencilInfo.depthTestEnable = VK_TRUE;
-		depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilInfo.depthTestEnable = config.depthTestEnable ? VK_TRUE : VK_FALSE;
+		depthStencilInfo.depthWriteEnable = config.depthWriteEnable ? VK_TRUE : VK_FALSE;
+		depthStencilInfo.depthCompareOp = config.depthCompareOp;
 		depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
-		depthStencilInfo.minDepthBounds = 0.0f;
-		depthStencilInfo.maxDepthBounds = 1.0f;
 		depthStencilInfo.stencilTestEnable = VK_FALSE;
 		depthStencilInfo.front = {};
 		depthStencilInfo.back = {};
-
-		if (type == PipelineType::Opaque)
-		{
-			depthStencilInfo.depthWriteEnable = VK_TRUE;
-		}
-		else if (type == PipelineType::Transparent)
-		{
-			depthStencilInfo.depthWriteEnable = VK_FALSE;
-		}
-
+		depthStencilInfo.minDepthBounds = 0.0f;
+		depthStencilInfo.maxDepthBounds = 1.0f;
+		
 		VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
 		colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-		if (type == PipelineType::Opaque)
+		colorBlendAttachmentState.blendEnable = config.blendEnable ? VK_TRUE : VK_FALSE;
+		
+		if (config.blendEnable)
 		{
-			colorBlendAttachmentState.blendEnable = VK_FALSE;
-		}
-		else if (type == PipelineType::Transparent)
-		{
-			colorBlendAttachmentState.blendEnable = VK_TRUE;
 			colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 			colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 			colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
@@ -130,7 +112,7 @@ namespace Nightbird::Vulkan
 			colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 			colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 		}
-
+		
 		VkPipelineColorBlendStateCreateInfo colorBlendStateInfo{};
 		colorBlendStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlendStateInfo.logicOpEnable = VK_FALSE;
@@ -141,18 +123,11 @@ namespace Nightbird::Vulkan
 		colorBlendStateInfo.blendConstants[1] = 0.0f;
 		colorBlendStateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateInfo.blendConstants[3] = 0.0f;
-
-		std::array<VkDescriptorSetLayout, 3> descriptorSetLayouts =
-		{
-			descriptorSetLayoutManager->GetGlobalDescriptorSetLayout(),
-			descriptorSetLayoutManager->GetMeshDescriptorSetLayout(),
-			descriptorSetLayoutManager->GetMaterialDescriptorSetLayout()
-		};
-
+		
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = (uint32_t)descriptorSetLayouts.size();
-		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(config.descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = config.descriptorSetLayouts.data();
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
 		if (vkCreatePipelineLayout(m_Device->GetLogical(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)

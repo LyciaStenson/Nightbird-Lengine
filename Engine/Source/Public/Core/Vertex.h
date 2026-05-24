@@ -7,6 +7,11 @@
 
 namespace Nightbird::Core
 {
+	struct VertexPos
+	{
+		glm::vec3 position;
+	};
+
 	struct Vertex
 	{
 		glm::vec3 position;

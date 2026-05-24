@@ -2,7 +2,10 @@
 
 #include "Import/AssetInfo.h"
 #include "Import/TextSceneImporter.h"
+#include "Import/TextCubemapImporter.h"
+
 #include "Import/GltfSceneImporter.h"
+#include "Import/StbTextureImporter.h"
 #include "Import/DrLibsAudioImporter.h"
 
 #include "Core/AssetManager.h"
@@ -19,6 +22,8 @@ namespace Nightbird::Editor
 	{
 		m_Importers.push_back(std::make_unique<TextSceneImporter>());
 		m_Importers.push_back(std::make_unique<GltfSceneImporter>());
+		m_Importers.push_back(std::make_unique<TextCubemapImporter>());
+		m_Importers.push_back(std::make_unique<StbTextureImporter>());
 		m_Importers.push_back(std::make_unique<DrLibsAudioImporter>());
 	}
 
@@ -83,7 +88,25 @@ namespace Nightbird::Editor
 	{
 		for (const auto& [uuid, assetInfo] : m_AssetInfos)
 		{
-			if (assetInfo.sourcePath == path)
+			if (assetInfo.path == path)
+				return &assetInfo;
+		}
+		return nullptr;
+	}
+
+	AssetInfo* ImportManager::GetAssetInfo(const uuids::uuid& uuid)
+	{
+		auto it = m_AssetInfos.find(uuid);
+		if (it != m_AssetInfos.end())
+			return &it->second;
+		return nullptr;
+	}
+
+	AssetInfo* ImportManager::GetAssetInfo(const std::filesystem::path& path)
+	{
+		for (auto& [uuid, assetInfo] : m_AssetInfos)
+		{
+			if (assetInfo.path == path)
 				return &assetInfo;
 		}
 		return nullptr;
@@ -99,21 +122,68 @@ namespace Nightbird::Editor
 		return nullptr;
 	}
 
+	void ImportManager::Register(AssetInfo assetInfo)
+	{
+		uuids::uuid uuid = assetInfo.uuid;
+		m_AssetInfos[uuid] = std::move(assetInfo);
+	}
+
 	std::shared_ptr<Core::Mesh> ImportManager::LoadMesh(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Mesh loading not yet supported");
+		Core::Log::Warning("ImportManager: Individual mesh loading not yet supported");
 		return nullptr;
 	}
 
 	std::shared_ptr<Core::Material> ImportManager::LoadMaterial(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Material loading not yet supported");
+		Core::Log::Warning("ImportManager: Individual material loading not yet supported");
 		return nullptr;
 	}
 
 	std::shared_ptr<Core::Texture> ImportManager::LoadTexture(const uuids::uuid& uuid)
 	{
-		Core::Log::Warning("ImportManager: Texture loading not yet supported");
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+		{
+			Core::Log::Warning("ImportManager: AssetInfo not found for texture UUID: " + uuids::to_string(uuid));
+			return nullptr;
+		}
+
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (auto* textureImporter = importer->AsTextureImporter())
+					return textureImporter->Load(*assetInfo);
+			}
+		}
+
+		Core::Log::Warning("ImportManager: No texture importer found for: " + assetInfo->importer);
+		return nullptr;
+	}
+
+	std::shared_ptr<Core::Cubemap> ImportManager::LoadCubemap(const uuids::uuid& uuid)
+	{
+		const AssetInfo* assetInfo = GetAssetInfo(uuid);
+		if (!assetInfo)
+		{
+			Core::Log::Warning("ImportManager: AssetInfo not found for cubemap UUID: " + uuids::to_string(uuid));
+			return nullptr;
+		}
+
+		for (const auto& importer : m_Importers)
+		{
+			if (importer->GetName() == assetInfo->importer)
+			{
+				if (auto* cubemapImporter = importer->AsCubemapImporter())
+				{
+					CubemapReadResult result = cubemapImporter->Load(*assetInfo, this);
+					return result.cubemap;
+				}
+			}
+		}
+
+		Core::Log::Warning("ImportManager: No cubemap importer found for: " + assetInfo->importer);
 		return nullptr;
 	}
 
@@ -201,19 +271,19 @@ namespace Nightbird::Editor
 		return gen();
 	}
 
-	std::string ImportManager::FindImporterName(const std::filesystem::path& sourcePath)
+	std::string ImportManager::FindImporterName(const std::filesystem::path& assetPath)
 	{
 		for (const auto& importer : m_Importers)
 		{
-			if (importer->SupportsExtension(sourcePath.extension().string()))
+			if (importer->SupportsExtension(assetPath.extension().string()))
 				return importer->GetName();
 		}
 		return {};
 	}
 
-	void ImportManager::GenerateAssetInfoFile(const std::filesystem::path& sourcePath)
+	void ImportManager::GenerateAssetInfoFile(const std::filesystem::path& assetPath)
 	{
-		std::string importerName = FindImporterName(sourcePath);
+		std::string importerName = FindImporterName(assetPath);
 		if (importerName.empty())
 			return;
 
@@ -226,9 +296,8 @@ namespace Nightbird::Editor
 
 		toml::table table;
 		table.insert("info", info);
-		table.insert("params", toml::table{});
 
-		std::filesystem::path assetInfoPath = sourcePath.string() + ".assetinfo";
+		std::filesystem::path assetInfoPath = assetPath.string() + ".assetinfo";
 		std::ofstream file(assetInfoPath);
 		file << table;
 		file.close();
@@ -266,21 +335,9 @@ namespace Nightbird::Editor
 		AssetInfo assetInfo;
 		assetInfo.uuid = *uuid;
 		assetInfo.importer = table["info"]["importer"].value_or(std::string{});
-
-		//for (const auto& importer : m_Importers)
-		//{
-		//	if (importer->GetName() == assetInfo.importer)
-		//	{
-		//		assetInfo.assetType = importer->GetAssetType();
-		//		break;
-		//	}
-		//}
-
+		
 		std::string assetInfoPathString = assetInfoPath.string();
-		assetInfo.sourcePath = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
-
-		if (table.contains("params"))
-			assetInfo.params = *table["params"].as_table();
+		assetInfo.path = assetInfoPathString.substr(0, assetInfoPathString.size() - std::string(".assetinfo").size());
 		
 		m_AssetInfos[assetInfo.uuid] = std::move(assetInfo);
 	}

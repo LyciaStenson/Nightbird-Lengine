@@ -1,10 +1,13 @@
 #include "Windows/Inspector.h"
 
 #include "EditorContext.h"
+#include "Import/ImportManager.h"
+#include "Import/TextCubemapWriter.h"
 
 #include "Core/Engine.h"
 #include "Core/AssetManager.h"
 #include "Core/SceneObject.h"
+#include "Core/Cubemap.h"
 #include "Core/AudioAsset.h"
 #include "Core/Log.h"
 
@@ -25,28 +28,40 @@ namespace Nightbird::Editor
 	void Inspector::OnRender()
 	{
 		Core::SceneObject* selected = m_Context.GetSelectedObject();
-		if (!selected)
+		if (selected)
 		{
-			ImGui::TextDisabled("Select an object to edit");
+			DrawSceneObject(selected);
 			return;
 		}
 
-		const TypeInfo* type = selected->GetTypeInfo();
+		const std::filesystem::path& selectedPath = m_Context.m_SelectedPath;
+		if (!selectedPath.empty() && std::filesystem::is_regular_file(selectedPath))
+		{
+			if (DrawAsset(selectedPath))
+				return;
+		}
+
+		ImGui::TextDisabled("Select something to edit");
+	}
+
+	void Inspector::DrawSceneObject(Core::SceneObject* object)
+	{
+		const TypeInfo* type = object->GetTypeInfo();
 		ImGui::Text("%s", type->name);
-		
+
 		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 		ImGui::Separator();
 		ImGui::Dummy(ImVec2(0.0f, 1.0f));
 
-		DrawFields(selected, type);
-		
-		if (selected->HasSourceScene())
+		DrawFields(object, type);
+
+		if (object->HasSourceScene())
 		{
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 			ImGui::Separator();
 			ImGui::Dummy(ImVec2(0.0f, 1.0f));
 
-			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(selected->GetSourceSceneUUID().value()).c_str());
+			ImGui::TextDisabled("Source Scene: %s", uuids::to_string(object->GetSourceSceneUUID().value()).c_str());
 		}
 	}
 
@@ -178,5 +193,83 @@ namespace Nightbird::Editor
 
 			ImGui::PopID();
 		}
+	}
+
+	bool Inspector::DrawAsset(const std::filesystem::path& path)
+	{
+		AssetInfo* assetInfo = m_Context.GetImportManager().GetAssetInfo(path);
+		if (!assetInfo || assetInfo->importer.empty())
+			return false;
+		
+		if (assetInfo->importer == "text_cubemap")
+		{
+			static constexpr const char* s_FaceKeys[6] = {"pos_x", "neg_x", "pos_y", "neg_y", "pos_z", "neg_z"};
+			static constexpr const char* faceNames[6] = {"+X", "-X", "+Y", "-Y", "+Z", "-Z"};
+			
+			ImGui::Text("Cubemap");
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.0f, 1.0f));
+
+			bool modified = false;
+
+			for (int i = 0; i < 6; ++i)
+			{
+				ImGui::PushID(i);
+
+				auto it = assetInfo->tags.find(s_FaceKeys[i]);
+				std::string currentValue = it != assetInfo->tags.end() ? it->second : std::string{};
+
+				std::string label = currentValue.empty() ? std::string("None (Texture)") : currentValue;
+
+				if (!currentValue.empty())
+				{
+					auto faceUUID = uuids::uuid::from_string(currentValue);
+					if (faceUUID)
+					{
+						const AssetInfo* faceAssetInfo = m_Context.GetImportManager().GetAssetInfo(*faceUUID);
+						if (faceAssetInfo)
+							label = faceAssetInfo->path.filename().string();
+					}
+				}
+
+				ImGui::Button(label.c_str(), ImVec2(-1, 0));
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_UUID"))
+					{
+						const uuids::uuid* droppedUUID = static_cast<const uuids::uuid*>(payload->Data);
+						assetInfo->tags[s_FaceKeys[i]] = uuids::to_string(*droppedUUID);
+						modified = true;
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::SameLine();
+				ImGui::Text(faceNames[i]);
+
+				ImGui::PopID();
+			}
+
+			if (modified)
+			{
+				m_Context.GetImportManager().Unload(assetInfo->uuid);
+
+				TextCubemapWriter writer;
+				writer.Write(*assetInfo, path);
+			}
+
+			return true;
+		}
+		else
+		{
+			ImGui::Text(assetInfo->importer.c_str());
+			ImGui::Text(assetInfo->path.string().c_str());
+			ImGui::TextDisabled(uuids::to_string(assetInfo->uuid).c_str());
+			return true;
+		}
+		
+		return false;
 	}
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vulkan/StorageBuffer.h"
+
 #include <volk.h>
 
 #include <vector>
@@ -8,19 +10,17 @@ namespace Nightbird::Vulkan
 {
 	class Device;
 	class UniformBuffer;
-	class StorageBuffer;
 	struct CameraUBO;
 	struct DirectionalLightData;
 	struct DirectionalLightMetaUBO;
 	struct PointLightData;
 	struct PointLightMetaUBO;
 
-	class GlobalDescriptorSetManager
+	class FrameDescriptorSetManager
 	{
 	public:
-		GlobalDescriptorSetManager(Device* device, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool);
-		~GlobalDescriptorSetManager();
-
+		FrameDescriptorSetManager(Device* device, VkDescriptorSetLayout layout, VkDescriptorPool pool);
+		
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const;
 
 		void UpdateCamera(uint32_t frameIndex, const CameraUBO& cameraUBO);
@@ -39,6 +39,6 @@ namespace Nightbird::Vulkan
 		std::vector<UniformBuffer> m_PointLightMetaBuffers;
 
 		void CreateBuffers();
-		void CreateDescriptorSets(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool);
+		void CreateDescriptorSets(VkDescriptorSetLayout layout, VkDescriptorPool pool);
 	};
 }

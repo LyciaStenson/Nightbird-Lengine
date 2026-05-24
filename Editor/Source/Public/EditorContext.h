@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 namespace Nightbird::Core
 {
 	class Engine;
@@ -28,6 +30,8 @@ namespace Nightbird::Editor
 
 		ImportManager& GetImportManager() const;
 		CookManager& GetCookManager() const;
+
+		std::filesystem::path m_SelectedPath;
 
 	private:
 		Core::Engine& m_Engine;

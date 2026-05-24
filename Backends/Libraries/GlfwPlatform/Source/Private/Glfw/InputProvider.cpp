@@ -5,17 +5,25 @@ namespace Nightbird::Glfw
 	InputProvider::InputProvider(GLFWwindow* window)
 		: m_Window(window)
 	{
+		glfwSetWindowUserPointer(window, this);
 
+		glfwSetScrollCallback(
+			window,
+			[](GLFWwindow* window, double xoffset, double yoffset)
+			{
+				auto* self = static_cast<InputProvider*>(glfwGetWindowUserPointer(window));
+				self->m_ScrollDelta += static_cast<float>(yoffset);
+			}
+		);
 	}
 
 	void InputProvider::Poll(Input::State& state)
 	{
-		state.keysPressed.fill(false);
-		state.keysReleased.fill(false);
-		state.buttonsPressed.fill(false);
-		state.buttonsReleased.fill(false);
+		state.pressed.fill(false);
+		state.released.fill(false);
 
 		PollKeyboard(state);
+		PollMouse(state);
 		PollGamepad(state);
 	}
 
@@ -33,19 +41,62 @@ namespace Nightbird::Glfw
 
 		for (int glfwKey : glfwKeys)
 		{
-			Input::Key key = ResolveGlfwKey(glfwKey);
+			Input::Digital key = ResolveGlfwKey(glfwKey);
 			bool isDown = glfwGetKey(m_Window, glfwKey) == GLFW_PRESS;
-			bool wasDown = state.keysDown[static_cast<size_t>(key)];
+			bool wasDown = state.down[static_cast<size_t>(key)];
 
-			state.keysDown[static_cast<size_t>(key)] = isDown;
+			state.down[static_cast<size_t>(key)] = isDown;
 
 			if (isDown && !wasDown)
-				state.keysPressed[static_cast<size_t>(key)] = true;
+				state.pressed[static_cast<size_t>(key)] = true;
 			else if (!isDown && wasDown)
-				state.keysReleased[static_cast<size_t>(key)] = true;
+				state.released[static_cast<size_t>(key)] = true;
 		}
 	}
+	
+	void InputProvider::PollMouse(Input::State& state)
+	{
+		struct MouseButtonPair
+		{
+			int glfwButton;
+			Input::Digital input;
+		};
 
+		static constexpr MouseButtonPair buttons[] =
+		{
+			{ GLFW_MOUSE_BUTTON_LEFT, Input::Digital::Mouse_Left },
+			{ GLFW_MOUSE_BUTTON_RIGHT, Input::Digital::Mouse_Right },
+			{ GLFW_MOUSE_BUTTON_MIDDLE, Input::Digital::Mouse_Middle }
+		};
+
+		for (const auto& [glfwButton, input] : buttons)
+		{
+			bool isDown = glfwGetMouseButton(m_Window, glfwButton) == GLFW_PRESS;
+
+			size_t index = static_cast<size_t>(input);
+
+			bool wasDown = state.down[index];
+
+			state.down[index] = isDown;
+
+			if (isDown && !wasDown)
+				state.pressed[index] = true;
+			else if (!isDown && wasDown)
+				state.released[index] = true;
+		}
+
+		state.axes1D[static_cast<size_t>(Input::Analog1D::Mouse_Wheel)] = m_ScrollDelta;
+		m_ScrollDelta = 0.0f;
+
+		double x, y;
+		glfwGetCursorPos(m_Window, &x, &y);
+
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Mouse_Move)] =
+		{
+			static_cast<float>(x), static_cast<float>(y)
+		};
+	}
+	
 	void InputProvider::PollGamepad(Input::State& state)
 	{
 		if (!glfwJoystickIsGamepad(GLFW_JOYSTICK_1))
@@ -68,125 +119,125 @@ namespace Nightbird::Glfw
 
 		for (int glfwButton : glfwButtons)
 		{
-			Input::Button button = ResolveGlfwButton(glfwButton);
+			Input::Digital button = ResolveGlfwButton(glfwButton);
 			bool isDown = gamepadState.buttons[glfwButton] == GLFW_PRESS;
-			bool wasDown = state.buttonsDown[static_cast<size_t>(button)];
+			bool wasDown = state.down[static_cast<size_t>(button)];
 
-			state.buttonsDown[static_cast<size_t>(button)] = isDown;
+			state.down[static_cast<size_t>(button)] = isDown;
 
 			if (isDown && !wasDown)
-				state.buttonsPressed[static_cast<size_t>(button)] = true;
+				state.pressed[static_cast<size_t>(button)] = true;
 			else if (!isDown && wasDown)
-				state.buttonsReleased[static_cast<size_t>(button)] = true;
+				state.released[static_cast<size_t>(button)] = true;
 		}
 
-		state.axes[static_cast<size_t>(Input::Axis::Left)] = { gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_X], gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] };
-		state.axes[static_cast<size_t>(Input::Axis::Right)] = { gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_X], gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] };
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Pad_LeftStick)] = { gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_X], gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] };
+		state.axes2D[static_cast<size_t>(Input::Analog2D::Pad_RightStick)] = { gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_X], gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] };
 	}
 
-	Input::Key InputProvider::ResolveGlfwKey(int glfwKey)
+	Input::Digital InputProvider::ResolveGlfwKey(int glfwKey)
 	{
 		switch (glfwKey)
 		{
 			case GLFW_KEY_SPACE:
-				return Input::Key::Space;
+				return Input::Digital::Key_Space;
 			case GLFW_KEY_ENTER:
-				return Input::Key::Enter;
+				return Input::Digital::Key_Enter;
 			case GLFW_KEY_ESCAPE:
-				return Input::Key::Escape;
+				return Input::Digital::Key_Escape;
 			case GLFW_KEY_A:
-				return Input::Key::A;
+				return Input::Digital::Key_A;
 			case GLFW_KEY_B:
-				return Input::Key::B;
+				return Input::Digital::Key_B;
 			case GLFW_KEY_C:
-				return Input::Key::C;
+				return Input::Digital::Key_C;
 			case GLFW_KEY_D:
-				return Input::Key::D;
+				return Input::Digital::Key_D;
 			case GLFW_KEY_E:
-				return Input::Key::E;
+				return Input::Digital::Key_E;
 			case GLFW_KEY_F:
-				return Input::Key::F;
+				return Input::Digital::Key_F;
 			case GLFW_KEY_G:
-				return Input::Key::G;
+				return Input::Digital::Key_G;
 			case GLFW_KEY_H:
-				return Input::Key::H;
+				return Input::Digital::Key_H;
 			case GLFW_KEY_I:
-				return Input::Key::I;
+				return Input::Digital::Key_I;
 			case GLFW_KEY_J:
-				return Input::Key::J;
+				return Input::Digital::Key_J;
 			case GLFW_KEY_K:
-				return Input::Key::K;
+				return Input::Digital::Key_K;
 			case GLFW_KEY_L:
-				return Input::Key::L;
+				return Input::Digital::Key_L;
 			case GLFW_KEY_M:
-				return Input::Key::M;
+				return Input::Digital::Key_M;
 			case GLFW_KEY_N:
-				return Input::Key::N;
+				return Input::Digital::Key_N;
 			case GLFW_KEY_O:
-				return Input::Key::O;
+				return Input::Digital::Key_O;
 			case GLFW_KEY_P:
-				return Input::Key::P;
+				return Input::Digital::Key_P;
 			case GLFW_KEY_Q:
-				return Input::Key::Q;
+				return Input::Digital::Key_Q;
 			case GLFW_KEY_R:
-				return Input::Key::R;
+				return Input::Digital::Key_R;
 			case GLFW_KEY_S:
-				return Input::Key::S;
+				return Input::Digital::Key_S;
 			case GLFW_KEY_T:
-				return Input::Key::T;
+				return Input::Digital::Key_T;
 			case GLFW_KEY_U:
-				return Input::Key::U;
+				return Input::Digital::Key_U;
 			case GLFW_KEY_V:
-				return Input::Key::V;
+				return Input::Digital::Key_V;
 			case GLFW_KEY_W:
-				return Input::Key::W;
+				return Input::Digital::Key_W;
 			case GLFW_KEY_X:
-				return Input::Key::X;
+				return Input::Digital::Key_X;
 			case GLFW_KEY_Y:
-				return Input::Key::Y;
+				return Input::Digital::Key_Y;
 			case GLFW_KEY_Z:
-				return Input::Key::Z;
+				return Input::Digital::Key_Z;
 			default:
-				return Input::Key::UNKNOWN;
+				return Input::Digital::COUNT;
 		}
 	}
 
-	Input::Button InputProvider::ResolveGlfwButton(int glfwButton)
+	Input::Digital InputProvider::ResolveGlfwButton(int glfwButton)
 	{
 		switch (glfwButton)
 		{
 		case GLFW_GAMEPAD_BUTTON_A:
-			return Input::Button::A;
+			return Input::Digital::Pad_A;
 		case GLFW_GAMEPAD_BUTTON_B:
-			return Input::Button::B;
+			return Input::Digital::Pad_B;
 		case GLFW_GAMEPAD_BUTTON_X:
-			return Input::Button::X;
+			return Input::Digital::Pad_X;
 		case GLFW_GAMEPAD_BUTTON_Y:
-			return Input::Button::Y;
+			return Input::Digital::Pad_Y;
 		case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
-			return Input::Button::L;
+			return Input::Digital::Pad_L;
 		case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
-			return Input::Button::R;
+			return Input::Digital::Pad_R;
 		case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
-			return Input::Button::ZL;
+			return Input::Digital::Pad_ZL;
 		case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
-			return Input::Button::ZR;
+			return Input::Digital::Pad_ZR;
 		case GLFW_GAMEPAD_BUTTON_START:
-			return Input::Button::Start;
+			return Input::Digital::Pad_Start;
 		case GLFW_GAMEPAD_BUTTON_BACK:
-			return Input::Button::Back;
+			return Input::Digital::Pad_Back;
 		case GLFW_GAMEPAD_BUTTON_GUIDE:
-			return Input::Button::Home;
+			return Input::Digital::Pad_Home;
 		case GLFW_GAMEPAD_BUTTON_DPAD_UP:
-			return Input::Button::Up;
+			return Input::Digital::Pad_Up;
 		case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
-			return Input::Button::Down;
+			return Input::Digital::Pad_Down;
 		case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
-			return Input::Button::Left;
+			return Input::Digital::Pad_Left;
 		case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
-			return Input::Button::Right;
+			return Input::Digital::Pad_Right;
 		default:
-			return Input::Button::UNKNOWN;
+			return Input::Digital::COUNT;
 		}
 	}
 }

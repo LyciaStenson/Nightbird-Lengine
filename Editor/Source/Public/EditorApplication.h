@@ -40,9 +40,9 @@ namespace Nightbird::Editor
 
 	private:
 		void InitializeEngine();
+		void InitializeEditor();
 		int LoadProject();
 		void UnloadProject();
-		void InitializeEditor();
 		void InitializeSettings();
 		void InitializeWindows();
 		void InitializeEditorUI();
