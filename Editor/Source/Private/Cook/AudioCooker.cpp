@@ -13,9 +13,15 @@
 
 namespace Nightbird::Editor
 {
-	static std::string GetVGAudioCliPath()
+	static std::filesystem::path GetVGAudioCliPath()
 	{
-		return "dotnet Tools/VGAudioCli/VGAudioCli.dll";
+		const char* envPath = std::getenv("NIGHTBIRD_PATH");
+		if (envPath)
+		{
+			return std::filesystem::path(envPath) / "Tools" / "VGAudioCli" / "VGAudioCli.dll";
+		}
+
+		return std::filesystem::path("Tools") / "VGAudioCli" / "VGAudioCli.dll";
 	}
 
 	static std::vector<uint8_t> ReadFile(const std::filesystem::path& path)
@@ -251,14 +257,14 @@ namespace Nightbird::Editor
 			return {};
 		}
 
-		std::string vgaudio = GetVGAudioCliPath();
+		std::filesystem::path vgaudio = GetVGAudioCliPath();
 		std::vector<std::vector<uint8_t>> channelBlobs;
 
 		for (uint8_t channel = 0; channel < outChannels; channel++)
 		{
 			std::filesystem::path dspPath = tempDir / (uuidString + "_channel" + std::to_string(channel) + ".dsp");
 
-			std::string command = vgaudio +
+			std::string command = "dotnet " + vgaudio.string() +
 				" -i:" + std::to_string(channel) +
 				" " + wavPath.string() +
 				" -o " + dspPath.string();
